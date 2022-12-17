@@ -947,6 +947,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `paynow`",
     )
+    pix = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `pix`",
+    )
     sepa_debit = JSONField(
         null=True,
         blank=True,
