@@ -830,6 +830,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `acss_debit`",
     )
+    affirm = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `affirm`",
+    )
     afterpay_clearpay = JSONField(
         null=True,
         blank=True,
@@ -855,6 +860,11 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `bancontact`",
     )
+    blik = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `blik`",
+    )
     boleto = JSONField(
         null=True,
         blank=True,
@@ -869,6 +879,11 @@ class PaymentMethod(StripeModel):
         null=True,
         blank=True,
         help_text="Additional information for payment methods of type `card_present`",
+    )
+    customer_balance = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `customer_balance`",
     )
     eps = JSONField(
         null=True,
@@ -902,6 +917,21 @@ class PaymentMethod(StripeModel):
             "Additional information for payment methods of type `interac_present`"
         ),
     )
+    klarna = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `klarna`",
+    )
+    konbini = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `konbini`",
+    )
+    link = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `link`",
+    )
     oxxo = JSONField(
         null=True,
         blank=True,
@@ -912,6 +942,21 @@ class PaymentMethod(StripeModel):
         blank=True,
         help_text="Additional information for payment methods of type `p24`",
     )
+    paynow = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `paynow`",
+    )
+    pix = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `pix`",
+    )
+    promptpay = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `promptpay`",
+    )
     sepa_debit = JSONField(
         null=True,
         blank=True,
@@ -921,6 +966,11 @@ class PaymentMethod(StripeModel):
         null=True,
         blank=True,
         help_text="Additional information for payment methods of type `sofort`",
+    )
+    us_bank_account = JSONField(
+        null=True,
+        blank=True,
+        help_text="Additional information for payment methods of type `us_bank_account`",
     )
     wechat_pay = JSONField(
         null=True,
