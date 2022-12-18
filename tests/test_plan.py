@@ -9,7 +9,7 @@ import stripe
 from django.test import TestCase
 
 from djstripe.enums import PriceUsageType
-from djstripe.models import Plan, Product, Subscription
+from djstripe.models import Plan, Product
 from djstripe.settings import djstripe_settings
 
 from . import (

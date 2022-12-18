@@ -5,7 +5,6 @@ import decimal
 from copy import deepcopy
 from unittest.mock import ANY, patch
 
-import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone

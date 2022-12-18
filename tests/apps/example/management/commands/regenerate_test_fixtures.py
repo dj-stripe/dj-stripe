@@ -1,6 +1,5 @@
 import json
 from copy import deepcopy
-from typing import Dict, List, Set, Type
 
 import stripe.api_resources
 import stripe.stripe_object

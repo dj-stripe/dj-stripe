@@ -2,7 +2,6 @@
 dj-stripe Subscription Model Tests.
 """
 from copy import deepcopy
-from datetime import datetime
 from decimal import Decimal
 from unittest.mock import PropertyMock, patch
 
