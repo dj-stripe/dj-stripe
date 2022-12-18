@@ -3528,7 +3528,26 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 
 
 
+<h4 id="tests.AccountDict-attributes">Attributes</h4>
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="tests.AccountDict.external_accounts" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">tests</span><span class="o">.</span><span class="n">AccountDict</span><span class="o">.</span><span class="n">external_accounts</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
 
 <h4 id="tests.AccountDict-functions">Functions</h4>
 
@@ -3553,39 +3572,6 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
     <span class="kn">from</span> <span class="nn">djstripe.models</span> <span class="kn">import</span> <span class="n">Account</span>
 
     <span class="k">return</span> <span class="n">Account</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="tests.AccountDict.external_accounts" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">tests</span><span class="o">.</span><span class="n">AccountDict</span><span class="o">.</span><span class="n">external_accounts</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>tests/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">external_accounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">ExternalAccounts</span><span class="p">(</span>
-        <span class="n">external_account_fakes</span><span class="o">=</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;external_accounts&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
-    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -4171,7 +4157,26 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 
 
 
+<h4 id="tests.CustomerDict-attributes">Attributes</h4>
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="tests.CustomerDict.sources" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">tests</span><span class="o">.</span><span class="n">CustomerDict</span><span class="o">.</span><span class="n">sources</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
 
 <h4 id="tests.CustomerDict-functions">Functions</h4>
 
@@ -4281,35 +4286,6 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1340</span>
 <span class="normal">1341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idempotency_key</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="tests.CustomerDict.sources" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">tests</span><span class="o">.</span><span class="n">CustomerDict</span><span class="o">.</span><span class="n">sources</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>tests/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1346</span>
-<span class="normal">1347</span>
-<span class="normal">1348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">sources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">Sources</span><span class="p">(</span><span class="n">card_fakes</span><span class="o">=</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;sources&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -5644,6 +5620,25 @@ the data attribute, just like Stripe iterables.</p>
 
 
 
+<h5 id="tests.StripeList.total_count" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">tests</span><span class="o">.</span><span class="n">StripeList</span><span class="o">.</span><span class="n">total_count</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="tests.StripeList.url" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">tests</span><span class="o">.</span><span class="n">StripeList</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;/v1/fakes&#39;</span></code>
   
@@ -5873,35 +5868,6 @@ argument-accepting functionality of Stripe's list() method.</p>
 <span class="sd">    argument-accepting functionality of Stripe&#39;s list() method.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="tests.StripeList.total_count" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">tests</span><span class="o">.</span><span class="n">StripeList</span><span class="o">.</span><span class="n">total_count</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>tests/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">total_count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>

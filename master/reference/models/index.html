@@ -2167,11 +2167,68 @@ are identified by a unique random ID.</p>
 
 
 
+<h5 id="djstripe.models.core.Charge.fee" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">fee</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.core.Charge.fraud_details" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">fraud_details</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Hash with information on fraud assessments for the charge.&#39;</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.core.Charge.fraudulent" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">fraudulent</span><span class="p">:</span> <span class="nb">bool</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.core.Charge.human_readable_status" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">human_readable_status</span><span class="p">:</span> <span class="nb">str</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
 </h5>
@@ -2690,111 +2747,6 @@ created a charge with the capture option set to False.</p>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span>
         <span class="n">captured_charge</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span>
     <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.core.Charge.fee" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">fee</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">fee</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_transaction</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_transaction</span><span class="o">.</span><span class="n">fee</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.core.Charge.fraudulent" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">fraudulent</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">fraudulent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fraud_details</span> <span class="ow">and</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fraud_details</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;fraudulent&quot;</span>
-    <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.core.Charge.human_readable_status" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Charge</span><span class="o">.</span><span class="n">human_readable_status</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">human_readable_status</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">captured</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;Uncaptured&quot;</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">disputed</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;Disputed&quot;</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">refunded</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;Refunded&quot;</span>
-    <span class="k">return</span> <span class="n">enums</span><span class="o">.</span><span class="n">ChargeStatus</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -4419,6 +4371,28 @@ charges that are associated with the same customer.</p>
 
 
 
+<h5 id="djstripe.models.core.Customer.active_subscriptions" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">active_subscriptions</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns active subscriptions
+(subscriptions with an active status that end in the future).</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.core.Customer.address" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;The customer&#39;s address.&quot;</span><span class="p">)</span></code>
   
@@ -4514,6 +4488,27 @@ charges that are associated with the same customer.</p>
 
 
 
+<h5 id="djstripe.models.core.Customer.credits" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">credits</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The customer is considered to have credits if their balance is below 0.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.core.Customer.currency" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">currency</span> <span class="o">=</span> <span class="n">StripeCurrencyCodeField</span><span class="p">(</span><span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;The currency the customer can be charged in for recurring billing purposes&#39;</span><span class="p">)</span></code>
   
@@ -4525,6 +4520,28 @@ charges that are associated with the same customer.</p>
 
 
   <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.core.Customer.customer_payment_methods" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">customer_payment_methods</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>An iterable of all of the customer's payment methods
+(sources, then legacy cards)</p>
   </div>
 
 </div>
@@ -4723,6 +4740,27 @@ charges that are associated with the same customer.</p>
 
 
 
+<h5 id="djstripe.models.core.Customer.pending_charges" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">pending_charges</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The customer is considered to have pending charges if their balance is above 0.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.core.Customer.phone" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">phone</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">TextField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;The customer&#39;s phone number.&quot;</span><span class="p">)</span></code>
   
@@ -4837,6 +4875,32 @@ charges that are associated with the same customer.</p>
 
 
 
+<h5 id="djstripe.models.core.Customer.subscription" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">subscription</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Shortcut to get this customer's subscription.</p>
+<p>:returns: None if the customer has no subscriptions, the subscription if
+    the customer has a subscription.
+:raises MultipleSubscriptionException: Raised if the customer has multiple
+    subscriptions.
+    In this case, use <code>Customer.subscriptions</code> instead.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.core.Customer.tax_exempt" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">tax_exempt</span> <span class="o">=</span> <span class="n">StripeEnumField</span><span class="p">(</span><span class="n">enum</span><span class="o">=</span><span class="n">enums</span><span class="o">.</span><span class="n">CustomerTaxExempt</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Describes the customer</span><span class="se">\&#39;</span><span class="s1">s tax exemption status. When set to reverse, invoice and receipt PDFs include the text &quot;Reverse charge&quot;.&#39;</span><span class="p">)</span></code>
   
@@ -4848,6 +4912,28 @@ charges that are associated with the same customer.</p>
 
 
   <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.core.Customer.valid_subscriptions" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">valid_subscriptions</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Returns this customer's valid subscriptions
+(subscriptions that aren't canceled or incomplete_expired).</p>
   </div>
 
 </div>
@@ -4941,52 +5027,6 @@ charges that are associated with the same customer.</p>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subscriber</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.core.Customer.active_subscriptions" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">active_subscriptions</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Returns active subscriptions
-(subscriptions with an active status that end in the future).</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1168</span>
-<span class="normal">1169</span>
-<span class="normal">1170</span>
-<span class="normal">1171</span>
-<span class="normal">1172</span>
-<span class="normal">1173</span>
-<span class="normal">1174</span>
-<span class="normal">1175</span>
-<span class="normal">1176</span>
-<span class="normal">1177</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">active_subscriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns active subscriptions</span>
-<span class="sd">    (subscriptions with an active status that end in the future).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscriptions</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span>
-        <span class="n">status</span><span class="o">=</span><span class="n">enums</span><span class="o">.</span><span class="n">SubscriptionStatus</span><span class="o">.</span><span class="n">active</span><span class="p">,</span>
-        <span class="n">current_period_end__gt</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span>
-    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -5601,91 +5641,6 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
 
 
 
-<h5 id="djstripe.models.core.Customer.credits" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">credits</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>The customer is considered to have credits if their balance is below 0.</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">847</span>
-<span class="normal">848</span>
-<span class="normal">849</span>
-<span class="normal">850</span>
-<span class="normal">851</span>
-<span class="normal">852</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">credits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The customer is considered to have credits if their balance is below 0.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.core.Customer.customer_payment_methods" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">customer_payment_methods</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>An iterable of all of the customer's payment methods
-(sources, then legacy cards)</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">854</span>
-<span class="normal">855</span>
-<span class="normal">856</span>
-<span class="normal">857</span>
-<span class="normal">858</span>
-<span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span>
-<span class="normal">862</span>
-<span class="normal">863</span>
-<span class="normal">864</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">customer_payment_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    An iterable of all of the customer&#39;s payment methods</span>
-<span class="sd">    (sources, then legacy cards)</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">source</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">iterator</span><span class="p">():</span>
-        <span class="k">yield</span> <span class="n">source</span>
-
-    <span class="k">for</span> <span class="n">card</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">legacy_cards</span><span class="o">.</span><span class="n">iterator</span><span class="p">():</span>
-        <span class="k">yield</span> <span class="n">card</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
 <h5 id="djstripe.models.core.Customer.get_or_create" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">get_or_create</span><span class="p">(</span><span class="n">subscriber</span><span class="p">,</span> <span class="n">livemode</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_LIVE_MODE</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
   
@@ -5870,43 +5825,6 @@ invoice. This is extremely useful when adding surcharges to subscriptions.</p>
             <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">price</span> <span class="ow">and</span> <span class="n">item</span><span class="o">.</span><span class="n">price</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">product</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="kc">False</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.core.Customer.pending_charges" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">pending_charges</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>The customer is considered to have pending charges if their balance is above 0.</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">866</span>
-<span class="normal">867</span>
-<span class="normal">868</span>
-<span class="normal">869</span>
-<span class="normal">870</span>
-<span class="normal">871</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">pending_charges</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The customer is considered to have pending charges if their balance is above 0.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">balance</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -6216,78 +6134,6 @@ Stripe API and sync for all RelatedModels would fail</p>
 
 
 
-<h5 id="djstripe.models.core.Customer.subscription" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">subscription</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Shortcut to get this customer's subscription.</p>
-<p>:returns: None if the customer has no subscriptions, the subscription if
-    the customer has a subscription.
-:raises MultipleSubscriptionException: Raised if the customer has multiple
-    subscriptions.
-    In this case, use <code>Customer.subscriptions</code> instead.</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1192</span>
-<span class="normal">1193</span>
-<span class="normal">1194</span>
-<span class="normal">1195</span>
-<span class="normal">1196</span>
-<span class="normal">1197</span>
-<span class="normal">1198</span>
-<span class="normal">1199</span>
-<span class="normal">1200</span>
-<span class="normal">1201</span>
-<span class="normal">1202</span>
-<span class="normal">1203</span>
-<span class="normal">1204</span>
-<span class="normal">1205</span>
-<span class="normal">1206</span>
-<span class="normal">1207</span>
-<span class="normal">1208</span>
-<span class="normal">1209</span>
-<span class="normal">1210</span>
-<span class="normal">1211</span>
-<span class="normal">1212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Shortcut to get this customer&#39;s subscription.</span>
-
-<span class="sd">    :returns: None if the customer has no subscriptions, the subscription if</span>
-<span class="sd">        the customer has a subscription.</span>
-<span class="sd">    :raises MultipleSubscriptionException: Raised if the customer has multiple</span>
-<span class="sd">        subscriptions.</span>
-<span class="sd">        In this case, use ``Customer.subscriptions`` instead.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">subscriptions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid_subscriptions</span>
-
-    <span class="k">if</span> <span class="n">subscriptions</span><span class="o">.</span><span class="n">count</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">MultipleSubscriptionException</span><span class="p">(</span>
-            <span class="s2">&quot;This customer has multiple subscriptions. Use Customer.subscriptions &quot;</span>
-            <span class="s2">&quot;to access them.&quot;</span>
-        <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">subscriptions</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
 <h5 id="djstripe.models.core.Customer.upcoming_invoice" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">upcoming_invoice</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
@@ -6326,56 +6172,6 @@ Stripe API and sync for all RelatedModels would fail</p>
 
     <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;customer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
     <span class="k">return</span> <span class="n">Invoice</span><span class="o">.</span><span class="n">upcoming</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.core.Customer.valid_subscriptions" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">valid_subscriptions</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Returns this customer's valid subscriptions
-(subscriptions that aren't canceled or incomplete_expired).</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1179</span>
-<span class="normal">1180</span>
-<span class="normal">1181</span>
-<span class="normal">1182</span>
-<span class="normal">1183</span>
-<span class="normal">1184</span>
-<span class="normal">1185</span>
-<span class="normal">1186</span>
-<span class="normal">1187</span>
-<span class="normal">1188</span>
-<span class="normal">1189</span>
-<span class="normal">1190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">valid_subscriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns this customer&#39;s valid subscriptions</span>
-<span class="sd">    (subscriptions that aren&#39;t canceled or incomplete_expired).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">subscriptions</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span>
-        <span class="n">status__in</span><span class="o">=</span><span class="p">[</span>
-            <span class="n">enums</span><span class="o">.</span><span class="n">SubscriptionStatus</span><span class="o">.</span><span class="n">canceled</span><span class="p">,</span>
-            <span class="n">enums</span><span class="o">.</span><span class="n">SubscriptionStatus</span><span class="o">.</span><span class="n">incomplete_expired</span><span class="p">,</span>
-        <span class="p">]</span>
-    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -7271,6 +7067,25 @@ to the configured webhook URL if the Event type matches.</p>
 
 
 
+<h5 id="djstripe.models.core.Event.customer" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">customer</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.core.Event.data" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;data received at webhook. data should be considered to be garbage until validity check is run and valid flag is set&#39;</span><span class="p">)</span></code>
   
@@ -7429,57 +7244,6 @@ to the configured webhook URL if the Event type matches.</p>
 <span class="k">def</span> <span class="nf">category</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Gets the event category string (e.g. &#39;customer&#39;).&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.core.Event.customer" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Event</span><span class="o">.</span><span class="n">customer</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1592</span>
-<span class="normal">1593</span>
-<span class="normal">1594</span>
-<span class="normal">1595</span>
-<span class="normal">1596</span>
-<span class="normal">1597</span>
-<span class="normal">1598</span>
-<span class="normal">1599</span>
-<span class="normal">1600</span>
-<span class="normal">1601</span>
-<span class="normal">1602</span>
-<span class="normal">1603</span>
-<span class="normal">1604</span>
-<span class="normal">1605</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">customer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;object&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;customer&quot;</span><span class="p">:</span>
-        <span class="n">customer_id</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">customer_id</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;customer&quot;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">customer_id</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Customer</span><span class="o">.</span><span class="n">_get_or_retrieve</span><span class="p">(</span>
-            <span class="nb">id</span><span class="o">=</span><span class="n">customer_id</span><span class="p">,</span>
-            <span class="n">stripe_account</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">djstripe_owner_account</span><span class="p">,</span> <span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">api_key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">,</span>
-        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -10622,6 +10386,25 @@ and its usage is encouraged instead of Plan objects.</p>
 
 
 
+<h5 id="djstripe.models.core.Price.human_readable_price" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Price</span><span class="o">.</span><span class="n">human_readable_price</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.core.Price.lookup_key" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Price</span><span class="o">.</span><span class="n">lookup_key</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;A lookup key used to retrieve prices dynamically from a static string.&#39;</span><span class="p">)</span></code>
   
@@ -11025,127 +10808,6 @@ and its usage is encouraged instead of Plan objects.</p>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
     <span class="k">except</span> <span class="bp">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.core.Price.human_readable_price" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Price</span><span class="o">.</span><span class="n">human_readable_price</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2294</span>
-<span class="normal">2295</span>
-<span class="normal">2296</span>
-<span class="normal">2297</span>
-<span class="normal">2298</span>
-<span class="normal">2299</span>
-<span class="normal">2300</span>
-<span class="normal">2301</span>
-<span class="normal">2302</span>
-<span class="normal">2303</span>
-<span class="normal">2304</span>
-<span class="normal">2305</span>
-<span class="normal">2306</span>
-<span class="normal">2307</span>
-<span class="normal">2308</span>
-<span class="normal">2309</span>
-<span class="normal">2310</span>
-<span class="normal">2311</span>
-<span class="normal">2312</span>
-<span class="normal">2313</span>
-<span class="normal">2314</span>
-<span class="normal">2315</span>
-<span class="normal">2316</span>
-<span class="normal">2317</span>
-<span class="normal">2318</span>
-<span class="normal">2319</span>
-<span class="normal">2320</span>
-<span class="normal">2321</span>
-<span class="normal">2322</span>
-<span class="normal">2323</span>
-<span class="normal">2324</span>
-<span class="normal">2325</span>
-<span class="normal">2326</span>
-<span class="normal">2327</span>
-<span class="normal">2328</span>
-<span class="normal">2329</span>
-<span class="normal">2330</span>
-<span class="normal">2331</span>
-<span class="normal">2332</span>
-<span class="normal">2333</span>
-<span class="normal">2334</span>
-<span class="normal">2335</span>
-<span class="normal">2336</span>
-<span class="normal">2337</span>
-<span class="normal">2338</span>
-<span class="normal">2339</span>
-<span class="normal">2340</span>
-<span class="normal">2341</span>
-<span class="normal">2342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">human_readable_price</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">billing_scheme</span> <span class="o">==</span> <span class="s2">&quot;per_unit&quot;</span><span class="p">:</span>
-        <span class="n">unit_amount</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unit_amount</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span>
-        <span class="n">amount</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="n">unit_amount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># tiered billing scheme</span>
-        <span class="n">tier_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tiers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">formatted_unit_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
-        <span class="p">)</span>
-        <span class="n">amount</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Starts at </span><span class="si">{</span><span class="n">formatted_unit_amount_tier_1</span><span class="si">}</span><span class="s2"> per unit&quot;</span>
-
-        <span class="c1"># stripe shows flat fee even if it is set to 0.00</span>
-        <span class="n">flat_amount_tier_1</span> <span class="o">=</span> <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;flat_amount&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">flat_amount_tier_1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">formatted_flat_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
-                <span class="n">flat_amount_tier_1</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
-            <span class="p">)</span>
-            <span class="n">amount</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">amount</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">formatted_flat_amount_tier_1</span><span class="si">}</span><span class="s2">&quot;</span>
-
-    <span class="n">format_args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="n">amount</span><span class="p">}</span>
-
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">recurring</span><span class="p">:</span>
-        <span class="n">interval_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recurring</span><span class="p">[</span><span class="s2">&quot;interval_count&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">interval_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">interval</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;day&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;week&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;week&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;month&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">),</span>
-            <span class="p">}[</span><span class="bp">self</span><span class="o">.</span><span class="n">recurring</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]]</span>
-            <span class="n">template</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{amount}</span><span class="s2">/</span><span class="si">{interval}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">interval</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;days&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;week&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;weeks&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;months&quot;</span><span class="p">),</span>
-                <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;years&quot;</span><span class="p">),</span>
-            <span class="p">}[</span><span class="bp">self</span><span class="o">.</span><span class="n">recurring</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]]</span>
-            <span class="n">template</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{amount}</span><span class="s2"> / every </span><span class="si">{interval_count}</span><span class="s2"> </span><span class="si">{interval}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval</span>
-            <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval_count</span>
-
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{amount}</span><span class="s2"> (one time)&quot;</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">format_lazy</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="o">**</span><span class="n">format_args</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -13167,6 +12829,25 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
 
 
 
+<h5 id="djstripe.models.payment_methods.BankAccount.human_readable_status" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">BankAccount</span><span class="o">.</span><span class="n">human_readable_status</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.payment_methods.BankAccount.last4" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">BankAccount</span><span class="o">.</span><span class="n">last4</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span></code>
   
@@ -13329,39 +13010,6 @@ objects for Custom accounts. They can be bank accounts or debit cards as well.</
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">api_retrieve</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.payment_methods.BankAccount.human_readable_status" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">BankAccount</span><span class="o">.</span><span class="n">human_readable_status</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">human_readable_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="s2">&quot;new&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;Pending Verification&quot;</span>
-    <span class="k">return</span> <span class="n">enums</span><span class="o">.</span><span class="n">BankAccountStatus</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -14630,7 +14278,57 @@ to Customer objects to store instrument details for future payments.</p>
 <span class="normal">1022</span>
 <span class="normal">1023</span>
 <span class="normal">1024</span>
-<span class="normal">1025</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PaymentMethod</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">1025</span>
+<span class="normal">1026</span>
+<span class="normal">1027</span>
+<span class="normal">1028</span>
+<span class="normal">1029</span>
+<span class="normal">1030</span>
+<span class="normal">1031</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span>
+<span class="normal">1036</span>
+<span class="normal">1037</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span>
+<span class="normal">1044</span>
+<span class="normal">1045</span>
+<span class="normal">1046</span>
+<span class="normal">1047</span>
+<span class="normal">1048</span>
+<span class="normal">1049</span>
+<span class="normal">1050</span>
+<span class="normal">1051</span>
+<span class="normal">1052</span>
+<span class="normal">1053</span>
+<span class="normal">1054</span>
+<span class="normal">1055</span>
+<span class="normal">1056</span>
+<span class="normal">1057</span>
+<span class="normal">1058</span>
+<span class="normal">1059</span>
+<span class="normal">1060</span>
+<span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span>
+<span class="normal">1069</span>
+<span class="normal">1070</span>
+<span class="normal">1071</span>
+<span class="normal">1072</span>
+<span class="normal">1073</span>
+<span class="normal">1074</span>
+<span class="normal">1075</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PaymentMethod</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    PaymentMethod objects represent your customer&#39;s payment instruments.</span>
 <span class="sd">    You can use them with PaymentIntents to collect payments or save them</span>
@@ -14669,6 +14367,11 @@ to Customer objects to store instrument details for future payments.</p>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `acss_debit`&quot;</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">affirm</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `affirm`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">afterpay_clearpay</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -14694,6 +14397,11 @@ to Customer objects to store instrument details for future payments.</p>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `bancontact`&quot;</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">blik</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `blik`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">boleto</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -14708,6 +14416,11 @@ to Customer objects to store instrument details for future payments.</p>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `card_present`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">customer_balance</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `customer_balance`&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">eps</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -14741,6 +14454,21 @@ to Customer objects to store instrument details for future payments.</p>
             <span class="s2">&quot;Additional information for payment methods of type `interac_present`&quot;</span>
         <span class="p">),</span>
     <span class="p">)</span>
+    <span class="n">klarna</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `klarna`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">konbini</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `konbini`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `link`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">oxxo</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -14751,6 +14479,21 @@ to Customer objects to store instrument details for future payments.</p>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `p24`&quot;</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">paynow</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `paynow`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">pix</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `pix`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">promptpay</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `promptpay`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">sepa_debit</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -14760,6 +14503,11 @@ to Customer objects to store instrument details for future payments.</p>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `sofort`&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">us_bank_account</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Additional information for payment methods of type `us_bank_account`&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">wechat_pay</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -14898,6 +14646,25 @@ to Customer objects to store instrument details for future payments.</p>
 
 
 
+<h5 id="djstripe.models.payment_methods.PaymentMethod.affirm" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">affirm</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `affirm`&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.payment_methods.PaymentMethod.afterpay_clearpay" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">afterpay_clearpay</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `afterpay_clearpay`&#39;</span><span class="p">)</span></code>
   
@@ -15012,6 +14779,25 @@ to Customer objects to store instrument details for future payments.</p>
 
 
 
+<h5 id="djstripe.models.payment_methods.PaymentMethod.blik" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">blik</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `blik`&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.payment_methods.PaymentMethod.boleto" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">boleto</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `boleto`&#39;</span><span class="p">)</span></code>
   
@@ -15071,6 +14857,25 @@ to Customer objects to store instrument details for future payments.</p>
 
 <h5 id="djstripe.models.payment_methods.PaymentMethod.customer" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">customer</span> <span class="o">=</span> <span class="n">StripeForeignKey</span><span class="p">(</span><span class="s1">&#39;Customer&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">SET_NULL</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">related_name</span><span class="o">=</span><span class="s1">&#39;payment_methods&#39;</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Customer to which this PaymentMethod is saved. This will not be set when the PaymentMethod has not been saved to a Customer.&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.payment_methods.PaymentMethod.customer_balance" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">customer_balance</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `customer_balance`&#39;</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
@@ -15221,6 +15026,63 @@ to Customer objects to store instrument details for future payments.</p>
 
 
 
+<h5 id="djstripe.models.payment_methods.PaymentMethod.klarna" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">klarna</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `klarna`&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.payment_methods.PaymentMethod.konbini" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">konbini</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `konbini`&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.payment_methods.PaymentMethod.link" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">link</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `link`&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.payment_methods.PaymentMethod.oxxo" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">oxxo</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `oxxo`&#39;</span><span class="p">)</span></code>
   
@@ -15242,6 +15104,63 @@ to Customer objects to store instrument details for future payments.</p>
 
 <h5 id="djstripe.models.payment_methods.PaymentMethod.p24" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">p24</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `p24`&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.payment_methods.PaymentMethod.paynow" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">paynow</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `paynow`&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.payment_methods.PaymentMethod.pix" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">pix</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `pix`&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.payment_methods.PaymentMethod.promptpay" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">promptpay</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `promptpay`&#39;</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
@@ -15335,6 +15254,25 @@ to Customer objects to store instrument details for future payments.</p>
 
 
 
+<h5 id="djstripe.models.payment_methods.PaymentMethod.us_bank_account" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">us_bank_account</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `us_bank_account`&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.payment_methods.PaymentMethod.wechat_pay" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">payment_methods</span><span class="o">.</span><span class="n">PaymentMethod</span><span class="o">.</span><span class="n">wechat_pay</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Additional information for payment methods of type `wechat_pay`&#39;</span><span class="p">)</span></code>
   
@@ -15366,10 +15304,10 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">931</span>
-<span class="normal">932</span>
-<span class="normal">933</span>
-<span class="normal">934</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">981</span>
+<span class="normal">982</span>
+<span class="normal">983</span>
+<span class="normal">984</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">PaymentMethodType</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">PaymentMethodType</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s2"> is not associated with any customer&quot;</span>
@@ -15393,22 +15331,22 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">941</span>
-<span class="normal">942</span>
-<span class="normal">943</span>
-<span class="normal">944</span>
-<span class="normal">945</span>
-<span class="normal">946</span>
-<span class="normal">947</span>
-<span class="normal">948</span>
-<span class="normal">949</span>
-<span class="normal">950</span>
-<span class="normal">951</span>
-<span class="normal">952</span>
-<span class="normal">953</span>
-<span class="normal">954</span>
-<span class="normal">955</span>
-<span class="normal">956</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 991</span>
+<span class="normal"> 992</span>
+<span class="normal"> 993</span>
+<span class="normal"> 994</span>
+<span class="normal"> 995</span>
+<span class="normal"> 996</span>
+<span class="normal"> 997</span>
+<span class="normal"> 998</span>
+<span class="normal"> 999</span>
+<span class="normal">1000</span>
+<span class="normal">1001</span>
+<span class="normal">1002</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span>
+<span class="normal">1005</span>
+<span class="normal">1006</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_hook</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="n">current_ids</span><span class="o">=</span><span class="kc">None</span>
 <span class="p">):</span>
     <span class="n">customer</span> <span class="o">=</span> <span class="kc">None</span>
@@ -15450,34 +15388,34 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">958</span>
-<span class="normal">959</span>
-<span class="normal">960</span>
-<span class="normal">961</span>
-<span class="normal">962</span>
-<span class="normal">963</span>
-<span class="normal">964</span>
-<span class="normal">965</span>
-<span class="normal">966</span>
-<span class="normal">967</span>
-<span class="normal">968</span>
-<span class="normal">969</span>
-<span class="normal">970</span>
-<span class="normal">971</span>
-<span class="normal">972</span>
-<span class="normal">973</span>
-<span class="normal">974</span>
-<span class="normal">975</span>
-<span class="normal">976</span>
-<span class="normal">977</span>
-<span class="normal">978</span>
-<span class="normal">979</span>
-<span class="normal">980</span>
-<span class="normal">981</span>
-<span class="normal">982</span>
-<span class="normal">983</span>
-<span class="normal">984</span>
-<span class="normal">985</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1008</span>
+<span class="normal">1009</span>
+<span class="normal">1010</span>
+<span class="normal">1011</span>
+<span class="normal">1012</span>
+<span class="normal">1013</span>
+<span class="normal">1014</span>
+<span class="normal">1015</span>
+<span class="normal">1016</span>
+<span class="normal">1017</span>
+<span class="normal">1018</span>
+<span class="normal">1019</span>
+<span class="normal">1020</span>
+<span class="normal">1021</span>
+<span class="normal">1022</span>
+<span class="normal">1023</span>
+<span class="normal">1024</span>
+<span class="normal">1025</span>
+<span class="normal">1026</span>
+<span class="normal">1027</span>
+<span class="normal">1028</span>
+<span class="normal">1029</span>
+<span class="normal">1030</span>
+<span class="normal">1031</span>
+<span class="normal">1032</span>
+<span class="normal">1033</span>
+<span class="normal">1034</span>
+<span class="normal">1035</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">attach</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span>
     <span class="n">payment_method</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="s2">&quot;PaymentMethod&quot;</span><span class="p">],</span>
@@ -15529,45 +15467,45 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 987</span>
-<span class="normal"> 988</span>
-<span class="normal"> 989</span>
-<span class="normal"> 990</span>
-<span class="normal"> 991</span>
-<span class="normal"> 992</span>
-<span class="normal"> 993</span>
-<span class="normal"> 994</span>
-<span class="normal"> 995</span>
-<span class="normal"> 996</span>
-<span class="normal"> 997</span>
-<span class="normal"> 998</span>
-<span class="normal"> 999</span>
-<span class="normal">1000</span>
-<span class="normal">1001</span>
-<span class="normal">1002</span>
-<span class="normal">1003</span>
-<span class="normal">1004</span>
-<span class="normal">1005</span>
-<span class="normal">1006</span>
-<span class="normal">1007</span>
-<span class="normal">1008</span>
-<span class="normal">1009</span>
-<span class="normal">1010</span>
-<span class="normal">1011</span>
-<span class="normal">1012</span>
-<span class="normal">1013</span>
-<span class="normal">1014</span>
-<span class="normal">1015</span>
-<span class="normal">1016</span>
-<span class="normal">1017</span>
-<span class="normal">1018</span>
-<span class="normal">1019</span>
-<span class="normal">1020</span>
-<span class="normal">1021</span>
-<span class="normal">1022</span>
-<span class="normal">1023</span>
-<span class="normal">1024</span>
-<span class="normal">1025</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1037</span>
+<span class="normal">1038</span>
+<span class="normal">1039</span>
+<span class="normal">1040</span>
+<span class="normal">1041</span>
+<span class="normal">1042</span>
+<span class="normal">1043</span>
+<span class="normal">1044</span>
+<span class="normal">1045</span>
+<span class="normal">1046</span>
+<span class="normal">1047</span>
+<span class="normal">1048</span>
+<span class="normal">1049</span>
+<span class="normal">1050</span>
+<span class="normal">1051</span>
+<span class="normal">1052</span>
+<span class="normal">1053</span>
+<span class="normal">1054</span>
+<span class="normal">1055</span>
+<span class="normal">1056</span>
+<span class="normal">1057</span>
+<span class="normal">1058</span>
+<span class="normal">1059</span>
+<span class="normal">1060</span>
+<span class="normal">1061</span>
+<span class="normal">1062</span>
+<span class="normal">1063</span>
+<span class="normal">1064</span>
+<span class="normal">1065</span>
+<span class="normal">1066</span>
+<span class="normal">1067</span>
+<span class="normal">1068</span>
+<span class="normal">1069</span>
+<span class="normal">1070</span>
+<span class="normal">1071</span>
+<span class="normal">1072</span>
+<span class="normal">1073</span>
+<span class="normal">1074</span>
+<span class="normal">1075</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">detach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Detach the payment method from its customer.</span>
 
@@ -15626,10 +15564,10 @@ to Customer objects to store instrument details for future payments.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/payment_methods.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">936</span>
-<span class="normal">937</span>
-<span class="normal">938</span>
-<span class="normal">939</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">986</span>
+<span class="normal">987</span>
+<span class="normal">988</span>
+<span class="normal">989</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">customer</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">()</span>
     <span class="k">return</span> <span class="s2">&quot;&quot;</span>
@@ -16927,6 +16865,44 @@ Coupons do not work with conventional one-off charges.</p>
 
 
 
+<h5 id="djstripe.models.billing.Coupon.human_readable" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Coupon</span><span class="o">.</span><span class="n">human_readable</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.Coupon.human_readable_amount" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Coupon</span><span class="o">.</span><span class="n">human_readable_amount</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.billing.Coupon.id" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Coupon</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">StripeIdField</span><span class="p">(</span><span class="n">max_length</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span></code>
   
@@ -17162,90 +17138,6 @@ Coupons do not work with conventional one-off charges.</p>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_readable</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.billing.Coupon.human_readable" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Coupon</span><span class="o">.</span><span class="n">human_readable</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">human_readable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">==</span> <span class="n">enums</span><span class="o">.</span><span class="n">CouponDuration</span><span class="o">.</span><span class="n">repeating</span><span class="p">:</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration_in_months</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">duration</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;for 1 month&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">duration</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">duration_in_months</span><span class="si">}</span><span class="s2"> months&quot;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">duration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">human_readable_amount</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">duration</span><span class="si">}</span><span class="s2">&quot;</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.billing.Coupon.human_readable_amount" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Coupon</span><span class="o">.</span><span class="n">human_readable_amount</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
-<span class="normal">177</span>
-<span class="normal">178</span>
-<span class="normal">179</span>
-<span class="normal">180</span>
-<span class="normal">181</span>
-<span class="normal">182</span>
-<span class="normal">183</span>
-<span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">human_readable_amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">percent_off</span><span class="p">:</span>
-        <span class="n">amount</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">percent_off</span><span class="si">}</span><span class="s2">%&quot;</span>
-    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">:</span>
-        <span class="n">amount</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount_off</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">amount</span> <span class="o">=</span> <span class="s2">&quot;(invalid amount)&quot;</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">amount</span><span class="si">}</span><span class="s2"> off&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -18998,6 +18890,25 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 
 
 
+<h5 id="djstripe.models.billing.Plan.amount_in_cents" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Plan</span><span class="o">.</span><span class="n">amount_in_cents</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.billing.Plan.billing_scheme" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Plan</span><span class="o">.</span><span class="n">billing_scheme</span> <span class="o">=</span> <span class="n">StripeEnumField</span><span class="p">(</span><span class="n">enum</span><span class="o">=</span><span class="n">enums</span><span class="o">.</span><span class="n">BillingScheme</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Describes how to compute the price per period. Either `per_unit` or `tiered`. `per_unit` indicates that the fixed amount (specified in amount) will be charged per unit in quantity (for plans with `usage_type=licensed`), or per unit of total usage (for plans with `usage_type=metered`). `tiered` indicates that the unit pricing will be computed using a tiering strategy as defined using the tiers and tiers_mode attributes.&#39;</span><span class="p">)</span></code>
   
@@ -19041,6 +18952,25 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.Plan.human_readable_price" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Plan</span><span class="o">.</span><span class="n">human_readable_price</span><span class="p">:</span> <span class="nb">str</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
 </h5>
@@ -19357,35 +19287,6 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 
 
 
-<h5 id="djstripe.models.billing.Plan.amount_in_cents" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Plan</span><span class="o">.</span><span class="n">amount_in_cents</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1199</span>
-<span class="normal">1200</span>
-<span class="normal">1201</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">amount_in_cents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
 <h5 id="djstripe.models.billing.Plan.create" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Plan</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
   
@@ -19468,119 +19369,6 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]),</span> <span class="kc">False</span>
     <span class="k">except</span> <span class="bp">cls</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="kc">True</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.billing.Plan.human_readable_price" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Plan</span><span class="o">.</span><span class="n">human_readable_price</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1203</span>
-<span class="normal">1204</span>
-<span class="normal">1205</span>
-<span class="normal">1206</span>
-<span class="normal">1207</span>
-<span class="normal">1208</span>
-<span class="normal">1209</span>
-<span class="normal">1210</span>
-<span class="normal">1211</span>
-<span class="normal">1212</span>
-<span class="normal">1213</span>
-<span class="normal">1214</span>
-<span class="normal">1215</span>
-<span class="normal">1216</span>
-<span class="normal">1217</span>
-<span class="normal">1218</span>
-<span class="normal">1219</span>
-<span class="normal">1220</span>
-<span class="normal">1221</span>
-<span class="normal">1222</span>
-<span class="normal">1223</span>
-<span class="normal">1224</span>
-<span class="normal">1225</span>
-<span class="normal">1226</span>
-<span class="normal">1227</span>
-<span class="normal">1228</span>
-<span class="normal">1229</span>
-<span class="normal">1230</span>
-<span class="normal">1231</span>
-<span class="normal">1232</span>
-<span class="normal">1233</span>
-<span class="normal">1234</span>
-<span class="normal">1235</span>
-<span class="normal">1236</span>
-<span class="normal">1237</span>
-<span class="normal">1238</span>
-<span class="normal">1239</span>
-<span class="normal">1240</span>
-<span class="normal">1241</span>
-<span class="normal">1242</span>
-<span class="normal">1243</span>
-<span class="normal">1244</span>
-<span class="normal">1245</span>
-<span class="normal">1246</span>
-<span class="normal">1247</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">human_readable_price</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">billing_scheme</span> <span class="o">==</span> <span class="s2">&quot;per_unit&quot;</span><span class="p">:</span>
-        <span class="n">unit_amount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span>
-        <span class="n">amount</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="n">unit_amount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># tiered billing scheme</span>
-        <span class="n">tier_1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tiers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">flat_amount_tier_1</span> <span class="o">=</span> <span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;flat_amount&quot;</span><span class="p">]</span>
-        <span class="n">formatted_unit_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">tier_1</span><span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
-        <span class="p">)</span>
-        <span class="n">amount</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Starts at </span><span class="si">{</span><span class="n">formatted_unit_amount_tier_1</span><span class="si">}</span><span class="s2"> per unit&quot;</span>
-
-        <span class="c1"># stripe shows flat fee even if it is set to 0.00</span>
-        <span class="k">if</span> <span class="n">flat_amount_tier_1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">formatted_flat_amount_tier_1</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
-                <span class="n">flat_amount_tier_1</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span>
-            <span class="p">)</span>
-            <span class="n">amount</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">amount</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">formatted_flat_amount_tier_1</span><span class="si">}</span><span class="s2">&quot;</span>
-
-    <span class="n">format_args</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="n">amount</span><span class="p">}</span>
-
-    <span class="n">interval_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval_count</span>
-    <span class="k">if</span> <span class="n">interval_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">interval</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;day&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;week&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;week&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;month&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">),</span>
-        <span class="p">}[</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">]</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{amount}</span><span class="s2">/</span><span class="si">{interval}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">interval</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;day&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;days&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;week&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;weeks&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;month&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;months&quot;</span><span class="p">),</span>
-            <span class="s2">&quot;year&quot;</span><span class="p">:</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;years&quot;</span><span class="p">),</span>
-        <span class="p">}[</span><span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">]</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{amount}</span><span class="s2"> / every </span><span class="si">{interval_count}</span><span class="s2"> </span><span class="si">{interval}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval</span>
-        <span class="n">format_args</span><span class="p">[</span><span class="s2">&quot;interval_count&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval_count</span>
-
-    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">format_lazy</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="o">**</span><span class="n">format_args</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -25253,6 +25041,97 @@ do actually want to instantiate the model and use relations.</p>
 
 </div>
 
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.UpcomingInvoice.default_tax_rates" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">default_tax_rates</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Gets the default tax rates associated with this upcoming invoice.
+:return:</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.UpcomingInvoice.id" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.UpcomingInvoice.invoiceitems" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">invoiceitems</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Gets the invoice items associated with this upcoming invoice.</p>
+<p>This differs from normal (non-upcoming) invoices, in that upcoming
+invoices are in-memory and do not persist to the database. Therefore,
+all of the data comes from the Stripe API itself.</p>
+<p>Instead of returning a normal queryset for the invoiceitems, this will
+return a mock of a queryset, but with the data fetched from Stripe - It
+will act like a normal queryset, but mutation will silently fail.</p>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.UpcomingInvoice.total_tax_amounts" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">total_tax_amounts</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>Gets the total tax amounts associated with this upcoming invoice.
+:return:</p>
+  </div>
+
+</div>
+
 <h4 id="djstripe.models.billing.UpcomingInvoice-functions">Functions</h4>
 
 <div class="doc doc-object doc-function">
@@ -25412,46 +25291,6 @@ do actually want to instantiate the model and use relations.</p>
 
 
 
-<h5 id="djstripe.models.billing.UpcomingInvoice.default_tax_rates" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">default_tax_rates</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Gets the default tax rates associated with this upcoming invoice.
-:return:</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">853</span>
-<span class="normal">854</span>
-<span class="normal">855</span>
-<span class="normal">856</span>
-<span class="normal">857</span>
-<span class="normal">858</span>
-<span class="normal">859</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">default_tax_rates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gets the default tax rates associated with this upcoming invoice.</span>
-<span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">QuerySetMock</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">TaxRate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_tax_rates</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
 <h5 id="djstripe.models.billing.UpcomingInvoice.get_stripe_dashboard_url" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">()</span></code>
 
@@ -25475,97 +25314,6 @@ do actually want to instantiate the model and use relations.</p>
 
 
 
-<h5 id="djstripe.models.billing.UpcomingInvoice.id" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">871</span>
-<span class="normal">872</span>
-<span class="normal">873</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">return</span> <span class="kc">None</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.billing.UpcomingInvoice.invoiceitems" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">invoiceitems</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Gets the invoice items associated with this upcoming invoice.</p>
-<p>This differs from normal (non-upcoming) invoices, in that upcoming
-invoices are in-memory and do not persist to the database. Therefore,
-all of the data comes from the Stripe API itself.</p>
-<p>Instead of returning a normal queryset for the invoiceitems, this will
-return a mock of a queryset, but with the data fetched from Stripe - It
-will act like a normal queryset, but mutation will silently fail.</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">837</span>
-<span class="normal">838</span>
-<span class="normal">839</span>
-<span class="normal">840</span>
-<span class="normal">841</span>
-<span class="normal">842</span>
-<span class="normal">843</span>
-<span class="normal">844</span>
-<span class="normal">845</span>
-<span class="normal">846</span>
-<span class="normal">847</span>
-<span class="normal">848</span>
-<span class="normal">849</span>
-<span class="normal">850</span>
-<span class="normal">851</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">invoiceitems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gets the invoice items associated with this upcoming invoice.</span>
-
-<span class="sd">    This differs from normal (non-upcoming) invoices, in that upcoming</span>
-<span class="sd">    invoices are in-memory and do not persist to the database. Therefore,</span>
-<span class="sd">    all of the data comes from the Stripe API itself.</span>
-
-<span class="sd">    Instead of returning a normal queryset for the invoiceitems, this will</span>
-<span class="sd">    return a mock of a queryset, but with the data fetched from Stripe - It</span>
-<span class="sd">    will act like a normal queryset, but mutation will silently fail.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="k">return</span> <span class="n">QuerySetMock</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">InvoiceItem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invoiceitems</span><span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
 <h5 id="djstripe.models.billing.UpcomingInvoice.save" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
@@ -25579,50 +25327,6 @@ will act like a normal queryset, but mutation will silently fail.</p>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">879</span>
 <span class="normal">880</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="k">return</span>  <span class="c1"># noop</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.billing.UpcomingInvoice.total_tax_amounts" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">total_tax_amounts</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Gets the total tax amounts associated with this upcoming invoice.
-:return:</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">861</span>
-<span class="normal">862</span>
-<span class="normal">863</span>
-<span class="normal">864</span>
-<span class="normal">865</span>
-<span class="normal">866</span>
-<span class="normal">867</span>
-<span class="normal">868</span>
-<span class="normal">869</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">total_tax_amounts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Gets the total tax amounts associated with this upcoming invoice.</span>
-<span class="sd">    :return:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">QuerySetMock</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span>
-        <span class="n">DjstripeUpcomingInvoiceTotalTaxAmount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_total_tax_amounts</span>
-    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -27223,6 +26927,44 @@ current e-mail address or if the account is enabled yet to make live charges.</p
 
 
 
+<h5 id="djstripe.models.account.Account.branding_icon" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">branding_icon</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.account.Account.branding_logo" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">branding_logo</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.account.Account.business_profile" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">business_profile</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Optional information related to the business.&#39;</span><span class="p">)</span></code>
   
@@ -27253,6 +26995,27 @@ current e-mail address or if the account is enabled yet to make live charges.</p
 
 
   <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.account.Account.business_url" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">business_url</span><span class="p">:</span> <span class="nb">str</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  
+      <p>The business's publicly available website.</p>
   </div>
 
 </div>
@@ -27304,6 +27067,25 @@ current e-mail address or if the account is enabled yet to make live charges.</p
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.account.Account.default_api_key" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">:</span> <span class="nb">str</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
   </span>
 
 </h5>
@@ -27618,146 +27400,6 @@ current e-mail address or if the account is enabled yet to make live charges.</p
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">reject</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="n">stripe_account</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.account.Account.branding_icon" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">branding_icon</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/account.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">205</span>
-<span class="normal">206</span>
-<span class="normal">207</span>
-<span class="normal">208</span>
-<span class="normal">209</span>
-<span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">branding_icon</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">..models.core</span> <span class="kn">import</span> <span class="n">File</span>
-
-    <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;branding&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;icon&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">File</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span> <span class="k">if</span> <span class="nb">id</span> <span class="k">else</span> <span class="kc">None</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.account.Account.branding_logo" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">branding_logo</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/account.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">212</span>
-<span class="normal">213</span>
-<span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">branding_logo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">..models.core</span> <span class="kn">import</span> <span class="n">File</span>
-
-    <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;branding&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;logo&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">File</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="nb">id</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span> <span class="k">if</span> <span class="nb">id</span> <span class="k">else</span> <span class="kc">None</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.account.Account.business_url" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">business_url</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>The business's publicly available website.</p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/account.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
-<span class="normal">119</span>
-<span class="normal">120</span>
-<span class="normal">121</span>
-<span class="normal">122</span>
-<span class="normal">123</span>
-<span class="normal">124</span>
-<span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">business_url</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    The business&#39;s publicly available website.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">business_profile</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">business_profile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;url&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;&quot;</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.account.Account.default_api_key" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">account</span><span class="o">.</span><span class="n">Account</span><span class="o">.</span><span class="n">default_api_key</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/account.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_api_key</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -29317,6 +28959,25 @@ debit card, or connected Stripe account, a transfer object will be created.</p>
 
 
 
+<h5 id="djstripe.models.connect.Transfer.fee" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">Transfer</span><span class="o">.</span><span class="n">fee</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.connect.Transfer.objects" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">Transfer</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">TransferManager</span><span class="p">()</span></code>
   
@@ -29481,37 +29142,6 @@ debit card, or connected Stripe account, a transfer object will be created.</p>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">amount</span><span class="si">}</span><span class="s2"> Partially Reversed&quot;</span>
     <span class="c1"># No Reversal</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">amount</span><span class="si">}</span><span class="s2">&quot;</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.connect.Transfer.fee" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">connect</span><span class="o">.</span><span class="n">Transfer</span><span class="o">.</span><span class="n">fee</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/connect.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span>
-<span class="normal">243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">fee</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_transaction</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">balance_transaction</span><span class="o">.</span><span class="n">fee</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -32527,6 +32157,25 @@ The 'valid' flag in this model monitors this.</p>
 
 
 
+<h5 id="djstripe.models.webhooks.WebhookEventTrigger.is_test_event" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">is_test_event</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-property"><code>property</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
 <h5 id="djstripe.models.webhooks.WebhookEventTrigger.processed" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">processed</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">BooleanField</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Whether or not the webhook event has been successfully processed&#39;</span><span class="p">)</span></code>
   
@@ -32869,37 +32518,6 @@ request object.</p>
         <span class="n">obj</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">obj</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.models.webhooks.WebhookEventTrigger.is_test_event" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">is_test_event</span><span class="p">()</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@property</span>
-<span class="k">def</span> <span class="nf">is_test_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">event_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">event_id</span> <span class="ow">and</span> <span class="n">event_id</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_00000000000000&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
