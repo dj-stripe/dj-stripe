@@ -121,11 +121,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://dj-stripe.github.io/dj-stripe/2.7/reference/context_managers/</loc>
-         <lastmod>2022-12-18</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://dj-stripe.github.io/dj-stripe/2.7/reference/enums/</loc>
          <lastmod>2022-12-18</lastmod>
          <changefreq>daily</changefreq>

@@ -116,8 +116,6 @@
               </ul>
               <p class="caption"><span class="caption-text">Reference</span></p>
               <ul class="current">
-                  <li class="toctree-l1"><a class="reference internal" href="../context_managers/">Context Managers</a>
-                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../enums/">Enumerations</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../managers/">Managers</a>
@@ -641,25 +639,7 @@ example, <code>"http://localhost:12111"</code> if you are running
 <span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripeSettings</span><span class="p">:</span>
+<span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripeSettings</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Container for Dj-stripe settings</span>
 
 <span class="sd">    :return: Initialised settings for Dj-stripe.</span>
@@ -891,24 +871,6 @@ example, <code>"http://localhost:12111"</code> if you are running
                 <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">subscriber_model</span>
-
-    <span class="k">def</span> <span class="nf">set_stripe_api_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Set the desired API version to use for Stripe requests.</span>
-
-<span class="sd">        :param version: The version to set for the Stripe API.</span>
-<span class="sd">        :type version: ``str``</span>
-<span class="sd">        :param validate: If True validate the value for the specified version).</span>
-<span class="sd">        :type validate: ``bool``</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">version</span> <span class="o">=</span> <span class="n">version</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">STRIPE_API_VERSION</span>
-
-        <span class="k">if</span> <span class="n">validate</span><span class="p">:</span>
-            <span class="n">valid</span> <span class="o">=</span> <span class="n">validate_stripe_api_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad stripe API version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="n">stripe</span><span class="o">.</span><span class="n">api_version</span> <span class="o">=</span> <span class="n">version</span>
 </code></pre></div></td></tr></table></div>
         </details>
 
@@ -1581,65 +1543,6 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 <span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model_string</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get the configured subscriber model as a module path string.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_SUBSCRIBER_MODEL&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-</code></pre></div></td></tr></table></div>
-      </details>
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-
-<h5 id="djstripe.settings.DjstripeSettings.set_stripe_api_version" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">set_stripe_api_version</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  
-      <p>Set the desired API version to use for Stripe requests.</p>
-<p>:param version: The version to set for the Stripe API.
-:type version: <code>str</code>
-:param validate: If True validate the value for the specified version).
-:type validate: <code>bool</code></p>
-
-      <details class="quote">
-        <summary>Source code in <code>djstripe/settings.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">246</span>
-<span class="normal">247</span>
-<span class="normal">248</span>
-<span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span>
-<span class="normal">258</span>
-<span class="normal">259</span>
-<span class="normal">260</span>
-<span class="normal">261</span>
-<span class="normal">262</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_stripe_api_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Set the desired API version to use for Stripe requests.</span>
-
-<span class="sd">    :param version: The version to set for the Stripe API.</span>
-<span class="sd">    :type version: ``str``</span>
-<span class="sd">    :param validate: If True validate the value for the specified version).</span>
-<span class="sd">    :type validate: ``bool``</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">version</span> <span class="o">=</span> <span class="n">version</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">STRIPE_API_VERSION</span>
-
-    <span class="k">if</span> <span class="n">validate</span><span class="p">:</span>
-        <span class="n">valid</span> <span class="o">=</span> <span class="n">validate_stripe_api_version</span><span class="p">(</span><span class="n">version</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">valid</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Bad stripe API version: </span><span class="si">{</span><span class="n">version</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-    <span class="n">stripe</span><span class="o">.</span><span class="n">api_version</span> <span class="o">=</span> <span class="n">version</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>

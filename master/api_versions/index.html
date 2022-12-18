@@ -126,8 +126,6 @@
               </ul>
               <p class="caption"><span class="caption-text">Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../reference/context_managers/">Context Managers</a>
-                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../reference/enums/">Enumerations</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../reference/managers/">Managers</a>
@@ -167,50 +165,31 @@
                 <h1 id="a-note-on-stripe-api-versions">A note on Stripe API versions</h1>
 <p>A point that can cause confusion to new users of dj-stripe is that there
 are several different Stripe API versions in play at once.</p>
-<div class="admonition attention">
-<p class="admonition-title">Attention</p>
-<p>Don't touch the <a href="../reference/settings/#stripe_api_version-2020-08-27">STRIPE_API_VERSION</a> setting, but don't worry,
-it doesn't need to match your Stripe account api version.</p>
-</div>
-<p>See also <a href="https://stripe.com/docs/api/versioning">Stripe API Versioning</a></p>
 <h2 id="your-stripe-accounts-api-version">Your Stripe account's API version</h2>
-<p>You can find this on <a href="https://dashboard.stripe.com/developers">your Stripe dashboard</a> labelled "<strong>default</strong>"</p>
-<p>For new accounts this will be the latest Stripe version. When upgrading
-version Stripe only allows you to upgrade to the <strong>latest</strong> version.</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>Checkout <a href="https://stripe.com/docs/upgrades#how-can-i-upgrade-my-api">Stripe Version Upgrade</a> Documentation for Upgrading Stripe API version</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This is the version used by Stripe when sending webhook data to you
-(though during webhook processing, dj-stripe re-fetches the data with
-its preferred version). It's also the default version used by the Stripe
-API, but dj-stripe overrides the API version when talking to stripe
-(this override is triggered on import of <code>djstripe.models</code>).</p>
-<p>As a result your Stripe account API version is mostly irrelevant, though
-from time to time we will increase the minimum supported API version,
-and it's good practise to regularly upgrade to the latest version with
-appropriate testing.</p>
-</div>
+<p>This is the version used by Stripe when sending webhook data to you and the default version used by the Stripe API.
+You can find this on <a href="https://dashboard.stripe.com/developers">your Stripe dashboard</a> labelled "<strong>default</strong>".
+New Stripe accounts are always on the latest version.</p>
+<p>Read more about it on <a href="https://stripe.com/docs/api/versioning">stripe.com/docs/api/versioning</a>.</p>
 <h2 id="stripes-current-latest-api-version">Stripe's current latest API version</h2>
 <p>You can find this on your Stripe dashboard labelled "<strong>latest</strong>" or in
 <a href="https://stripe.com/docs/upgrades#api-changelog">Stripe's API documentation</a></p>
-<p>This is the version used by new accounts and it's also "<strong>true</strong>" internal
-version of Stripe's API</p>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>Checkout <a href="https://stripe.com/blog/api-versioning">Stripe API Versioning</a></p>
-</div>
+<p>See <a href="https://stripe.com/docs/upgrades#how-can-i-upgrade-my-api">stripe.com/docs/upgrades</a> on how to upgrade your Stripe API version.
+Stripe will only allow upgrades to the <strong>latest</strong> version.</p>
 <h2 id="dj-stripe-api-version">Dj-stripe API version</h2>
 <p>This is the Stripe API version used by dj-stripe in all communication
 with Stripe, including when processing webhooks (though webhook data is
 sent to you by Stripe with your API version, we re-fetch the data with
 dj-stripe's API version), this is because the API schema needs to match
 dj-stripe's Django model schema.</p>
-<p>This is defined by <a class="autorefs autorefs-internal" href="../reference/settings/#djstripe.settings.DjstripeSettings.DEFAULT_STRIPE_API_VERSION"><code>djstripe.settings.djstripe_settings.DEFAULT_STRIPE_API_VERSION</code></a> and
-can be overridden by the function, <a class="autorefs autorefs-internal" href="../reference/settings/#djstripe.settings.DjstripeSettings.set_stripe_api_version"><code>djstripe.settings.djstripe_settings.set_stripe_api_version</code></a>, though see the warning
-about doing this.</p>
+<p>It is defined by <a href="../reference/settings/#stripe_api_version-2020-08-27"><code>STRIPE_API_VERSION</code></a> with a default of
+<a class="autorefs autorefs-internal" href="../reference/settings/#djstripe.settings.DjstripeSettings.DEFAULT_STRIPE_API_VERSION"><code>DEFAULT_STRIPE_API_VERSION</code></a>.
+You mustn't change this as it ensures that
+dj-stripe receives data in the format it expects.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>dj-stripe will always use <code>STRIPE_API_VERSION</code> in its requests
+regardless of what <code>stripe.api_version</code> is set to.</p>
+</div>
 <h2 id="dj-stripe-latest-tested-version">Dj-stripe Latest Tested Version</h2>
 <p>This is the most recent Stripe account API version used by the
 maintainers during testing, more recent versions account versions are

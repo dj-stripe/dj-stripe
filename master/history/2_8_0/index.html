@@ -116,8 +116,6 @@
               </ul>
               <p class="caption"><span class="caption-text">Reference</span></p>
               <ul>
-                  <li class="toctree-l1"><a class="reference internal" href="../../reference/context_managers/">Context Managers</a>
-                  </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../reference/enums/">Enumerations</a>
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../reference/managers/">Managers</a>
@@ -172,6 +170,7 @@ To upgrade from an older version, first upgrade to dj-stripe 2.5.0.</p>
 </ul>
 </li>
 <li><code>djstripe.signals.webhook_processing_error</code> now also takes <code>instance</code> and <code>api_key</code> arguments</li>
+<li><code>stripe.api_version</code> is no longer manipulated by dj-stripe.</li>
 </ul>
 <h2 id="deprecated-features">Deprecated features</h2>
 <ul>
@@ -189,6 +188,9 @@ To upgrade from an older version, first upgrade to dj-stripe 2.5.0.</p>
 <li>Remove <code>DJSTRIPE_PRORATION_POLICY</code> setting (deprecated in 2.6.0)</li>
 <li>Remove deprecated <code>prorate</code> argument to <code>Subscription.update()</code> (Use Stripe's
     <code>proration_behavior</code> argument instead)</li>
+<li>Remove undocumented <code>set_stripe_api_version()</code> helper function
+    and context manager <code>stripe_temporary_api_version()</code>.
+    The API version is now set on each request individually.</li>
 </ul>
 <h2 id="other-changes">Other changes</h2>
 <ul>
