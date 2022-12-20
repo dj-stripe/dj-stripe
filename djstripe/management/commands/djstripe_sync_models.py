@@ -68,7 +68,6 @@ class Command(BaseCommand):
             # action="extend",
             help="Specify the api_keys you would like to perform this sync for.",
         )
-        # Named (optional) arguments
         parser.add_argument(
             "--created",
             metavar="Created",
@@ -76,12 +75,24 @@ class Command(BaseCommand):
             type=str,
             help="Specify the created you would like to perform this sync for.",
         )
+        parser.add_argument(
+            "--strategy",
+            metavar="Strategy",
+            nargs="?",
+            type=str,
+            choices=enums.DjStripeSyncModelTrackStrategyType.__members__,
+            default=enums.DjStripeSyncModelTrackStrategyType.incremental,
+            help="The strategy of djstripe_sync_models management command. Defaults to incremental syncs. Choices: incremental or full_refresh",
+        )
 
-    def handle(self, *args, api_keys, created, **options):
+    def handle(self, *args, api_keys, created, strategy, **options):
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
         model_list = []  # type: List[models.StripeModel]
         if created:
+            self.stdout.write(
+                "Passing `created` will override the incremental strategy and will sync Stripe objects as desired by the `created` arguement."
+            )
             try:
                 created = json.loads(created)
             except json.decoder.JSONDecodeError as error:
