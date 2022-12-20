@@ -38,8 +38,10 @@ from django.core.exceptions import FieldDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
 from django.db import models as django_models
 
+from djstripe.utils import datetime_to_unix
+
 from ... import enums, models
-from ...models.base import StripeBaseModel
+from ...models.base import DjStripeSyncModelTrack, StripeBaseModel
 from ...settings import djstripe_settings
 
 # TODO Improve performance using multiprocessing
@@ -130,9 +132,40 @@ class Command(BaseCommand):
                 )
                 return
 
-        for model in model_list:
-            for api_key in api_qs:
-                self.sync_model(model, api_key=api_key, created=created)
+        # todo Check the most recent DjStripeSyncModelTrack and if status ~="completed"
+        # todo prompt the user to resume that or to create a new one.
+
+        # as model_list is a generator
+        model_list = list(model_list)
+
+        models_to_sync = ([model.__name__ for model in model_list],)
+        api_keys_to_sync = ([api.secret for api in api_qs],)
+        if (
+            not created
+            and strategy == enums.DjStripeSyncModelTrackStrategyType.incremental
+        ):
+            # before syncing get the most recent related sync
+            # and dynamically construct the created dictionary (if not passed already)
+            most_recent_sync_object = DjStripeSyncModelTrack.objects.filter(
+                models_to_sync=models_to_sync,
+                api_keys_to_sync=api_keys_to_sync,
+                status=enums.DjStripeSyncModelTrackStatusType.completed,
+            )
+
+            if most_recent_sync_object.exists():
+                created = {
+                    "gte": datetime_to_unix(
+                        most_recent_sync_object[0].djstripe_created
+                    ),
+                }
+
+        # Create an instance of the DjStripeSyncModelTrack
+        sync_tracker = DjStripeSyncModelTrack.objects.create(
+            models_to_sync=models_to_sync,
+            api_keys_to_sync=api_keys_to_sync,
+            stripe_created_dict=created,
+            strategy=strategy,
+        )
 
     def _should_sync_model(self, model):
         if not issubclass(model, StripeBaseModel):
