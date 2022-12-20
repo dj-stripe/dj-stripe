@@ -51,7 +51,7 @@ class StripeBaseModel(models.Model):
             results = cls.stripe_class.list(
                 api_key=api_key,
                 stripe_version=djstripe_settings.STRIPE_API_VERSION,
-                **kwargs
+                **kwargs,
             ).auto_paging_iter()
         except InvalidRequestError as e:
             if "Received unknown parameter: created" == e.user_message:
