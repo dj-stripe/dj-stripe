@@ -166,6 +166,26 @@ class Command(BaseCommand):
             stripe_created_dict=created,
             strategy=strategy,
         )
+        try:
+            # Start sync
+            for model in model_list:
+                for api_key in api_qs:
+                    self.sync_model(
+                        model,
+                        api_key=api_key,
+                        created=created,
+                        sync_tracker=sync_tracker,
+                    )
+        # todo need to add Keyboardinterrupt at other try-except loops below as well.
+        except KeyboardInterrupt:
+            # Update status to Cancelled
+            sync_tracker.status = enums.DjStripeSyncModelTrackStatusType.cancelled
+            raise CommandError("Syncing models cancelled.")
+        else:
+            # Update status to Completed after best effort sync gets completed
+            sync_tracker.status = enums.DjStripeSyncModelTrackStatusType.completed
+        finally:
+            sync_tracker.save()
 
     def _should_sync_model(self, model):
         if not issubclass(model, StripeBaseModel):
