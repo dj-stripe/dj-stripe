@@ -20,7 +20,7 @@ from ..fields import (
 )
 from ..managers import StripeModelManager
 from ..settings import djstripe_settings
-from ..utils import get_friendly_currency_amount, get_id_from_stripe_data
+from ..utils import get_id_from_stripe_data
 
 logger = logging.getLogger(__name__)
 

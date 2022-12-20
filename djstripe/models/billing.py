@@ -8,8 +8,6 @@ from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from stripe.error import InvalidRequestError
 
-import djstripe
-
 from .. import enums
 from ..fields import (
     JSONField,
@@ -189,7 +187,7 @@ class Coupon(StripeModel):
     def human_readable(self):
         if self.duration == enums.CouponDuration.repeating:
             if self.duration_in_months == 1:
-                duration = f"for 1 month"
+                duration = "for 1 month"
             else:
                 duration = f"for {self.duration_in_months} months"
         else:

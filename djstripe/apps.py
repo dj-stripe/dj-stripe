@@ -19,8 +19,6 @@ class DjstripeAppConfig(AppConfig):
     def ready(self):
         import stripe
 
-        from . import checks, event_handlers
-
         # Set app info
         # https://stripe.com/docs/building-plugins#setappinfo
         stripe.set_app_info(
