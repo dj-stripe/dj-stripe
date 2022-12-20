@@ -9,7 +9,7 @@ from django.apps import apps
 from django.conf import settings
 from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models.query import QuerySet
-from django.utils import timezone
+from django.utils import dateformat, timezone
 
 
 def get_supported_currency_choices(api_key):
@@ -47,6 +47,10 @@ def convert_tstamp(response) -> Optional[datetime.datetime]:
     tz = timezone.utc if settings.USE_TZ else None
 
     return datetime.datetime.fromtimestamp(response, tz)
+
+
+def datetime_to_unix(datetime_):
+    return int(dateformat.format(datetime_, "U"))
 
 
 # TODO: Finish this.

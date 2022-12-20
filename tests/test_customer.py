@@ -27,6 +27,7 @@ from djstripe.models import (
     Subscription,
 )
 from djstripe.settings import djstripe_settings
+from djstripe.utils import datetime_to_unix
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -56,7 +57,6 @@ from . import (
     FAKE_UPCOMING_INVOICE,
     AssertStripeFksMixin,
     StripeList,
-    datetime_to_unix,
 )
 
 

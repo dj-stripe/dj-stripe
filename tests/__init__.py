@@ -16,8 +16,9 @@ from typing import Any, Dict
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.utils import dateformat, timezone
+from django.utils import timezone
 
+from djstripe.utils import datetime_to_unix
 from djstripe.webhooks import TEST_EVENT_ID
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.settings")
@@ -87,10 +88,6 @@ class AssertStripeFksMixin:
 def load_fixture(filename):
     with FIXTURE_DIR_PATH.joinpath(filename).open("r") as f:
         return json.load(f)
-
-
-def datetime_to_unix(datetime_):
-    return int(dateformat.format(datetime_, "U"))
 
 
 class StripeItem(dict):

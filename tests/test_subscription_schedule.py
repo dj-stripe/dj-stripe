@@ -11,6 +11,7 @@ from django.test import TestCase
 from djstripe.enums import SubscriptionScheduleStatus
 from djstripe.models import Invoice, SubscriptionSchedule
 from djstripe.settings import djstripe_settings
+from djstripe.utils import datetime_to_unix
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -24,7 +25,6 @@ from . import (
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_SCHEDULE,
     AssertStripeFksMixin,
-    datetime_to_unix,
 )
 
 

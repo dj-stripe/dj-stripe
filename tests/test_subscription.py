@@ -16,6 +16,7 @@ from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Product, Subscription
 from djstripe.models.billing import Invoice
 from djstripe.settings import djstripe_settings
+from djstripe.utils import datetime_to_unix
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -43,7 +44,6 @@ from . import (
     FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT,
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
     AssertStripeFksMixin,
-    datetime_to_unix,
 )
 
 pytestmark = pytest.mark.django_db
