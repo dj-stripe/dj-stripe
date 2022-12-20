@@ -87,6 +87,7 @@ class TestAdminRegisteredModelsChildrenOfStripeModel(TestCase):
             "WebhookEndpoint",
             "IdempotencyKey",
             "APIKey",
+            "DjStripeSyncModelTrack",
         ]
 
     def test_get_list_display_links(self):
@@ -918,6 +919,7 @@ class TestCustomActionMixin:
         "WebhookEndpoint",
         "IdempotencyKey",
         "APIKey",
+        "DjStripeSyncModelTrack",
     ]
 
     @pytest.mark.parametrize(

@@ -35,6 +35,19 @@ class IdempotencyKeyAdmin(ReadOnlyMixin, admin.ModelAdmin):
     search_fields = ("uuid", "action")
 
 
+@admin.register(models.DjStripeSyncModelTrack)
+class DjStripeSyncModelTrackAdmin(ReadOnlyMixin, admin.ModelAdmin):
+    list_display = (
+        "status",
+        "strategy",
+        "djstripe_created",
+        "djstripe_updated",
+        "models_to_sync",
+        "api_keys_to_sync",
+        "stripe_created_dict",
+    )
+
+
 @admin.register(models.WebhookEventTrigger)
 class WebhookEventTriggerAdmin(ReadOnlyMixin, admin.ModelAdmin):
     list_display = (
