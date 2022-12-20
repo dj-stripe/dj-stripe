@@ -6,14 +6,17 @@ from typing import Dict, List, Optional, Type
 from django.apps import apps
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
+from django.utils.translation import gettext_lazy as _
 from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
 from stripe.util import convert_to_stripe_object
 
+from .. import enums
 from ..exceptions import ImpossibleAPIRequest
 from ..fields import (
     JSONField,
     StripeDateTimeField,
+    StripeEnumField,
     StripeForeignKey,
     StripeIdField,
     StripePercentField,
@@ -1104,3 +1107,55 @@ class IdempotencyKey(models.Model):
     @property
     def is_expired(self) -> bool:
         return timezone.now() > self.created + timedelta(hours=24)
+
+
+class DjStripeSyncModelTrack(models.Model):
+    """
+    A model to keep track of djstripe_sync_model management command invokations.
+
+    This would allow to do faster incremental syncs if the user so desires.
+    """
+
+    status = StripeEnumField(
+        enum=enums.DjStripeSyncModelTrackStatusType,
+        default=enums.DjStripeSyncModelTrackStatusType.started,
+        help_text="The status of djstripe_sync_models management command.",
+    )
+    strategy = StripeEnumField(
+        enum=enums.DjStripeSyncModelTrackStrategyType,
+        default=enums.DjStripeSyncModelTrackStrategyType.incremental,
+        help_text="The strategy of djstripe_sync_models management command. Deafults to incremental syncs.",
+    )
+    # TODO uncomment the field below once it is time to allow users to resume past cancelled syncs
+    # sync_create_strategy = StripeEnumField(
+    #     enum=enums.DjStripeSyncModelTracksyncCreateStrategyType,
+    #     default=enums.DjStripeSyncModelTracksyncCreateStrategyType.create_new,
+    #     help_text="The strategy of djstripe_sync_models management command to either resume the last sync (if not completed) or to create a new one. Deafults to creating a new sync.",
+    # )
+    djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
+    djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
+    models_to_sync = models.JSONField(
+        help_text=_("Names of model instances to sync."),
+    )
+    instances_not_synced = models.JSONField(
+        null=True,
+        blank=True,
+        help_text=_("Model instances that could not be synced due to errors."),
+    )
+    api_keys_to_sync = models.JSONField(
+        help_text=_("API Keys to sync for."),
+    )
+    stripe_created_dict = models.JSONField(
+        null=True,
+        blank=True,
+        help_text=_(
+            "A filter on the model instances based on the object created field. The value can be a string with an integer Unix timestamp, or it can be a dictionary."
+        ),
+    )
+
+    class Meta:
+        ordering = ["-djstripe_created"]
+        verbose_name = "DjStripeSyncModelTrack"
+
+    def __str__(self):
+        return f"<id={self.id}>"

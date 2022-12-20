@@ -1,6 +1,6 @@
 from .account import Account
 from .api import APIKey
-from .base import IdempotencyKey, StripeModel
+from .base import DjStripeSyncModelTrack, IdempotencyKey, StripeModel
 from .billing import (
     Coupon,
     Invoice,
