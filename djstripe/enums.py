@@ -845,3 +845,31 @@ class DjstripePaymentMethodType(Enum):
     card = _("Card")
     bank_account = _("Bank account")
     source = _("Source")
+
+
+class DjStripeSyncModelTrackStatusType(Enum):
+    """
+    A djstripe-specific enum for the DjStripeSyncModelTrack model status.
+    """
+
+    started = _("Sync Started")
+    cancelled = _("Sync Cancelled")
+    completed = _("Sync Completed")
+
+
+class DjStripeSyncModelTrackStrategyType(Enum):
+    """
+    A djstripe-specific enum for the DjStripeSyncModelTrack model sync strategy.
+    """
+
+    incremental = _("Incremental")
+    full_refresh = _("Full Refresh")
+
+
+class DjStripeSyncModelTracksyncCreateStrategyType(Enum):
+    """
+    A djstripe-specific enum for the DjStripeSyncModelTrack model sync create strategy.
+    """
+
+    resume = _("Resume")
+    create_new = _("Create New")
