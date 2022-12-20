@@ -214,7 +214,13 @@ class Command(BaseCommand):
 
         return True, ""
 
-    def sync_model(self, model, api_key: str, created: Union[Dict, int]):
+    def sync_model(
+        self,
+        model,
+        api_key: str,
+        created: Union[Dict, int],
+        sync_tracker: DjStripeSyncModelTrack,
+    ):
         model_name = model.__name__
 
         should_sync, reason = self._should_sync_model(model)
@@ -276,7 +282,32 @@ class Command(BaseCommand):
                             )
                             count += 1
                         except Exception as e:
-                            self.stderr.write(f"Skipping {stripe_obj.get('id')}: {e}")
+                            if stripe_obj is not None:
+                                self.stderr.write(
+                                    f"Skipping {stripe_obj.get('id')}: {e}"
+                                )
+
+                                # Initialise sync_tracker.instances_not_synced object
+                                if not sync_tracker.instances_not_synced:
+                                    sync_tracker.instances_not_synced = {
+                                        model_name: {api_key.secret: []}
+                                    }
+
+                                if not sync_tracker.instances_not_synced.get(
+                                    model_name
+                                ):
+                                    sync_tracker.instances_not_synced[model_name] = {
+                                        api_key.secret: []
+                                    }
+
+                                # Add ID of Stripe Object that could not get synced
+                                apikey_lst = sync_tracker.instances_not_synced.get(
+                                    model_name
+                                ).get(api_key.secret)
+                                apikey_lst.append(stripe_obj.get("id"))
+
+                                # We immediately save as the user can cancel the sync at any time
+                                sync_tracker.save()
 
                             continue
                 except Exception as e:
