@@ -904,8 +904,16 @@ class Customer(StripeModel):
         if subscriber_key not in ("", None):
             metadata[subscriber_key] = subscriber.pk
 
+        try:
+            # if subscriber table has a get_full_name() method, use it as name
+            # ref django.contrib.auth.models.User.get_full_name
+            name = subscriber.get_full_name()
+        except AttributeError:
+            name = None
+
         stripe_customer = cls._api_create(
             email=subscriber.email,
+            name=name,
             idempotency_key=idempotency_key,
             metadata=metadata,
             stripe_account=stripe_account,
