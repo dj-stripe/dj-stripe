@@ -828,7 +828,7 @@ class Customer(StripeModel):
             name = subscriber.name
         else:
             # use email's username as customer name
-            name = re.sub('[_.-]', ' ', subscriber.email).title()
+            name = re.sub('[_.-]', ' ', subscriber.email.split('@')[0]).title()
 
         stripe_customer = cls._api_create(
             email=subscriber.email,
