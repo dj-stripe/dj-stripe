@@ -1,6 +1,7 @@
 import warnings
 from decimal import Decimal
 from typing import Optional, Union
+import re
 
 import stripe
 from django.apps import apps
