@@ -1,7 +1,6 @@
 import warnings
 from decimal import Decimal
 from typing import Optional, Union
-import re
 
 import stripe
 from django.apps import apps
@@ -824,12 +823,11 @@ class Customer(StripeModel):
         if subscriber_key not in ("", None):
             metadata[subscriber_key] = subscriber.pk
 
-        if hasattr(subscriber, 'name') and subscriber.name:
+        try:
             # if subscriber table has name column use it as customer name
             name = subscriber.name
-        else:
-            # use email's username as customer name
-            name = re.sub('[_.-]', ' ', subscriber.email.split('@')[0]).title()
+        except AttributeError:
+            name = None
 
         stripe_customer = cls._api_create(
             email=subscriber.email,
