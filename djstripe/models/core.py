@@ -823,11 +823,11 @@ class Customer(StripeModel):
         if subscriber_key not in ("", None):
             metadata[subscriber_key] = subscriber.pk
 
-        try:
-            # if subscriber column has name field use it as customer name
+        if hasattr(subscriber, 'name') and subscriber.name:
+            # if subscriber table has name column use it as customer name
             name = subscriber.name
-        except:
-            # use email username as customer name
+        else:
+            # use email's username as customer name
             name = re.sub('[_.-]', ' ', subscriber.email).title()
 
         stripe_customer = cls._api_create(
