@@ -214,10 +214,7 @@ def _check_webhook_endpoint_validation(secret, messages, endpoint=None):
         messages.append(
             checks.Info(
                 f"DJSTRIPE_WEBHOOK_VALIDATION is set to 'verify_signature' {extra_msg}",
-                hint=(
-                    f"Set {secret_attr} from Django shell or set"
-                    " DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'"
-                ),
+                hint=f"Set {secret_attr} or set DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
                 id="djstripe.I006",
             )
         )
