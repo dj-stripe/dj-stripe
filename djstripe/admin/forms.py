@@ -173,6 +173,11 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
     # This is used by Django for ModelForm logic. It's internal, but exactly
     # what we need to add errors after the data has been validated locally.
     def _post_clean(self):
+        # In case of erros, abort processing and let Django take care
+        # of showing it to users.
+        if self.errors:
+            return super()._post_clean()
+
         base_url = self.cleaned_data["base_url"]
         url_path = reverse(
             "djstripe:djstripe_webhook_by_uuid",
