@@ -454,6 +454,7 @@ class StripeModel(StripeBaseModel):
         """
         from djstripe.models import DjstripePaymentMethod
 
+        field_data = None
         instance = None
         field_name = field.name
         refetch = False
@@ -518,6 +519,7 @@ class StripeModel(StripeBaseModel):
                         stripe_account=stripe_account,
                         api_key=api_key,
                     )
+                    instance = field_data
                 except ImpossibleAPIRequest:
                     # Found to happen in the following situation:
                     # Customer has a `default_source` set to a `card_` object,
