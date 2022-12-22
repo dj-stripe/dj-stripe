@@ -7,8 +7,8 @@ FROM python:${PYTHON_VERSION} as python
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
-# Install Poetry Version 1.2.0rc2
-ENV POETRY_VERSION=1.2.0rc2
+# Install Poetry Version 1.3.1
+ENV POETRY_VERSION=1.3.1
 # So that poetry exec can be found on $PATH
 ENV PATH="/root/.local/bin:$PATH"
 
