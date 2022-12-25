@@ -11,6 +11,8 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
+from djstripe.constants import CURRENCY_SIGILS, RIGHT_SIDE_SIMBOLS
+
 
 def get_supported_currency_choices(api_key):
     """
@@ -49,15 +51,15 @@ def convert_tstamp(response) -> Optional[datetime.datetime]:
     return datetime.datetime.fromtimestamp(response, tz)
 
 
-# TODO: Finish this.
-CURRENCY_SIGILS = {"CAD": "$", "EUR": "€", "GBP": "£", "USD": "$"}
-
-
 def get_friendly_currency_amount(amount, currency: str) -> str:
     currency = currency.upper()
     sigil = CURRENCY_SIGILS.get(currency, "")
     amount_two_decimals = f"{amount:.2f}"
-    return f"{sigil}{intcomma(amount_two_decimals)} {currency}"
+    if currency in RIGHT_SIDE_SIMBOLS:
+        result = f"{intcomma(amount_two_decimals)} {sigil} {currency}"
+    else:
+        result = f"{sigil}{intcomma(amount_two_decimals)} {currency}"
+    return result
 
 
 class QuerySetMock(QuerySet):
