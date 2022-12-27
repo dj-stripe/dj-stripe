@@ -1989,12 +1989,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertEqual(0, len(items))
         self.assertIsNotNone(invoice.plan)
 
-    @patch("stripe.Customer.retrieve", autospec=True)
-    def test_delete_subscriber_without_customer_is_noop(self, customer_retrieve_mock):
-        self.user.delete()
-        for customer in self.user.djstripe_customers.all():
-            self.assertIsNone(customer.date_purged)
-
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
