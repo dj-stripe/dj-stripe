@@ -506,6 +506,14 @@ class Product(StripeModel):
             "Applicable to both `service` and `good` types."
         ),
     )
+    default_price = StripeForeignKey(
+        "Price",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="products",
+        help_text="The default price this product is associated with.",
+    )
     type = StripeEnumField(
         enum=enums.ProductType,
         help_text=(

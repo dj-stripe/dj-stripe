@@ -94,6 +94,7 @@ class TestOrder(AssertStripeFksMixin, TestCase):
             "djstripe.PaymentIntent.on_behalf_of",
             "djstripe.PaymentIntent.payment_method",
             "djstripe.PaymentIntent.upcominginvoice (related name)",
+            "djstripe.Product.default_price",
         }
         # Ensure Order objects with Customer and PaymentIntent data sync correctly
         order = Order.sync_from_stripe_data(
