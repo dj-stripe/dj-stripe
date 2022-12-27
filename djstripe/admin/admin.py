@@ -481,7 +481,14 @@ class PriceAdmin(StripeModelAdmin):
 
 @admin.register(models.Product)
 class ProductAdmin(StripeModelAdmin):
-    list_display = ("name", "type", "active", "url", "statement_descriptor")
+    list_display = (
+        "name",
+        "default_price",
+        "type",
+        "active",
+        "url",
+        "statement_descriptor",
+    )
     list_filter = ("type", "active", "shippable")
     search_fields = ("name", "statement_descriptor")
 
