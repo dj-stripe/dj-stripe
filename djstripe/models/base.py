@@ -143,6 +143,8 @@ class StripeModel(StripeBaseModel):
             for which this request is being made.
         :type stripe_account: string
         """
+        from djstripe.models import Account
+
         api_key = api_key or self.default_api_key
 
         try:
@@ -157,11 +159,9 @@ class StripeModel(StripeBaseModel):
         reverse_account_relations = (
             field
             for field in self._meta.get_fields(include_parents=True)
-            if field.is_relation and field.one_to_many
-            # Avoid circular import problems by using the app registry to
-            # get the model class rather than a direct import.
-            and field.related_model
-            is apps.get_model(app_label="djstripe", model_name="account")
+            if field.is_relation
+            and field.one_to_many
+            and field.related_model is Account
         )
 
         # Handle case where we have a reverse relation to Account and should pass
@@ -169,10 +169,15 @@ class StripeModel(StripeBaseModel):
         for field in reverse_account_relations:
             # Grab the related object, using the first one we find.
             reverse_lookup_attr = field.get_accessor_name()
-            account = getattr(self, reverse_lookup_attr).first()
-
-            if account is not None:
-                return account.id
+            try:
+                account = getattr(self, reverse_lookup_attr).first()
+            except ValueError:
+                if isinstance(self, Account):
+                    # return the id if self is the Account model itself.
+                    return self.id
+            else:
+                if account is not None:
+                    return account.id
 
         return None
 
