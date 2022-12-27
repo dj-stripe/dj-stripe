@@ -53,7 +53,13 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
             **expected_create_kwargs,
         )
 
-        self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            price,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Product.default_price",
+            },
+        )
 
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -76,7 +82,13 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
             **expected_create_kwargs,
         )
 
-        self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            price,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Product.default_price",
+            },
+        )
 
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -98,7 +110,13 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
             **FAKE_PRICE,
         )
 
-        self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            price,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Product.default_price",
+            },
+        )
 
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -122,7 +140,13 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
             **expected_create_kwargs,
         )
 
-        self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            price,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Product.default_price",
+            },
+        )
 
 
 class PriceTest(AssertStripeFksMixin, TestCase):
@@ -148,7 +172,13 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         )
         price = Price.sync_from_stripe_data(stripe_price)
 
-        self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            price,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Product.default_price",
+            },
+        )
 
         assert price.human_readable_price == "$20.00 USD/month"
 
@@ -160,7 +190,13 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         assert price.unit_amount is None
         assert price.tiers is not None
 
-        self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            price,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Product.default_price",
+            },
+        )
 
     @patch("stripe.Price.retrieve", autospec=True)
     def test_stripe_metered_price(self, price_retrieve_mock):
@@ -170,7 +206,13 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         assert price.recurring["usage_type"] == PriceUsageType.metered
         assert price.unit_amount is not None
 
-        self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            price,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Product.default_price",
+            },
+        )
 
     @patch("stripe.Price.retrieve", autospec=True)
     def test_stripe_onetime_price(self, price_retrieve_mock):
@@ -181,7 +223,13 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         assert not price.recurring
         assert price.type == PriceType.one_time
 
-        self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
+        self.assert_fks(
+            price,
+            expected_blank_fks={
+                "djstripe.Customer.coupon",
+                "djstripe.Product.default_price",
+            },
+        )
 
 
 class TestStrPrice:
