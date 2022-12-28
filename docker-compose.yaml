@@ -24,6 +24,7 @@ services:
     ports:
       - "5432:5432"
 
+    # # mysql --host=0.0.0.0 --port=3306 --user=root --password=random_number random_number
     # image: mysql:5.7
     # # command: --default-authentication-plugin=mysql_native_password
     # volumes:
@@ -35,6 +36,7 @@ services:
     #   - MYSQL_ROOT_PASSWORD=random_number
     # ports:
     #   - "3306:3306"
+
 
   web:
     build:
