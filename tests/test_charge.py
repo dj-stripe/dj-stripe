@@ -223,6 +223,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.assert_fks(
@@ -312,6 +313,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             expand=[],
             id=FAKE_BALANCE_TRANSACTION_REFUND["id"],
             stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         refunds = list(charge_refunded.refunds.all())
@@ -405,12 +407,14 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
                     expand=[],
                     id=FAKE_BALANCE_TRANSACTION["id"],
                     stripe_account=None,
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 ),
                 call(
                     api_key=djstripe_settings.STRIPE_SECRET_KEY,
                     expand=[],
                     id=FAKE_BALANCE_TRANSACTION_REFUND["id"],
                     stripe_account=None,
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 ),
             ]
         )
@@ -561,6 +565,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.assert_fks(
@@ -618,6 +623,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.assert_fks(
@@ -705,6 +711,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.assert_fks(
@@ -778,6 +785,7 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
             expand=[],
             id=FAKE_BALANCE_TRANSACTION["id"],
             stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         self.assert_fks(charge, expected_blank_fks=self.default_expected_blank_fks)

@@ -9,7 +9,7 @@ import stripe
 from django.test import TestCase
 
 from djstripe.enums import PriceType, PriceUsageType
-from djstripe.models import Price, Product, Subscription
+from djstripe.models import Price, Product
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -48,7 +48,10 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
         expected_create_kwargs = deepcopy(FAKE_PRICE)
         expected_create_kwargs["api_key"] = djstripe_settings.STRIPE_SECRET_KEY
 
-        price_create_mock.assert_called_once_with(**expected_create_kwargs)
+        price_create_mock.assert_called_once_with(
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **expected_create_kwargs,
+        )
 
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
 
@@ -68,7 +71,9 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
         expected_create_kwargs["product"] = self.stripe_product
 
         price_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY, **expected_create_kwargs
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **expected_create_kwargs,
         )
 
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -88,7 +93,9 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
         price = Price.create(**fake_price)
 
         price_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY, **FAKE_PRICE
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **FAKE_PRICE,
         )
 
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -110,7 +117,9 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
         expected_create_kwargs["metadata"] = metadata
 
         price_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY, **expected_create_kwargs
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **expected_create_kwargs,
         )
 
         self.assert_fks(price, expected_blank_fks={"djstripe.Customer.coupon"})
@@ -135,6 +144,7 @@ class PriceTest(AssertStripeFksMixin, TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=["product", "tiers"],
             stripe_account=self.price.djstripe_owner_account.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
         price = Price.sync_from_stripe_data(stripe_price)
 

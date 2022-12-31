@@ -338,6 +338,7 @@ class TestOrderMethods:
             "order_fakefakefakefakefake0001",
             api_key=expected_api_key,
             stripe_account=stripe_account or FAKE_PLATFORM_ACCOUNT["id"],
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
@@ -419,6 +420,7 @@ class TestOrderMethods:
             "order_fakefakefakefakefake0001",
             api_key=expected_api_key,
             stripe_account=stripe_account or FAKE_PLATFORM_ACCOUNT["id"],
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @pytest.mark.parametrize("stripe_account", (None, "acct_fakefakefakefake001"))
@@ -503,5 +505,6 @@ class TestOrderMethods:
             "order_fakefakefakefakefake0001",
             api_key=expected_api_key,
             stripe_account=stripe_account or FAKE_PLATFORM_ACCOUNT["id"],
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expected_total=expected_total,
         )

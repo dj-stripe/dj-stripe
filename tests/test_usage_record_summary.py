@@ -150,6 +150,7 @@ class TestUsageRecordSummary(AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock.assert_called_once_with(
             id=FAKE_INVOICE_METERED_SUBSCRIPTION["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=[],
             stripe_account=None,
         )
@@ -256,4 +257,5 @@ class TestUsageRecordSummary(AssertStripeFksMixin, TestCase):
         usage_record_list_mock.assert_called_once_with(
             id=fake_usage_data["data"][1]["subscription_item"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )

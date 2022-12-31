@@ -5,7 +5,6 @@ from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import ANY, call, patch
 
-import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe.error import InvalidRequestError
@@ -34,6 +33,7 @@ from djstripe.models.checkout import Session
 from djstripe.models.core import File
 from djstripe.models.orders import Order
 from djstripe.models.payment_methods import BankAccount
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_ACCOUNT,
@@ -2384,12 +2384,14 @@ class TestPaymentIntentEvents(EventTestCase):
                     api_key=ANY,
                     expand=ANY,
                     stripe_account=FAKE_ACCOUNT["id"],
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 ),
                 call(
                     id=FAKE_FILEUPLOAD_LOGO["id"],
                     api_key=ANY,
                     expand=ANY,
                     stripe_account=FAKE_ACCOUNT["id"],
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 ),
             )
         )

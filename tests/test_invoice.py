@@ -459,6 +459,7 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             expand=[],
             stripe_account=invoice.djstripe_owner_account.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
         self.assertTrue(return_value)
 
@@ -1179,7 +1180,11 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.id)
 
         subscription_retrieve_mock.assert_called_once_with(
-            api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"], stripe_account=None
+            api_key=ANY,
+            expand=ANY,
+            id=FAKE_SUBSCRIPTION["id"],
+            stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
         plan_retrieve_mock.assert_not_called()
 
@@ -1271,7 +1276,11 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.save())
 
         subscription_retrieve_mock.assert_called_once_with(
-            api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"], stripe_account=None
+            api_key=ANY,
+            expand=ANY,
+            id=FAKE_SUBSCRIPTION["id"],
+            stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
         plan_retrieve_mock.assert_not_called()
 
@@ -1332,7 +1341,11 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.save())
 
         subscription_retrieve_mock.assert_called_once_with(
-            api_key=ANY, expand=ANY, id=FAKE_SUBSCRIPTION["id"], stripe_account=None
+            api_key=ANY,
+            expand=ANY,
+            id=FAKE_SUBSCRIPTION["id"],
+            stripe_account=None,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
         plan_retrieve_mock.assert_not_called()
 

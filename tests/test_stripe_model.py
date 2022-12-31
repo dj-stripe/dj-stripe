@@ -61,7 +61,11 @@ def test__api_delete(
     )
 
     mock_stripe_class.delete.assert_called_once_with(
-        mock_id, api_key=expected_api_key, stripe_account=stripe_account, **extra_kwargs
+        mock_id,
+        api_key=expected_api_key,
+        stripe_account=stripe_account,
+        stripe_version=djstripe_settings.STRIPE_API_VERSION,
+        **extra_kwargs
     )
 
 
@@ -89,6 +93,7 @@ def test_api_retrieve(
         id=mock_id,
         api_key=expected_api_key,
         stripe_account=stripe_account,
+        stripe_version=djstripe_settings.STRIPE_API_VERSION,
         expand=expand_fields,
     )
 
@@ -136,7 +141,11 @@ def test_api_retrieve_reverse_foreign_key_lookup(mock_stripe_class):
 
     # Expect the retrieve to be done with the reverse look up of the Account ID.
     mock_stripe_class.retrieve.assert_called_once_with(
-        id=mock_id, api_key=mock_api_key, stripe_account=mock_account.id, expand=[]
+        id=mock_id,
+        api_key=mock_api_key,
+        stripe_account=mock_account.id,
+        expand=[],
+        stripe_version=djstripe_settings.STRIPE_API_VERSION,
     )
     mock_reverse_foreign_key.get_accessor_name.assert_called_once_with()
     mock_account_reverse_manager.first.assert_called_once_with()

@@ -128,6 +128,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
             id=FAKE_TRANSFER_WITH_1_REVERSAL["id"],
             nested_id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=["balance_transaction", "transfer"],
             stripe_account=transfer_reversal.djstripe_owner_account.id,
         )
@@ -157,6 +158,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         transfer_reversal_create_mock.assert_called_once_with(
             id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch("stripe.Transfer.list_reversals", autospec=True)
@@ -171,6 +173,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         transfer_reversal_list_mock.assert_called_once_with(
             id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     def test_is_valid_object(self):

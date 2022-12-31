@@ -165,6 +165,7 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
             FAKE_SUBSCRIPTION_SCHEDULE["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_account=schedule.djstripe_owner_account.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -194,6 +195,7 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
             FAKE_SUBSCRIPTION_SCHEDULE["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_account=schedule.djstripe_owner_account.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
@@ -223,4 +225,5 @@ class SubscriptionScheduleTest(AssertStripeFksMixin, TestCase):
             FAKE_SUBSCRIPTION_SCHEDULE["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_account=schedule.djstripe_owner_account.id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )

@@ -48,7 +48,11 @@ class StripeBaseModel(models.Model):
         :returns: an iterator over all items in the query
         """
 
-        return cls.stripe_class.list(api_key=api_key, **kwargs).auto_paging_iter()
+        return cls.stripe_class.list(
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        ).auto_paging_iter()
 
 
 class StripeModel(StripeBaseModel):
@@ -190,6 +194,7 @@ class StripeModel(StripeBaseModel):
         return self.stripe_class.retrieve(
             id=self.id,
             api_key=api_key or self.default_api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=self.expand_fields,
             stripe_account=stripe_account,
         )
@@ -204,7 +209,11 @@ class StripeModel(StripeBaseModel):
         :type api_key: string
         """
 
-        return cls.stripe_class.create(api_key=api_key, **kwargs)
+        return cls.stripe_class.create(
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        )
 
     def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
         """
@@ -223,7 +232,11 @@ class StripeModel(StripeBaseModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.delete(
-            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
 
     def _api_update(self, api_key=None, stripe_account=None, **kwargs):
@@ -243,7 +256,11 @@ class StripeModel(StripeBaseModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.modify(
-            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
 
     @classmethod
@@ -978,7 +995,12 @@ class StripeModel(StripeBaseModel):
         return refund_objs
 
     @classmethod
-    def sync_from_stripe_data(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
+    def sync_from_stripe_data(
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        stripe_version=djstripe_settings.STRIPE_API_VERSION,
+    ):
         """
         Syncs this object from the stripe data provided.
 
@@ -1043,7 +1065,9 @@ class StripeModel(StripeBaseModel):
             "api_key",
             djstripe_settings.get_default_api_key(livemode=kwargs.get("livemode")),
         )
-        data = cls.stripe_class.retrieve(id=id, **kwargs)
+        data = cls.stripe_class.retrieve(
+            id=id, stripe_version=djstripe_settings.STRIPE_API_VERSION, **kwargs
+        )
         instance = cls.sync_from_stripe_data(data, api_key=kwargs.get("api_key"))
         return instance
 

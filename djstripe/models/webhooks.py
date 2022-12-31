@@ -13,7 +13,6 @@ from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
 from .. import signals
-from ..context_managers import stripe_temporary_api_version
 from ..enums import WebhookEndpointStatus
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
@@ -334,10 +333,11 @@ class WebhookEventTrigger(models.Model):
         api_key = api_key or djstripe_settings.get_default_api_key(livemode)
 
         # Retrieve the event using the api_version specified in itself
-        with stripe_temporary_api_version(local_data["api_version"], validate=False):
-            remote_data = Event.stripe_class.retrieve(
-                id=local_data["id"], api_key=api_key
-            )
+        remote_data = Event.stripe_class.retrieve(
+            id=local_data["id"],
+            api_key=api_key,
+            stripe_version=local_data["api_version"],
+        )
 
         return local_data["data"] == remote_data["data"]
 

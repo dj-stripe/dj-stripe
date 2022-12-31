@@ -248,24 +248,6 @@ class DjstripeSettings:
 
         return subscriber_model
 
-    def set_stripe_api_version(self, version=None, validate=True):
-        """
-        Set the desired API version to use for Stripe requests.
-
-        :param version: The version to set for the Stripe API.
-        :type version: ``str``
-        :param validate: If True validate the value for the specified version).
-        :type validate: ``bool``
-        """
-        version = version or self.STRIPE_API_VERSION
-
-        if validate:
-            valid = validate_stripe_api_version(version)
-            if not valid:
-                raise ValueError(f"Bad stripe API version: {version!r}")
-
-        stripe.api_version = version
-
 
 # initialise the settings object
 djstripe_settings = DjstripeSettings()

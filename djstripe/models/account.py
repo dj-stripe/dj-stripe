@@ -131,7 +131,9 @@ class Account(StripeModel):
         if djstripe_settings.STRIPE_SECRET_KEY.startswith("rk_"):
             return None
 
-        account_data = cls.stripe_class.retrieve(api_key=api_key)
+        account_data = cls.stripe_class.retrieve(
+            api_key=api_key, stripe_version=djstripe_settings.STRIPE_API_VERSION
+        )
 
         return cls._get_or_create_from_stripe_object(account_data, api_key=api_key)[0]
 
@@ -170,7 +172,11 @@ class Account(StripeModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.reject(
-            self.id, api_key=api_key, stripe_account=stripe_account, **kwargs
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
 
     @classmethod
