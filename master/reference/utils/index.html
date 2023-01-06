@@ -274,7 +274,7 @@ Used by UpcomingInvoice.invoiceitems.</p>
 <span class="normal">81</span>
 <span class="normal">82</span>
 <span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">QuerySetMock</span><span class="p">(</span><span class="n">QuerySet</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A mocked QuerySet class that does not handle updates.</span>
 <span class="sd">    Used by UpcomingInvoice.invoiceitems.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -456,7 +456,7 @@ Used by UpcomingInvoice.invoiceitems.</p>
 <span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">convert_tstamp</span><span class="p">(</span><span class="n">response</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a Stripe API timestamp response (unix epoch) to a native datetime.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">response</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -531,7 +531,7 @@ Used by UpcomingInvoice.invoiceitems.</p>
 <span class="normal">96</span>
 <span class="normal">97</span>
 <span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_id_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract stripe id from stripe field data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -636,7 +636,7 @@ supported currencies.</p>
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_supported_currency_choices</span><span class="p">(</span><span class="n">api_key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pull a stripe account&#39;s supported currencies and returns a choices tuple of those</span>
 <span class="sd">    supported currencies.</span>
 

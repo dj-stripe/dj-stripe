@@ -244,8 +244,8 @@
 <p>Both <strong>jsonfield</strong> and <strong>jsonfield2</strong> use the same import path, so if
 upgrading from dj-stripe\~=2.2.0 in an existing virtualenv, be sure to
 uninstall jsonfield2 first. eg:</p>
-<div class="highlight"><pre><span></span><code>    <span class="c1"># ensure jsonfield is uninstalled before we install jsonfield2</span>
-    pip uninstall jsonfield2 -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.3.0dev&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1"># ensure jsonfield is uninstalled before we install jsonfield2</span>
+<span class="w">    </span>pip<span class="w"> </span>uninstall<span class="w"> </span>jsonfield2<span class="w"> </span>-y<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;dj-stripe&gt;=2.3.0dev&quot;</span>
 </code></pre></div>
 <p>Otherwise, <code>pip uninstall jsonfield2</code> will remove jsonfield's
 <code>jsonfield</code> module from <code>site-packages</code>, which would cause errors like
@@ -253,7 +253,7 @@ uninstall jsonfield2 first. eg:</p>
 <p>If you have hit this ImportError already after upgrading, running this
 should resolve it:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># remove both jsonfield packages before reinstall to fix ImportError:</span>
-pip uninstall jsonfield jsonfield2 -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.3.0&quot;</span>
+pip<span class="w"> </span>uninstall<span class="w"> </span>jsonfield<span class="w"> </span>jsonfield2<span class="w"> </span>-y<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;dj-stripe&gt;=2.3.0&quot;</span>
 </code></pre></div>
 <p>Note that this is only necessary if upgrading from dj-stripe 2.2.x,
 which temporarily depended on jsonfield2. This process is not necessary
@@ -332,7 +332,7 @@ if upgrading from an earlier version of dj-stripe.</p>
 upgrading to dj-stripe&gt;=2.2 in an existing virtualenv, be sure to
 uninstall jsonfield first. eg:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># ensure jsonfield is uninstalled before we install jsonfield2</span>
-pip uninstall jsonfield -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.2.0&quot;</span>
+pip<span class="w"> </span>uninstall<span class="w"> </span>jsonfield<span class="w"> </span>-y<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;dj-stripe&gt;=2.2.0&quot;</span>
 </code></pre></div>
 <p>Otherwise, <code>pip uninstall jsonfield</code> will remove jsonfield2's
 <code>jsonfield</code> module from <code>site-packages</code>, which would cause errors like
@@ -340,7 +340,7 @@ pip uninstall jsonfield -y <span class="o">&amp;&amp;</span> pip install <span c
 <p>If you have hit this ImportError already after upgrading, running this
 should resolve it:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># remove both jsonfield packages before reinstall to fix ImportError:</span>
-pip uninstall jsonfield jsonfield2 -y <span class="o">&amp;&amp;</span> pip install <span class="s2">&quot;dj-stripe&gt;=2.2.0&quot;</span>
+pip<span class="w"> </span>uninstall<span class="w"> </span>jsonfield<span class="w"> </span>jsonfield2<span class="w"> </span>-y<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;dj-stripe&gt;=2.2.0&quot;</span>
 </code></pre></div>
 <h3 id="note-on-usage-of-stripe-elements-js">Note on usage of Stripe Elements JS</h3>
 <p>See <a href="https://dj-stripe.github.io/dj-stripe/en/master/stripe_elements_js/">Integrating Stripe Elements</a>

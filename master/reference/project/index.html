@@ -3696,7 +3696,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
             <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">assert_fks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">expected_blank_fks</span><span class="p">,</span> <span class="n">processed_stripe_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Recursively walk through fks on obj, asserting they&#39;re not-none</span>
 <span class="sd">        :param obj:</span>
 <span class="sd">        :param expected_blank_fks: fields that are expected to be None</span>
@@ -3802,7 +3802,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 <span class="normal">82</span>
 <span class="normal">83</span>
 <span class="normal">84</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">assert_fks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">expected_blank_fks</span><span class="p">,</span> <span class="n">processed_stripe_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Recursively walk through fks on obj, asserting they&#39;re not-none</span>
 <span class="sd">    :param obj:</span>
 <span class="sd">    :param expected_blank_fks: fields that are expected to be None</span>
@@ -3942,7 +3942,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 <span class="normal">682</span>
 <span class="normal">683</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ChargeDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `charge.refunds`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `charge.refunds`.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">refunds</span> <span class="o">=</span> <span class="n">StripeList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refunds</span><span class="p">)</span>
 
@@ -4007,7 +4007,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 <span class="normal">673</span>
 <span class="normal">674</span>
 <span class="normal">675</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `charge.refunds`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `charge.refunds`.&quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">refunds</span> <span class="o">=</span> <span class="n">StripeList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refunds</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -4518,7 +4518,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 <span class="normal">1392</span>
 <span class="normal">1393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">InvoiceDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `invoice.lines`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `invoice.lines`.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">StripeList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
 
@@ -4578,7 +4578,7 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 <span class="normal">1388</span>
 <span class="normal">1389</span>
 <span class="normal">1390</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `invoice.lines`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `invoice.lines`.&quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">StripeList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -5103,7 +5103,7 @@ of Stripe's library, which allows both object + dictionary access.</p>
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">StripeItem</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Flexible class built to mock any generic Stripe object.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Flexible class built to mock any generic Stripe object.</span>
 
 <span class="sd">    Implements object access + deletion methods to match the behavior</span>
 <span class="sd">    of Stripe&#39;s library, which allows both object + dictionary access.</span>
@@ -5112,7 +5112,7 @@ of Stripe's library, which allows both object + dictionary access.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Give StripeItem normal object access to match Stripe behavior.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Give StripeItem normal object access to match Stripe behavior.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -5128,7 +5128,7 @@ of Stripe's library, which allows both object + dictionary access.</p>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;No such attribute: &quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Superficial mock that adds a deleted attribute.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Superficial mock that adds a deleted attribute.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">deleted</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deleted</span>
@@ -5138,13 +5138,13 @@ of Stripe's library, which allows both object + dictionary access.</p>
         <span class="k">return</span> <span class="s2">&quot;/v1/test-items/&quot;</span>
 
     <span class="k">def</span> <span class="nf">instance_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Superficial mock that emulates instance_url.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Superficial mock that emulates instance_url.&quot;&quot;&quot;</span>
         <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
         <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_url</span><span class="p">()</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Superficial mock that emulates request method.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Superficial mock that emulates request method.&quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;post&quot;</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -5215,7 +5215,7 @@ of Stripe's library, which allows both object + dictionary access.</p>
 <span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Give StripeItem normal object access to match Stripe behavior.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Give StripeItem normal object access to match Stripe behavior.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -5299,7 +5299,7 @@ of Stripe's library, which allows both object + dictionary access.</p>
 <span class="normal">123</span>
 <span class="normal">124</span>
 <span class="normal">125</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Superficial mock that adds a deleted attribute.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Superficial mock that adds a deleted attribute.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">deleted</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">deleted</span>
@@ -5330,7 +5330,7 @@ of Stripe's library, which allows both object + dictionary access.</p>
 <span class="normal">133</span>
 <span class="normal">134</span>
 <span class="normal">135</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">instance_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Superficial mock that emulates instance_url.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Superficial mock that emulates instance_url.&quot;&quot;&quot;</span>
     <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
     <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_url</span><span class="p">()</span>
     <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
@@ -5362,7 +5362,7 @@ of Stripe's library, which allows both object + dictionary access.</p>
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Superficial mock that emulates request method.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Superficial mock that emulates request method.&quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="n">method</span> <span class="o">==</span> <span class="s2">&quot;post&quot;</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -5498,7 +5498,7 @@ the data attribute, just like Stripe iterables.</p>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">StripeList</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Mock a generic Stripe Iterable.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Mock a generic Stripe Iterable.</span>
 
 <span class="sd">    It has the relevant attributes of a stripe iterable (has_more, data).</span>
 
@@ -5518,7 +5518,7 @@ the data attribute, just like Stripe iterables.</p>
     <span class="n">has_more</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Give StripeItem normal object access to match Stripe behavior.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Give StripeItem normal object access to match Stripe behavior.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -5534,19 +5534,19 @@ the data attribute, just like Stripe iterables.</p>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;No such attribute: &quot;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Make StripeList an iterable, to match the Stripe iterable behavior.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Make StripeList an iterable, to match the Stripe iterable behavior.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">iter_copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StripeItem</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Define iteration for StripeList.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Define iteration for StripeList.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iter_copy</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_copy</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">StopIteration</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;StripeList&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add a list method to the StripeList which returns itself.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a list method to the StripeList which returns itself.</span>
 
 <span class="sd">        list() accepts arbitrary kwargs, be careful is you expect the</span>
 <span class="sd">        argument-accepting functionality of Stripe&#39;s list() method.</span>
@@ -5554,7 +5554,7 @@ the data attribute, just like Stripe iterables.</p>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">auto_paging_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;StripeList&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Add an auto_paging_iter method to the StripeList which returns itself.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add an auto_paging_iter method to the StripeList which returns itself.</span>
 
 <span class="sd">        The StripeList is an iterable, so this mimics the real behavior.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -5705,7 +5705,7 @@ the data attribute, just like Stripe iterables.</p>
 <span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Give StripeItem normal object access to match Stripe behavior.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Give StripeItem normal object access to match Stripe behavior.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
@@ -5736,7 +5736,7 @@ the data attribute, just like Stripe iterables.</p>
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Make StripeList an iterable, to match the Stripe iterable behavior.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make StripeList an iterable, to match the Stripe iterable behavior.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">iter_copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
@@ -5767,7 +5767,7 @@ the data attribute, just like Stripe iterables.</p>
 <span class="normal">189</span>
 <span class="normal">190</span>
 <span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StripeItem</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Define iteration for StripeList.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Define iteration for StripeList.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">iter_copy</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iter_copy</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -5824,7 +5824,7 @@ the data attribute, just like Stripe iterables.</p>
 <span class="normal">204</span>
 <span class="normal">205</span>
 <span class="normal">206</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">auto_paging_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;StripeList&quot;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Add an auto_paging_iter method to the StripeList which returns itself.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add an auto_paging_iter method to the StripeList which returns itself.</span>
 
 <span class="sd">    The StripeList is an iterable, so this mimics the real behavior.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -5860,7 +5860,7 @@ argument-accepting functionality of Stripe's list() method.</p>
 <span class="normal">197</span>
 <span class="normal">198</span>
 <span class="normal">199</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;StripeList&quot;</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Add a list method to the StripeList which returns itself.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add a list method to the StripeList which returns itself.</span>
 
 <span class="sd">    list() accepts arbitrary kwargs, be careful is you expect the</span>
 <span class="sd">    argument-accepting functionality of Stripe&#39;s list() method.</span>
@@ -5935,7 +5935,7 @@ argument-accepting functionality of Stripe's list() method.</p>
 <span class="normal">1106</span>
 <span class="normal">1107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `subscription.items`.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `subscription.items`.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">StripeList</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">])</span>
 
@@ -6003,7 +6003,7 @@ argument-accepting functionality of Stripe's list() method.</p>
 <span class="normal">1075</span>
 <span class="normal">1076</span>
 <span class="normal">1077</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `subscription.items`.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `subscription.items`.&quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">StripeList</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">])</span>
 </code></pre></div></td></tr></table></div>

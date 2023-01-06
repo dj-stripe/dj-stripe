@@ -163,32 +163,32 @@
                 <h2 id="installation">Installation</h2>
 <h3 id="get-the-distribution">Get the distribution</h3>
 <p>Install dj-stripe with pip:
-<div class="highlight"><pre><span></span><code>    pip install dj-stripe
+<div class="highlight"><pre><span></span><code><span class="w">    </span>pip<span class="w"> </span>install<span class="w"> </span>dj-stripe
 </code></pre></div></p>
 <p>Or with <a href="https://python-poetry.org/">Poetry</a> (recommended):
-<div class="highlight"><pre><span></span><code>    poetry add dj-stripe
+<div class="highlight"><pre><span></span><code><span class="w">    </span>poetry<span class="w"> </span>add<span class="w"> </span>dj-stripe
 </code></pre></div></p>
 <h3 id="configuration">Configuration</h3>
 <p>Add <code>djstripe</code> to your <code>INSTALLED_APPS</code>:
-<div class="highlight"><pre><span></span><code>    <span class="nv">INSTALLED_APPS</span> <span class="o">=(</span>
-        ...
-        <span class="s2">&quot;djstripe&quot;</span>,
-        ...
-    <span class="o">)</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nv">INSTALLED_APPS</span><span class="w"> </span><span class="o">=(</span>
+<span class="w">        </span>...
+<span class="w">        </span><span class="s2">&quot;djstripe&quot;</span>,
+<span class="w">        </span>...
+<span class="w">    </span><span class="o">)</span>
 </code></pre></div></p>
 <p>Add to urls.py:</p>
-<div class="highlight"><pre><span></span><code>    path<span class="o">(</span><span class="s2">&quot;stripe/&quot;</span>, include<span class="o">(</span><span class="s2">&quot;djstripe.urls&quot;</span>, <span class="nv">namespace</span><span class="o">=</span><span class="s2">&quot;djstripe&quot;</span><span class="o">))</span>,
+<div class="highlight"><pre><span></span><code><span class="w">    </span>path<span class="o">(</span><span class="s2">&quot;stripe/&quot;</span>,<span class="w"> </span>include<span class="o">(</span><span class="s2">&quot;djstripe.urls&quot;</span>,<span class="w"> </span><span class="nv">namespace</span><span class="o">=</span><span class="s2">&quot;djstripe&quot;</span><span class="o">))</span>,
 </code></pre></div>
 <p>Tell Stripe about the webhook (Stripe webhook docs can be found
 <a href="https://stripe.com/docs/webhooks">here</a>) using the full URL of your
 endpoint from the urls.py step above (e.g.
 <code>https://example.com/stripe/webhook</code>).</p>
 <p>Add your Stripe keys and set the operating mode:
-<div class="highlight"><pre><span></span><code>    <span class="nv">STRIPE_LIVE_SECRET_KEY</span> <span class="o">=</span> os.environ.get<span class="o">(</span><span class="s2">&quot;STRIPE_LIVE_SECRET_KEY&quot;</span>, <span class="s2">&quot;&lt;your secret key&gt;&quot;</span><span class="o">)</span>
-    <span class="nv">STRIPE_TEST_SECRET_KEY</span> <span class="o">=</span> os.environ.get<span class="o">(</span><span class="s2">&quot;STRIPE_TEST_SECRET_KEY&quot;</span>, <span class="s2">&quot;&lt;your secret key&gt;&quot;</span><span class="o">)</span>
-    <span class="nv">STRIPE_LIVE_MODE</span> <span class="o">=</span> False  <span class="c1"># Change to True in production</span>
-    <span class="nv">DJSTRIPE_WEBHOOK_SECRET</span> <span class="o">=</span> <span class="s2">&quot;whsec_xxx&quot;</span>  <span class="c1"># Get it from the section in the Stripe dashboard where you added the webhook endpoint</span>
-    <span class="nv">DJSTRIPE_FOREIGN_KEY_TO_FIELD</span> <span class="o">=</span> <span class="s2">&quot;id&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="nv">STRIPE_LIVE_SECRET_KEY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>os.environ.get<span class="o">(</span><span class="s2">&quot;STRIPE_LIVE_SECRET_KEY&quot;</span>,<span class="w"> </span><span class="s2">&quot;&lt;your secret key&gt;&quot;</span><span class="o">)</span>
+<span class="w">    </span><span class="nv">STRIPE_TEST_SECRET_KEY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>os.environ.get<span class="o">(</span><span class="s2">&quot;STRIPE_TEST_SECRET_KEY&quot;</span>,<span class="w"> </span><span class="s2">&quot;&lt;your secret key&gt;&quot;</span><span class="o">)</span>
+<span class="w">    </span><span class="nv">STRIPE_LIVE_MODE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>False<span class="w">  </span><span class="c1"># Change to True in production</span>
+<span class="w">    </span><span class="nv">DJSTRIPE_WEBHOOK_SECRET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;whsec_xxx&quot;</span><span class="w">  </span><span class="c1"># Get it from the section in the Stripe dashboard where you added the webhook endpoint</span>
+<span class="w">    </span><span class="nv">DJSTRIPE_FOREIGN_KEY_TO_FIELD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;id&quot;</span>
 </code></pre></div></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -200,17 +200,17 @@ endpoint from the urls.py step above (e.g.
 <p>djstripe expects <code>APIKeys</code> of all Stripe Accounts you'd like to sync data for to already be in the DB. They can be Added from Django Admin.</p>
 </div>
 <p>Run the commands:</p>
-<div class="highlight"><pre><span></span><code>    python manage.py migrate
+<div class="highlight"><pre><span></span><code><span class="w">    </span>python<span class="w"> </span>manage.py<span class="w"> </span>migrate
 
-    python manage.py djstripe_sync_models
+<span class="w">    </span>python<span class="w"> </span>manage.py<span class="w"> </span>djstripe_sync_models
 </code></pre></div>
 <p>See <a href="../stripe_elements_js/#integrating_stripe_elements-js_sdk">here</a> for notes about usage of the Stripe Elements
 frontend JS library.</p>
 <h3 id="running-tests">Running Tests</h3>
 <p>Assuming the tests are run against PostgreSQL:</p>
-<div class="highlight"><pre><span></span><code>    createdb djstripe
-    pip install tox
-    tox
+<div class="highlight"><pre><span></span><code><span class="w">    </span>createdb<span class="w"> </span>djstripe
+<span class="w">    </span>pip<span class="w"> </span>install<span class="w"> </span>tox
+<span class="w">    </span>tox
 </code></pre></div>
               
             </div>

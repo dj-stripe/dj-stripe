@@ -166,16 +166,16 @@ circumstances you may want to manually sync Stripe API data as well.</p>
 <p>You can sync your database with stripe using the management command
 [<code>djstripe_sync_models</code>][djstripe.management.commands.djstripe_sync_models], e.g. to populate an empty database from an
 existing Stripe account.
-<div class="highlight"><pre><span></span><code>    ./manage.py djstripe_sync_models
+<div class="highlight"><pre><span></span><code><span class="w">    </span>./manage.py<span class="w"> </span>djstripe_sync_models
 </code></pre></div>
 With no arguments this will sync all supported models for all in database API Keys , or a list of
 models to sync can also be provided.
-<div class="highlight"><pre><span></span><code>    ./manage.py djstripe_sync_models Invoice Subscription
+<div class="highlight"><pre><span></span><code><span class="w">    </span>./manage.py<span class="w"> </span>djstripe_sync_models<span class="w"> </span>Invoice<span class="w"> </span>Subscription
 </code></pre></div>
 Note that this may be redundant since we recursively sync related
 objects.</p>
 <p>A list of models to sync can also be provided along with the API Keys.
-<div class="highlight"><pre><span></span><code>    ./manage.py djstripe_sync_models Invoice Subscription --api-keys sk_test_XXX sk_test_YYY
+<div class="highlight"><pre><span></span><code><span class="w">    </span>./manage.py<span class="w"> </span>djstripe_sync_models<span class="w"> </span>Invoice<span class="w"> </span>Subscription<span class="w"> </span>--api-keys<span class="w"> </span>sk_test_XXX<span class="w"> </span>sk_test_YYY
 </code></pre></div>
 This will sync all the Invoice and Subscription data for the given API Keys. Please note that the API Keys sk_test_YYY and sk_test_XXX need to be in the database.</p>
 <p>You can manually reprocess events using the management commands
@@ -183,16 +183,16 @@ This will sync all the Invoice and Subscription data for the given API Keys. Ple
 options can be passed to limit the events processed. Note the Stripe API
 documents a limitation where events are only guaranteed to be available
 for 30 days.</p>
-<div class="highlight"><pre><span></span><code>    <span class="c1"># all events</span>
-    ./manage.py djstripe_process_events
-    <span class="c1"># failed events (events with pending webhooks or where all webhook delivery attempts failed)</span>
-    ./manage.py djstripe_process_events --failed
-    <span class="c1"># filter by event type (all payment_intent events in this example)</span>
-    ./manage.py djstripe_process_events --type payment_intent.*
-    <span class="c1"># specific events by ID</span>
-    ./manage.py djstripe_process_events --ids evt_foo evt_bar
-    <span class="c1"># more output for debugging processing failures</span>
-    ./manage.py djstripe_process_events -v <span class="m">2</span>
+<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1"># all events</span>
+<span class="w">    </span>./manage.py<span class="w"> </span>djstripe_process_events
+<span class="w">    </span><span class="c1"># failed events (events with pending webhooks or where all webhook delivery attempts failed)</span>
+<span class="w">    </span>./manage.py<span class="w"> </span>djstripe_process_events<span class="w"> </span>--failed
+<span class="w">    </span><span class="c1"># filter by event type (all payment_intent events in this example)</span>
+<span class="w">    </span>./manage.py<span class="w"> </span>djstripe_process_events<span class="w"> </span>--type<span class="w"> </span>payment_intent.*
+<span class="w">    </span><span class="c1"># specific events by ID</span>
+<span class="w">    </span>./manage.py<span class="w"> </span>djstripe_process_events<span class="w"> </span>--ids<span class="w"> </span>evt_foo<span class="w"> </span>evt_bar
+<span class="w">    </span><span class="c1"># more output for debugging processing failures</span>
+<span class="w">    </span>./manage.py<span class="w"> </span>djstripe_process_events<span class="w"> </span>-v<span class="w"> </span><span class="m">2</span>
 </code></pre></div>
 <h2 id="in-code">In Code</h2>
 <p>To sync in code, for example if you write to the Stripe API and want to

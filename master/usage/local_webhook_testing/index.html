@@ -160,7 +160,7 @@
 you created via the Django admin or the Stripe Dashboard.
 New Style <code>UUID</code> urls are also supported from <code>v2.7</code> onwards.
 For example:</p>
-<div class="highlight"><pre><span></span><code>stripe listen --forward-to http://localhost:8000/stripe/webhook/&lt;UUID&gt;
+<div class="highlight"><pre><span></span><code>stripe<span class="w"> </span>listen<span class="w"> </span>--forward-to<span class="w"> </span>http://localhost:8000/stripe/webhook/&lt;UUID&gt;
 </code></pre></div>
 <p>The <a href="https://stripe.com/docs/webhooks/signatures">signatures of events sent by Stripe to the webhooks are verified</a>
 to prevent third-parties from interacting with the endpoints.
@@ -171,9 +171,9 @@ or by running <code>stripe listen --print-secret</code>.</p>
 <p>In order to let dj-stripe know about the secret key to verify the signature,
 it can be passed as an HTTP header;
 dj-stripe looks for a header called <code>X-Djstripe-Webhook-Secret</code>:</p>
-<div class="highlight"><pre><span></span><code>stripe listen <span class="se">\</span>
-  --forward-to http://localhost:8000/stripe/webhook/&lt;UUID&gt; <span class="se">\</span>
-  -H <span class="s2">&quot;x-djstripe-webhook-secret: </span><span class="k">$(</span>stripe listen --print-secret<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code>stripe<span class="w"> </span>listen<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--forward-to<span class="w"> </span>http://localhost:8000/stripe/webhook/&lt;UUID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;x-djstripe-webhook-secret: </span><span class="k">$(</span>stripe<span class="w"> </span>listen<span class="w"> </span>--print-secret<span class="k">)</span><span class="s2">&quot;</span>
 </code></pre></div>
 <p>From now on, whenever you make changes on the Stripe Dashboard,
 the webhook endpoint you specified with <code>--forward-to</code> will called
@@ -185,7 +185,7 @@ signature validation will fail with an HTTP status code 400
 and the message "Failed to verify header".</p>
 </div>
 <p>Stripe events can now be triggered like so:</p>
-<div class="highlight"><pre><span></span><code>stripe trigger customer.created
+<div class="highlight"><pre><span></span><code>stripe<span class="w"> </span>trigger<span class="w"> </span>customer.created
 </code></pre></div>
               
             </div>

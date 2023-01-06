@@ -310,7 +310,7 @@ processing.</p>
 <p>Examples:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># callbacks.py</span>
 <span class="k">def</span> <span class="nf">webhook_event_callback</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">api_key</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Dispatches the event to celery for processing. &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Dispatches the event to celery for processing. &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">tasks</span>
     <span class="c1"># Ansychronous hand-off to celery so that we can continue immediately</span>
     <span class="n">tasks</span><span class="o">.</span><span class="n">process_webhook_event</span><span class="o">.</span><span class="n">s</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pk</span><span class="p">)</span><span class="o">.</span><span class="n">apply_async</span><span class="p">()</span>
@@ -321,7 +321,7 @@ processing.</p>
 
 <span class="nd">@shared_task</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">process_webhook_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Processes events from Stripe asynchronously. &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Processes events from Stripe asynchronously. &quot;&quot;&quot;</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing Stripe event: </span><span class="si">{</span><span class="n">pk</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># get the event</span>
@@ -640,7 +640,7 @@ example, <code>"http://localhost:12111"</code> if you are running
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripeSettings</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Container for Dj-stripe settings</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Container for Dj-stripe settings</span>
 
 <span class="sd">    :return: Initialised settings for Dj-stripe.</span>
 <span class="sd">    :rtype: object</span>
@@ -761,14 +761,14 @@ example, <code>"http://localhost:12111"</code> if you are running
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">STRIPE_API_VERSION</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the desired API version to use for Stripe requests.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">version</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;STRIPE_API_VERSION&quot;</span><span class="p">,</span> <span class="n">stripe</span><span class="o">.</span><span class="n">api_version</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">version</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_STRIPE_API_VERSION</span>
 
     <span class="k">def</span> <span class="nf">get_callback_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Resolve a callback function based on a setting name.</span>
 
 <span class="sd">        If the setting value isn&#39;t set, default is returned.  If the setting value</span>
@@ -808,7 +808,7 @@ example, <code>"http://localhost:12111"</code> if you are running
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">idempotency_key</span><span class="o">.</span><span class="n">uuid</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the default API key for a value of `livemode`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">livemode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -822,11 +822,11 @@ example, <code>"http://localhost:12111"</code> if you are running
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">TEST_API_KEY</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span>
 
     <span class="k">def</span> <span class="nf">get_subscriber_model_string</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get the configured subscriber model as a module path string.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the configured subscriber model as a module path string.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_SUBSCRIBER_MODEL&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">def</span> <span class="nf">get_subscriber_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Attempt to pull settings.DJSTRIPE_SUBSCRIBER_MODEL.</span>
 
 <span class="sd">        Users have the option of specifying a custom subscriber model via the</span>
@@ -1323,7 +1323,7 @@ a failed import causing ImportError to be raised.</p>
 <span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_callback_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Resolve a callback function based on a setting name.</span>
 
 <span class="sd">    If the setting value isn&#39;t set, default is returned.  If the setting value</span>
@@ -1387,7 +1387,7 @@ a failed import causing ImportError to be raised.</p>
 <span class="normal">191</span>
 <span class="normal">192</span>
 <span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the default API key for a value of `livemode`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">livemode</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1471,7 +1471,7 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 <span class="normal">242</span>
 <span class="normal">243</span>
 <span class="normal">244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempt to pull settings.DJSTRIPE_SUBSCRIBER_MODEL.</span>
 
 <span class="sd">    Users have the option of specifying a custom subscriber model via the</span>
@@ -1541,7 +1541,7 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
         <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model_string</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get the configured subscriber model as a module path string.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the configured subscriber model as a module path string.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_SUBSCRIBER_MODEL&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </code></pre></div></td></tr></table></div>
       </details>

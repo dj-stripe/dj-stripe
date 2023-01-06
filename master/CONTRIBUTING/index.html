@@ -180,7 +180,7 @@ docs, in docstrings, or even on the web in blog posts, articles, and such.</p>
 <div class="admonition attention">
 <p class="admonition-title">In case of any installation error</p>
 <p>In case you get the error that some plugin is not installed, please run:
-    <div class="highlight"><pre><span></span><code>poetry install --with docs
+    <div class="highlight"><pre><span></span><code>poetry<span class="w"> </span>install<span class="w"> </span>--with<span class="w"> </span>docs
 </code></pre></div></p>
 </div>
 <p>If you wish to just generate the documentation, you can replace <code>serve</code> with <code>build</code>,
@@ -206,25 +206,25 @@ channel at <a href="https://discord.gg/UJY8fcc">https://discord.gg/UJY8fcc</a>.<
 </li>
 <li>
 <p>Clone your fork locally:</p>
-<div class="codehilite"><pre><span></span><code>$ git clone git@github.com:your_name_here/dj-stripe.git
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:your_name_here/dj-stripe.git
 </code></pre></div>
 
 </li>
 <li>
 <p>Set up <a href="https://pre-commit.com/">pre-commit</a>:</p>
-<div class="codehilite"><pre><span></span><code>$ git init <span class="c1"># A git repo is required to install pre-commit</span>
-$ pre-commit install
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>init<span class="w"> </span><span class="c1"># A git repo is required to install pre-commit</span>
+$<span class="w"> </span>pre-commit<span class="w"> </span>install
 </code></pre></div>
 
 </li>
 <li>
 <p>Set up your test database. If you're running tests using PostgreSQL:</p>
-<div class="codehilite"><pre><span></span><code>$ createdb djstripe
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>createdb<span class="w"> </span>djstripe
 </code></pre></div>
 
 <p>or if you want to test vs sqlite (for convenience) or MySQL, they can be selected by
 setting this environment variable:</p>
-<div class="codehilite"><pre><span></span><code>$ <span class="nb">export</span> <span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite
 <span class="c1"># or: export DJSTRIPE_TEST_DB_VENDOR=mysql</span>
 </code></pre></div>
 
@@ -234,39 +234,39 @@ environment variables, see <code>tests/settings.py</code></p>
 <li>
 <p>Install <a href="https://python-poetry.org/">Poetry</a> if you do not have it already.</p>
 <p>You can set up a virtual environment with:</p>
-<div class="codehilite"><pre><span></span><code>$ poetry install
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>poetry<span class="w"> </span>install
 </code></pre></div>
 
 <p>You can then, at any time, open a shell into that environment with:</p>
-<div class="codehilite"><pre><span></span><code>$ poetry shell
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>poetry<span class="w"> </span>shell
 </code></pre></div>
 
 </li>
 <li>
 <p>When you're done making changes, check that your changes pass the tests. A quick
     test run can be done as follows:</p>
-<div class="codehilite"><pre><span></span><code>$ <span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite poetry run pytest --reuse-db
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite<span class="w"> </span>poetry<span class="w"> </span>run<span class="w"> </span>pytest<span class="w"> </span>--reuse-db
 </code></pre></div>
 
 <p>You should also check that the tests pass with other python and Django versions with
 tox. pytest will output both command line and html coverage statistics and will warn
 you if your changes caused code coverage to drop.:</p>
-<div class="codehilite"><pre><span></span><code>$ pip install tox
-$ tox
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>tox
+$<span class="w"> </span>tox
 </code></pre></div>
 
 </li>
 <li>
 <p>If your changes altered the models you may need to generate Django migrations:</p>
-<div class="codehilite"><pre><span></span><code>$ <span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite poetry run ./manage.py makemigrations
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nv">DJSTRIPE_TEST_DB_VENDOR</span><span class="o">=</span>sqlite<span class="w"> </span>poetry<span class="w"> </span>run<span class="w"> </span>./manage.py<span class="w"> </span>makemigrations
 </code></pre></div>
 
 </li>
 <li>
 <p>Commit your changes and push your branch to GitHub:</p>
-<div class="codehilite"><pre><span></span><code>$ git add .
-$ git commit -m <span class="s2">&quot;Your detailed description of your changes.&quot;</span>
-$ git push
+<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>add<span class="w"> </span>.
+$<span class="w"> </span>git<span class="w"> </span>commit<span class="w"> </span>-m<span class="w"> </span><span class="s2">&quot;Your detailed description of your changes.&quot;</span>
+$<span class="w"> </span>git<span class="w"> </span>push
 </code></pre></div>
 
 </li>
