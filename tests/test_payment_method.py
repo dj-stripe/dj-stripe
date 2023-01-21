@@ -207,10 +207,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
 
         self.assertIsNone(payment_method.customer)
 
-        if sys.version_info >= (3, 6):
-            # this mock isn't working on py34, py35, but it's not strictly necessary
-            # for the test
-            mock_detach.assert_called()
+        mock_detach.assert_called()
 
         self.assert_fks(
             payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
@@ -230,7 +227,10 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             autospec=True,
         ) as payment_method_retrieve_mock:
             payment_method_retrieve_mock.return_value["customer"] = None
-
+            # Need to re-sync as the PaymentMethod object has been deleted
+            models.PaymentMethod.sync_from_stripe_data(
+                deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)
+            )
             self.assertFalse(
                 payment_method.detach(), "Second call to detach should return false"
             )
@@ -284,10 +284,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             "We expect PaymentMethod id = card_* to be deleted",
         )
 
-        if sys.version_info >= (3, 6):
-            # this mock isn't working on py34, py35, but it's not strictly necessary
-            # for the test
-            mock_detach.assert_called()
+        mock_detach.assert_called()
 
         with patch(
             "tests.PaymentMethodDict.detach",
@@ -303,7 +300,14 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             autospec=True,
         ) as payment_method_retrieve_mock:
             payment_method_retrieve_mock.return_value["customer"] = None
-
+            # Need to re-sync as the PaymentMethod object has been deleted
+            models.PaymentMethod.sync_from_stripe_data(
+                deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)
+            )
+            # Get the Payment Method from the DB
+            payment_method = models.PaymentMethod.objects.filter(
+                id=payment_method.id
+            ).first()
             self.assertFalse(
                 payment_method.detach(), "Second call to detach should return false"
             )
