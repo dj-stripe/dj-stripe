@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.utils import timezone
 
 from djstripe.models import Charge, Customer, Plan, Subscription, Transfer
+from djstripe.utils import get_timezone_utc
 
 from . import (
     FAKE_PLAN,
@@ -25,10 +25,10 @@ class SubscriptionManagerTest(TestCase):
     def setUp(self):
 
         # create customers and current subscription records
-        period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)
-        period_end = datetime.datetime(2013, 4, 30, tzinfo=timezone.utc)
+        period_start = datetime.datetime(2013, 4, 1, tzinfo=get_timezone_utc())
+        period_end = datetime.datetime(2013, 4, 30, tzinfo=get_timezone_utc())
         start = datetime.datetime(
-            2013, 1, 1, 0, 0, 1, tzinfo=timezone.utc
+            2013, 1, 1, 0, 0, 1, tzinfo=get_timezone_utc()
         )  # more realistic start
 
         with patch(
@@ -192,7 +192,7 @@ class ChargeManagerTest(TestCase):
         self.march_charge = Charge.objects.create(
             id="ch_XXXXMAR1",
             customer=customer,
-            created=datetime.datetime(2015, 3, 31, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 3, 31, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -202,7 +202,7 @@ class ChargeManagerTest(TestCase):
         self.april_charge_1 = Charge.objects.create(
             id="ch_XXXXAPR1",
             customer=customer,
-            created=datetime.datetime(2015, 4, 1, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 4, 1, tzinfo=get_timezone_utc()),
             amount=decimal.Decimal("20.15"),
             amount_refunded=0,
             currency="usd",
@@ -213,7 +213,7 @@ class ChargeManagerTest(TestCase):
         self.april_charge_2 = Charge.objects.create(
             id="ch_XXXXAPR2",
             customer=customer,
-            created=datetime.datetime(2015, 4, 18, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 4, 18, tzinfo=get_timezone_utc()),
             amount=decimal.Decimal("10.35"),
             amount_refunded=decimal.Decimal("5.35"),
             currency="usd",
@@ -224,7 +224,7 @@ class ChargeManagerTest(TestCase):
         self.april_charge_3 = Charge.objects.create(
             id="ch_XXXXAPR3",
             customer=customer,
-            created=datetime.datetime(2015, 4, 30, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 4, 30, tzinfo=get_timezone_utc()),
             amount=decimal.Decimal("100.00"),
             amount_refunded=decimal.Decimal("80.00"),
             currency="usd",
@@ -235,7 +235,7 @@ class ChargeManagerTest(TestCase):
         self.may_charge = Charge.objects.create(
             id="ch_XXXXMAY1",
             customer=customer,
-            created=datetime.datetime(2015, 5, 1, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 5, 1, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -245,7 +245,7 @@ class ChargeManagerTest(TestCase):
         self.november_charge = Charge.objects.create(
             id="ch_XXXXNOV1",
             customer=customer,
-            created=datetime.datetime(2015, 11, 16, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 11, 16, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -255,7 +255,7 @@ class ChargeManagerTest(TestCase):
         self.charge_2014 = Charge.objects.create(
             id="ch_XXXX20141",
             customer=customer,
-            created=datetime.datetime(2014, 12, 31, tzinfo=timezone.utc),
+            created=datetime.datetime(2014, 12, 31, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -265,7 +265,7 @@ class ChargeManagerTest(TestCase):
         self.charge_2016 = Charge.objects.create(
             id="ch_XXXX20161",
             customer=customer,
-            created=datetime.datetime(2016, 1, 1, tzinfo=timezone.utc),
+            created=datetime.datetime(2016, 1, 1, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",
