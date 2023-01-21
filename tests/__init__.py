@@ -6,24 +6,25 @@ Updated to API VERSION 2016-03-07 with bogus fields.
 """
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import datetime
 import json
 import logging
 import os
 from copy import deepcopy
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
-from django.utils import dateformat, timezone
+from django.utils import dateformat
 
+from djstripe.utils import get_timezone_utc
 from djstripe.webhooks import TEST_EVENT_ID
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.settings")
 logger = logging.getLogger(__name__)
 
-FUTURE_DATE = datetime(2100, 4, 30, tzinfo=timezone.utc)
+FUTURE_DATE = datetime.datetime(2100, 4, 30, tzinfo=get_timezone_utc())
 
 FIXTURE_DIR_PATH = Path(__file__).parent.joinpath("fixtures")
 
@@ -1077,7 +1078,7 @@ class SubscriptionDict(StripeItem):
         self["items"] = StripeList(self["items"])
 
     def __setattr__(self, name, value):
-        if type(value) == datetime:
+        if type(value) == datetime.datetime:
             value = datetime_to_unix(value)
 
         # Special case for price and plan

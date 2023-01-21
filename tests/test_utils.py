@@ -9,12 +9,12 @@ from unittest.mock import patch
 
 from django.test import TestCase
 from django.test.utils import override_settings
-from django.utils import timezone
 
 from djstripe.utils import (
     convert_tstamp,
     get_friendly_currency_amount,
     get_supported_currency_choices,
+    get_timezone_utc,
 )
 
 TZ_IS_UTC = time.tzname == ("UTC", "UTC")
@@ -23,7 +23,9 @@ TZ_IS_UTC = time.tzname == ("UTC", "UTC")
 class TestTimestampConversion(TestCase):
     def test_conversion(self):
         stamp = convert_tstamp(1365567407)
-        self.assertEqual(stamp, datetime(2013, 4, 10, 4, 16, 47, tzinfo=timezone.utc))
+        self.assertEqual(
+            stamp, datetime(2013, 4, 10, 4, 16, 47, tzinfo=get_timezone_utc())
+        )
 
     # NOTE: These next two tests will fail if your system clock is not in UTC
     # Travis CI is, and coverage is good, so...
