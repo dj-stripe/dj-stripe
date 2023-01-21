@@ -2119,14 +2119,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.id)
         self.assertIsNone(invoice.save())
 
-<<<<<<< HEAD
-        subscription_retrieve_mock.assert_called_once_with(
-            api_key=ANY,
-            expand=ANY,
-            id=FAKE_SUBSCRIPTION["id"],
-            stripe_account=None,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-=======
         # one more because of creating the associated line item
         subscription_retrieve_mock.assert_has_calls(
             [
@@ -2143,7 +2135,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                     stripe_account=None,
                 ),
             ]
->>>>>>> 620ab159 (Updated the application code to resolve the ambiguity between LineItem and InvoiceItem)
         )
 
         plan_retrieve_mock.assert_not_called()
@@ -2553,14 +2544,6 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.id)
         self.assertIsNone(invoice.save())
 
-<<<<<<< HEAD
-        subscription_retrieve_mock.assert_called_once_with(
-            api_key=ANY,
-            expand=ANY,
-            id=FAKE_SUBSCRIPTION["id"],
-            stripe_account=None,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-=======
         # one more because of creating the associated line item
         subscription_retrieve_mock.assert_has_calls(
             [
@@ -2577,7 +2560,6 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
                     stripe_account=None,
                 ),
             ]
->>>>>>> 620ab159 (Updated the application code to resolve the ambiguity between LineItem and InvoiceItem)
         )
 
         plan_retrieve_mock.assert_not_called()
