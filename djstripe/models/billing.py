@@ -627,11 +627,10 @@ class BaseInvoice(StripeModel):
         )
 
     def retry(self):
-        """Retry payment on this invoice if it isn't paid or uncollectible."""
+        """Retry payment on this invoice if it isn't paid."""
 
         if (
             self.status != enums.InvoiceStatus.paid
-            and self.status != enums.InvoiceStatus.uncollectible
             and self.auto_advance
         ):
             stripe_invoice = self.api_retrieve()
