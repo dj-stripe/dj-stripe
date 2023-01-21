@@ -905,18 +905,6 @@ class StripeModel(StripeBaseModel):
                 save = True
                 line.setdefault("invoice", invoice.id)
 
-<<<<<<< HEAD
-                if line.get("type") == "subscription":
-                    # Lines for subscriptions need to be keyed based on invoice and
-                    # subscription, because their id is *just* the subscription
-                    # when received from Stripe. This means that future updates to
-                    # a subscription will change previously saved invoices - Doing
-                    # the composite key avoids this.
-                    line_id = line["id"]
-                    if not line_id.startswith(invoice.id):
-                        line["id"] = f"{invoice.id}-{line_id}"
-=======
->>>>>>> 620ab159 (Updated the application code to resolve the ambiguity between LineItem and InvoiceItem)
             else:
                 # Don't save invoice items for ephemeral invoices
                 save = False

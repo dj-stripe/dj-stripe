@@ -1031,13 +1031,6 @@ class InvoiceItem(StripeModel):
     def __str__(self):
         return self.description
 
-<<<<<<< HEAD
-    @classmethod
-    def is_valid_object(cls, data):
-        return data and data.get("object") in ("invoiceitem", "line_item")
-
-=======
->>>>>>> 620ab159 (Updated the application code to resolve the ambiguity between LineItem and InvoiceItem)
     def get_stripe_dashboard_url(self):
         return self.invoice.get_stripe_dashboard_url()
 
