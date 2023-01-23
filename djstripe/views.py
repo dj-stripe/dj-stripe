@@ -28,7 +28,8 @@ class ProcessWebhookView(View):
     """
 
     def post(self, request, uuid=None):
-        if "HTTP_STRIPE_SIGNATURE" not in request.META:
+        # https://stripe.com/docs/webhooks/signatures
+        if "stripe-signature" not in request.headers:
             # Do not even attempt to process/store the event if there is
             # no signature in the headers so we avoid overfilling the db.
             logger.error("HTTP_STRIPE_SIGNATURE is missing")
