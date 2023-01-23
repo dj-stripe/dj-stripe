@@ -3,7 +3,6 @@ import uuid
 from datetime import timedelta
 from typing import Dict, List, Optional, Type
 
-from django.apps import apps
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from stripe.api_resources.abstract.api_resource import APIResource
@@ -20,7 +19,7 @@ from ..fields import (
 )
 from ..managers import StripeModelManager
 from ..settings import djstripe_settings
-from ..utils import get_friendly_currency_amount, get_id_from_stripe_data
+from ..utils import get_id_from_stripe_data
 
 logger = logging.getLogger(__name__)
 

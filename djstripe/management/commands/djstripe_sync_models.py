@@ -23,7 +23,6 @@ Invoke like so:
     7) To only sync Stripe Accounts and Charges for sk_test_XXX and sk_test_YYY API keys:
         python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY
 """
-from typing import List
 
 from django.apps import apps
 from django.core.exceptions import FieldDoesNotExist
