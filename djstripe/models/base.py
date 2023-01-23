@@ -47,12 +47,22 @@ class StripeBaseModel(models.Model):
 
         :returns: an iterator over all items in the query
         """
+        try:
+            results = cls.stripe_class.list(
+                api_key=api_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                **kwargs,
+            ).auto_paging_iter()
+        except InvalidRequestError as e:
+            if "Received unknown parameter: created" == e.user_message:
+                kwargs.pop("created", None)
+                results = cls.stripe_class.list(
+                    api_key=api_key, **kwargs
+                ).auto_paging_iter()
+            else:
+                raise
 
-        return cls.stripe_class.list(
-            api_key=api_key,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **kwargs,
-        ).auto_paging_iter()
+        return results
 
 
 class StripeModel(StripeBaseModel):

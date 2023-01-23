@@ -27,6 +27,12 @@ A list of models to sync can also be provided along with the API Keys.
 ```
 This will sync all the Invoice and Subscription data for the given API Keys. Please note that the API Keys sk_test_YYY and sk_test_XXX need to be in the database.
 
+An Optional Kwarg `created` can be added to restrict syncing objects created between a certain timeperiod as mentioned in the [Stripe docs.](https://stripe.com/docs/api/customers/list#list_customers-created). Please note that the `created` kwarg is not supported by all Stripe models and we silently ignore it is the model being synced does not support it.
+
+```bash
+    ./manage.py djstripe_sync_models Invoice Subscription --api-keys sk_test_XXX sk_test_YYY --created "{\"gte\": {unix_gt_timestamp}, \"lte\": {unix_lt_timestamp}}"
+```
+
 You can manually reprocess events using the management commands
 [`djstripe_process_events`][djstripe.management.commands.djstripe_process_events]. By default this processes all events, but
 options can be passed to limit the events processed. Note the Stripe API
