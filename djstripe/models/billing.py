@@ -629,10 +629,7 @@ class BaseInvoice(StripeModel):
     def retry(self):
         """Retry payment on this invoice if it isn't paid."""
 
-        if (
-            self.status != enums.InvoiceStatus.paid
-            and self.auto_advance
-        ):
+        if self.status != enums.InvoiceStatus.paid and self.auto_advance:
             stripe_invoice = self.api_retrieve()
             updated_stripe_invoice = (
                 stripe_invoice.pay()
