@@ -28,3 +28,13 @@ repos:
     hooks:
       - id: django-upgrade
         args: [--target-version, "3.2"]
+
+  - repo: local
+    hooks:
+      - id: check-missing-django-migrations
+        name: Check missing django migrations
+        entry: python manage.py makemigrations --dry-run --check
+        language: python
+        types: [python]
+        always_run: true
+        pass_filenames: false
