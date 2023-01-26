@@ -7,9 +7,9 @@ on:
     # The branches below must be a subset of the branches above
     branches: [master]
 
-env:
-  POETRY_VERSION: "1.2.2"
-  POETRY_VIRTUALENVS_IN_PROJECT: "1"
+# env:
+#   POETRY_VERSION: "1.2.2"
+#   POETRY_VIRTUALENVS_IN_PROJECT: "1"
 
 jobs:
   linting:
@@ -20,26 +20,26 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install poetry
-        run: |
-          curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
+      # - name: Install poetry
+      #   run: |
+      #     curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
 
-      - name: Set up cache
-        uses: actions/cache@v3
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ matrix.python-version }}
+      # - name: Set up cache
+      #   uses: actions/cache@v3
+      #   id: cache
+      #   with:
+      #     path: .venv
+      #     key: venv-${{ matrix.python-version }}
 
-      - name: Ensure cache is healthy
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: timeout 10s poetry run pip --version || rm -rf .venv
+      # - name: Ensure cache is healthy
+      #   if: steps.cache.outputs.cache-hit == 'true'
+      #   run: timeout 10s poetry run pip --version || rm -rf .venv
 
-      - name: Install dependencies
-        run: poetry install --with ci
+      # - name: Install dependencies
+      #   run: poetry install --with ci
 
       - name: Install pre-commit
         run: pip install pre-commit
 
       - name: Run pre-commit
-        run: poetry run pre-commit run --all-files --show-diff-on-failure
+        run: pre-commit run --all-files --show-diff-on-failure

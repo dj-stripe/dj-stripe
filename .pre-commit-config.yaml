@@ -36,6 +36,6 @@ repos:
         always_run: true
         args:
           [
-            --exec-command=poetry run python,
+            # --exec-command=poetry run python,
             --manage-path=./manage.py,
           ]
