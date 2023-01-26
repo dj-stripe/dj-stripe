@@ -7,6 +7,10 @@ on:
     # The branches below must be a subset of the branches above
     branches: [master]
 
+env:
+  POETRY_VERSION: "1.2.2"
+  POETRY_VIRTUALENVS_IN_PROJECT: "1"
+
 jobs:
   linting:
     runs-on: ubuntu-latest
@@ -15,6 +19,24 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "3.11"
+
+      - name: Install poetry
+        run: |
+          curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
+
+      - name: Set up cache
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: .venv
+          key: venv-${{ matrix.python-version }}
+
+      - name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: timeout 10s poetry run pip --version || rm -rf .venv
+
+      - name: Install dependencies
+        run: poetry install --with ci
 
       - name: Install pre-commit
         run: pip install pre-commit
