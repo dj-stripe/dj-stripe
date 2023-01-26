@@ -20,7 +20,7 @@ WHERE EXISTS(SELECT * from djstripe_bankaccount WHERE djstripe_bankaccount.djstr
 -- Remove field destination from payout
 --
 ALTER TABLE "djstripe_payout" DROP COLUMN "destination_id" CASCADE;
--- ALTER TABLE "djstripe_payout" DROP COLUMN "destination_clone_id" CASCADE;
+
 
 --
 -- Rename field destination_clone on payout to destination
