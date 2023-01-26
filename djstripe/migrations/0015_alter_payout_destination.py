@@ -46,7 +46,7 @@ def reverse_func(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("djstripe", "0012_auto_20221217_0559"),
+        ("djstripe", "0014_lineitem"),
     ]
     operations = [
         migrations.RunPython(forwards_func, reverse_func),
