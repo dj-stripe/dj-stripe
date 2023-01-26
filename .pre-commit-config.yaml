@@ -29,11 +29,13 @@ repos:
       - id: django-upgrade
         args: [--target-version, "3.2"]
 
-  - repo: local
+  - repo: https://github.com/remastr/pre-commit-django-check-migrations
+    rev: v0.1.0
     hooks:
-      - id: check-missing-django-migrations
-        name: Check missing django migrations
-        entry: poetry run python manage.py makemigrations --dry-run --check
-        language: python
+      - id: check-migrations-created
         always_run: true
-        pass_filenames: false
+        args:
+          [
+            --exec-command=poetry run python,
+            --manage-path=./manage.py,
+          ]
