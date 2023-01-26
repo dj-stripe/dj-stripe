@@ -13,6 +13,7 @@ from djstripe import models
 from .actions import CustomActionMixin
 from .admin_inline import (
     InvoiceItemInline,
+    LineItemInline,
     SubscriptionInline,
     SubscriptionItemInline,
     SubscriptionScheduleInline,
@@ -412,6 +413,19 @@ class InvoiceAdmin(StripeModelAdmin):
         )
 
 
+@admin.register(models.LineItem)
+class LineItemAdmin(StripeModelAdmin):
+    list_display = (
+        "amount",
+        "invoice_item",
+        "subscription",
+        "subscription_item",
+        "type",
+    )
+    list_filter = ("type", "invoice_item", "subscription", "subscription_item")
+    list_select_related = ("invoice_item", "subscription", "subscription_item")
+
+
 @admin.register(models.Mandate)
 class MandateAdmin(StripeModelAdmin):
     list_display = ("status", "type", "payment_method")
@@ -588,7 +602,7 @@ class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer", "status", "get_product_name", "get_default_tax_rates")
     list_filter = ("status", "cancel_at_period_end")
 
-    inlines = (SubscriptionItemInline, SubscriptionScheduleInline)
+    inlines = (SubscriptionItemInline, SubscriptionScheduleInline, LineItemInline)
 
     def get_actions(self, request):
         # get all actions
