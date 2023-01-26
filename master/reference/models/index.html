@@ -9377,8 +9377,7 @@ a payout to either a bank account or debit card of a connected Stripe account.</
 <span class="normal">2138</span>
 <span class="normal">2139</span>
 <span class="normal">2140</span>
-<span class="normal">2141</span>
-<span class="normal">2142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Payout</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Payout</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A Payout object is created when you receive funds from Stripe, or when you initiate</span>
 <span class="sd">    a payout to either a bank account or debit card of a connected Stripe account.</span>
@@ -9414,8 +9413,7 @@ a payout to either a bank account or debit card of a connected Stripe account.</
         <span class="s2">&quot;account balance.&quot;</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">currency</span> <span class="o">=</span> <span class="n">StripeCurrencyCodeField</span><span class="p">()</span>
-    <span class="n">destination</span> <span class="o">=</span> <span class="n">StripeForeignKey</span><span class="p">(</span>
-        <span class="s2">&quot;BankAccount&quot;</span><span class="p">,</span>
+    <span class="n">destination</span> <span class="o">=</span> <span class="n">PaymentMethodForeignKey</span><span class="p">(</span>
         <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">,</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Bank account or card the payout was sent to.&quot;</span><span class="p">,</span>
@@ -9604,7 +9602,7 @@ a payout to either a bank account or debit card of a connected Stripe account.</
 
 
 <h5 id="djstripe.models.core.Payout.destination" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Payout</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="n">StripeForeignKey</span><span class="p">(</span><span class="s1">&#39;BankAccount&#39;</span><span class="p">,</span> <span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Bank account or card the payout was sent to.&#39;</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Payout</span><span class="o">.</span><span class="n">destination</span> <span class="o">=</span> <span class="n">PaymentMethodForeignKey</span><span class="p">(</span><span class="n">on_delete</span><span class="o">=</span><span class="n">models</span><span class="o">.</span><span class="n">PROTECT</span><span class="p">,</span> <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Bank account or card the payout was sent to.&#39;</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
@@ -9843,8 +9841,8 @@ a payout to either a bank account or debit card of a connected Stripe account.</
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2141</span>
-<span class="normal">2142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2140</span>
+<span class="normal">2141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">amount</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">PayoutStatus</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -9890,7 +9888,8 @@ and its usage is encouraged instead of Plan objects.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2145</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2144</span>
+<span class="normal">2145</span>
 <span class="normal">2146</span>
 <span class="normal">2147</span>
 <span class="normal">2148</span>
@@ -10090,8 +10089,7 @@ and its usage is encouraged instead of Plan objects.</p>
 <span class="normal">2342</span>
 <span class="normal">2343</span>
 <span class="normal">2344</span>
-<span class="normal">2345</span>
-<span class="normal">2346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Price</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Price</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Prices define the unit cost, currency, and (optional) billing cycle for</span>
 <span class="sd">    both recurring and one-time purchases of products.</span>
@@ -10649,8 +10647,8 @@ and its usage is encouraged instead of Plan objects.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2266</span>
-<span class="normal">2267</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2265</span>
+<span class="normal">2266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;unit_amount&quot;</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -10709,8 +10707,8 @@ and its usage is encouraged instead of Plan objects.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2295</span>
-<span class="normal">2296</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2294</span>
+<span class="normal">2295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">human_readable_price</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -10736,7 +10734,8 @@ and its usage is encouraged instead of Plan objects.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2278</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2277</span>
+<span class="normal">2278</span>
 <span class="normal">2279</span>
 <span class="normal">2280</span>
 <span class="normal">2281</span>
@@ -10750,8 +10749,7 @@ and its usage is encouraged instead of Plan objects.</p>
 <span class="normal">2289</span>
 <span class="normal">2290</span>
 <span class="normal">2291</span>
-<span class="normal">2292</span>
-<span class="normal">2293</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">2292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="c1"># A few minor things are changed in the api-version of the create call</span>
     <span class="n">api_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
@@ -10793,14 +10791,14 @@ and its usage is encouraged instead of Plan objects.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2269</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2268</span>
+<span class="normal">2269</span>
 <span class="normal">2270</span>
 <span class="normal">2271</span>
 <span class="normal">2272</span>
 <span class="normal">2273</span>
 <span class="normal">2274</span>
-<span class="normal">2275</span>
-<span class="normal">2276</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">2275</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">get_or_create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get or create a Price.&quot;&quot;&quot;</span>
 
@@ -11481,7 +11479,8 @@ that was originally charged.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/core.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2349</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2348</span>
+<span class="normal">2349</span>
 <span class="normal">2350</span>
 <span class="normal">2351</span>
 <span class="normal">2352</span>
@@ -11546,8 +11545,7 @@ that was originally charged.</p>
 <span class="normal">2411</span>
 <span class="normal">2412</span>
 <span class="normal">2413</span>
-<span class="normal">2414</span>
-<span class="normal">2415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Refund</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Refund</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Refund objects allow you to refund a charge that has previously been created</span>
 <span class="sd">    but not yet refunded. Funds will be refunded to the credit or debit card</span>
@@ -11833,10 +11831,10 @@ that was originally charged.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2412</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2411</span>
+<span class="normal">2412</span>
 <span class="normal">2413</span>
-<span class="normal">2414</span>
-<span class="normal">2415</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">2414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">amount</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currency</span><span class="p">)</span>
     <span class="n">status</span> <span class="o">=</span> <span class="n">enums</span><span class="o">.</span><span class="n">RefundStatus</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">status</span><span class="p">)</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">amount</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">status</span><span class="si">}</span><span class="s2">)&quot;</span>
@@ -11860,8 +11858,8 @@ that was originally charged.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/core.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2409</span>
-<span class="normal">2410</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2408</span>
+<span class="normal">2409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_stripe_dashboard_url</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">charge</span><span class="o">.</span><span class="n">get_stripe_dashboard_url</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
       </details>
