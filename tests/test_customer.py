@@ -2127,12 +2127,14 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
                     expand=[],
                     id=FAKE_SUBSCRIPTION["id"],
                     stripe_account=None,
+                    stripe_version="2020-08-27",
                 ),
                 call(
                     api_key=djstripe_settings.STRIPE_SECRET_KEY,
                     expand=[],
                     id=FAKE_SUBSCRIPTION["id"],
                     stripe_account=None,
+                    stripe_version="2020-08-27",
                 ),
             ]
         )
@@ -2552,12 +2554,14 @@ class TestCustomerLegacy(AssertStripeFksMixin, TestCase):
                     expand=[],
                     id=FAKE_SUBSCRIPTION["id"],
                     stripe_account=None,
+                    stripe_version="2020-08-27",
                 ),
                 call(
                     api_key=djstripe_settings.STRIPE_SECRET_KEY,
                     expand=[],
                     id=FAKE_SUBSCRIPTION["id"],
                     stripe_account=None,
+                    stripe_version="2020-08-27",
                 ),
             ]
         )
