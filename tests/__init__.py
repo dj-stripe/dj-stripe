@@ -1393,7 +1393,7 @@ FAKE_DISCOUNT_CUSTOMER = {
     "id": "di_fakefakefakefakefake0002",
     "object": "discount",
     "coupon": deepcopy(FAKE_COUPON),
-    "customer": FAKE_CUSTOMER,
+    "customer": deepcopy(FAKE_CUSTOMER),
     "start": 1493206114,
     "end": None,
     "subscription": None,
@@ -2080,14 +2080,14 @@ FAKE_EVENT_CUSTOMER_DELETED.update(
 )
 
 FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED = {
-    "id": "evt_test_customer.discount.created",
+    "id": "AGBWvF5zBm4sMCsLLPZrw9YY",
     "object": "event",
     "api_version": "2018-05-21",
     "created": 1439229084,
     "data": {"object": deepcopy(FAKE_DISCOUNT_CUSTOMER)},
     "livemode": False,
-    "pending_webhooks": 1,
-    "request": {"id": "req_6l38DHch3whaDj", "idempotency_key": None},
+    "pending_webhooks": 0,
+    "request": "req_6l38DHch3whaDj",
     "type": "customer.discount.created",
 }
 
@@ -2098,6 +2098,7 @@ FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED = {
     "api_version": "2017-02-14",
     "created": 1439229084,
     "object": "event",
+    "livemode": False,
     "pending_webhooks": 0,
     "request": "req_6l38DHch3whaDj",
     "data": {"object": deepcopy(FAKE_DISCOUNT_CUSTOMER)},
