@@ -1300,14 +1300,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         ),
         autospec=True,
     )
-    @patch(
-        "stripe.LineItem.retrieve", return_value=deepcopy(FAKE_LINE_ITEM), autospec=True
-    )
     @patch("djstripe.models.Invoice.retry", autospec=True)
     def test_retry_unpaid_invoices(
         self,
         invoice_retry_mock,
-        line_item_retrieve_mock,
         invoice_list_mock,
         invoice_retrieve_mock,
         invoice_item_retrieve_mock,
@@ -1498,14 +1494,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         "stripe.Invoice.list",
         return_value=StripeList(data=[deepcopy(FAKE_INVOICE_III)]),
     )
-    @patch(
-        "stripe.LineItem.retrieve", return_value=deepcopy(FAKE_LINE_ITEM), autospec=True
-    )
     @patch("djstripe.models.Invoice.retry", autospec=True)
     def test_retry_unpaid_invoices_unexpected_exception(
         self,
         invoice_retry_mock,
-        line_item_retrieve_mock,
         invoice_list_mock,
         invoice_retrieve_mock,
         invoice_item_retrieve_mock,

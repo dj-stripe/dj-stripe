@@ -474,9 +474,6 @@ class TestConfirmCustomActionView:
         def mock_invoice_item_get(*args, **kwargs):
             return FAKE_INVOICEITEM
 
-        def mock_line_item_get(*args, **kwargs):
-            return FAKE_LINE_ITEM
-
         def mock_customer_get(*args, **kwargs):
             return FAKE_CUSTOMER
 
@@ -508,7 +505,6 @@ class TestConfirmCustomActionView:
         # the desired json response.
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
         monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
-        monkeypatch.setattr(stripe.LineItem, "retrieve", mock_line_item_get)
 
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
         monkeypatch.setattr(
@@ -582,9 +578,6 @@ class TestConfirmCustomActionView:
         def mock_invoice_item_get(*args, **kwargs):
             return FAKE_INVOICEITEM
 
-        def mock_line_item_get(*args, **kwargs):
-            return FAKE_LINE_ITEM
-
         def mock_customer_get(*args, **kwargs):
             return FAKE_CUSTOMER
 
@@ -616,7 +609,6 @@ class TestConfirmCustomActionView:
         # the desired json response.
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
         monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
-        monkeypatch.setattr(stripe.LineItem, "retrieve", mock_line_item_get)
 
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
         monkeypatch.setattr(
@@ -700,9 +692,6 @@ class TestConfirmCustomActionView:
         def mock_invoice_item_get(*args, **kwargs):
             return FAKE_INVOICEITEM
 
-        def mock_line_item_get(*args, **kwargs):
-            return FAKE_LINE_ITEM
-
         def mock_customer_get(*args, **kwargs):
             return FAKE_CUSTOMER
 
@@ -726,7 +715,6 @@ class TestConfirmCustomActionView:
 
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
         monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
-        monkeypatch.setattr(stripe.LineItem, "retrieve", mock_line_item_get)
 
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
 
@@ -812,9 +800,6 @@ class TestConfirmCustomActionView:
         def mock_invoice_item_get(*args, **kwargs):
             return FAKE_INVOICEITEM
 
-        def mock_line_item_get(*args, **kwargs):
-            return FAKE_LINE_ITEM
-
         def mock_customer_get(*args, **kwargs):
             return FAKE_CUSTOMER
 
@@ -838,7 +823,6 @@ class TestConfirmCustomActionView:
 
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
         monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
-        monkeypatch.setattr(stripe.LineItem, "retrieve", mock_line_item_get)
 
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
 
@@ -924,9 +908,6 @@ class TestConfirmCustomActionView:
         def mock_invoice_item_get(*args, **kwargs):
             return FAKE_INVOICEITEM
 
-        def mock_line_item_get(*args, **kwargs):
-            return FAKE_LINE_ITEM
-
         def mock_customer_get(*args, **kwargs):
             return FAKE_CUSTOMER
 
@@ -950,7 +931,6 @@ class TestConfirmCustomActionView:
 
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
         monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
-        monkeypatch.setattr(stripe.LineItem, "retrieve", mock_line_item_get)
 
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
 
@@ -1026,9 +1006,6 @@ class TestConfirmCustomActionView:
         def mock_invoice_item_get(*args, **kwargs):
             return FAKE_INVOICEITEM
 
-        def mock_line_item_get(*args, **kwargs):
-            return FAKE_LINE_ITEM
-
         def mock_customer_get(*args, **kwargs):
             return FAKE_CUSTOMER
 
@@ -1052,7 +1029,6 @@ class TestConfirmCustomActionView:
 
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
         monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
-        monkeypatch.setattr(stripe.LineItem, "retrieve", mock_line_item_get)
 
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
 

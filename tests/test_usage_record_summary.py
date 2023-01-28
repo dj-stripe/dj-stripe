@@ -107,11 +107,6 @@ class TestUsageRecordSummary(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
-        "stripe.LineItem.retrieve",
-        return_value=deepcopy(FAKE_LINE_ITEM),
-        autospec=True,
-    )
-    @patch(
         "stripe.InvoiceItem.retrieve",
         return_value=deepcopy(FAKE_INVOICEITEM_II),
         autospec=True,
@@ -125,7 +120,6 @@ class TestUsageRecordSummary(AssertStripeFksMixin, TestCase):
         self,
         invoice_retrieve_mock,
         invoice_item_retrieve_mock,
-        line_item_retrieve_mock,
         subscription_retrieve_mock,
         subscription_item_retrieve_mock,
         customer_retrieve_mock,
@@ -205,11 +199,6 @@ class TestUsageRecordSummary(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
-        "stripe.LineItem.retrieve",
-        return_value=deepcopy(FAKE_LINE_ITEM),
-        autospec=True,
-    )
-    @patch(
         "stripe.InvoiceItem.retrieve",
         return_value=deepcopy(FAKE_INVOICEITEM),
         autospec=True,
@@ -223,7 +212,6 @@ class TestUsageRecordSummary(AssertStripeFksMixin, TestCase):
         self,
         invoice_retrieve_mock,
         invoice_item_retrieve_mock,
-        line_item_retrieve_mock,
         subscription_retrieve_mock,
         subscription_item_retrieve_mock,
         customer_retrieve_mock,

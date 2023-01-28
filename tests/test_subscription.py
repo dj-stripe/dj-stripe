@@ -1021,9 +1021,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
-        "stripe.LineItem.retrieve", return_value=deepcopy(FAKE_LINE_ITEM), autospec=True
-    )
-    @patch(
         "stripe.InvoiceItem.retrieve",
         return_value=deepcopy(FAKE_INVOICEITEM),
         autospec=True,
@@ -1058,7 +1055,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         plan_retrieve_mock,
         invoice_retrieve_mock,
         invoice_item_retrieve_mock,
-        line_item_retrieve_mock,
         paymentintent_retrieve_mock,
         paymentmethod_retrieve_mock,
         charge_retrieve_mock,
@@ -1216,9 +1212,6 @@ class TestSubscriptionDecimal:
         def mock_invoice_item_get(*args, **kwargs):
             return FAKE_INVOICEITEM
 
-        def mock_line_item_get(*args, **kwargs):
-            return FAKE_LINE_ITEM
-
         def mock_customer_get(*args, **kwargs):
             return FAKE_CUSTOMER
 
@@ -1250,7 +1243,6 @@ class TestSubscriptionDecimal:
         # the desired json response.
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
         monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
-        monkeypatch.setattr(stripe.LineItem, "retrieve", mock_line_item_get)
 
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
         monkeypatch.setattr(

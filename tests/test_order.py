@@ -228,9 +228,6 @@ class TestOrderStr:
         def mock_invoice_item_get(*args, **kwargs):
             return FAKE_INVOICEITEM
 
-        def mock_line_item_get(*args, **kwargs):
-            return FAKE_LINE_ITEM
-
         def mock_subscription_get(*args, **kwargs):
             """Monkeypatched stripe.Subscription.retrieve"""
             return deepcopy(FAKE_SUBSCRIPTION)
@@ -260,7 +257,6 @@ class TestOrderStr:
         # because of Reverse o2o field sync due to PaymentIntent.sync_from_stripe_data..
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
         monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
-        monkeypatch.setattr(stripe.LineItem, "retrieve", mock_line_item_get)
         monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
         monkeypatch.setattr(
             stripe.SubscriptionItem, "retrieve", mock_subscriptionitem_get
