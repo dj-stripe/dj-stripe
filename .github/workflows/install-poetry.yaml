@@ -3,13 +3,13 @@ name: Setup and install poetry
 on:
   workflow_call:
       inputs:
-        - POETRY_VERSION:
+        POETRY_VERSION:
             required: true
             type: string
-        - POETRY_VIRTUALENVS_IN_PROJECT:
+        POETRY_VIRTUALENVS_IN_PROJECT:
             required: true
             type: string
-        - python_version:
+        python_version:
             required: true
             type: string
 
