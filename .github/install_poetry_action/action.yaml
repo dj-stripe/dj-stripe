@@ -1,0 +1,36 @@
+name: Setup and install poetry
+description: Install and Setup Poetry
+
+inputs:
+  POETRY_VERSION:
+    required: true
+    type: string
+  python_version:
+    required: true
+    type: string
+
+
+runs:
+  using: "composite"
+  steps:
+      - name: Set up Python ${{ inputs.python_version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python_version }}
+
+      - name: Install poetry (${{ inputs.POETRY_VERSION }}) binary on runner
+        run: |
+          curl -sL https://install.python-poetry.org | python - --version ${{ inputs.POETRY_VERSION }}
+        shell: bash
+
+      - name: Set up cache
+        uses: actions/cache@v3
+        id: cache
+        with:
+          path: .venv
+          key: venv-${{ inputs.python_version }}
+
+      - name: Ensure cache is healthy
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: timeout 10s poetry run pip --version || rm -rf .venv
+        shell: bash
