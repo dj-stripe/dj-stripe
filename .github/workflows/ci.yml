@@ -18,6 +18,18 @@ env:
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
 
 jobs:
+  install_poetry:
+        runs-on: ubuntu-latest
+        strategy:
+          fail-fast: true
+          matrix:
+            python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        uses: ./.github/workflows/install-poetry.yaml
+        with:
+            POETRY_VERSION: ${{ env.POETRY_VERSION }}
+            POETRY_VIRTUALENVS_IN_PROJECT: ${{ env.POETRY_VIRTUALENVS_IN_PROJECT }}
+            python_version: ${{ matrix.python-version }}
+
   tests:
     runs-on: ubuntu-latest
     strategy:
@@ -54,11 +66,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: ./.github/workflows/install-poetry.yaml
-        with:
-            POETRY_VERSION: ${{ env.POETRY_VERSION }}
-            POETRY_VIRTUALENVS_IN_PROJECT: ${{ env.POETRY_VIRTUALENVS_IN_PROJECT }}
-            python_version: ${{ matrix.python-version }}
+      # - uses: ./.github/workflows/install-poetry.yaml
+      #   with:
+      #       POETRY_VERSION: ${{ env.POETRY_VERSION }}
+      #       POETRY_VIRTUALENVS_IN_PROJECT: ${{ env.POETRY_VIRTUALENVS_IN_PROJECT }}
+      #       python_version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: poetry install --with ci

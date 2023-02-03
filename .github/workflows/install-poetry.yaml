@@ -19,12 +19,10 @@ env:
 
 
 jobs:
-  deploy:
+  install_poetry:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-
-
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python ${{ inputs.python_version }}
