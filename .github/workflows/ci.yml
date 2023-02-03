@@ -56,8 +56,8 @@ jobs:
 
       - uses: ./.github/workflows/install-poetry.yaml
           with:
-            POETRY_VERSION: ${{ env.POETRY_VERSION }}
-            POETRY_VIRTUALENVS_IN_PROJECT: ${{ env.POETRY_VIRTUALENVS_IN_PROJECT }}
+            # POETRY_VERSION: ${{ env.POETRY_VERSION }}
+            # POETRY_VIRTUALENVS_IN_PROJECT: ${{ env.POETRY_VIRTUALENVS_IN_PROJECT }}
             python_version: ${{ matrix.python-version }}
 
       - name: Install dependencies
