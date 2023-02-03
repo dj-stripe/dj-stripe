@@ -54,7 +54,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - uses: dj-stripe/dj-stripe/.github/workflows/install-poetry.yaml # @master
+      - uses: ./.github/workflows/install-poetry.yaml
           with:
             POETRY_VERSION: ${{ env.POETRY_VERSION }}
             POETRY_VIRTUALENVS_IN_PROJECT: ${{ env.POETRY_VIRTUALENVS_IN_PROJECT }}
