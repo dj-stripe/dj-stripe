@@ -9,7 +9,6 @@ import stripe
 from django.test import TestCase
 
 from djstripe.models import PaymentIntent
-from djstripe.models.billing import Invoice
 
 from . import (
     FAKE_ACCOUNT,
