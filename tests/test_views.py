@@ -1110,7 +1110,7 @@ class TestConfirmCustomActionView:
         }
 
         # get the custom action POST url
-        change_url = reverse("djstripe:djstripe_custom_action", kwargs=kwargs)
+        change_url = reverse("admin:djstripe_custom_action", kwargs=kwargs)
 
         request = RequestFactory().post(change_url, data=data, follow=True)
 
@@ -1174,7 +1174,7 @@ class TestConfirmCustomActionView:
         }
 
         # get the custom action POST url
-        change_url = reverse("djstripe:djstripe_custom_action", kwargs=kwargs)
+        change_url = reverse("admin:djstripe_custom_action", kwargs=kwargs)
 
         request = RequestFactory().post(change_url, data=data, follow=True)
 
