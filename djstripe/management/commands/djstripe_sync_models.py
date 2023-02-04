@@ -10,6 +10,8 @@ Invoke like so:
 
     3) To sync all Objects only for sk_test_XXX and sk_test_YYY API keys:
         python manage.py djstripe_sync_models --api-keys sk_test_XXX sk_test_XXX
+                                    OR
+        python manage.py djstripe_sync_models --api-keys sk_test_XXX --api-keys sk_test_XXX
 
     4) To only sync Stripe Accounts for all API keys:
         python manage.py djstripe_sync_models Account
@@ -23,6 +25,7 @@ Invoke like so:
     7) To only sync Stripe Accounts and Charges for sk_test_XXX and sk_test_YYY API keys:
         python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY
 """
+import typing
 
 from django.apps import apps
 from django.core.exceptions import FieldDoesNotExist
@@ -55,8 +58,7 @@ class Command(BaseCommand):
             metavar="ApiKeys",
             nargs="*",
             type=str,
-            # todo uncomment this once support for python 3.7 is dropped.
-            # action="extend",
+            action="extend",
             help="Specify the api_keys you would like to perform this sync for.",
         )
 
