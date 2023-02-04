@@ -1,0 +1,4 @@
+# Run action even on Draft PRs
+runOnDraft: true
+
+
