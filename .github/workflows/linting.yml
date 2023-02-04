@@ -42,4 +42,4 @@ jobs:
         run: poetry install --with dev
 
       - name: Run pre-commit
-        run: pre-commit run --all-files --show-diff-on-failure
+        run: poetry run pre-commit run --all-files --show-diff-on-failure
