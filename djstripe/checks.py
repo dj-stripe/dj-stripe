@@ -10,6 +10,7 @@ STRIPE_API_VERSION_PATTERN = re.compile(
     r"(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})(; [\w=]*)?$"
 )
 
+
 # 4 possibilities:
 # Keys in admin and in settings
 # Keys in admin and not in settings
