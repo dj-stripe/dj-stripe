@@ -29,7 +29,7 @@ If relevant it's very helpful to include webhook tracebacks and content (note th
 - dj-stripe version: [e.g. master at <hash>, 2.0.0 etc]
 - Your Stripe account's default API version: [e.g. 2019-02-19 - shown as "default" on https://dashboard.stripe.com/developers]
 - Database: [e.g. MySQL 5.7.25]
-- Python version: [e.g. 3.7.2]
+- Python version: [e.g. 3.8.2]
 - Django version: [e.g. 2.1.7]
 
 **Can you reproduce the issue with the latest version of master?**
