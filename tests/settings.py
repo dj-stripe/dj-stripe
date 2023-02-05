@@ -20,7 +20,7 @@ ALLOWED_HOSTS = json.loads(os.environ.get("DJSTRIPE_TEST_ALLOWED_HOSTS_JSON", '[
 if test_db_vendor == "postgres":
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": test_db_name,
             "USER": test_db_user,
             "PASSWORD": test_db_pass,
