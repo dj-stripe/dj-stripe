@@ -1307,7 +1307,6 @@ class InvoiceOrLineItem(models.Model):
         stripe_account=None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
-
         raw_field_data = data.get(field_name)
         id_ = get_id_from_stripe_data(raw_field_data)
 
