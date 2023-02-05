@@ -29,7 +29,6 @@ class TestCheckApiKeySettings(TestCase):
         fileupload_retrieve_mock,
         account_retrieve_mock,
     ):
-
         fake_account = deepcopy(FAKE_ACCOUNT)
         fake_account["settings"]["branding"]["icon"] = None
         account_retrieve_mock.return_value = fake_account
@@ -39,7 +38,6 @@ class TestCheckApiKeySettings(TestCase):
             "get_api_key_details_by_prefix",
             return_value=(APIKeyType.secret, True),
         ):
-
             account = models.Account.sync_from_stripe_data(
                 fake_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
             )
@@ -65,7 +63,6 @@ class TestCheckApiKeySettings(TestCase):
         fileupload_retrieve_mock,
         account_retrieve_mock,
     ):
-
         fake_account = deepcopy(FAKE_ACCOUNT)
         fake_account["settings"]["branding"]["icon"] = None
         account_retrieve_mock.return_value = fake_account
@@ -75,7 +72,6 @@ class TestCheckApiKeySettings(TestCase):
             "get_api_key_details_by_prefix",
             return_value=(APIKeyType.secret, False),
         ):
-
             account = models.Account.sync_from_stripe_data(
                 fake_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
             )
@@ -112,7 +108,6 @@ class TestCheckApiKeySettings(TestCase):
             "get_api_key_details_by_prefix",
             return_value=(APIKeyType.secret, True),
         ):
-
             account = models.Account.sync_from_stripe_data(
                 fake_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
             )
@@ -142,7 +137,6 @@ class TestCheckApiKeySettings(TestCase):
         fileupload_retrieve_mock,
         account_retrieve_mock,
     ):
-
         fake_account = deepcopy(FAKE_ACCOUNT)
         fake_account["settings"]["branding"]["icon"] = None
         account_retrieve_mock.return_value = fake_account
@@ -152,7 +146,6 @@ class TestCheckApiKeySettings(TestCase):
             "get_api_key_details_by_prefix",
             return_value=(APIKeyType.secret, False),
         ):
-
             account = models.Account.sync_from_stripe_data(
                 fake_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
             )

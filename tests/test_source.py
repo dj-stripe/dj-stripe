@@ -21,7 +21,6 @@ from . import (
 
 class SourceTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )

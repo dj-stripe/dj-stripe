@@ -6,7 +6,6 @@ import djstripe.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("djstripe", "0009_2_6"),
     ]

@@ -80,7 +80,6 @@ class SubscriptionStrTest(TestCase):
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
-
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION_III)
         subscription_fake["latest_invoice"] = None
 
@@ -255,7 +254,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
-
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION_II)
         subscription_fake["latest_invoice"] = FAKE_INVOICE["id"]
         subscription_retrieve_mock.return_value = subscription_fake
@@ -890,7 +888,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
-
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)
         subscription_fake["latest_invoice"] = FAKE_INVOICE["id"]
         subscription_retrieve_mock.return_value = subscription_fake

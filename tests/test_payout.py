@@ -29,7 +29,6 @@ pytestmark = pytest.mark.django_db
 
 class TestPayout(AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         # create a Standard Stripe Account
         self.standard_account = FAKE_STANDARD_ACCOUNT.create()
 

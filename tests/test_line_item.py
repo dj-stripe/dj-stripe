@@ -118,7 +118,6 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
         product_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-
         # create the latest invoice as Line Items (Invoice) need to exist on an Invoice
         Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
@@ -140,13 +139,11 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
         self,
         invoice_retrieve_mock,
     ):
-
         p = PropertyMock(return_value=deepcopy(FAKE_LINE_ITEM))
 
         with patch.object(
             invoice_retrieve_mock.return_value.lines, "list"
         ) as patched_obj:
-
             type(patched_obj).auto_paging_iter = p
 
             # Invoke LineItem.api_list(...)

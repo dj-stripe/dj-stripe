@@ -82,7 +82,6 @@ class SessionTest(AssertStripeFksMixin, TestCase):
         subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-
         session = Session.sync_from_stripe_data(deepcopy(FAKE_SESSION_I))
 
         self.assert_fks(
@@ -164,14 +163,12 @@ class SessionTest(AssertStripeFksMixin, TestCase):
         subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-
         session = Session.sync_from_stripe_data(deepcopy(FAKE_SESSION_I))
 
         self.assertEqual(f"<id={FAKE_SESSION_I['id']}>", str(session))
 
 
 class TestSession:
-
     key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
 
     @pytest.mark.parametrize(

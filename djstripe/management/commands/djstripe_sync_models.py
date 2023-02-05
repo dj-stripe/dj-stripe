@@ -241,7 +241,6 @@ class Command(BaseCommand):
                         field_inst,
                         (django_models.ForeignKey, django_models.OneToOneField),
                     ):
-
                         try:
                             for (
                                 related_model_expand_field
@@ -265,7 +264,6 @@ class Command(BaseCommand):
                                         django_models.OneToOneField,
                                     ),
                                 ):
-
                                     try:
                                         # need to prepend "field_name." to each of the entry in the expand_fields list
                                         related_model_expand_fields = map(
@@ -320,7 +318,6 @@ class Command(BaseCommand):
             for stripe_invoice in models.Invoice.api_list(
                 stripe_account=stripe_account, api_key=api_key
             ):
-
                 all_list_kwargs.append({"id": stripe_invoice.id, **def_kwarg})
 
         return all_list_kwargs
@@ -515,7 +512,6 @@ class Command(BaseCommand):
         if type in (enums.AccountType.custom, enums.AccountType.express) and isinstance(
             instance, models.Account
         ):
-
             # fetch all Card and BankAccount objects associated with the instance
             items = models.Account.stripe_class.list_external_accounts(
                 **kwargs
@@ -537,7 +533,6 @@ class Command(BaseCommand):
         bank_count = 0
         card_count = 0
         for item in items:
-
             if item.object == "bank_account":
                 model = models.BankAccount
                 bank_count += 1

@@ -23,7 +23,6 @@ from . import (
 
 class SubscriptionManagerTest(TestCase):
     def setUp(self):
-
         # create customers and current subscription records
         period_start = datetime.datetime(2013, 4, 1, tzinfo=get_timezone_utc())
         period_end = datetime.datetime(2013, 4, 30, tzinfo=get_timezone_utc())
@@ -184,7 +183,6 @@ class TransferManagerTest(TestCase):
 
 class ChargeManagerTest(TestCase):
     def setUp(self):
-
         customer = Customer.objects.create(
             id="cus_XXXXXXX", livemode=False, balance=0, delinquent=False
         )

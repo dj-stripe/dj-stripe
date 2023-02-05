@@ -62,7 +62,6 @@ class TestConfirmCustomActionView:
         ],
     )
     def test_get_form_kwargs(self, action_name, admin_user, monkeypatch):
-
         model = CustomActionModel
 
         # monkeypatch utils.get_model
@@ -245,7 +244,6 @@ class TestConfirmCustomActionView:
                 model.__name__ == "WebhookEndpoint"
                 or model.__name__ not in self.ignore_models
             ):
-
                 # monkeypatch utils.get_model
                 def mock_get_model(*args, **kwargs):
                     return model
@@ -370,7 +368,6 @@ class TestConfirmCustomActionView:
             assert self.kwargs_called_with == {}
 
     def test__resync_instances_stripe_permission_error(self, monkeypatch):
-
         model = CustomActionModel
 
         # create instance to be used in the Django Admin Action

@@ -518,7 +518,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
     def test_customer_purge_raises_customer_exception(
         self, customer_retrieve_mock, customer_delete_mock, customer_source_delete_mock
     ):
-
         self.customer.purge()
         customer = Customer.objects.get(id=self.customer.id)
         self.assertTrue(customer.subscriber is None)
@@ -581,7 +580,6 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     def test_add_card_set_default_false(self, customer_retrieve_mock):
-
         # self.customer already has FAKE_CARD as its default payment method
         self.customer.add_card(FAKE_CARD_III["id"], set_default=False)
 

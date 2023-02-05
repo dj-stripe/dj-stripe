@@ -44,7 +44,6 @@ def reverse_func(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("djstripe", "0014_lineitem"),
     ]

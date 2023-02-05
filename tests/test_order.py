@@ -279,7 +279,6 @@ class TestOrderStr:
             OrderStatus.complete,
             OrderStatus.processing,
         ):
-
             assert str(order) == f"Placed on 07/10/2019 ({order_status})"
 
 

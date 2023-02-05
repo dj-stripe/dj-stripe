@@ -242,7 +242,6 @@ class PlanTest(AssertStripeFksMixin, TestCase):
 
 
 class TestHumanReadablePlan:
-
     #
     # Helpers
     #

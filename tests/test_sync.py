@@ -52,7 +52,6 @@ class TestSyncSubscriber(TestCase):
         _sync_invoices_mock,
         _sync_charges_mock,
     ):
-
         sync_subscriber(self.user)
         self.assertEqual(1, Customer.objects.count())
         self.assertEqual(

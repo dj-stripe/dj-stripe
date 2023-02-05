@@ -57,7 +57,6 @@ class TestBalanceTransactionSourceClass:
 
     @pytest.mark.parametrize("transaction_type", ["network_cost", "payment_refund"])
     def test_get_source_class_failure(self, transaction_type):
-
         modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
         modified_balance_transaction["type"] = transaction_type
 
@@ -120,7 +119,6 @@ class TestBalanceTransaction(TestCase):
         customer_retrieve_mock,
         invoice_retrieve_mock,
     ):
-
         balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
             deepcopy(FAKE_BALANCE_TRANSACTION)
         )
@@ -194,7 +192,6 @@ class TestBalanceTransaction(TestCase):
         invoice_retrieve_mock,
         invoiceitem_retrieve_mock,
     ):
-
         balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
             deepcopy(FAKE_BALANCE_TRANSACTION)
         )
@@ -264,7 +261,6 @@ class TestBalanceTransaction(TestCase):
         invoice_retrieve_mock,
         invoiceitem_retrieve_mock,
     ):
-
         balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
             deepcopy(FAKE_BALANCE_TRANSACTION)
         )

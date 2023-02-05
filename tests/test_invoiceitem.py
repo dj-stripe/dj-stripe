@@ -132,7 +132,6 @@ class InvoiceItemTest(AssertStripeFksMixin, TestCase):
         plan_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-
         fake_card = deepcopy(FAKE_CARD_II)
         fake_card["customer"] = None
 

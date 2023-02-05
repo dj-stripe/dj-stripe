@@ -39,7 +39,6 @@ if DJSTRIPE_SUBSCRIBER_MODEL != settings.AUTH_USER_MODEL:
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [DJSTRIPE_SUBSCRIBER_MODEL_DEPENDENCY]

@@ -14,7 +14,6 @@ from .forms import CustomActionForm
 
 
 class CustomActionMixin:
-
     # So that actions get shown even if there are 0 instances
     # https://docs.djangoproject.com/en/dev/ref/contrib/admin/#django.contrib.admin.ModelAdmin.show_full_result_count
     show_full_result_count = False
@@ -30,7 +29,6 @@ class CustomActionMixin:
         return custom_urls + super().get_urls()
 
     def get_admin_action_context(self, queryset, action_name, form_class):
-
         context = {
             "action_name": action_name,
             "model_name": self.model._meta.model_name,

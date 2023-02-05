@@ -44,7 +44,6 @@ def _get_fake_payment_intent_i_no_customer():
 
 
 class TestStrPaymentIntent:
-
     #
     # Helpers
     #
@@ -127,25 +126,21 @@ class TestStrPaymentIntent:
             assert pi.invoice is not None
 
         if has_account and has_customer:
-
             assert (
                 str(pi)
                 == "$1,902.00 USD (The funds are in your account.) for dj-stripe by Michael Smith"
             )
 
         elif has_account and not has_customer:
-
             assert (
                 str(pi)
             ) == "$1,902.00 USD for dj-stripe. The funds are in your account."
 
         elif has_customer and not has_account:
-
             assert (
                 str(pi)
             ) == "$20.00 USD by Michael Smith. The funds are in your account."
         elif not has_customer and not has_account:
-
             assert str(pi) == "$20.00 USD (The funds are in your account.)"
 
 

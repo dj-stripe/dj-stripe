@@ -79,7 +79,6 @@ def test_apikey_detect_livemode_and_type(
 
 class APIKeyTest(TestCase):
     def setUp(self):
-
         # create a Stripe Platform Account
         self.account = FAKE_PLATFORM_ACCOUNT.create()
 

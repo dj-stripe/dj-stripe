@@ -7,7 +7,6 @@ import djstripe.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("djstripe", "0015_alter_payout_destination"),
     ]

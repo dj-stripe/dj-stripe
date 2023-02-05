@@ -1446,7 +1446,6 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-
         fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
         fake_upcoming_invoice_data["lines"]["data"][0][
             "subscription"
@@ -1577,7 +1576,6 @@ class InvoiceTest(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-
         fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
         fake_upcoming_invoice_data["lines"]["data"][0][
             "subscription"

@@ -121,7 +121,6 @@ class Session(StripeModel):
 
         # only update if customer and metadata exist
         if self.customer and self.metadata:
-
             key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
             current_value = self.metadata.get(key)
 

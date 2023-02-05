@@ -766,7 +766,6 @@ class Customer(StripeModel):
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
-
         # stripe adds a deleted attribute if the Customer has been deleted upstream
         if data.get("deleted"):
             logger.warning(
@@ -1450,7 +1449,6 @@ class Dispute(StripeModel):
         pending_relations=None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
-
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations, api_key=api_key
         )

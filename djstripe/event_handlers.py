@@ -68,7 +68,6 @@ def customer_webhook_handler(event):
     target_object_type = event.data.get("object", {}).get("object", {})
 
     if event.customer and target_object_type == "customer":
-
         metadata = event.data.get("object", {}).get("metadata", {})
         customer_id = event.data.get("object", {}).get("id", "")
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY

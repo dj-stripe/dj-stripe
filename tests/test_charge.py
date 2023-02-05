@@ -218,7 +218,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         customer_retrieve_mock,
         default_account_mock,
     ):
-
         default_account_mock.return_value = self.account
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
@@ -448,7 +447,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         default_account_mock,
         customer_retrieve_mock,
     ):
-
         default_account_mock.return_value = self.account
         fake_charge_copy = deepcopy(FAKE_CHARGE_REFUNDED)
 
@@ -654,7 +652,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         default_account_mock,
         customer_retrieve_mock,
     ):
-
         default_account_mock.return_value = self.account
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
@@ -708,7 +705,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-
         default_account_mock.return_value = self.account
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)
@@ -815,7 +811,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         transfer__attach_object_post_save_hook_mock,
         customer_retrieve_mock,
     ):
-
         default_account_mock.return_value = self.account
 
         fake_transfer = deepcopy(FAKE_TRANSFER)
@@ -918,7 +913,6 @@ class ChargeTest(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock,
         customer_retrieve_mock,
     ):
-
         account_retrieve_mock.return_value = FAKE_STANDARD_ACCOUNT
 
         fake_charge_copy = deepcopy(FAKE_CHARGE)

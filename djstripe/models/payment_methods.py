@@ -50,7 +50,6 @@ class DjstripePaymentMethod(models.Model):
     def _get_or_create_source(
         cls, data, source_type=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
     ):
-
         # prefer passed in source_type
         if not source_type:
             source_type = data["object"]
@@ -97,7 +96,6 @@ class DjstripePaymentMethod(models.Model):
         stripe_account=None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
-
         raw_field_data = data.get(field_name)
         id_ = get_id_from_stripe_data(raw_field_data)
         if not id_:

@@ -24,7 +24,6 @@ pytestmark = pytest.mark.django_db
 
 
 class TestProduct:
-
     #
     # Helper Methods for monkeypatching
     #
@@ -67,7 +66,6 @@ class TestProduct:
             )
 
     def test_sync_from_stripe_data(self, monkeypatch):
-
         # monkeypatch stripe.Product.retrieve call to return
         # the desired json response.
         monkeypatch.setattr(stripe.Product, "retrieve", self.mock_product_get)

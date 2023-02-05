@@ -21,7 +21,6 @@ class TestCustomActionForm:
         "action_name", ["_sync_all_instances", "_resync_instances"]
     )
     def test___init__(self, action_name, monkeypatch):
-
         # monkeypatch utils.get_model
         def mock_get_model(*args, **kwargs):
             return model
@@ -58,7 +57,6 @@ class TestCustomActionForm:
 class TestAPIKeyAdminCreateForm:
     @pytest.mark.parametrize("secret", [SK_TEST, SK_LIVE, RK_TEST, RK_LIVE])
     def test__post_clean(self, secret, monkeypatch):
-
         form = APIKeyAdminCreateForm(data={"name": "Test Secret Key", "secret": secret})
 
         # Manually invoking internals of Form.full_clean() to isolate

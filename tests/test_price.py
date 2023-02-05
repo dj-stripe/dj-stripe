@@ -26,7 +26,6 @@ pytestmark = pytest.mark.django_db
 
 class PriceCreateTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         with patch(
             "stripe.Product.retrieve",
             return_value=deepcopy(FAKE_PRODUCT),
@@ -151,7 +150,6 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
 
 class PriceTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         self.price_data = deepcopy(FAKE_PRICE)
         with patch(
             "stripe.Product.retrieve",
@@ -268,7 +266,6 @@ class TestStrPrice:
 
 
 class TestHumanReadablePrice:
-
     #
     # Helpers
     #

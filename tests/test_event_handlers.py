@@ -599,7 +599,6 @@ class TestAccountEvents(EventTestCase):
     def test_standard_account_updated_event(
         self, event_retrieve_mock, account_retrieve_mock
     ):
-
         # fetch the Stripe Account
         standard_account = self.standard_account
 
@@ -635,7 +634,6 @@ class TestAccountEvents(EventTestCase):
     def test_express_account_updated_event(
         self, event_retrieve_mock, account_retrieve_mock
     ):
-
         # fetch the Stripe Account
         express_account = self.express_account
 
@@ -671,7 +669,6 @@ class TestAccountEvents(EventTestCase):
     def test_custom_account_updated_event(
         self, event_retrieve_mock, account_retrieve_mock
     ):
-
         # fetch the Stripe Account
         custom_account = self.custom_account
 
@@ -788,7 +785,6 @@ class TestChargeEvents(EventTestCase):
 
 class TestCheckoutEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -1091,7 +1087,6 @@ class TestCheckoutEvents(EventTestCase):
 
 class TestCustomerEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -1119,7 +1114,6 @@ class TestCustomerEvents(EventTestCase):
     def test_customer_metadata_created(
         self, event_retrieve_mock, customer_retrieve_mock
     ):
-
         fake_customer = deepcopy(FAKE_CUSTOMER)
         fake_customer["metadata"] = {"djstripe_subscriber": self.user.id}
 
@@ -1148,7 +1142,6 @@ class TestCustomerEvents(EventTestCase):
     def test_customer_metadata_updated(
         self, event_retrieve_mock, customer_retrieve_mock
     ):
-
         fake_customer = deepcopy(FAKE_CUSTOMER)
         fake_customer["metadata"] = {"djstripe_subscriber": self.user.id}
 
@@ -1190,7 +1183,6 @@ class TestCustomerEvents(EventTestCase):
         customer_delete_mock,
         customer_source_delete_mock,
     ):
-
         FAKE_CUSTOMER.create_for_user(self.user)
         event = self._create_event(FAKE_EVENT_CUSTOMER_CREATED)
         event.invoke_webhook_handlers()
@@ -1443,7 +1435,6 @@ class TestCustomerEvents(EventTestCase):
 
 class TestDisputeEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="fake_customer_1", email=FAKE_CUSTOMER["email"]
         )
@@ -1542,7 +1533,6 @@ class TestDisputeEvents(EventTestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_FUNDS_WITHDRAWN)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -1593,7 +1583,6 @@ class TestDisputeEvents(EventTestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_UPDATED)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -1644,7 +1633,6 @@ class TestDisputeEvents(EventTestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_CLOSED)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -1700,7 +1688,6 @@ class TestDisputeEvents(EventTestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_FULL)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -1766,7 +1753,6 @@ class TestDisputeEvents(EventTestCase):
 
 class TestFileEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -1792,7 +1778,6 @@ class TestFileEvents(EventTestCase):
 
 class TestInvoiceEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -1858,7 +1843,6 @@ class TestInvoiceEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
 
@@ -1930,7 +1914,6 @@ class TestInvoiceEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-
         FAKE_CUSTOMER.create_for_user(self.user)
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
@@ -2003,7 +1986,6 @@ class TestInvoiceEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-
         FAKE_CUSTOMER.create_for_user(self.user)
 
         event = self._create_event(FAKE_EVENT_INVOICE_CREATED)
@@ -2026,7 +2008,6 @@ class TestInvoiceEvents(EventTestCase):
 
 class TestInvoiceItemEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -2090,7 +2071,6 @@ class TestInvoiceItemEvents(EventTestCase):
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-
         fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_II)
         fake_payment_intent["invoice"] = FAKE_INVOICE_II["id"]
         paymentintent_retrieve_mock.return_value = fake_payment_intent
@@ -2267,7 +2247,6 @@ class TestPlanEvents(EventTestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     def test_plan_deleted(self, product_retrieve_mock, plan_retrieve_mock):
-
         event = self._create_event(FAKE_EVENT_PLAN_CREATED)
         event.invoke_webhook_handlers()
 
@@ -2331,7 +2310,6 @@ class TestPriceEvents(EventTestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     def test_price_deleted(self, product_retrieve_mock, price_retrieve_mock):
-
         event = self._create_event(FAKE_EVENT_PRICE_CREATED)
         event.invoke_webhook_handlers()
 
@@ -2346,7 +2324,6 @@ class TestPriceEvents(EventTestCase):
 
 class TestPaymentMethodEvents(AssertStripeFksMixin, EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="fake_customer_1", email=FAKE_CUSTOMER["email"]
         )
@@ -2642,7 +2619,6 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     def test_subscription_schedule_canceled(
         self, customer_retrieve_mock, schedule_retrieve_mock
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
         fake_stripe_event["data"]["previous_attributes"] = {
             "canceled_at": None,
@@ -2688,7 +2664,6 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     def test_subscription_schedule_completed(
         self, customer_retrieve_mock, schedule_retrieve_mock
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
         fake_stripe_event["data"]["object"]["subscription"] = None
 
@@ -2730,7 +2705,6 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     def test_subscription_schedule_expiring(
         self, customer_retrieve_mock, schedule_retrieve_mock
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
         fake_stripe_event["data"]["object"]["subscription"] = None
 
@@ -2771,7 +2745,6 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     def test_subscription_schedule_released(
         self, customer_retrieve_mock, schedule_retrieve_mock
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
         fake_stripe_event["data"]["previous_attributes"] = {
             "released_at": None,
