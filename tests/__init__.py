@@ -1385,11 +1385,13 @@ FAKE_DISCOUNT_CUSTOMER = {
 
 
 FAKE_LINE_ITEM = load_fixture("line_item_il_invoice_item_fakefakefakefakefake0001.json")
-
+FAKE_LINE_ITEM["discounts"] = [deepcopy(FAKE_DISCOUNT_CUSTOMER)]
 
 FAKE_LINE_ITEM_SUBSCRIPTION = load_fixture(
     "line_item_il_invoice_item_fakefakefakefakefake0002.json"
 )
+FAKE_LINE_ITEM_SUBSCRIPTION["discounts"] = [deepcopy(FAKE_DISCOUNT_CUSTOMER)]
+FAKE_LINE_ITEM_SUBSCRIPTION["discounts"][0]["subscription"] = "sub_1rn1dp7WgjMtx9"
 
 
 class InvoiceDict(StripeItem):
