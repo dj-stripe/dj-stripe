@@ -1,3 +1,4 @@
+import logging
 import warnings
 from typing import Optional, Union
 
@@ -10,6 +11,7 @@ from stripe.error import InvalidRequestError
 
 from .. import enums
 from ..fields import (
+    InvoiceOrLineItemForeignKey,
     JSONField,
     PaymentMethodForeignKey,
     StripeCurrencyCodeField,
@@ -23,9 +25,11 @@ from ..fields import (
 )
 from ..managers import SubscriptionManager
 from ..settings import djstripe_settings
-from ..utils import QuerySetMock, get_friendly_currency_amount
+from ..utils import QuerySetMock, get_friendly_currency_amount, get_id_from_stripe_data
 from .base import StripeModel
 from .core import Customer
+
+logger = logging.getLogger(__name__)
 
 
 # TODO Mimic stripe-python decorator pattern to easily add and expose CRUD operations like create, update, delete etc on models
@@ -193,6 +197,86 @@ class Coupon(StripeModel):
         else:
             duration = self.duration
         return f"{self.human_readable_amount} {duration}"
+
+
+class Discount(StripeModel):
+    """
+    A discount represents the actual application of a coupon or promotion code.
+    It contains information about when the discount began,
+    when it will end, and what it is applied to.
+
+    Stripe documentation: https://stripe.com/docs/api/discounts
+    """
+
+    expand_fields = ["customer"]
+    stripe_class = None
+
+    checkout_session = StripeForeignKey(
+        "Session",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The Checkout session that this coupon is applied to, if it is applied to a particular session in payment mode. Will not be present for subscription mode.",
+    )
+    coupon = JSONField(
+        null=True,
+        blank=True,
+        help_text="Hash describing the coupon applied to create this discount.",
+    )
+    customer = StripeForeignKey(
+        "Customer",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The ID of the customer associated with this discount.",
+        related_name="customer_discounts",
+    )
+    end = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text=(
+            "If the coupon has a duration of repeating, the date that this discount will end. If the coupon has a duration of once or forever, this attribute will be null."
+        ),
+    )
+    invoice = StripeForeignKey(
+        "Invoice",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The invoice that the discount’s coupon was applied to, if it was applied directly to a particular invoice.",
+        related_name="invoice_discounts",
+    )
+    invoice_item = InvoiceOrLineItemForeignKey(
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The invoice item id (or invoice line item id for invoice line items of type=‘subscription’) that the discount’s coupon was applied to, if it was applied directly to a particular invoice item or invoice line item.",
+    )
+    promotion_code = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="The promotion code applied to create this discount.",
+    )
+    start = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text=("Date that the coupon was applied."),
+    )
+    subscription = StripeForeignKey(
+        "subscription",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The subscription that this coupon is applied to, if it is applied to a particular subscription.",
+        related_name="subscription_discounts",
+    )
+
+    @classmethod
+    def is_valid_object(cls, data):
+        """
+        Returns whether the data is a valid object for the class
+        """
+        return "object" in data and data["object"] == "discount"
 
 
 class BaseInvoice(StripeModel):
@@ -1188,6 +1272,67 @@ class LineItem(StripeModel):
         return invoice.lines.list(
             api_key=api_key, expand=expand_fields, **kwargs
         ).auto_paging_iter()
+
+
+class InvoiceOrLineItem(models.Model):
+    """An Internal Model that abstracts InvoiceItem and lineItem
+    objects
+
+    Contains two fields: `id` and `type`:
+    - `id` is the id of the Stripe object.
+    - `type` can be `line_item`, `invoice_item` or `unsupported`
+    """
+
+    id = models.CharField(max_length=255, primary_key=True)
+    type = StripeEnumField(
+        enum=enums.InvoiceorLineItemType,
+        help_text="Indicates whether the underlying model is LineItem or InvoiceItem. Can be one of: 'invoice_item', 'line_item' or 'unsupported'",
+    )
+
+    @classmethod
+    def _model_type(cls, id_):
+        if id_.startswith("ii"):
+            return InvoiceItem, "invoice_item"
+        elif id_.startswith("il"):
+            return LineItem, "line_item"
+        raise ValueError(f"Unknown object type with id: {id_}")
+
+    @classmethod
+    def _get_or_create_from_stripe_object(
+        cls,
+        data,
+        field_name="id",
+        refetch=True,
+        current_ids=None,
+        pending_relations=None,
+        save=True,
+        stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+    ):
+        raw_field_data = data.get(field_name)
+        id_ = get_id_from_stripe_data(raw_field_data)
+
+        try:
+            object_cls, object_type = cls._model_type(id_)
+        except ValueError:
+            # This may happen if we have object types we don't know about.
+            # Let's not make dj-stripe entirely unusable if that happens.
+            logger.warning(f"Unknown Object. Could not sync object with id: {id_}")
+            return cls.objects.get_or_create(id=id_, defaults={"type": "unsupported"})
+
+        # call model's _get_or_create_from_stripe_object to ensure
+        # that object exists before getting or creating its InvoiceorLineItem mapping
+        object_cls._get_or_create_from_stripe_object(
+            data,
+            field_name,
+            refetch=refetch,
+            current_ids=current_ids,
+            pending_relations=pending_relations,
+            stripe_account=stripe_account,
+            api_key=api_key,
+        )
+
+        return cls.objects.get_or_create(id=id_, defaults={"type": object_type})
 
 
 class Plan(StripeModel):

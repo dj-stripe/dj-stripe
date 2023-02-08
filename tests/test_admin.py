@@ -479,6 +479,9 @@ class TestAdminRegisteredModelsChildrenOfStripeModel(TestCase):
                     elif model.__name__ in ("Mandate", "UsageRecord"):
                         assert "_resync_instances" in actions
                         assert "_sync_all_instances" not in actions
+                    elif model.__name__ == "Discount":
+                        assert "_resync_instances" not in actions
+                        assert "_sync_all_instances" not in actions
                     else:
                         assert "_resync_instances" in actions
                         assert "_sync_all_instances" in actions
@@ -1095,7 +1098,7 @@ class TestCustomActionMixin:
         for model in all_models_lst:
             if (
                 model in site._registry.keys()
-                and model.__name__ not in ("Mandate", "UsageRecord")
+                and model.__name__ not in ("Mandate", "UsageRecord", "Discount")
                 and (
                     model.__name__ == "WebhookEndpoint"
                     or model.__name__ not in self.ignore_models

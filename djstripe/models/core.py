@@ -26,7 +26,7 @@ from ..fields import (
 from ..managers import ChargeManager
 from ..settings import djstripe_settings
 from ..signals import WEBHOOK_SIGNALS
-from ..utils import get_friendly_currency_amount
+from ..utils import get_friendly_currency_amount, get_id_from_stripe_data
 from .base import IdempotencyKey, StripeModel, logger
 
 
@@ -1595,9 +1595,9 @@ class Event(StripeModel):
     def customer(self):
         data = self.data["object"]
         if data["object"] == "customer":
-            customer_id = data.get("id")
+            customer_id = get_id_from_stripe_data(data.get("id"))
         else:
-            customer_id = data.get("customer")
+            customer_id = get_id_from_stripe_data(data.get("customer"))
 
         if customer_id:
             return Customer._get_or_retrieve(

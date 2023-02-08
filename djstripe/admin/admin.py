@@ -248,6 +248,30 @@ class CustomerAdmin(StripeModelAdmin):
         )
 
 
+@admin.register(models.Discount)
+class DiscountAdmin(ReadOnlyMixin, StripeModelAdmin):
+    list_display = (
+        "customer",
+        "coupon",
+        "invoice_item",
+        "promotion_code",
+        "subscription",
+    )
+    list_filter = ("customer", "start", "end", "promotion_code", "coupon")
+
+    def get_actions(self, request):
+        """
+        Returns _resync_instances only for
+        models with a defined model.stripe_class.retrieve
+        """
+        actions = super().get_actions(request)
+
+        # remove "_sync_all_instances" as Discounts cannot be listed
+        actions.pop("_sync_all_instances", None)
+
+        return actions
+
+
 @admin.register(models.Dispute)
 class DisputeAdmin(ReadOnlyMixin, StripeModelAdmin):
     list_display = ("reason", "status", "amount", "currency", "is_charge_refundable")
