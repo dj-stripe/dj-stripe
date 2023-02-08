@@ -4585,14 +4585,14 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 
         <details class="quote">
           <summary>Source code in <code>tests/__init__.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1395</span>
-<span class="normal">1396</span>
-<span class="normal">1397</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1397</span>
 <span class="normal">1398</span>
 <span class="normal">1399</span>
 <span class="normal">1400</span>
 <span class="normal">1401</span>
-<span class="normal">1402</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">InvoiceDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
+<span class="normal">1402</span>
+<span class="normal">1403</span>
+<span class="normal">1404</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">InvoiceDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `invoice.lines`.&quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -4650,10 +4650,10 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 
       <details class="quote">
         <summary>Source code in <code>tests/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1396</span>
-<span class="normal">1397</span>
-<span class="normal">1398</span>
-<span class="normal">1399</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1398</span>
+<span class="normal">1399</span>
+<span class="normal">1400</span>
+<span class="normal">1401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Match Stripe&#39;s behavior: return a stripe iterable on `invoice.lines`.&quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">StripeList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span>
@@ -4677,8 +4677,8 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 
       <details class="quote">
         <summary>Source code in <code>tests/__init__.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1401</span>
-<span class="normal">1402</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1403</span>
+<span class="normal">1404</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">pay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -4857,8 +4857,8 @@ Updated to API VERSION 2016-03-07 with bogus fields.</p>
 
         <details class="quote">
           <summary>Source code in <code>tests/__init__.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1859</span>
-<span class="normal">1860</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PayoutDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1861</span>
+<span class="normal">1862</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">PayoutDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
     <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -6255,8 +6255,8 @@ argument-accepting functionality of Stripe's list() method.</p>
 
         <details class="quote">
           <summary>Source code in <code>tests/__init__.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1841</span>
-<span class="normal">1842</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">UsageRecordSummaryDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1843</span>
+<span class="normal">1844</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">UsageRecordSummaryDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
     <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -6284,8 +6284,8 @@ argument-accepting functionality of Stripe's list() method.</p>
 
         <details class="quote">
           <summary>Source code in <code>tests/__init__.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1850</span>
-<span class="normal">1851</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEndpointDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1852</span>
+<span class="normal">1853</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEndpointDict</span><span class="p">(</span><span class="n">StripeItem</span><span class="p">):</span>
     <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
         </details>

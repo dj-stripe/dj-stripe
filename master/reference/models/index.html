@@ -18517,7 +18517,9 @@ or having Stripe tabulate your usage-based billing totals.</p>
 <span class="normal">1185</span>
 <span class="normal">1186</span>
 <span class="normal">1187</span>
-<span class="normal">1188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">LineItem</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">1188</span>
+<span class="normal">1189</span>
+<span class="normal">1190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">LineItem</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The individual line items that make up the invoice.</span>
 
@@ -18525,8 +18527,7 @@ or having Stripe tabulate your usage-based billing totals.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">stripe_class</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">InvoiceLineItem</span>
-    <span class="c1"># todo uncomment when discount model gets implemented</span>
-    <span class="c1"># expand_fields = [&quot;discounts&quot;]</span>
+    <span class="n">expand_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;discounts&quot;</span><span class="p">]</span>
 
     <span class="n">amount</span> <span class="o">=</span> <span class="n">StripeQuantumCurrencyAmountField</span><span class="p">(</span><span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;The amount, in cents.&quot;</span><span class="p">)</span>
     <span class="n">amount_excluding_tax</span> <span class="o">=</span> <span class="n">StripeQuantumCurrencyAmountField</span><span class="p">(</span>
@@ -18616,22 +18617,20 @@ or having Stripe tabulate your usage-based billing totals.</p>
 
         <span class="k">return</span> <span class="n">data</span>
 
-    <span class="c1"># todo uncomment when discount model gets implemented</span>
-    <span class="c1"># def _attach_objects_post_save_hook(</span>
-    <span class="c1">#     self,</span>
-    <span class="c1">#     cls,</span>
-    <span class="c1">#     data,</span>
-    <span class="c1">#     api_key=djstripe_settings.STRIPE_SECRET_KEY,</span>
-    <span class="c1">#     pending_relations=None,</span>
-    <span class="c1"># ):</span>
-    <span class="c1">#     super()._attach_objects_post_save_hook(</span>
-    <span class="c1">#         cls, data, api_key=api_key, pending_relations=pending_relations</span>
-    <span class="c1">#     )</span>
-    <span class="c1">#</span>
-    <span class="c1">#</span>
-    <span class="c1"># # sync every discount</span>
-    <span class="c1"># for discount in self.discounts:</span>
-    <span class="c1">#     Discount.sync_from_stripe_data(discount, api_key=api_key)</span>
+    <span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span>
+        <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
+        <span class="p">)</span>
+
+        <span class="c1"># sync every discount</span>
+        <span class="k">for</span> <span class="n">discount</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">discounts</span><span class="p">:</span>
+            <span class="n">Discount</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">discount</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">api_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -18654,10 +18653,15 @@ or having Stripe tabulate your usage-based billing totals.</p>
         <span class="c1"># get current invoice if any</span>
         <span class="n">invoice_id</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
+        <span class="c1"># get expand parameter that needs to be passed to invoice.lines.list call</span>
+        <span class="n">expand_fields</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;expand&quot;</span><span class="p">)</span>
+
         <span class="n">invoice</span> <span class="o">=</span> <span class="n">Invoice</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">invoice_id</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># iterate over all the line items on the current invoice</span>
-        <span class="k">return</span> <span class="n">invoice</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">invoice</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">list</span><span class="p">(</span>
+            <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="n">expand_fields</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
         </details>
 
@@ -18772,6 +18776,25 @@ or having Stripe tabulate your usage-based billing totals.</p>
 
 <h5 id="djstripe.models.billing.LineItem.discounts" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">LineItem</span><span class="o">.</span><span class="n">discounts</span> <span class="o">=</span> <span class="n">JSONField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;The discounts applied to the invoice line item. Line item discounts are applied before invoice discounts.&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.models.billing.LineItem.expand_fields" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">LineItem</span><span class="o">.</span><span class="n">expand_fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;discounts&#39;</span><span class="p">]</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
@@ -19076,6 +19099,53 @@ or having Stripe tabulate your usage-based billing totals.</p>
 
 
 
+<h5 id="djstripe.models.billing.LineItem._attach_objects_post_save_hook" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">LineItem</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+
+      <details class="quote">
+        <summary>Source code in <code>djstripe/models/billing.py</code></summary>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1146</span>
+<span class="normal">1147</span>
+<span class="normal">1148</span>
+<span class="normal">1149</span>
+<span class="normal">1150</span>
+<span class="normal">1151</span>
+<span class="normal">1152</span>
+<span class="normal">1153</span>
+<span class="normal">1154</span>
+<span class="normal">1155</span>
+<span class="normal">1156</span>
+<span class="normal">1157</span>
+<span class="normal">1158</span>
+<span class="normal">1159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="bp">cls</span><span class="p">,</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span>
+    <span class="n">pending_relations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_attach_objects_post_save_hook</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">pending_relations</span><span class="o">=</span><span class="n">pending_relations</span>
+    <span class="p">)</span>
+
+    <span class="c1"># sync every discount</span>
+    <span class="k">for</span> <span class="n">discount</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">discounts</span><span class="p">:</span>
+        <span class="n">Discount</span><span class="o">.</span><span class="n">sync_from_stripe_data</span><span class="p">(</span><span class="n">discount</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+      </details>
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
 <h5 id="djstripe.models.billing.LineItem._manipulate_stripe_object_hook" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">LineItem</span><span class="o">.</span><span class="n">_manipulate_stripe_object_hook</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
   
@@ -19090,12 +19160,12 @@ or having Stripe tabulate your usage-based billing totals.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1140</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1139</span>
+<span class="normal">1140</span>
 <span class="normal">1141</span>
 <span class="normal">1142</span>
 <span class="normal">1143</span>
-<span class="normal">1144</span>
-<span class="normal">1145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">1144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">_manipulate_stripe_object_hook</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;period_start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;period&quot;</span><span class="p">][</span><span class="s2">&quot;start&quot;</span><span class="p">]</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;period_end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;period&quot;</span><span class="p">][</span><span class="s2">&quot;end&quot;</span><span class="p">]</span>
@@ -19135,7 +19205,10 @@ line items are also not retrieved and synced</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1164</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1161</span>
+<span class="normal">1162</span>
+<span class="normal">1163</span>
+<span class="normal">1164</span>
 <span class="normal">1165</span>
 <span class="normal">1166</span>
 <span class="normal">1167</span>
@@ -19159,7 +19232,9 @@ line items are also not retrieved and synced</p>
 <span class="normal">1185</span>
 <span class="normal">1186</span>
 <span class="normal">1187</span>
-<span class="normal">1188</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">1188</span>
+<span class="normal">1189</span>
+<span class="normal">1190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">api_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Call the stripe API&#39;s list operation for this model.</span>
@@ -19180,10 +19255,15 @@ line items are also not retrieved and synced</p>
     <span class="c1"># get current invoice if any</span>
     <span class="n">invoice_id</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
+    <span class="c1"># get expand parameter that needs to be passed to invoice.lines.list call</span>
+    <span class="n">expand_fields</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;expand&quot;</span><span class="p">)</span>
+
     <span class="n">invoice</span> <span class="o">=</span> <span class="n">Invoice</span><span class="o">.</span><span class="n">stripe_class</span><span class="o">.</span><span class="n">retrieve</span><span class="p">(</span><span class="n">invoice_id</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="c1"># iterate over all the line items on the current invoice</span>
-    <span class="k">return</span> <span class="n">invoice</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">invoice</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">list</span><span class="p">(</span>
+        <span class="n">api_key</span><span class="o">=</span><span class="n">api_key</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="n">expand_fields</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">auto_paging_iter</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
       </details>
   </div>
@@ -19223,9 +19303,7 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1191</span>
-<span class="normal">1192</span>
-<span class="normal">1193</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1193</span>
 <span class="normal">1194</span>
 <span class="normal">1195</span>
 <span class="normal">1196</span>
@@ -19437,7 +19515,9 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 <span class="normal">1402</span>
 <span class="normal">1403</span>
 <span class="normal">1404</span>
-<span class="normal">1405</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Plan</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">1405</span>
+<span class="normal">1406</span>
+<span class="normal">1407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Plan</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A subscription plan contains the pricing information for different</span>
 <span class="sd">    products and feature levels on your site.</span>
@@ -20065,8 +20145,8 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1325</span>
-<span class="normal">1326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1327</span>
+<span class="normal">1328</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="n">ordering</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;amount&quot;</span><span class="p">]</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -20125,10 +20205,10 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1352</span>
-<span class="normal">1353</span>
-<span class="normal">1354</span>
-<span class="normal">1355</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1354</span>
+<span class="normal">1355</span>
+<span class="normal">1356</span>
+<span class="normal">1357</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">product</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">human_readable_price</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">product</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">human_readable_price</span>
@@ -20156,9 +20236,7 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1337</span>
-<span class="normal">1338</span>
-<span class="normal">1339</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1339</span>
 <span class="normal">1340</span>
 <span class="normal">1341</span>
 <span class="normal">1342</span>
@@ -20169,7 +20247,9 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 <span class="normal">1347</span>
 <span class="normal">1348</span>
 <span class="normal">1349</span>
-<span class="normal">1350</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">1350</span>
+<span class="normal">1351</span>
+<span class="normal">1352</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="c1"># A few minor things are changed in the api-version of the create call</span>
     <span class="n">api_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
@@ -20209,14 +20289,14 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1328</span>
-<span class="normal">1329</span>
-<span class="normal">1330</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1330</span>
 <span class="normal">1331</span>
 <span class="normal">1332</span>
 <span class="normal">1333</span>
 <span class="normal">1334</span>
-<span class="normal">1335</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">1335</span>
+<span class="normal">1336</span>
+<span class="normal">1337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">get_or_create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get or create a Plan.&quot;&quot;&quot;</span>
 
@@ -20262,9 +20342,7 @@ to collect shipping costs.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2098</span>
-<span class="normal">2099</span>
-<span class="normal">2100</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2100</span>
 <span class="normal">2101</span>
 <span class="normal">2102</span>
 <span class="normal">2103</span>
@@ -20324,7 +20402,9 @@ to collect shipping costs.</p>
 <span class="normal">2157</span>
 <span class="normal">2158</span>
 <span class="normal">2159</span>
-<span class="normal">2160</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ShippingRate</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2160</span>
+<span class="normal">2161</span>
+<span class="normal">2162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ShippingRate</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Shipping rates describe the price of shipping presented</span>
 <span class="sd">    to your customers and can be applied to Checkout Sessions</span>
@@ -20610,8 +20690,8 @@ to collect shipping costs.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2150</span>
-<span class="normal">2151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2152</span>
+<span class="normal">2153</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
     <span class="n">verbose_name</span> <span class="o">=</span> <span class="s2">&quot;Shipping Rate&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -20670,14 +20750,14 @@ to collect shipping costs.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2153</span>
-<span class="normal">2154</span>
-<span class="normal">2155</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2155</span>
 <span class="normal">2156</span>
 <span class="normal">2157</span>
 <span class="normal">2158</span>
 <span class="normal">2159</span>
-<span class="normal">2160</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">2160</span>
+<span class="normal">2161</span>
+<span class="normal">2162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="n">amount</span> <span class="o">=</span> <span class="n">get_friendly_currency_amount</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fixed_amount</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fixed_amount</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;currency&quot;</span><span class="p">)</span>
     <span class="p">)</span>
@@ -20734,9 +20814,7 @@ pay their closed invoices.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1408</span>
-<span class="normal">1409</span>
-<span class="normal">1410</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1410</span>
 <span class="normal">1411</span>
 <span class="normal">1412</span>
 <span class="normal">1413</span>
@@ -21183,7 +21261,9 @@ pay their closed invoices.</p>
 <span class="normal">1854</span>
 <span class="normal">1855</span>
 <span class="normal">1856</span>
-<span class="normal">1857</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Subscription</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">1857</span>
+<span class="normal">1858</span>
+<span class="normal">1859</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Subscription</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Subscriptions allow you to charge a customer&#39;s card on a recurring basis.</span>
 <span class="sd">    A subscription ties a customer to a particular plan you&#39;ve created.</span>
@@ -22308,9 +22388,7 @@ pay their closed invoices.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1838</span>
-<span class="normal">1839</span>
-<span class="normal">1840</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1840</span>
 <span class="normal">1841</span>
 <span class="normal">1842</span>
 <span class="normal">1843</span>
@@ -22327,7 +22405,9 @@ pay their closed invoices.</p>
 <span class="normal">1854</span>
 <span class="normal">1855</span>
 <span class="normal">1856</span>
-<span class="normal">1857</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
+<span class="normal">1857</span>
+<span class="normal">1858</span>
+<span class="normal">1859</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="bp">cls</span><span class="p">,</span>
     <span class="n">data</span><span class="p">,</span>
@@ -22377,9 +22457,7 @@ See Stripe documentation for accepted kwargs for each object.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1653</span>
-<span class="normal">1654</span>
-<span class="normal">1655</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1655</span>
 <span class="normal">1656</span>
 <span class="normal">1657</span>
 <span class="normal">1658</span>
@@ -22391,7 +22469,9 @@ See Stripe documentation for accepted kwargs for each object.
 <span class="normal">1664</span>
 <span class="normal">1665</span>
 <span class="normal">1666</span>
-<span class="normal">1667</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">1667</span>
+<span class="normal">1668</span>
+<span class="normal">1669</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">api_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Call the stripe API&#39;s list operation for this model.</span>
@@ -22449,9 +22529,7 @@ subscription at all.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1710</span>
-<span class="normal">1711</span>
-<span class="normal">1712</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1712</span>
 <span class="normal">1713</span>
 <span class="normal">1714</span>
 <span class="normal">1715</span>
@@ -22507,7 +22585,9 @@ subscription at all.</p>
 <span class="normal">1765</span>
 <span class="normal">1766</span>
 <span class="normal">1767</span>
-<span class="normal">1768</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">1768</span>
+<span class="normal">1769</span>
+<span class="normal">1770</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">at_period_end</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cancels this subscription. If you set the at_period_end parameter to true,</span>
 <span class="sd">    the subscription will remain active until the end of the period, at which point</span>
@@ -22590,9 +22670,7 @@ subscription at all.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1690</span>
-<span class="normal">1691</span>
-<span class="normal">1692</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1692</span>
 <span class="normal">1693</span>
 <span class="normal">1694</span>
 <span class="normal">1695</span>
@@ -22608,7 +22686,9 @@ subscription at all.</p>
 <span class="normal">1705</span>
 <span class="normal">1706</span>
 <span class="normal">1707</span>
-<span class="normal">1708</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+<span class="normal">1708</span>
+<span class="normal">1709</span>
+<span class="normal">1710</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extends this subscription by the provided delta.</span>
 
@@ -22649,14 +22729,14 @@ subscription at all.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1788</span>
-<span class="normal">1789</span>
-<span class="normal">1790</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1790</span>
 <span class="normal">1791</span>
 <span class="normal">1792</span>
 <span class="normal">1793</span>
 <span class="normal">1794</span>
-<span class="normal">1795</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_period_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1795</span>
+<span class="normal">1796</span>
+<span class="normal">1797</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_period_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if this subscription&#39;s period is current, false otherwise.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -22687,13 +22767,13 @@ false otherwise.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1797</span>
-<span class="normal">1798</span>
-<span class="normal">1799</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1799</span>
 <span class="normal">1800</span>
 <span class="normal">1801</span>
 <span class="normal">1802</span>
-<span class="normal">1803</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_status_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1803</span>
+<span class="normal">1804</span>
+<span class="normal">1805</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_status_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if this subscription&#39;s status is current (active or trialing),</span>
 <span class="sd">    false otherwise.</span>
@@ -22729,9 +22809,7 @@ subscription is temporarily current.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1805</span>
-<span class="normal">1806</span>
-<span class="normal">1807</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1807</span>
 <span class="normal">1808</span>
 <span class="normal">1809</span>
 <span class="normal">1810</span>
@@ -22746,7 +22824,9 @@ subscription is temporarily current.</p>
 <span class="normal">1819</span>
 <span class="normal">1820</span>
 <span class="normal">1821</span>
-<span class="normal">1822</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_status_temporarily_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1822</span>
+<span class="normal">1823</span>
+<span class="normal">1824</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_status_temporarily_current</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A status is temporarily current when the subscription is canceled with the</span>
 <span class="sd">    ``at_period_end`` flag.</span>
@@ -22787,9 +22867,7 @@ false otherwise.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1824</span>
-<span class="normal">1825</span>
-<span class="normal">1826</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1826</span>
 <span class="normal">1827</span>
 <span class="normal">1828</span>
 <span class="normal">1829</span>
@@ -22799,7 +22877,9 @@ false otherwise.</p>
 <span class="normal">1833</span>
 <span class="normal">1834</span>
 <span class="normal">1835</span>
-<span class="normal">1836</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1836</span>
+<span class="normal">1837</span>
+<span class="normal">1838</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns True if this subscription&#39;s status and period are current,</span>
 <span class="sd">    false otherwise.</span>
@@ -22839,9 +22919,7 @@ Subscriptions canceled immediately cannot be reactivated.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1770</span>
-<span class="normal">1771</span>
-<span class="normal">1772</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1772</span>
 <span class="normal">1773</span>
 <span class="normal">1774</span>
 <span class="normal">1775</span>
@@ -22855,7 +22933,9 @@ Subscriptions canceled immediately cannot be reactivated.
 <span class="normal">1783</span>
 <span class="normal">1784</span>
 <span class="normal">1785</span>
-<span class="normal">1786</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">reactivate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1786</span>
+<span class="normal">1787</span>
+<span class="normal">1788</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">reactivate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Reactivates this subscription.</span>
 
@@ -22897,9 +22977,7 @@ Subscriptions canceled immediately cannot be reactivated.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1669</span>
-<span class="normal">1670</span>
-<span class="normal">1671</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1671</span>
 <span class="normal">1672</span>
 <span class="normal">1673</span>
 <span class="normal">1674</span>
@@ -22916,7 +22994,9 @@ Subscriptions canceled immediately cannot be reactivated.
 <span class="normal">1685</span>
 <span class="normal">1686</span>
 <span class="normal">1687</span>
-<span class="normal">1688</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plan</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StripeModel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">1688</span>
+<span class="normal">1689</span>
+<span class="normal">1690</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plan</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">StripeModel</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    See `Customer.subscribe() &lt;#djstripe.models.Customer.subscribe&gt;`__</span>
 
@@ -22973,9 +23053,7 @@ with more than one plan, making it easy to represent complex billing relationshi
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1860</span>
-<span class="normal">1861</span>
-<span class="normal">1862</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1862</span>
 <span class="normal">1863</span>
 <span class="normal">1864</span>
 <span class="normal">1865</span>
@@ -23054,7 +23132,9 @@ with more than one plan, making it easy to represent complex billing relationshi
 <span class="normal">1938</span>
 <span class="normal">1939</span>
 <span class="normal">1940</span>
-<span class="normal">1941</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionItem</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">1941</span>
+<span class="normal">1942</span>
+<span class="normal">1943</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionItem</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Subscription items allow you to create customer subscriptions</span>
 <span class="sd">    with more than one plan, making it easy to represent complex billing relationships.</span>
@@ -23336,9 +23416,7 @@ with more than one plan, making it easy to represent complex billing relationshi
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1926</span>
-<span class="normal">1927</span>
-<span class="normal">1928</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1928</span>
 <span class="normal">1929</span>
 <span class="normal">1930</span>
 <span class="normal">1931</span>
@@ -23351,7 +23429,9 @@ with more than one plan, making it easy to represent complex billing relationshi
 <span class="normal">1938</span>
 <span class="normal">1939</span>
 <span class="normal">1940</span>
-<span class="normal">1941</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
+<span class="normal">1941</span>
+<span class="normal">1942</span>
+<span class="normal">1943</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">_attach_objects_post_save_hook</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="bp">cls</span><span class="p">,</span>
     <span class="n">data</span><span class="p">,</span>
@@ -23404,9 +23484,7 @@ of a subscription by predefining expected changes.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1944</span>
-<span class="normal">1945</span>
-<span class="normal">1946</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1946</span>
 <span class="normal">1947</span>
 <span class="normal">1948</span>
 <span class="normal">1949</span>
@@ -23555,7 +23633,9 @@ of a subscription by predefining expected changes.</p>
 <span class="normal">2092</span>
 <span class="normal">2093</span>
 <span class="normal">2094</span>
-<span class="normal">2095</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionSchedule</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2095</span>
+<span class="normal">2096</span>
+<span class="normal">2097</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionSchedule</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Subscription schedules allow you to create and manage the lifecycle</span>
 <span class="sd">    of a subscription by predefining expected changes.</span>
@@ -23992,9 +24072,7 @@ and returns the Canceled SubscriptionSchedule.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2053</span>
-<span class="normal">2054</span>
-<span class="normal">2055</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2055</span>
 <span class="normal">2056</span>
 <span class="normal">2057</span>
 <span class="normal">2058</span>
@@ -24018,7 +24096,9 @@ and returns the Canceled SubscriptionSchedule.
 <span class="normal">2076</span>
 <span class="normal">2077</span>
 <span class="normal">2078</span>
-<span class="normal">2079</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">2079</span>
+<span class="normal">2080</span>
+<span class="normal">2081</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">cancel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cancels a subscription schedule and its associated subscription immediately</span>
 <span class="sd">    (if the subscription schedule has an active subscription). A subscription schedule can only be canceled if its status is not_started or active</span>
@@ -24078,9 +24158,7 @@ and returns the Released SubscriptionSchedule.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2021</span>
-<span class="normal">2022</span>
-<span class="normal">2023</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2023</span>
 <span class="normal">2024</span>
 <span class="normal">2025</span>
 <span class="normal">2026</span>
@@ -24108,7 +24186,9 @@ and returns the Released SubscriptionSchedule.
 <span class="normal">2048</span>
 <span class="normal">2049</span>
 <span class="normal">2050</span>
-<span class="normal">2051</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">2051</span>
+<span class="normal">2052</span>
+<span class="normal">2053</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Releases the subscription schedule immediately, which will stop scheduling</span>
 <span class="sd">    of its phases, but leave any existing subscription in place.</span>
@@ -24167,9 +24247,7 @@ and returns the updated SubscriptionSchedule.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2081</span>
-<span class="normal">2082</span>
-<span class="normal">2083</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2083</span>
 <span class="normal">2084</span>
 <span class="normal">2085</span>
 <span class="normal">2086</span>
@@ -24181,7 +24259,9 @@ and returns the updated SubscriptionSchedule.
 <span class="normal">2092</span>
 <span class="normal">2093</span>
 <span class="normal">2094</span>
-<span class="normal">2095</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="normal">2095</span>
+<span class="normal">2096</span>
+<span class="normal">2097</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Updates an existing subscription schedule</span>
 <span class="sd">    and returns the updated SubscriptionSchedule.</span>
@@ -24232,9 +24312,7 @@ and returns the updated SubscriptionSchedule.
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2163</span>
-<span class="normal">2164</span>
-<span class="normal">2165</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2165</span>
 <span class="normal">2166</span>
 <span class="normal">2167</span>
 <span class="normal">2168</span>
@@ -24256,7 +24334,9 @@ and returns the updated SubscriptionSchedule.
 <span class="normal">2184</span>
 <span class="normal">2185</span>
 <span class="normal">2186</span>
-<span class="normal">2187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TaxCode</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2187</span>
+<span class="normal">2188</span>
+<span class="normal">2189</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TaxCode</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tax codes classify goods and services for tax purposes.</span>
 
@@ -24371,8 +24451,8 @@ and returns the updated SubscriptionSchedule.
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2178</span>
-<span class="normal">2179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2180</span>
+<span class="normal">2181</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
     <span class="n">verbose_name</span> <span class="o">=</span> <span class="s2">&quot;Tax Code&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -24431,8 +24511,8 @@ and returns the updated SubscriptionSchedule.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2181</span>
-<span class="normal">2182</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2183</span>
+<span class="normal">2184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -24458,10 +24538,10 @@ and returns the updated SubscriptionSchedule.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2184</span>
-<span class="normal">2185</span>
-<span class="normal">2186</span>
-<span class="normal">2187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2186</span>
+<span class="normal">2187</span>
+<span class="normal">2188</span>
+<span class="normal">2189</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">_find_owner_account</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">):</span>
     <span class="c1"># Tax Codes do not belong to any Stripe Account</span>
     <span class="k">pass</span>
@@ -24503,9 +24583,7 @@ credit notes issued for the customer.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2190</span>
-<span class="normal">2191</span>
-<span class="normal">2192</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2192</span>
 <span class="normal">2193</span>
 <span class="normal">2194</span>
 <span class="normal">2195</span>
@@ -24595,7 +24673,9 @@ credit notes issued for the customer.</p>
 <span class="normal">2279</span>
 <span class="normal">2280</span>
 <span class="normal">2281</span>
-<span class="normal">2282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TaxId</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2282</span>
+<span class="normal">2283</span>
+<span class="normal">2284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TaxId</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add one or multiple tax IDs to a customer.</span>
 <span class="sd">    A customer&#39;s tax IDs are displayed on invoices and</span>
@@ -24873,8 +24953,8 @@ credit notes issued for the customer.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2219</span>
-<span class="normal">2220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2221</span>
+<span class="normal">2222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
     <span class="n">verbose_name</span> <span class="o">=</span> <span class="s2">&quot;Tax ID&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -24933,8 +25013,8 @@ credit notes issued for the customer.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2216</span>
-<span class="normal">2217</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2218</span>
+<span class="normal">2219</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">enums</span><span class="o">.</span><span class="n">TaxIdType</span><span class="o">.</span><span class="n">humanize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">verification</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;status&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -24964,9 +25044,7 @@ credit notes issued for the customer.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2222</span>
-<span class="normal">2223</span>
-<span class="normal">2224</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2224</span>
 <span class="normal">2225</span>
 <span class="normal">2226</span>
 <span class="normal">2227</span>
@@ -24982,7 +25060,9 @@ credit notes issued for the customer.</p>
 <span class="normal">2237</span>
 <span class="normal">2238</span>
 <span class="normal">2239</span>
-<span class="normal">2240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">2240</span>
+<span class="normal">2241</span>
+<span class="normal">2242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">_api_create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Call the stripe API&#39;s create operation for this model.</span>
@@ -25031,9 +25111,7 @@ See Stripe documentation for accepted kwargs for each object.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2268</span>
-<span class="normal">2269</span>
-<span class="normal">2270</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2270</span>
 <span class="normal">2271</span>
 <span class="normal">2272</span>
 <span class="normal">2273</span>
@@ -25045,7 +25123,9 @@ See Stripe documentation for accepted kwargs for each object.
 <span class="normal">2279</span>
 <span class="normal">2280</span>
 <span class="normal">2281</span>
-<span class="normal">2282</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">2282</span>
+<span class="normal">2283</span>
+<span class="normal">2284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">api_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Call the stripe API&#39;s list operation for this model.</span>
@@ -25086,9 +25166,7 @@ See Stripe documentation for accepted kwargs for each object.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2242</span>
-<span class="normal">2243</span>
-<span class="normal">2244</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2244</span>
 <span class="normal">2245</span>
 <span class="normal">2246</span>
 <span class="normal">2247</span>
@@ -25110,7 +25188,9 @@ See Stripe documentation for accepted kwargs for each object.
 <span class="normal">2263</span>
 <span class="normal">2264</span>
 <span class="normal">2265</span>
-<span class="normal">2266</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">api_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">2266</span>
+<span class="normal">2267</span>
+<span class="normal">2268</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">api_retrieve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stripe_account</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Call the stripe API&#39;s retrieve operation for this model.</span>
 <span class="sd">    :param api_key: The api key to use for this request. \</span>
@@ -25171,9 +25251,7 @@ See Stripe documentation for accepted kwargs for each object.
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2285</span>
-<span class="normal">2286</span>
-<span class="normal">2287</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2287</span>
 <span class="normal">2288</span>
 <span class="normal">2289</span>
 <span class="normal">2290</span>
@@ -25231,7 +25309,9 @@ See Stripe documentation for accepted kwargs for each object.
 <span class="normal">2342</span>
 <span class="normal">2343</span>
 <span class="normal">2344</span>
-<span class="normal">2345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TaxRate</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2345</span>
+<span class="normal">2346</span>
+<span class="normal">2347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TaxRate</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Tax rates can be applied to invoices and subscriptions to collect tax.</span>
 
@@ -25515,8 +25595,8 @@ See Stripe documentation for accepted kwargs for each object.
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2344</span>
-<span class="normal">2345</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2346</span>
+<span class="normal">2347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Meta</span><span class="p">(</span><span class="n">StripeModel</span><span class="o">.</span><span class="n">Meta</span><span class="p">):</span>
     <span class="n">verbose_name</span> <span class="o">=</span> <span class="s2">&quot;Tax Rate&quot;</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -25575,8 +25655,8 @@ See Stripe documentation for accepted kwargs for each object.
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2341</span>
-<span class="normal">2342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2343</span>
+<span class="normal">2344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">percentage</span><span class="si">}</span><span class="s2">%&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -26014,8 +26094,8 @@ do actually want to instantiate the model and use relations.</p>
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
       <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
   </span>
 
 </h5>
@@ -26338,9 +26418,7 @@ Stripe for metered billing of plans.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2348</span>
-<span class="normal">2349</span>
-<span class="normal">2350</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2350</span>
 <span class="normal">2351</span>
 <span class="normal">2352</span>
 <span class="normal">2353</span>
@@ -26411,7 +26489,9 @@ Stripe for metered billing of plans.</p>
 <span class="normal">2418</span>
 <span class="normal">2419</span>
 <span class="normal">2420</span>
-<span class="normal">2421</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">UsageRecord</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2421</span>
+<span class="normal">2422</span>
+<span class="normal">2423</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">UsageRecord</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage records allow you to continually report usage and metrics to</span>
 <span class="sd">    Stripe for metered billing of plans.</span>
@@ -26647,8 +26727,8 @@ Stripe for metered billing of plans.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2385</span>
-<span class="normal">2386</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2387</span>
+<span class="normal">2388</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Usage for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subscription_item</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">action</span><span class="si">}</span><span class="s2">) is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">quantity</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -26678,9 +26758,7 @@ Stripe for metered billing of plans.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2388</span>
-<span class="normal">2389</span>
-<span class="normal">2390</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2390</span>
 <span class="normal">2391</span>
 <span class="normal">2392</span>
 <span class="normal">2393</span>
@@ -26704,7 +26782,9 @@ Stripe for metered billing of plans.</p>
 <span class="normal">2411</span>
 <span class="normal">2412</span>
 <span class="normal">2413</span>
-<span class="normal">2414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">2414</span>
+<span class="normal">2415</span>
+<span class="normal">2416</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">_api_create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Call the stripe API&#39;s create operation for this model.</span>
@@ -26757,12 +26837,12 @@ Stripe for metered billing of plans.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2416</span>
-<span class="normal">2417</span>
-<span class="normal">2418</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2418</span>
 <span class="normal">2419</span>
 <span class="normal">2420</span>
-<span class="normal">2421</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">2421</span>
+<span class="normal">2422</span>
+<span class="normal">2423</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A wrapper around _api_create() to allow one to create and sync UsageRecord Objects</span>
@@ -26808,9 +26888,7 @@ should be seen as unstable until the subscription billing period ends.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2424</span>
-<span class="normal">2425</span>
-<span class="normal">2426</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2426</span>
 <span class="normal">2427</span>
 <span class="normal">2428</span>
 <span class="normal">2429</span>
@@ -26893,7 +26971,9 @@ should be seen as unstable until the subscription billing period ends.</p>
 <span class="normal">2506</span>
 <span class="normal">2507</span>
 <span class="normal">2508</span>
-<span class="normal">2509</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">UsageRecordSummary</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">2509</span>
+<span class="normal">2510</span>
+<span class="normal">2511</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">UsageRecordSummary</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Usage record summaries provides usage information that&#39;s been summarized</span>
 <span class="sd">    from multiple usage records and over a subscription billing period</span>
@@ -27179,8 +27259,8 @@ should be seen as unstable until the subscription billing period ends.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2474</span>
-<span class="normal">2475</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2476</span>
+<span class="normal">2477</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Usage Summary for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">subscription_item</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">invoice</span><span class="si">}</span><span class="s2">) is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">total_usage</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -27206,12 +27286,12 @@ should be seen as unstable until the subscription billing period ends.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2477</span>
-<span class="normal">2478</span>
-<span class="normal">2479</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2479</span>
 <span class="normal">2480</span>
 <span class="normal">2481</span>
-<span class="normal">2482</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">2482</span>
+<span class="normal">2483</span>
+<span class="normal">2484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">_manipulate_stripe_object_hook</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;period_start&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;period&quot;</span><span class="p">][</span><span class="s2">&quot;start&quot;</span><span class="p">]</span>
     <span class="n">data</span><span class="p">[</span><span class="s2">&quot;period_end&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;period&quot;</span><span class="p">][</span><span class="s2">&quot;end&quot;</span><span class="p">]</span>
@@ -27247,9 +27327,7 @@ should be seen as unstable until the subscription billing period ends.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/billing.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2484</span>
-<span class="normal">2485</span>
-<span class="normal">2486</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2486</span>
 <span class="normal">2487</span>
 <span class="normal">2488</span>
 <span class="normal">2489</span>
@@ -27272,7 +27350,9 @@ should be seen as unstable until the subscription billing period ends.</p>
 <span class="normal">2506</span>
 <span class="normal">2507</span>
 <span class="normal">2508</span>
-<span class="normal">2509</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">2509</span>
+<span class="normal">2510</span>
+<span class="normal">2511</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">api_list</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">api_key</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">STRIPE_SECRET_KEY</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Call the stripe API&#39;s list operation for this model.</span>
