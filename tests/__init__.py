@@ -1380,7 +1380,7 @@ FAKE_DISCOUNT = {
     "description": "",
     "checkout_session": None,
     "coupon": deepcopy(FAKE_COUPON),
-    "customer": FAKE_CUSTOMER,
+    "customer": deepcopy(FAKE_CUSTOMER),
     "end": None,
     "invoice": None,
     "invoice_item": None,
