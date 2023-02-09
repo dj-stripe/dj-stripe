@@ -1192,7 +1192,7 @@ class TestCustomerEvents(EventTestCase):
         customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
 
-    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
+    @patch("stripe.Customer.retrieve", autospec=True)
     @patch("stripe.Coupon.retrieve", return_value=FAKE_COUPON, autospec=True)
     @patch(
         "stripe.Event.retrieve",
