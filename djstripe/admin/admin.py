@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 from django.contrib import admin
 from django.db import IntegrityError, transaction
+from django.http.request import split_domain_port
 from django.shortcuts import render
 from stripe.error import InvalidRequestError
 
@@ -838,7 +839,15 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
 
     def get_changeform_initial_data(self, request) -> Dict[str, str]:
         ret = super().get_changeform_initial_data(request)
-        base_url = f"{request.scheme}://{request.get_host()}"
+        domain, port = split_domain_port(request.get_host())
+
+        # Stripe will not allow to create webhook
+        # with 127.0.0.1 domain which is important
+        # for local webhook testing
+        if domain == "127.0.0.1":
+            domain = "0.0.0.0"
+
+        base_url = f"{request.scheme}://{domain}:{port}"
         ret.setdefault("base_url", base_url)
         return ret
 
