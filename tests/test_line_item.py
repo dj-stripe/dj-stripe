@@ -43,6 +43,7 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
             "djstripe.Charge.transfer",
             "djstripe.Customer.default_payment_method",
             "djstripe.Customer.subscriber",
+            "djstripe.Customer.coupon",
             "djstripe.Invoice.default_payment_method",
             "djstripe.Invoice.default_source",
             "djstripe.InvoiceItem.plan",

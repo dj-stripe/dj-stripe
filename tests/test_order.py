@@ -92,6 +92,7 @@ class TestOrder(AssertStripeFksMixin, TestCase):
         default_expected_blank_fks = {
             "djstripe.Customer.default_payment_method",
             "djstripe.Customer.subscriber",
+            "djstripe.Customer.coupon",
             "djstripe.Charge.latest_upcominginvoice (related name)",
             "djstripe.Charge.application_fee",
             "djstripe.Charge.dispute",
