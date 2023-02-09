@@ -30,6 +30,7 @@ from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
+    FAKE_BALANCE_TRANSACTION_REFUND,
     FAKE_CARD,
     FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CARD_III,
@@ -49,6 +50,7 @@ from . import (
     FAKE_PLATFORM_ACCOUNT,
     FAKE_PRICE,
     FAKE_PRODUCT,
+    FAKE_REFUND,
     FAKE_SOURCE,
     FAKE_SOURCE_II,
     FAKE_SUBSCRIPTION,
@@ -793,12 +795,17 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         )
 
     @patch(
+        "stripe.Refund.create",
+        return_value=deepcopy(FAKE_REFUND),
+        autospec=True,
+    )
+    @patch(
         "djstripe.models.Account.get_default_account",
         autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
         autospec=True,
     )
     @patch("stripe.Charge.retrieve", autospec=True)
@@ -815,6 +822,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock,
         balance_transaction_retrieve_mock,
         default_account_mock,
+        refund_create_mock,
     ):
         default_account_mock.return_value = self.account
 
@@ -855,45 +863,23 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             },
         )
 
-        charge.refund()
+        refund_object = charge.refund()
+        self.assertEqual(refund_object.status, "succeeded")
+        self.assertEqual(refund_object.charge.id, charge.id)
+        self.assertEqual(refund_object.amount, 2000)
 
-        refunded_charge, created2 = Charge._get_or_create_from_stripe_object(
-            fake_charge_no_invoice
-        )
-        self.assertFalse(created2)
-
-        self.assertEqual(refunded_charge.refunded, True)
-        self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("20.00"))
-
-        self.assert_fks(
-            refunded_charge,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.application_fee",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.latest_invoice (related name)",
-                "djstripe.Charge.latest_upcominginvoice (related name)",
-                "djstripe.Charge.invoice",
-                "djstripe.Charge.on_behalf_of",
-                "djstripe.Charge.source_transfer",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.Customer.default_payment_method",
-                "djstripe.PaymentIntent.invoice (related name)",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.PaymentIntent.upcominginvoice (related name)",
-            },
-        )
-
+    @patch(
+        "stripe.Refund.create",
+        return_value=deepcopy(FAKE_REFUND),
+        autospec=True,
+    )
     @patch(
         "djstripe.models.Account.get_default_account",
         autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
         autospec=True,
     )
     @patch("stripe.Charge.retrieve", autospec=True)
@@ -910,6 +896,7 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
         charge_retrieve_mock,
         balance_transaction_retrieve_mock,
         default_account_mock,
+        refund_create_mock,
     ):
         default_account_mock.return_value = self.account
 
@@ -950,31 +937,10 @@ class TestCustomer(AssertStripeFksMixin, TestCase):
             },
         )
 
-        refunded_charge = charge.refund()
-        self.assertEqual(refunded_charge.refunded, True)
-        self.assertEqual(refunded_charge.amount_refunded, decimal.Decimal("20.00"))
-
-        self.assert_fks(
-            refunded_charge,
-            expected_blank_fks={
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-                "djstripe.Charge.application_fee",
-                "djstripe.Charge.dispute",
-                "djstripe.Charge.latest_invoice (related name)",
-                "djstripe.Charge.latest_upcominginvoice (related name)",
-                "djstripe.Charge.invoice",
-                "djstripe.Charge.on_behalf_of",
-                "djstripe.Charge.source_transfer",
-                "djstripe.Charge.transfer",
-                "djstripe.Customer.coupon",
-                "djstripe.Customer.default_payment_method",
-                "djstripe.PaymentIntent.invoice (related name)",
-                "djstripe.PaymentIntent.on_behalf_of",
-                "djstripe.PaymentIntent.payment_method",
-                "djstripe.PaymentIntent.upcominginvoice (related name)",
-            },
-        )
+        refund_object = charge.refund()
+        self.assertEqual(refund_object.status, "succeeded")
+        self.assertEqual(refund_object.charge.id, charge.id)
+        self.assertEqual(refund_object.amount, 2000)
 
     def test_calculate_refund_amount_partial_refund(self):
         charge = Charge(
