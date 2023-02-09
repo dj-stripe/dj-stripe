@@ -301,6 +301,22 @@ class Discount(StripeModel):
         """
         return "object" in data and data["object"] == "discount"
 
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
+        super()._attach_objects_post_save_hook(cls, data, api_key, pending_relations)
+
+        # Update the Customer object with the disocount
+        customer = Customer.objects.filter(id=self.customer.id)
+        if customer.exists():
+            customer = customer.get()
+            customer.discount = data
+            customer.save()
+
 
 class BaseInvoice(StripeModel):
     """

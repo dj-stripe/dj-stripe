@@ -15,6 +15,7 @@ from . import (
     FAKE_CHARGE,
     FAKE_CUSTOMER,
     FAKE_DISCOUNT,
+    FAKE_DISCOUNT_CUSTOMER,
     FAKE_INVOICE,
     FAKE_INVOICEITEM,
     FAKE_PAYMENT_INTENT_I,
@@ -119,3 +120,71 @@ class TestDiscount(AssertStripeFksMixin, TestCase):
                 "djstripe.Subscription.schedule",
             },
         )
+
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve",
+        autospec=True,
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Invoice.retrieve", autospec=True, return_value=deepcopy(FAKE_INVOICE)
+    )
+    def test__attach_objects_post_save_hook(
+        self,
+        invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
+        subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
+        customer_retrieve_mock,
+        product_retrieve_mock,
+        payment_intent_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
+        charge_retrieve_mock,
+        balance_transaction_retrieve_mock,
+    ):
+        fake_customer_with_discount = deepcopy(FAKE_CUSTOMER)
+        fake_customer_with_discount["discount"] = FAKE_DISCOUNT_CUSTOMER
+        customer_retrieve_mock.return_value = fake_customer_with_discount
+
+        fake_discount_data = deepcopy(FAKE_DISCOUNT_CUSTOMER)
+        discount = Discount.sync_from_stripe_data(fake_discount_data)
+
+        self.assertEqual(discount.id, fake_discount_data["id"])
+
+        # Assert Customer.discount is populated
+        discount.customer.refresh_from_db()
+        self.assertIsNotNone(discount.customer.discount)
+        self.assertEqual(discount.customer.discount, fake_discount_data)
