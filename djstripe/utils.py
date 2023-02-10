@@ -44,7 +44,7 @@ def convert_tstamp(response) -> Optional[datetime.datetime]:
         return response
 
     # Overrides the set timezone to UTC - I think...
-    tz = timezone.utc if settings.USE_TZ else None
+    tz = get_timezone_utc() if settings.USE_TZ else None
 
     return datetime.datetime.fromtimestamp(response, tz)
 
@@ -63,7 +63,7 @@ def get_friendly_currency_amount(amount, currency: str) -> str:
 class QuerySetMock(QuerySet):
     """
     A mocked QuerySet class that does not handle updates.
-    Used by UpcomingInvoice.invoiceitems.
+    Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
     """
 
     @classmethod
@@ -108,3 +108,17 @@ def get_model(model_name):
 def get_queryset(pks, model_name):
     model = get_model(model_name)
     return model.objects.filter(pk__in=pks)
+
+
+def get_timezone_utc():
+    """
+    Returns UTC attribute in a backwards compatible way.
+
+    UTC attribute has been moved from django.utils.timezone module to
+    datetime.timezone class
+    """
+    try:
+        # Django 4+
+        return datetime.timezone.utc
+    except AttributeError:
+        return timezone.utc

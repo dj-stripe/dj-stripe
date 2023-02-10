@@ -24,7 +24,6 @@ pytestmark = pytest.mark.django_db
 
 
 class TestStrSetupIntent:
-
     #
     # Helpers
     #

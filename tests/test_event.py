@@ -22,7 +22,6 @@ from . import (
 
 class EventTest(TestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )

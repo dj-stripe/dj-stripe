@@ -16,10 +16,12 @@ from . import (
     FAKE_CHARGE,
     FAKE_CUSTOMER,
     FAKE_INVOICE,
+    FAKE_INVOICEITEM,
     FAKE_PAYMENT_INTENT_I,
     FAKE_PLAN,
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_ITEM,
 )
 
 pytestmark = pytest.mark.django_db
@@ -55,7 +57,6 @@ class TestBalanceTransactionSourceClass:
 
     @pytest.mark.parametrize("transaction_type", ["network_cost", "payment_refund"])
     def test_get_source_class_failure(self, transaction_type):
-
         modified_balance_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
         modified_balance_transaction["type"] = transaction_type
 
@@ -118,7 +119,6 @@ class TestBalanceTransaction(TestCase):
         customer_retrieve_mock,
         invoice_retrieve_mock,
     ):
-
         balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
             deepcopy(FAKE_BALANCE_TRANSACTION)
         )
@@ -130,6 +130,11 @@ class TestBalanceTransaction(TestCase):
         assert balance_transaction.status == FAKE_BALANCE_TRANSACTION["status"]
 
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve",
         return_value=deepcopy(FAKE_INVOICE),
         autospec=True,
@@ -162,6 +167,11 @@ class TestBalanceTransaction(TestCase):
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        autospec=True,
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
     )
     @patch(
         "stripe.Subscription.retrieve",
@@ -171,6 +181,7 @@ class TestBalanceTransaction(TestCase):
     def test_get_source_instance(
         self,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
         charge_retrieve_mock,
@@ -179,14 +190,19 @@ class TestBalanceTransaction(TestCase):
         balance_transaction_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
+        invoiceitem_retrieve_mock,
     ):
-
         balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
             deepcopy(FAKE_BALANCE_TRANSACTION)
         )
         charge = models.Charge.sync_from_stripe_data(deepcopy(FAKE_CHARGE))
         assert balance_transaction.get_source_instance() == charge
 
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
     @patch(
         "stripe.Invoice.retrieve",
         return_value=deepcopy(FAKE_INVOICE),
@@ -222,6 +238,11 @@ class TestBalanceTransaction(TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        autospec=True,
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -229,6 +250,7 @@ class TestBalanceTransaction(TestCase):
     def test_get_stripe_dashboard_url(
         self,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
         charge_retrieve_mock,
@@ -237,8 +259,8 @@ class TestBalanceTransaction(TestCase):
         balance_transaction_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
+        invoiceitem_retrieve_mock,
     ):
-
         balance_transaction = models.BalanceTransaction.sync_from_stripe_data(
             deepcopy(FAKE_BALANCE_TRANSACTION)
         )

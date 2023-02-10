@@ -17,7 +17,6 @@ class CustomActionForm(forms.Form):
     """Form for Custom Django Admin Actions"""
 
     def __init__(self, *args, **kwargs):
-
         # remove model_name kwarg
         model_name = kwargs.pop("model_name")
 
@@ -194,7 +193,6 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
 
 
 class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
-
     enabled_events = forms.MultipleChoiceField(
         label="Enabled Events",
         required=True,

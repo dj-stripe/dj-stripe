@@ -1,7 +1,6 @@
 """
 dj-stripe PaymenthMethod Model Tests.
 """
-import sys
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -25,7 +24,6 @@ pytestmark = pytest.mark.django_db
 
 
 class TestPaymentMethod:
-
     #
     # Helper Methods for monkeypatching
     #
@@ -35,7 +33,6 @@ class TestPaymentMethod:
 
     @pytest.mark.parametrize("customer_exists", [True, False])
     def test___str__(self, monkeypatch, customer_exists):
-
         # monkeypatch stripe.Customer.retrieve call to return
         # the desired json response.
         monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
@@ -60,7 +57,6 @@ class TestPaymentMethod:
 
     @pytest.mark.parametrize("customer_exists", [True, False])
     def test_get_stripe_dashboard_url(self, monkeypatch, customer_exists):
-
         # monkeypatch stripe.Customer.retrieve call to return
         # the desired json response.
         monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
@@ -82,7 +78,6 @@ class TestPaymentMethod:
 
     @pytest.mark.parametrize("customer_exists", [True, False])
     def test_sync_from_stripe_data(self, monkeypatch, customer_exists):
-
         # monkeypatch stripe.Customer.retrieve call to return
         # the desired json response.
         monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
@@ -98,7 +93,6 @@ class TestPaymentMethod:
 
 class PaymentMethodTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )
@@ -115,7 +109,6 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     def test_attach(self, attach_mock):
-
         payment_method = models.PaymentMethod.attach(
             FAKE_PAYMENT_METHOD_I["id"], customer=FAKE_CUSTOMER["id"]
         )
@@ -207,10 +200,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
 
         self.assertIsNone(payment_method.customer)
 
-        if sys.version_info >= (3, 6):
-            # this mock isn't working on py34, py35, but it's not strictly necessary
-            # for the test
-            mock_detach.assert_called()
+        mock_detach.assert_called()
 
         self.assert_fks(
             payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
@@ -230,7 +220,10 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             autospec=True,
         ) as payment_method_retrieve_mock:
             payment_method_retrieve_mock.return_value["customer"] = None
-
+            # Need to re-sync as the PaymentMethod object has been deleted
+            models.PaymentMethod.sync_from_stripe_data(
+                deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)
+            )
             self.assertFalse(
                 payment_method.detach(), "Second call to detach should return false"
             )
@@ -284,10 +277,7 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             "We expect PaymentMethod id = card_* to be deleted",
         )
 
-        if sys.version_info >= (3, 6):
-            # this mock isn't working on py34, py35, but it's not strictly necessary
-            # for the test
-            mock_detach.assert_called()
+        mock_detach.assert_called()
 
         with patch(
             "tests.PaymentMethodDict.detach",
@@ -303,7 +293,14 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
             autospec=True,
         ) as payment_method_retrieve_mock:
             payment_method_retrieve_mock.return_value["customer"] = None
-
+            # Need to re-sync as the PaymentMethod object has been deleted
+            models.PaymentMethod.sync_from_stripe_data(
+                deepcopy(FAKE_CARD_AS_PAYMENT_METHOD)
+            )
+            # Get the Payment Method from the DB
+            payment_method = models.PaymentMethod.objects.filter(
+                id=payment_method.id
+            ).first()
             self.assertFalse(
                 payment_method.detach(), "Second call to detach should return false"
             )

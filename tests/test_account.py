@@ -328,7 +328,6 @@ class TestAccountMethods:
         with patch.object(
             Account, "get_or_retrieve_for_api_key", return_value=platform_account
         ):
-
             account = Account.sync_from_stripe_data(
                 fake_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
             )
@@ -374,7 +373,6 @@ class TestAccountMethods:
         with patch.object(
             Account, "get_or_retrieve_for_api_key", return_value=platform_account
         ):
-
             account = Account.sync_from_stripe_data(
                 fake_account, api_key=djstripe_settings.STRIPE_SECRET_KEY
             )

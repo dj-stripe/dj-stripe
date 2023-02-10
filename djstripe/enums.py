@@ -414,6 +414,12 @@ class InvoiceStatus(Enum):
     void = _("Void")
 
 
+class InvoiceorLineItemType(Enum):
+    invoice_item = _("Invoice Item")
+    line_item = _("Line Item")
+    unsupported = _("Unsupported")
+
+
 class IntentUsage(Enum):
     on_session = _("On session")
     off_session = _("Off session")
@@ -435,6 +441,11 @@ class IntentStatus(Enum):
         "Cancellation invalidates the intent for future confirmation and "
         "cannot be undone."
     )
+
+
+class LineItem(Enum):
+    invoiceitem = _("Invoice Item")
+    subscription = _("Subscription")
 
 
 class MandateStatus(Enum):

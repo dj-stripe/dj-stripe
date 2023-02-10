@@ -103,6 +103,7 @@ mypy = ">=0.971"
 # I'm grateful flake8 exists. But it's not a useful enough tool to allow it to
 # waste our time like this, and it's largely been displaced by the other tools:
 # mypy, isort, and black. So let's stick to those instead.
+pre-commit = "^3.0.4"
 
 [tool.poetry.group.docs]
 optional = true

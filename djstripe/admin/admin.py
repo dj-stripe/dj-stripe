@@ -13,6 +13,7 @@ from djstripe import models
 from .actions import CustomActionMixin
 from .admin_inline import (
     InvoiceItemInline,
+    LineItemInline,
     SubscriptionInline,
     SubscriptionItemInline,
     SubscriptionScheduleInline,
@@ -247,6 +248,30 @@ class CustomerAdmin(StripeModelAdmin):
         )
 
 
+@admin.register(models.Discount)
+class DiscountAdmin(ReadOnlyMixin, StripeModelAdmin):
+    list_display = (
+        "customer",
+        "coupon",
+        "invoice_item",
+        "promotion_code",
+        "subscription",
+    )
+    list_filter = ("customer", "start", "end", "promotion_code", "coupon")
+
+    def get_actions(self, request):
+        """
+        Returns _resync_instances only for
+        models with a defined model.stripe_class.retrieve
+        """
+        actions = super().get_actions(request)
+
+        # remove "_sync_all_instances" as Discounts cannot be listed
+        actions.pop("_sync_all_instances", None)
+
+        return actions
+
+
 @admin.register(models.Dispute)
 class DisputeAdmin(ReadOnlyMixin, StripeModelAdmin):
     list_display = ("reason", "status", "amount", "currency", "is_charge_refundable")
@@ -412,6 +437,19 @@ class InvoiceAdmin(StripeModelAdmin):
         )
 
 
+@admin.register(models.LineItem)
+class LineItemAdmin(StripeModelAdmin):
+    list_display = (
+        "amount",
+        "invoice_item",
+        "subscription",
+        "subscription_item",
+        "type",
+    )
+    list_filter = ("type", "invoice_item", "subscription", "subscription_item")
+    list_select_related = ("invoice_item", "subscription", "subscription_item")
+
+
 @admin.register(models.Mandate)
 class MandateAdmin(StripeModelAdmin):
     list_display = ("status", "type", "payment_method")
@@ -481,7 +519,14 @@ class PriceAdmin(StripeModelAdmin):
 
 @admin.register(models.Product)
 class ProductAdmin(StripeModelAdmin):
-    list_display = ("name", "type", "active", "url", "statement_descriptor")
+    list_display = (
+        "name",
+        "default_price",
+        "type",
+        "active",
+        "url",
+        "statement_descriptor",
+    )
     list_filter = ("type", "active", "shippable")
     search_fields = ("name", "statement_descriptor")
 
@@ -581,7 +626,7 @@ class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer", "status", "get_product_name", "get_default_tax_rates")
     list_filter = ("status", "cancel_at_period_end")
 
-    inlines = (SubscriptionItemInline, SubscriptionScheduleInline)
+    inlines = (SubscriptionItemInline, SubscriptionScheduleInline, LineItemInline)
 
     def get_actions(self, request):
         # get all actions

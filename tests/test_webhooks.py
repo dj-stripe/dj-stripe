@@ -84,7 +84,6 @@ class TestWebhookEventTrigger(TestCase):
         transfer_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         invalid_event["id"] = "evt_invalid"
         invalid_event["data"]["valid"] = "not really"
@@ -120,7 +119,6 @@ class TestWebhookEventTrigger(TestCase):
         account_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
 
         self.assertEqual(resp.status_code, 200)
@@ -149,7 +147,6 @@ class TestWebhookEventTrigger(TestCase):
         transfer_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         invalid_event["id"] = "evt_invalid"
         invalid_event["data"]["valid"] = "not really"
@@ -190,7 +187,6 @@ class TestWebhookEventTrigger(TestCase):
         verify_header_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
 
         self.assertEqual(resp.status_code, 200)
@@ -229,7 +225,6 @@ class TestWebhookEventTrigger(TestCase):
         verify_header_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         invalid_event["id"] = "evt_invalid"
         invalid_event["data"]["valid"] = "not really"

@@ -10,6 +10,8 @@ Invoke like so:
 
     3) To sync all Objects only for sk_test_XXX and sk_test_YYY API keys:
         python manage.py djstripe_sync_models --api-keys sk_test_XXX sk_test_XXX
+                                    OR
+        python manage.py djstripe_sync_models --api-keys sk_test_XXX --api-keys sk_test_XXX
 
     4) To only sync Stripe Accounts for all API keys:
         python manage.py djstripe_sync_models Account
@@ -23,7 +25,7 @@ Invoke like so:
     7) To only sync Stripe Accounts and Charges for sk_test_XXX and sk_test_YYY API keys:
         python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY
 """
-from typing import List
+import typing
 
 from django.apps import apps
 from django.core.exceptions import FieldDoesNotExist
@@ -56,15 +58,14 @@ class Command(BaseCommand):
             metavar="ApiKeys",
             nargs="*",
             type=str,
-            # todo uncomment this once support for python 3.7 is dropped.
-            # action="extend",
+            action="extend",
             help="Specify the api_keys you would like to perform this sync for.",
         )
 
-    def handle(self, *args, api_keys, **options):
+    def handle(self, *args, api_keys: typing.List[str], **options):
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
-        model_list = []  # type: List[models.StripeModel]
+        model_list: typing.List[models.StripeModel] = []
 
         if args:
             for model_label in args:
@@ -110,6 +111,7 @@ class Command(BaseCommand):
         if not hasattr(model.stripe_class, "list"):
             if model in (
                 models.ApplicationFeeRefund,
+                models.LineItem,
                 models.Source,
                 models.TransferReversal,
                 models.TaxId,
@@ -239,7 +241,6 @@ class Command(BaseCommand):
                         field_inst,
                         (django_models.ForeignKey, django_models.OneToOneField),
                     ):
-
                         try:
                             for (
                                 related_model_expand_field
@@ -263,7 +264,6 @@ class Command(BaseCommand):
                                         django_models.OneToOneField,
                                     ),
                                 ):
-
                                     try:
                                         # need to prepend "field_name." to each of the entry in the expand_fields list
                                         related_model_expand_fields = map(
@@ -306,8 +306,25 @@ class Command(BaseCommand):
         return default_list_kwargs
 
     @staticmethod
+    def get_list_kwargs_il(default_list_kwargs):
+        """Returns sequence of kwargs to sync Line Items for
+        all Stripe Accounts"""
+
+        all_list_kwargs = []
+
+        for def_kwarg in default_list_kwargs:
+            stripe_account = def_kwarg.get("stripe_account")
+            api_key = def_kwarg.get("api_key")
+            for stripe_invoice in models.Invoice.api_list(
+                stripe_account=stripe_account, api_key=api_key
+            ):
+                all_list_kwargs.append({"id": stripe_invoice.id, **def_kwarg})
+
+        return all_list_kwargs
+
+    @staticmethod
     def get_list_kwargs_pm(default_list_kwargs):
-        """Returns sequence of kwrags to sync Payment Methods for
+        """Returns sequence of kwargs to sync Payment Methods for
         all Stripe Accounts"""
 
         all_list_kwargs = []
@@ -344,7 +361,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_si(default_list_kwargs):
-        """Returns sequence of kwrags to sync Subscription Items for
+        """Returns sequence of kwargs to sync Subscription Items for
         all Stripe Accounts"""
 
         all_list_kwargs = []
@@ -359,7 +376,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_country_spec(default_list_kwargs):
-        """Returns sequence of kwrags to sync Country Specs for
+        """Returns sequence of kwargs to sync Country Specs for
         all Stripe Accounts"""
 
         all_list_kwargs = []
@@ -378,7 +395,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_trr(default_list_kwargs):
-        """Returns sequence of kwrags to sync Transfer Reversals for
+        """Returns sequence of kwargs to sync Transfer Reversals for
         all Stripe Accounts"""
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
@@ -393,7 +410,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_fee_refund(default_list_kwargs):
-        """Returns sequence of kwrags to sync Application Fee Refunds for
+        """Returns sequence of kwargs to sync Application Fee Refunds for
         all Stripe Accounts"""
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
@@ -408,7 +425,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_tax_id(default_list_kwargs):
-        """Returns sequence of kwrags to sync Tax Ids for
+        """Returns sequence of kwargs to sync Tax Ids for
         all Stripe Accounts"""
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
@@ -423,7 +440,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_sis(default_list_kwargs):
-        """Returns sequence of kwrags to sync Usage Record Summarys for
+        """Returns sequence of kwargs to sync Usage Record Summarys for
         all Stripe Accounts"""
         all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
@@ -453,6 +470,7 @@ class Command(BaseCommand):
         """
 
         list_kwarg_handlers_dict = {
+            "LineItem": self.get_list_kwargs_il,
             "PaymentMethod": self.get_list_kwargs_pm,
             "Source": self.get_list_kwargs_src,
             "SubscriptionItem": self.get_list_kwargs_si,
@@ -494,7 +512,6 @@ class Command(BaseCommand):
         if type in (enums.AccountType.custom, enums.AccountType.express) and isinstance(
             instance, models.Account
         ):
-
             # fetch all Card and BankAccount objects associated with the instance
             items = models.Account.stripe_class.list_external_accounts(
                 **kwargs
@@ -516,7 +533,6 @@ class Command(BaseCommand):
         bank_count = 0
         card_count = 0
         for item in items:
-
             if item.object == "bank_account":
                 model = models.BankAccount
                 bank_count += 1

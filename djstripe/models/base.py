@@ -3,7 +3,6 @@ import uuid
 from datetime import timedelta
 from typing import Dict, List, Optional, Type
 
-from django.apps import apps
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from stripe.api_resources.abstract.api_resource import APIResource
@@ -20,7 +19,7 @@ from ..fields import (
 )
 from ..managers import StripeModelManager
 from ..settings import djstripe_settings
-from ..utils import get_friendly_currency_amount, get_id_from_stripe_data
+from ..utils import get_id_from_stripe_data
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +142,8 @@ class StripeModel(StripeBaseModel):
             for which this request is being made.
         :type stripe_account: string
         """
+        from djstripe.models import Account
+
         api_key = api_key or self.default_api_key
 
         try:
@@ -157,11 +158,9 @@ class StripeModel(StripeBaseModel):
         reverse_account_relations = (
             field
             for field in self._meta.get_fields(include_parents=True)
-            if field.is_relation and field.one_to_many
-            # Avoid circular import problems by using the app registry to
-            # get the model class rather than a direct import.
-            and field.related_model
-            is apps.get_model(app_label="djstripe", model_name="account")
+            if field.is_relation
+            and field.one_to_many
+            and field.related_model is Account
         )
 
         # Handle case where we have a reverse relation to Account and should pass
@@ -169,10 +168,15 @@ class StripeModel(StripeBaseModel):
         for field in reverse_account_relations:
             # Grab the related object, using the first one we find.
             reverse_lookup_attr = field.get_accessor_name()
-            account = getattr(self, reverse_lookup_attr).first()
-
-            if account is not None:
-                return account.id
+            try:
+                account = getattr(self, reverse_lookup_attr).first()
+            except ValueError:
+                if isinstance(self, Account):
+                    # return the id if self is the Account model itself.
+                    return self.id
+            else:
+                if account is not None:
+                    return account.id
 
         return None
 
@@ -435,7 +439,7 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         :return:
         """
-        from djstripe.models import DjstripePaymentMethod
+        from djstripe.models import DjstripePaymentMethod, InvoiceOrLineItem
 
         field_data = None
         field_name = field.name
@@ -447,10 +451,9 @@ class StripeModel(StripeBaseModel):
         if current_ids is None:
             current_ids = set()
 
-        if issubclass(field.related_model, StripeModel) or issubclass(
-            field.related_model, DjstripePaymentMethod
+        if issubclass(
+            field.related_model, (StripeModel, DjstripePaymentMethod, InvoiceOrLineItem)
         ):
-
             if field_name in manipulated_data:
                 raw_field_data = manipulated_data.get(field_name)
 
@@ -873,44 +876,34 @@ class StripeModel(StripeBaseModel):
         instance.total_tax_amounts.exclude(pk__in=pks).delete()
 
     @classmethod
-    def _stripe_object_to_invoice_items(
+    def _stripe_object_to_line_items(
         cls, target_cls, data, invoice, api_key=djstripe_settings.STRIPE_SECRET_KEY
     ):
         """
-        Retrieves InvoiceItems for an invoice.
+        Retrieves LineItems for an invoice.
 
-        If the invoice item doesn't exist already then it is created.
+        If the line item doesn't exist already then it is created.
 
         If the invoice is an upcoming invoice that doesn't persist to the
-        database (i.e. ephemeral) then the invoice items are also not saved.
+        database (i.e. ephemeral) then the line items are also not saved.
 
-        :param target_cls: The target class to instantiate per invoice item.
-        :type target_cls:  Type[djstripe.models.InvoiceItem]
+        :param target_cls: The target class to instantiate per line item.
+        :type target_cls:  Type[djstripe.models.LineItem]
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
-        :param invoice: The invoice object that should hold the invoice items.
+        :param invoice: The invoice object that should hold the line items.
         :type invoice: ``djstripe.models.Invoice``
         """
-
         lines = data.get("lines")
         if not lines:
             return []
 
-        invoiceitems = []
+        lineitems = []
         for line in lines.auto_paging_iter():
             if invoice.id:
                 save = True
                 line.setdefault("invoice", invoice.id)
 
-                if line.get("type") == "subscription":
-                    # Lines for subscriptions need to be keyed based on invoice and
-                    # subscription, because their id is *just* the subscription
-                    # when received from Stripe. This means that future updates to
-                    # a subscription will change previously saved invoices - Doing
-                    # the composite key avoids this.
-                    line_id = line["id"]
-                    if not line_id.startswith(invoice.id):
-                        line["id"] = f"{invoice.id}-{line_id}"
             else:
                 # Don't save invoice items for ephemeral invoices
                 save = False
@@ -921,9 +914,9 @@ class StripeModel(StripeBaseModel):
             item, _ = target_cls._get_or_create_from_stripe_object(
                 line, refetch=False, save=save, api_key=api_key
             )
-            invoiceitems.append(item)
+            lineitems.append(item)
 
-        return invoiceitems
+        return lineitems
 
     @classmethod
     def _stripe_object_to_subscription_items(

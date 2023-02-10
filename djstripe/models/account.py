@@ -237,7 +237,6 @@ class Account(StripeModel):
 
         # set the livemode if not returned by data
         if "livemode" not in data.keys() and self.djstripe_owner_account is not None:
-
             # Platform Account
             if self == self.djstripe_owner_account:
                 self.livemode = None

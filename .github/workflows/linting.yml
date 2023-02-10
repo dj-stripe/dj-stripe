@@ -7,17 +7,24 @@ on:
     # The branches below must be a subset of the branches above
     branches: [master]
 
+env:
+  POETRY_VERSION: "1.2.2"
+  POETRY_VIRTUALENVS_IN_PROJECT: "1"
+
+
 jobs:
   linting:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+
+      - uses: ./.github/install_poetry_action
         with:
-          python-version: "3.11"
+            POETRY_VERSION: ${{ env.POETRY_VERSION }}
+            python_version: "3.11"
 
       - name: Install pre-commit
-        run: pip install pre-commit
+        run: poetry install --with dev
 
       - name: Run pre-commit
-        run: pre-commit run --all-files --show-diff-on-failure
+        run: poetry run pre-commit run --all-files --show-diff-on-failure

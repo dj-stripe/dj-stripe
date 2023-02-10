@@ -9,7 +9,6 @@ import djstripe.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("djstripe", "0010_alter_customer_balance"),
     ]

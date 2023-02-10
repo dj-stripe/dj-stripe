@@ -123,7 +123,6 @@ class TestStrBankAccount:
 
 class BankAccountTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         # create a Standard Stripe Account
         self.standard_account = FAKE_STANDARD_ACCOUNT.create()
 
@@ -316,7 +315,6 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
     def test__api_create_with_customer_and_account(
         self, account_retrieve_mock, customer_retrieve_mock
     ):
-
         FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_SOURCE)
         FAKE_BANK_ACCOUNT_DICT["account"] = FAKE_CUSTOM_ACCOUNT["id"]
 

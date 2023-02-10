@@ -10,6 +10,7 @@ STRIPE_API_VERSION_PATTERN = re.compile(
     r"(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})(; [\w=]*)?$"
 )
 
+
 # 4 possibilities:
 # Keys in admin and in settings
 # Keys in admin and not in settings
@@ -190,10 +191,10 @@ def _check_webhook_endpoint_validation(secret, messages, endpoint=None):
             secret_attr = "DJSTRIPE_WEBHOOK_SECRET"
 
         messages.append(
-            checks.Critical(
+            checks.Info(
                 f"DJSTRIPE_WEBHOOK_VALIDATION is set to 'verify_signature' {extra_msg}",
-                hint=f"Set {secret_attr} or set DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
-                id="djstripe.C006",
+                hint=f"Set {secret_attr} from Django shell or set DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
+                id="djstripe.I006",
             )
         )
     return messages
@@ -223,7 +224,6 @@ def check_webhook_validation(app_configs=None, **kwargs):
             )
         )
     elif djstripe_settings.WEBHOOK_VALIDATION == "verify_signature":
-
         try:
             webhooks = list(WebhookEndpoint.objects.all())
         except DatabaseError:
@@ -363,7 +363,6 @@ def check_webhook_event_callback_accepts_api_key(app_configs=None, **kwargs):
     callable = djstripe_settings.WEBHOOK_EVENT_CALLBACK
 
     if callable:
-
         # Deprecated in 2.8.0. Raise a warning.
         messages.append(
             checks.Warning(

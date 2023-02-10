@@ -8,7 +8,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import JSONField as BaseJSONField
 
-from .settings import djstripe_settings
 from .utils import convert_tstamp
 
 
@@ -57,6 +56,12 @@ class StripeForeignKey(models.ForeignKey):
 class PaymentMethodForeignKey(FieldDeconstructMixin, models.ForeignKey):
     def __init__(self, **kwargs):
         kwargs.setdefault("to", "DjstripePaymentMethod")
+        super().__init__(**kwargs)
+
+
+class InvoiceOrLineItemForeignKey(models.ForeignKey):
+    def __init__(self, **kwargs):
+        kwargs.setdefault("to", "InvoiceOrLineItem")
         super().__init__(**kwargs)
 
 

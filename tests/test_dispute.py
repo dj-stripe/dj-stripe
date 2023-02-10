@@ -69,7 +69,6 @@ class TestDispute(TestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_I)
         self.assertEqual(str(dispute), "$10.00 USD (Needs response) ")
 
@@ -110,7 +109,6 @@ class TestDispute(TestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_I)
         assert dispute.id == FAKE_DISPUTE_I["id"]
 
@@ -153,7 +151,6 @@ class TestDispute(TestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_III)
         assert dispute.id == FAKE_DISPUTE_III["id"]
 
@@ -212,7 +209,6 @@ class TestDispute(TestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_I)
         self.assertEqual(
             dispute.get_stripe_dashboard_url(),

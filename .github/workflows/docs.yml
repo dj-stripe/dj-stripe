@@ -21,25 +21,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - uses: ./.github/install_poetry_action
         with:
-          python-version: "3.11"
-
-      - name: Install poetry (${{ env.POETRY_VERSION }}) binary on runner
-        run: |
-          curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
-
-      - name: Set up cache
-        uses: actions/cache@v3
-        id: cache
-        with:
-          path: .venv
-          key: venv
-
-      - name: Ensure cache is healthy
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: timeout 10s poetry run pip --version || rm -rf .venv
+            POETRY_VERSION: ${{ env.POETRY_VERSION }}
+            python_version: "3.11"
 
       - name: Install dependencies
         run: poetry install --with docs

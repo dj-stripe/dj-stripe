@@ -145,6 +145,7 @@ from . import (
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED,
     FAKE_SUBSCRIPTION_III,
+    FAKE_SUBSCRIPTION_ITEM,
     FAKE_SUBSCRIPTION_SCHEDULE,
     FAKE_TAX_ID,
     FAKE_TAX_ID_UPDATED,
@@ -598,7 +599,6 @@ class TestAccountEvents(EventTestCase):
     def test_standard_account_updated_event(
         self, event_retrieve_mock, account_retrieve_mock
     ):
-
         # fetch the Stripe Account
         standard_account = self.standard_account
 
@@ -634,7 +634,6 @@ class TestAccountEvents(EventTestCase):
     def test_express_account_updated_event(
         self, event_retrieve_mock, account_retrieve_mock
     ):
-
         # fetch the Stripe Account
         express_account = self.express_account
 
@@ -670,7 +669,6 @@ class TestAccountEvents(EventTestCase):
     def test_custom_account_updated_event(
         self, event_retrieve_mock, account_retrieve_mock
     ):
-
         # fetch the Stripe Account
         custom_account = self.custom_account
 
@@ -712,6 +710,11 @@ class TestChargeEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER),
+        autospec=True,
+    )
+    @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
     )
@@ -728,10 +731,20 @@ class TestChargeEvents(EventTestCase):
     )
     @patch("stripe.Event.retrieve", autospec=True)
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
     )
     @patch(
         "stripe.Subscription.retrieve",
@@ -741,13 +754,16 @@ class TestChargeEvents(EventTestCase):
     def test_charge_created(
         self,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         product_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         event_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         payment_intent_retrieve_mock,
         charge_retrieve_mock,
         balance_transaction_retrieve_mock,
+        customer_retrieve_mock,
         account_mock,
     ):
         FAKE_CUSTOMER.create_for_user(self.user)
@@ -769,7 +785,6 @@ class TestChargeEvents(EventTestCase):
 
 class TestCheckoutEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -781,6 +796,11 @@ class TestCheckoutEvents(EventTestCase):
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
         autospec=True,
     )
     @patch(
@@ -796,6 +816,11 @@ class TestCheckoutEvents(EventTestCase):
     )
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
     )
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
@@ -815,10 +840,12 @@ class TestCheckoutEvents(EventTestCase):
         payment_intent_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
         session_retrieve_mock,
     ):
@@ -840,6 +867,11 @@ class TestCheckoutEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -852,6 +884,11 @@ class TestCheckoutEvents(EventTestCase):
     )
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
     )
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
@@ -871,10 +908,12 @@ class TestCheckoutEvents(EventTestCase):
         payment_intent_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
         session_retrieve_mock,
     ):
@@ -898,6 +937,11 @@ class TestCheckoutEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -910,6 +954,11 @@ class TestCheckoutEvents(EventTestCase):
     )
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
     )
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
@@ -929,10 +978,12 @@ class TestCheckoutEvents(EventTestCase):
         payment_intent_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
         session_retrieve_mock,
     ):
@@ -954,6 +1005,11 @@ class TestCheckoutEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -966,6 +1022,11 @@ class TestCheckoutEvents(EventTestCase):
     )
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
     )
     @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
@@ -987,10 +1048,12 @@ class TestCheckoutEvents(EventTestCase):
         payment_intent_retrieve_mock,
         customer_modify_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
         session_retrieve_mock,
     ):
@@ -1024,7 +1087,6 @@ class TestCheckoutEvents(EventTestCase):
 
 class TestCustomerEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -1052,7 +1114,6 @@ class TestCustomerEvents(EventTestCase):
     def test_customer_metadata_created(
         self, event_retrieve_mock, customer_retrieve_mock
     ):
-
         fake_customer = deepcopy(FAKE_CUSTOMER)
         fake_customer["metadata"] = {"djstripe_subscriber": self.user.id}
 
@@ -1081,7 +1142,6 @@ class TestCustomerEvents(EventTestCase):
     def test_customer_metadata_updated(
         self, event_retrieve_mock, customer_retrieve_mock
     ):
-
         fake_customer = deepcopy(FAKE_CUSTOMER)
         fake_customer["metadata"] = {"djstripe_subscriber": self.user.id}
 
@@ -1123,7 +1183,6 @@ class TestCustomerEvents(EventTestCase):
         customer_delete_mock,
         customer_source_delete_mock,
     ):
-
         FAKE_CUSTOMER.create_for_user(self.user)
         event = self._create_event(FAKE_EVENT_CUSTOMER_CREATED)
         event.invoke_webhook_handlers()
@@ -1291,9 +1350,19 @@ class TestCustomerEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
     @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
@@ -1310,8 +1379,10 @@ class TestCustomerEvents(EventTestCase):
         customer_retrieve_mock,
         product_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         plan_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
@@ -1364,7 +1435,6 @@ class TestCustomerEvents(EventTestCase):
 
 class TestDisputeEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="fake_customer_1", email=FAKE_CUSTOMER["email"]
         )
@@ -1463,7 +1533,6 @@ class TestDisputeEvents(EventTestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_FUNDS_WITHDRAWN)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -1514,7 +1583,6 @@ class TestDisputeEvents(EventTestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_UPDATED)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -1565,7 +1633,6 @@ class TestDisputeEvents(EventTestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_CLOSED)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -1621,7 +1688,6 @@ class TestDisputeEvents(EventTestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_DISPUTE_FUNDS_REINSTATED_FULL)
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -1687,7 +1753,6 @@ class TestDisputeEvents(EventTestCase):
 
 class TestFileEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -1713,7 +1778,6 @@ class TestFileEvents(EventTestCase):
 
 class TestInvoiceEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -1729,6 +1793,11 @@ class TestInvoiceEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -1740,6 +1809,11 @@ class TestInvoiceEvents(EventTestCase):
     @patch(
         "stripe.PaymentIntent.retrieve",
         return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
         autospec=True,
     )
     @patch(
@@ -1760,14 +1834,15 @@ class TestInvoiceEvents(EventTestCase):
         paymentmethod_card_retrieve_mock,
         event_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         payment_intent_retrieve_mock,
         charge_retrieve_mock,
         customer_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
         event_retrieve_mock.return_value = fake_stripe_event
 
@@ -1791,6 +1866,11 @@ class TestInvoiceEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -1802,6 +1882,11 @@ class TestInvoiceEvents(EventTestCase):
     @patch(
         "stripe.PaymentIntent.retrieve",
         return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
         autospec=True,
     )
     @patch("stripe.Invoice.retrieve", autospec=True)
@@ -1820,14 +1905,15 @@ class TestInvoiceEvents(EventTestCase):
         paymentmethod_card_retrieve_mock,
         event_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         payment_intent_retrieve_mock,
         charge_retrieve_mock,
         customer_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-
         FAKE_CUSTOMER.create_for_user(self.user)
 
         fake_stripe_event = deepcopy(FAKE_EVENT_INVOICE_CREATED)
@@ -1856,6 +1942,11 @@ class TestInvoiceEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -1864,6 +1955,11 @@ class TestInvoiceEvents(EventTestCase):
     @patch(
         "stripe.PaymentIntent.retrieve",
         return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
         autospec=True,
     )
     @patch(
@@ -1882,13 +1978,14 @@ class TestInvoiceEvents(EventTestCase):
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         payment_intent_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-
         FAKE_CUSTOMER.create_for_user(self.user)
 
         event = self._create_event(FAKE_EVENT_INVOICE_CREATED)
@@ -1911,7 +2008,6 @@ class TestInvoiceEvents(EventTestCase):
 
 class TestInvoiceItemEvents(EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -1924,6 +2020,11 @@ class TestInvoiceItemEvents(EventTestCase):
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
         autospec=True,
     )
     @patch(
@@ -1966,10 +2067,10 @@ class TestInvoiceItemEvents(EventTestCase):
         paymentmethod_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
-
         fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_II)
         fake_payment_intent["invoice"] = FAKE_INVOICE_II["id"]
         paymentintent_retrieve_mock.return_value = fake_payment_intent
@@ -1977,6 +2078,11 @@ class TestInvoiceItemEvents(EventTestCase):
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION_III)
         fake_subscription["latest_invoice"] = FAKE_INVOICE_II["id"]
         subscription_retrieve_mock.return_value = fake_subscription
+
+        fake_stripe_event = deepcopy(FAKE_EVENT_INVOICEITEM_CREATED)
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        invoiceitem_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
 
         fake_card = deepcopy(FAKE_CARD_II)
         fake_card["customer"] = None
@@ -1987,11 +2093,6 @@ class TestInvoiceItemEvents(EventTestCase):
         Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE_II))
 
         FAKE_CUSTOMER_II.create_for_user(self.user)
-
-        fake_stripe_event = deepcopy(FAKE_EVENT_INVOICEITEM_CREATED)
-        event_retrieve_mock.return_value = fake_stripe_event
-
-        invoiceitem_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
 
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
@@ -2012,6 +2113,11 @@ class TestInvoiceItemEvents(EventTestCase):
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
         autospec=True,
     )
     @patch(
@@ -2056,6 +2162,7 @@ class TestInvoiceItemEvents(EventTestCase):
         paymentmethod_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
         default_account_mock,
     ):
@@ -2140,7 +2247,6 @@ class TestPlanEvents(EventTestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     def test_plan_deleted(self, product_retrieve_mock, plan_retrieve_mock):
-
         event = self._create_event(FAKE_EVENT_PLAN_CREATED)
         event.invoke_webhook_handlers()
 
@@ -2204,7 +2310,6 @@ class TestPriceEvents(EventTestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     def test_price_deleted(self, product_retrieve_mock, price_retrieve_mock):
-
         event = self._create_event(FAKE_EVENT_PRICE_CREATED)
         event.invoke_webhook_handlers()
 
@@ -2219,7 +2324,6 @@ class TestPriceEvents(EventTestCase):
 
 class TestPaymentMethodEvents(AssertStripeFksMixin, EventTestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="fake_customer_1", email=FAKE_CUSTOMER["email"]
         )
@@ -2435,6 +2539,11 @@ class TestSubscriptionScheduleEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -2454,6 +2563,11 @@ class TestSubscriptionScheduleEvents(EventTestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", autospec=True, return_value=deepcopy(FAKE_INVOICE)
     )
     @patch(
@@ -2471,11 +2585,13 @@ class TestSubscriptionScheduleEvents(EventTestCase):
         customer_retrieve_mock,
         schedule_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         # create latest invoice
@@ -2503,7 +2619,6 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     def test_subscription_schedule_canceled(
         self, customer_retrieve_mock, schedule_retrieve_mock
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
         fake_stripe_event["data"]["previous_attributes"] = {
             "canceled_at": None,
@@ -2549,7 +2664,6 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     def test_subscription_schedule_completed(
         self, customer_retrieve_mock, schedule_retrieve_mock
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
         fake_stripe_event["data"]["object"]["subscription"] = None
 
@@ -2591,7 +2705,6 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     def test_subscription_schedule_expiring(
         self, customer_retrieve_mock, schedule_retrieve_mock
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
         fake_stripe_event["data"]["object"]["subscription"] = None
 
@@ -2632,7 +2745,6 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     def test_subscription_schedule_released(
         self, customer_retrieve_mock, schedule_retrieve_mock
     ):
-
         fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_UPDATED)
         fake_stripe_event["data"]["previous_attributes"] = {
             "released_at": None,
@@ -2675,6 +2787,11 @@ class TestSubscriptionScheduleEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -2694,6 +2811,11 @@ class TestSubscriptionScheduleEvents(EventTestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", autospec=True, return_value=deepcopy(FAKE_INVOICE)
     )
     @patch("stripe.SubscriptionSchedule.retrieve", autospec=True)
@@ -2707,11 +2829,13 @@ class TestSubscriptionScheduleEvents(EventTestCase):
         customer_retrieve_mock,
         schedule_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_stripe_event = deepcopy(FAKE_EVENT_SUBSCRIPTION_SCHEDULE_CREATED)
@@ -2755,6 +2879,11 @@ class TestSubscriptionScheduleEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         autospec=True,
     )
@@ -2771,6 +2900,11 @@ class TestSubscriptionScheduleEvents(EventTestCase):
     )
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
     )
     @patch(
         "stripe.Invoice.retrieve", autospec=True, return_value=deepcopy(FAKE_INVOICE)
@@ -2790,11 +2924,13 @@ class TestSubscriptionScheduleEvents(EventTestCase):
         customer_retrieve_mock,
         schedule_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
@@ -2985,6 +3121,11 @@ class TestOrderEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -3007,6 +3148,11 @@ class TestOrderEvents(EventTestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch("stripe.Order.retrieve", autospec=True)
@@ -3016,12 +3162,14 @@ class TestOrderEvents(EventTestCase):
         event_retrieve_mock,
         order_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         customer_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_stripe_event = deepcopy(FAKE_EVENT_ORDER_CREATED)
@@ -3043,6 +3191,11 @@ class TestOrderEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -3065,6 +3218,11 @@ class TestOrderEvents(EventTestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch("stripe.Order.retrieve", autospec=True)
@@ -3074,12 +3232,14 @@ class TestOrderEvents(EventTestCase):
         event_retrieve_mock,
         order_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         customer_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_stripe_event = deepcopy(FAKE_EVENT_ORDER_UPDATED)
@@ -3102,6 +3262,11 @@ class TestOrderEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -3124,6 +3289,11 @@ class TestOrderEvents(EventTestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch("stripe.Order.retrieve", autospec=True)
@@ -3133,12 +3303,14 @@ class TestOrderEvents(EventTestCase):
         event_retrieve_mock,
         order_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         customer_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_stripe_event = deepcopy(FAKE_EVENT_ORDER_SUBMITTED)
@@ -3161,6 +3333,11 @@ class TestOrderEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -3183,6 +3360,11 @@ class TestOrderEvents(EventTestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch("stripe.Order.retrieve", autospec=True)
@@ -3192,12 +3374,14 @@ class TestOrderEvents(EventTestCase):
         event_retrieve_mock,
         order_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         customer_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_stripe_event = deepcopy(FAKE_EVENT_ORDER_PROCESSING)
@@ -3220,6 +3404,11 @@ class TestOrderEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -3242,6 +3431,11 @@ class TestOrderEvents(EventTestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch("stripe.Order.retrieve", autospec=True)
@@ -3251,12 +3445,14 @@ class TestOrderEvents(EventTestCase):
         event_retrieve_mock,
         order_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         customer_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_stripe_event = deepcopy(FAKE_EVENT_ORDER_CANCELLED)
@@ -3279,6 +3475,11 @@ class TestOrderEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         return_value=deepcopy(FAKE_SUBSCRIPTION),
         autospec=True,
@@ -3301,6 +3502,11 @@ class TestOrderEvents(EventTestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch("stripe.Order.retrieve", autospec=True)
@@ -3310,12 +3516,14 @@ class TestOrderEvents(EventTestCase):
         event_retrieve_mock,
         order_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         customer_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
         fake_stripe_event = deepcopy(FAKE_EVENT_ORDER_COMPLETED)

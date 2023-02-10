@@ -68,7 +68,6 @@ def customer_webhook_handler(event):
     target_object_type = event.data.get("object", {}).get("object", {})
 
     if event.customer and target_object_type == "customer":
-
         metadata = event.data.get("object", {}).get("metadata", {})
         customer_id = event.data.get("object", {}).get("id", "")
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
@@ -409,9 +408,14 @@ def _handle_crud_like_event(
         if event.parts[:2] == ["account", "external_account"] and stripe_account:
             kwargs["account"] = models.Account._get_or_retrieve(id=stripe_account)
 
-        data = target_cls(**kwargs).api_retrieve(
-            stripe_account=stripe_account, api_key=event.default_api_key
-        )
+        # Stripe doesn't allow retrieval of Discount Objects
+        if target_cls not in (models.Discount,):
+            data = target_cls(**kwargs).api_retrieve(
+                stripe_account=stripe_account, api_key=event.default_api_key
+            )
+        else:
+            data = data.get("object")
+
         # create or update the object from the retrieved Stripe Data
         obj = target_cls.sync_from_stripe_data(data, api_key=event.default_api_key)
 

@@ -17,6 +17,7 @@ from . import (
     FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
     FAKE_INVOICE,
+    FAKE_INVOICEITEM,
     FAKE_PAYMENT_INTENT_I,
     FAKE_PLAN,
     FAKE_PLAN_II,
@@ -27,6 +28,7 @@ from . import (
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_II,
+    FAKE_SUBSCRIPTION_ITEM,
     FAKE_SUBSCRIPTION_ITEM_METERED,
     FAKE_SUBSCRIPTION_ITEM_MULTI_PLAN,
     FAKE_SUBSCRIPTION_ITEM_TAX_RATES,
@@ -39,8 +41,18 @@ from . import (
 
 class SubscriptionItemTest(AssertStripeFksMixin, TestCase):
     @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER),
+        autospec=True,
+    )
+    @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
         autospec=True,
     )
     @patch(
@@ -63,17 +75,25 @@ class SubscriptionItemTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", autospec=True, return_value=deepcopy(FAKE_INVOICE)
     )
     def setUp(
         self,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
+        customer_retrieve_mock,
     ):
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
@@ -83,6 +103,7 @@ class SubscriptionItemTest(AssertStripeFksMixin, TestCase):
         self.default_expected_blank_fks = {
             "djstripe.Customer.coupon",
             "djstripe.Customer.default_payment_method",
+            "djstripe.Product.default_price",
             "djstripe.Subscription.default_payment_method",
             "djstripe.Subscription.default_source",
             "djstripe.Subscription.pending_setup_intent",
@@ -167,7 +188,6 @@ class SubscriptionItemTest(AssertStripeFksMixin, TestCase):
         plan_retrieve_mock,
         price_retrieve_mock,
     ):
-
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION_II)
         fake_subscription["latest_invoice"] = FAKE_INVOICE["id"]
         subscription_retrieve_mock.return_value = fake_subscription
@@ -244,7 +264,6 @@ class SubscriptionItemTest(AssertStripeFksMixin, TestCase):
         plan_retrieve_mock,
         price_retrieve_mock,
     ):
-
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)
         fake_subscription["latest_invoice"] = FAKE_INVOICE["id"]
         subscription_retrieve_mock.return_value = fake_subscription

@@ -19,7 +19,7 @@ class DjstripeAppConfig(AppConfig):
     def ready(self):
         import stripe
 
-        from . import checks, event_handlers
+        from . import checks, event_handlers  # noqa (register event handlers)
 
         # Set app info
         # https://stripe.com/docs/building-plugins#setappinfo

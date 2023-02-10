@@ -32,7 +32,6 @@ class TestTaxIdStr(TestCase):
         tax_id_retrieve_mock,
         customer_retrieve_mock,
     ):
-
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
         self.assertEqual(
             str(tax_id),
@@ -56,7 +55,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         tax_id_retrieve_mock,
         customer_retrieve_mock,
     ):
-
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
         assert tax_id
         assert tax_id.id == FAKE_TAX_ID["id"]
@@ -86,7 +84,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         tax_id_create_mock,
         customer_get_mock,
     ):
-
         STRIPE_DATA = TaxId._api_create(
             id=FAKE_CUSTOMER["id"], type=FAKE_TAX_ID["type"], value=FAKE_TAX_ID["value"]
         )
@@ -154,7 +151,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         tax_id_retrieve_mock,
         customer_retrieve_mock,
     ):
-
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
         assert tax_id
         tax_id.api_retrieve()

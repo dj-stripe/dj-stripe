@@ -1,4 +1,3 @@
-import warnings
 from decimal import Decimal
 from typing import Optional, Union
 
@@ -27,7 +26,7 @@ from ..fields import (
 from ..managers import ChargeManager
 from ..settings import djstripe_settings
 from ..signals import WEBHOOK_SIGNALS
-from ..utils import get_friendly_currency_amount
+from ..utils import get_friendly_currency_amount, get_id_from_stripe_data
 from .base import IdempotencyKey, StripeModel, logger
 
 
@@ -506,6 +505,14 @@ class Product(StripeModel):
             "Applicable to both `service` and `good` types."
         ),
     )
+    default_price = StripeForeignKey(
+        "Price",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="products",
+        help_text="The default price this product is associated with.",
+    )
     type = StripeEnumField(
         enum=enums.ProductType,
         help_text=(
@@ -684,6 +691,12 @@ class Customer(StripeModel):
         "the date that the discount will end.",
     )
     # </discount>
+    discount = JSONField(
+        null=True,
+        blank=True,
+        help_text="Describes the current discount active on the customer, if there is one.",
+    )
+
     email = models.TextField(max_length=5000, default="", blank=True)
     invoice_prefix = models.CharField(
         default="",
@@ -759,7 +772,6 @@ class Customer(StripeModel):
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
-
         # stripe adds a deleted attribute if the Customer has been deleted upstream
         if data.get("deleted"):
             logger.warning(
@@ -1443,7 +1455,6 @@ class Dispute(StripeModel):
         pending_relations=None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
-
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations, api_key=api_key
         )
@@ -1590,9 +1601,9 @@ class Event(StripeModel):
     def customer(self):
         data = self.data["object"]
         if data["object"] == "customer":
-            customer_id = data.get("id")
+            customer_id = get_id_from_stripe_data(data.get("id"))
         else:
-            customer_id = data.get("customer")
+            customer_id = get_id_from_stripe_data(data.get("customer"))
 
         if customer_id:
             return Customer._get_or_retrieve(
@@ -2056,8 +2067,7 @@ class Payout(StripeModel):
         "account balance.",
     )
     currency = StripeCurrencyCodeField()
-    destination = StripeForeignKey(
-        "BankAccount",
+    destination = PaymentMethodForeignKey(
         on_delete=models.PROTECT,
         null=True,
         help_text="Bank account or card the payout was sent to.",

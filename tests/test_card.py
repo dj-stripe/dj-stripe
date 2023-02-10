@@ -82,7 +82,6 @@ class TestStrCard:
 
 class CardTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         # create a Standard Stripe Account
         self.standard_account = FAKE_STANDARD_ACCOUNT.create()
 
@@ -358,7 +357,6 @@ class CardTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     def test_remove_card_by_account(self, account_retrieve_mock, card_delete_mock):
-
         stripe_card = Card._api_create(
             account=self.custom_account, source=FAKE_CARD_IV["id"]
         )
@@ -392,7 +390,6 @@ class CardTest(AssertStripeFksMixin, TestCase):
     def test_remove_already_deleted_card_by_account(
         self, account_retrieve_mock, card_delete_mock
     ):
-
         stripe_card = Card._api_create(
             account=self.custom_account, source=FAKE_CARD_IV["id"]
         )
