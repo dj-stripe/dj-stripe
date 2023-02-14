@@ -86,7 +86,6 @@ def standard_account_fixture(django_db_setup, django_db_blocker, configure_setti
     """Create Standard Stripe Account."""
     # See: https://pytest-django.readthedocs.io/en/latest/database.html#populate-the-test-database-if-you-don-t-use-transactional-or-live-server
     with django_db_blocker.unblock():
-
         # setup_stuff
         account_json = models.Account._api_create(
             type="standard",
@@ -114,7 +113,6 @@ def custom_account_fixture(django_db_setup, django_db_blocker, configure_setting
     """Create Custom Stripe Account."""
     # See: https://pytest-django.readthedocs.io/en/latest/database.html#populate-the-test-database-if-you-don-t-use-transactional-or-live-server
     with django_db_blocker.unblock():
-
         # setup_stuff
         account_json = models.Account._api_create(
             type="custom",
@@ -150,7 +148,6 @@ def custom_account_func_fixture(django_db_setup, django_db_blocker, configure_se
     """
     # See: https://pytest-django.readthedocs.io/en/latest/database.html#populate-the-test-database-if-you-don-t-use-transactional-or-live-server
     with django_db_blocker.unblock():
-
         # setup_stuff
         account_json = models.Account._api_create(
             type="custom",
@@ -182,7 +179,6 @@ def platform_account_fixture(django_db_setup, django_db_blocker, configure_setti
     """Retrieve Platform Stripe Account."""
     # See: https://pytest-django.readthedocs.io/en/latest/database.html#populate-the-test-database-if-you-don-t-use-transactional-or-live-server
     with django_db_blocker.unblock():
-
         # setup_stuff
         account_json = stripe.Account.retrieve(
             api_key=settings.STRIPE_SECRET_KEY,

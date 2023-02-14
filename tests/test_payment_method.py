@@ -25,7 +25,6 @@ from .conftest import CreateAccountMixin
 
 
 class TestPaymentMethod(CreateAccountMixin):
-
     #
     # Helper Methods for monkeypatching
     #
