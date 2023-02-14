@@ -45,7 +45,6 @@ class TestGetSupportedCurrencyChoices(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value={"country": "US"},
-        autospec=True,
     )
     def test_get_choices(
         self, stripe_account_retrieve_mock, stripe_countryspec_retrieve_mock

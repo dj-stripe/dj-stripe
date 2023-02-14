@@ -18,7 +18,7 @@ class TestCheckApiKeySettings(TestCase):
         STRIPE_LIVE_PUBLIC_KEY="sk_live_foo",
         STRIPE_LIVE_MODE=True,
     )
-    @patch("stripe.Account.retrieve", autospec=True)
+    @patch("stripe.Account.retrieve")
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
@@ -52,7 +52,7 @@ class TestCheckApiKeySettings(TestCase):
         STRIPE_TEST_PUBLIC_KEY="pk_test_foo",
         STRIPE_LIVE_MODE=False,
     )
-    @patch("stripe.Account.retrieve", autospec=True)
+    @patch("stripe.Account.retrieve")
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
@@ -88,7 +88,7 @@ class TestCheckApiKeySettings(TestCase):
         STRIPE_LIVE_PUBLIC_KEY="pk_live_foo",
         STRIPE_LIVE_MODE=True,
     )
-    @patch("stripe.Account.retrieve", autospec=True)
+    @patch("stripe.Account.retrieve")
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
@@ -126,7 +126,7 @@ class TestCheckApiKeySettings(TestCase):
         STRIPE_LIVE_PUBLIC_KEY="pk_live_foo",
         STRIPE_LIVE_MODE=False,
     )
-    @patch("stripe.Account.retrieve", autospec=True)
+    @patch("stripe.Account.retrieve")
     @patch(
         "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),

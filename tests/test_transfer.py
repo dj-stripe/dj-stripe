@@ -46,7 +46,6 @@ class TestTransferStr:
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -80,7 +79,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -115,7 +113,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -140,7 +137,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
