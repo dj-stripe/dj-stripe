@@ -75,7 +75,6 @@ class TestPayout(AssertStripeFksMixin, TestCase):
         bank_account_retrieve_mock,
         balance_transaction_retrieve_mock,
     ):
-
         fake_payout_custom = deepcopy(FAKE_PAYOUT_CUSTOM_BANK_ACCOUNT)
         payout = Payout.sync_from_stripe_data(fake_payout_custom)
 
