@@ -268,7 +268,6 @@ class TestStrPrice(CreateAccountMixin):
 
 
 class TestHumanReadablePrice(CreateAccountMixin):
-
     #
     # Helpers
     #

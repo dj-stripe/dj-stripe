@@ -243,7 +243,6 @@ class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
 
 class TestHumanReadablePlan(CreateAccountMixin):
-
     #
     # Helpers
     #

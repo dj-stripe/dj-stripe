@@ -185,7 +185,6 @@ class SessionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
 
 class TestSession(CreateAccountMixin):
-
     key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
 
     @pytest.mark.parametrize(

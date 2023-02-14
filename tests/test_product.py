@@ -25,7 +25,6 @@ from .conftest import CreateAccountMixin
 
 
 class TestProduct(CreateAccountMixin):
-
     #
     # Helper Methods for monkeypatching
     #
