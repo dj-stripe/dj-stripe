@@ -22,7 +22,6 @@ from . import (
 
 class SourceTransactionTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         user = get_user_model().objects.create_user(
             username="arnav13", email="arnav13@gmail.com"
         )
