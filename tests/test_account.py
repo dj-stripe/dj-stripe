@@ -457,7 +457,6 @@ def test_account__create_from_stripe_object(
 @pytest.mark.parametrize("extra_kwargs", ({"reason": "fraud"}, {"reason": "other"}))
 @patch(
     "stripe.Account.retrieve",
-    autospec=True,
     return_value=deepcopy(FAKE_ACCOUNT),
 )
 @patch(

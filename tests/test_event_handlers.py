@@ -2471,7 +2471,6 @@ class TestPaymentIntentEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.File.retrieve",
@@ -2490,11 +2489,11 @@ class TestPaymentIntentEvents(EventTestCase):
     )
     def test_payment_intent_succeeded_with_destination_charge(
         self,
-        customer_retrieve_mock,
-        account_retrieve_mock,
-        file_upload_retrieve_mock,
-        payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
+        payment_intent_retrieve_mock,
+        file_upload_retrieve_mock,
+        account_retrieve_mock,
+        customer_retrieve_mock,
     ):
         """Test that the payment intent succeeded event can create all related objects.
 
@@ -3085,18 +3084,12 @@ class TestTaxIdEvents(CreateAccountMixin, EventTestCase):
 
 class TestTransferEvents(EventTestCase):
     @patch.object(Transfer, "_attach_objects_post_save_hook")
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=True,
-    )
     @patch("stripe.Transfer.retrieve", autospec=True)
     @patch("stripe.Event.retrieve", autospec=True)
     def test_transfer_created(
         self,
         event_retrieve_mock,
         transfer_retrieve_mock,
-        account_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
         fake_stripe_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
@@ -3116,7 +3109,6 @@ class TestTransferEvents(EventTestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=True,
     )
     @patch("stripe.Transfer.retrieve", return_value=FAKE_TRANSFER, autospec=True)
     def test_transfer_deleted(

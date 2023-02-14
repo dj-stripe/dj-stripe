@@ -153,7 +153,6 @@ class TransferManagerTest(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=True,
     )
     def test_transfer_summary(
         self, account_retrieve_mock, transfer__attach_object_post_save_hook_mock
