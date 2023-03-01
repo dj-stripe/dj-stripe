@@ -21,7 +21,11 @@ class Session(StripeModel):
     Stripe documentation: https://stripe.com/docs/api/checkout/sessions?lang=python
     """
 
-    expand_fields = ["line_items", "total_details.breakdown"]
+    expand_fields = [
+        "line_items",
+        "total_details.breakdown",
+        "line_items.data.discounts",
+    ]
     stripe_class = stripe.checkout.Session
 
     amount_total = StripeQuantumCurrencyAmountField(
