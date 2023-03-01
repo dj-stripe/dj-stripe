@@ -661,7 +661,7 @@ FAKE_SESSION_I = {
     "mode": None,
     "payment_intent": FAKE_PAYMENT_INTENT_I["id"],
     "payment_method_types": ["card"],
-    "setup_intent": None,
+    "setup_intent": FAKE_SETUP_INTENT_II["id"],
     "submit_type": None,
     "subscription": None,
     "success_url": "https://example.com/success",

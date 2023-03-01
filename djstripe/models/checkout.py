@@ -91,6 +91,13 @@ class Session(StripeModel):
         help_text="The list of payment method types (e.g. card) that this "
         "Checkout Session is allowed to accept."
     )
+    setup_intent = StripeForeignKey(
+        "SetupIntent",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text=("The ID of the SetupIntent for Checkout Sessions in setup mode."),
+    )
     submit_type = StripeEnumField(
         enum=enums.SubmitTypeStatus,
         blank=True,
