@@ -673,6 +673,7 @@ FAKE_SESSION_I = {
     "success_url": "https://example.com/success",
     "metadata": {},
     "line_tems": {},
+    "url": "",
 }
 
 

@@ -157,6 +157,14 @@ class Session(StripeModel):
             "creation is successful."
         ),
     )
+    url = models.TextField(
+        max_length=5000,
+        blank=True,
+        null=True,
+        help_text=(
+            "The URL to the Checkout Session. Redirect customers to this URL to take them to Checkout. If you’re using Custom Domains, the URL will use your subdomain. Otherwise, it’ll use checkout.stripe.com. This value is only present when the session is active."
+        ),
+    )
 
     def _attach_objects_post_save_hook(
         self,
