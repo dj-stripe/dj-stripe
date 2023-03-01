@@ -674,6 +674,7 @@ FAKE_SESSION_I = {
     "metadata": {},
     "line_tems": {},
     "url": "",
+    "total_details": {},
 }
 
 

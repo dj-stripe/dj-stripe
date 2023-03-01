@@ -157,6 +157,11 @@ class Session(StripeModel):
             "creation is successful."
         ),
     )
+    total_details = JSONField(
+        null=True,
+        blank=True,
+        help_text=("Tax and discount details for the computed total amount."),
+    )
     url = models.TextField(
         max_length=5000,
         blank=True,
