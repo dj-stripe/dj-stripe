@@ -153,6 +153,12 @@ class Session(StripeModel):
         blank=True,
         help_text=("The shipping rate options applied to this Session."),
     )
+    status = StripeEnumField(
+        enum=enums.SessionStatus,
+        null=True,
+        blank=True,
+        help_text="The status of the Checkout Session, one of open, complete, or expired.",
+    )
     submit_type = StripeEnumField(
         enum=enums.SubmitTypeStatus,
         blank=True,

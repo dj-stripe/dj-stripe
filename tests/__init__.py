@@ -670,6 +670,7 @@ FAKE_SESSION_I = {
     "shipping_cost": {},
     "shipping_details": {},
     "shipping_options": {},
+    "status": "open",
     "submit_type": None,
     "subscription": None,
     "success_url": "https://example.com/success",

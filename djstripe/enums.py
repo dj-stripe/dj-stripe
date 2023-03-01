@@ -317,6 +317,12 @@ class ChargeStatus(Enum):
     failed = _("Failed")
 
 
+class SessionStatus(Enum):
+    open = _("Open")
+    complete = _("Complete")
+    expired = _("Expired")
+
+
 class SessionPaymentStatus(Enum):
     paid = _("Paid")
     unpaid = _("Unpaid")
