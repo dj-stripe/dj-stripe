@@ -643,6 +643,7 @@ FAKE_SESSION_I = {
     "billing_address_collection": None,
     "cancel_url": "https://example.com/cancel",
     "client_reference_id": None,
+    "currency": "usd",
     "customer": "cus_6lsBvm5rJ0zyHc",
     "customer_email": None,
     "display_items": [

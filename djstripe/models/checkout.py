@@ -6,6 +6,7 @@ from djstripe.settings import djstripe_settings
 from .. import enums
 from ..fields import (
     JSONField,
+    StripeCurrencyCodeField,
     StripeEnumField,
     StripeForeignKey,
     StripeQuantumCurrencyAmountField,
@@ -62,6 +63,11 @@ class Session(StripeModel):
             "This can be a customer ID, a cart ID, or similar, and"
             "can be used to reconcile the session with your internal systems."
         ),
+    )
+    currency = StripeCurrencyCodeField(
+        null=True,
+        blank=True,
+        help_text="Three-letter ISO currency code, in lowercase. Must be a supported currency.",
     )
     customer = StripeForeignKey(
         "Customer",
