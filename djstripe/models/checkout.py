@@ -4,7 +4,12 @@ from django.db import models
 from djstripe.settings import djstripe_settings
 
 from .. import enums
-from ..fields import JSONField, StripeEnumField, StripeForeignKey
+from ..fields import (
+    JSONField,
+    StripeEnumField,
+    StripeForeignKey,
+    StripeQuantumCurrencyAmountField,
+)
 from .base import StripeModel
 
 
@@ -19,6 +24,16 @@ class Session(StripeModel):
     expand_fields = ["line_items"]
     stripe_class = stripe.checkout.Session
 
+    amount_total = StripeQuantumCurrencyAmountField(
+        null=True,
+        blank=True,
+        help_text="Total of all items after discounts and taxes are applied.",
+    )
+    amount_subtotal = StripeQuantumCurrencyAmountField(
+        null=True,
+        blank=True,
+        help_text="Total of all items after discounts and taxes are applied.",
+    )
     billing_address_collection = StripeEnumField(
         enum=enums.SessionBillingAddressCollection,
         blank=True,
