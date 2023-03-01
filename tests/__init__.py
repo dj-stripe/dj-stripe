@@ -666,6 +666,7 @@ FAKE_SESSION_I = {
     "subscription": None,
     "success_url": "https://example.com/success",
     "metadata": {},
+    "line_tems": {},
 }
 
 

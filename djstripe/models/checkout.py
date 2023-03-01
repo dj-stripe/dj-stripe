@@ -16,6 +16,7 @@ class Session(StripeModel):
     Stripe documentation: https://stripe.com/docs/api/checkout/sessions?lang=python
     """
 
+    expand_fields = ["line_items"]
     stripe_class = stripe.checkout.Session
 
     billing_address_collection = StripeEnumField(
@@ -60,6 +61,11 @@ class Session(StripeModel):
         null=True,
         blank=True,
         help_text=("The line items, plans, or SKUs purchased by the customer."),
+    )
+    line_items = JSONField(
+        null=True,
+        blank=True,
+        help_text=("The line items purchased by the customer."),
     )
     locale = models.CharField(
         max_length=255,
