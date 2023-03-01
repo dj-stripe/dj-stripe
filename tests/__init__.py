@@ -664,6 +664,7 @@ FAKE_SESSION_I = {
     "mode": None,
     "payment_intent": FAKE_PAYMENT_INTENT_I["id"],
     "payment_method_types": ["card"],
+    "payment_status": "unpaid",
     "setup_intent": FAKE_SETUP_INTENT_II["id"],
     "shipping_address_collection": {},
     "shipping_cost": {},

@@ -317,6 +317,12 @@ class ChargeStatus(Enum):
     failed = _("Failed")
 
 
+class SessionPaymentStatus(Enum):
+    paid = _("Paid")
+    unpaid = _("Unpaid")
+    no_payment_required = _("No Payment Required")
+
+
 class ConfirmationMethod(Enum):
     automatic = _("Automatic")
     manual = _("Manual")

@@ -116,6 +116,12 @@ class Session(StripeModel):
         help_text="The list of payment method types (e.g. card) that this "
         "Checkout Session is allowed to accept."
     )
+    payment_status = StripeEnumField(
+        enum=enums.SessionPaymentStatus,
+        null=True,
+        blank=True,
+        help_text="The payment status of the Checkout Session, one of paid, unpaid, or no_payment_required. You can use this value to decide when to fulfill your customer's order.",
+    )
     setup_intent = StripeForeignKey(
         "SetupIntent",
         null=True,
