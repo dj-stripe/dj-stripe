@@ -98,6 +98,30 @@ class Session(StripeModel):
         on_delete=models.SET_NULL,
         help_text=("The ID of the SetupIntent for Checkout Sessions in setup mode."),
     )
+    shipping_address_collection = JSONField(
+        null=True,
+        blank=True,
+        help_text=(
+            "When set, provides configuration for Checkout to collect a shipping address from a customer."
+        ),
+    )
+    shipping_cost = JSONField(
+        null=True,
+        blank=True,
+        help_text=(
+            "The details of the customer cost of shipping, including the customer chosen ShippingRate."
+        ),
+    )
+    shipping_details = JSONField(
+        null=True,
+        blank=True,
+        help_text=("Shipping information for this Checkout Session."),
+    )
+    shipping_options = JSONField(
+        null=True,
+        blank=True,
+        help_text=("The shipping rate options applied to this Session."),
+    )
     submit_type = StripeEnumField(
         enum=enums.SubmitTypeStatus,
         blank=True,
