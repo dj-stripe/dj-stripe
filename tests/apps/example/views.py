@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import DetailView, FormView
-from django.views.generic.base import TemplateView
+from django.views.generic.base import RedirectView, TemplateView
 
 from djstripe import models
 from djstripe import settings as djstripe_settings
@@ -20,6 +20,111 @@ logger = logging.getLogger(__name__)
 
 User = get_user_model()
 stripe.api_key = djstripe_settings.djstripe_settings.STRIPE_SECRET_KEY
+
+
+class CreateCheckoutSessionServerView(LoginRequiredMixin, RedirectView):
+    """
+    Example View to demonstrate how to use dj-stripe to:
+
+     * Create a Stripe Server Checkout Session (for a new and a returning customer)
+     * Add SUBSCRIBER_CUSTOMER_KEY to metadata to populate customer.subscriber model field
+     * Fill out Payment Form and Complete Payment
+
+    Redirects the User to Stripe Checkout Session.
+    This does a logged in purchase for a new and a returning customer using Stripe Checkout
+    """
+
+    def get_redirect_url(self, *args, **kwargs):
+        """
+        Creates and redirects user to a Stripe Server Checkout Session
+        """
+        success_url = self.request.build_absolute_uri(
+            reverse("djstripe_example:success")
+        )
+        cancel_url = self.request.build_absolute_uri(reverse("home"))
+
+        # get the id of the Model instance of djstripe_settings.djstripe_settings.get_subscriber_model()
+        # here we have assumed it is the Django User model. It could be a Team, Company model too.
+        # note that it needs to have an email field.
+        id = self.request.user.id
+
+        # example of how to insert the SUBSCRIBER_CUSTOMER_KEY: id in the metadata
+        # to add customer.subscriber to the newly created/updated customer.
+        metadata = {
+            f"{djstripe_settings.djstripe_settings.SUBSCRIBER_CUSTOMER_KEY}": id
+        }
+
+        try:
+            # retreive the Stripe Customer.
+            customer = models.Customer.objects.get(subscriber=self.request.user)
+
+            print("Customer Object in DB.")
+
+            # ! Note that Stripe will always create a new Customer Object if customer id not provided
+            # ! even if customer_email is provided!
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                customer=customer.id,
+                # payment_method_types=["bacs_debit"],  # for bacs_debit
+                payment_intent_data={
+                    "setup_future_usage": "off_session",
+                    # so that the metadata gets copied to the associated Payment Intent and Charge Objects
+                    "metadata": metadata,
+                },
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "usd",
+                            # "currency": "gbp",  # for bacs_debit
+                            "unit_amount": 2000,
+                            "product_data": {
+                                "name": "Sample Product Name",
+                                "images": ["https://i.imgur.com/EHyR2nP.png"],
+                                "description": "Sample Description",
+                            },
+                        },
+                        "quantity": 1,
+                    },
+                ],
+                mode="payment",
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata=metadata,
+            )
+
+        except models.Customer.DoesNotExist:
+            print("Customer Object not in DB.")
+
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                # payment_method_types=["bacs_debit"],  # for bacs_debit
+                payment_intent_data={
+                    "setup_future_usage": "off_session",
+                    # so that the metadata gets copied to the associated Payment Intent and Charge Objects
+                    "metadata": metadata,
+                },
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "usd",
+                            # "currency": "gbp",  # for bacs_debit
+                            "unit_amount": 2000,
+                            "product_data": {
+                                "name": "Sample Product Name",
+                                "images": ["https://i.imgur.com/EHyR2nP.png"],
+                                "description": "Sample Description",
+                            },
+                        },
+                        "quantity": 1,
+                    },
+                ],
+                mode="payment",
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata=metadata,
+            )
+
+        return session.url
 
 
 class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
