@@ -10,6 +10,11 @@ urlpatterns = [
         views.CreateCheckoutSessionView.as_view(),
         name="checkout",
     ),
+    path(
+        "checkout/server/",
+        views.CreateCheckoutSessionServerView.as_view(),
+        name="checkout",
+    ),
     path("success/", views.CheckoutSessionSuccessView.as_view(), name="success"),
     path(
         "purchase-subscription",
