@@ -127,7 +127,7 @@ class CreateCheckoutSessionServerView(LoginRequiredMixin, RedirectView):
         return session.url
 
 
-class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
+class CreateCheckoutSessionClientView(LoginRequiredMixin, TemplateView):
     """
     Example View to demonstrate how to use dj-stripe to:
 

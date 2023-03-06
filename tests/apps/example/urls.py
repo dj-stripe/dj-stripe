@@ -7,7 +7,7 @@ app_name = "djstripe_example"
 urlpatterns = [
     path(
         "checkout/",
-        views.CreateCheckoutSessionView.as_view(),
+        views.CreateCheckoutSessionClientView.as_view(),
         name="checkout",
     ),
     path(
