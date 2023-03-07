@@ -1092,7 +1092,7 @@ class InvoiceItem(StripeModel):
     unit_amount_decimal = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
-        max_digits=19,
+        max_digits=20,
         decimal_places=12,
         help_text=(
             "Same as `unit_amount`, but contains a decimal value with "
