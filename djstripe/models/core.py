@@ -397,9 +397,15 @@ class Charge(StripeModel):
 
         return int(amount_to_refund * 100)
 
-    def refund(self, amount: Decimal = None, reason: str = None) -> "Charge":
+    def refund(
+        self,
+        amount: Decimal = None,
+        reason: str = None,
+        api_key: str = None,
+        stripe_account: str = None,
+    ) -> "Refund":
         """
-        Initiate a refund. Returns the charge object.
+        Initiate a refund. Returns the refund object.
 
         :param amount: A positive decimal amount representing how much of this charge
             to refund. If amount is not provided, then this will be a full refund.
@@ -410,11 +416,22 @@ class Charge(StripeModel):
             when you believe the charge to be fraudulent will
             help Stripe improve their fraud detection algorithms.
         """
-        charge_obj = self.api_retrieve().refund(
-            amount=self._calculate_refund_amount(amount=amount), reason=reason
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        refund_obj = Refund._api_create(
+            charge=self.id,
+            amount=self._calculate_refund_amount(amount=amount),
+            reason=reason,
+            api_key=api_key or self.default_api_key,
+            stripe_account=stripe_account,
         )
-        return self.__class__.sync_from_stripe_data(
-            charge_obj, api_key=self.default_api_key
+
+        return Refund.sync_from_stripe_data(
+            refund_obj,
+            api_key=api_key or self.default_api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     def capture(self, **kwargs) -> "Charge":
