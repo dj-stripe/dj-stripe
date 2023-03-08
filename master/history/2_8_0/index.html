@@ -194,6 +194,10 @@ To upgrade from an older version, first upgrade to dj-stripe 2.5.0.</p>
 <li>Remove undocumented <code>set_stripe_api_version()</code> helper function
     and context manager <code>stripe_temporary_api_version()</code>.
     The API version is now set on each request individually.</li>
+<li>Updated <code>Charge.refund(...)</code> helper function
+    to correctly create the desired refund. Note that the
+    created <code>Refund</code> object is now returned as opposed to
+    the <code>Charge</code> object.</li>
 </ul>
 <h2 id="other-changes">Other changes</h2>
 <ul>
