@@ -4,7 +4,13 @@ from django.db import models
 from djstripe.settings import djstripe_settings
 
 from .. import enums
-from ..fields import JSONField, StripeEnumField, StripeForeignKey
+from ..fields import (
+    JSONField,
+    StripeCurrencyCodeField,
+    StripeEnumField,
+    StripeForeignKey,
+    StripeQuantumCurrencyAmountField,
+)
 from .base import StripeModel
 
 
@@ -16,8 +22,23 @@ class Session(StripeModel):
     Stripe documentation: https://stripe.com/docs/api/checkout/sessions?lang=python
     """
 
+    expand_fields = [
+        "line_items",
+        "total_details.breakdown",
+        "line_items.data.discounts",
+    ]
     stripe_class = stripe.checkout.Session
 
+    amount_total = StripeQuantumCurrencyAmountField(
+        null=True,
+        blank=True,
+        help_text="Total of all items after discounts and taxes are applied.",
+    )
+    amount_subtotal = StripeQuantumCurrencyAmountField(
+        null=True,
+        blank=True,
+        help_text="Total of all items after discounts and taxes are applied.",
+    )
     billing_address_collection = StripeEnumField(
         enum=enums.SessionBillingAddressCollection,
         blank=True,
@@ -43,6 +64,11 @@ class Session(StripeModel):
             "can be used to reconcile the session with your internal systems."
         ),
     )
+    currency = StripeCurrencyCodeField(
+        null=True,
+        blank=True,
+        help_text="Three-letter ISO currency code, in lowercase. Must be a supported currency.",
+    )
     customer = StripeForeignKey(
         "Customer",
         null=True,
@@ -60,6 +86,11 @@ class Session(StripeModel):
         null=True,
         blank=True,
         help_text=("The line items, plans, or SKUs purchased by the customer."),
+    )
+    line_items = JSONField(
+        null=True,
+        blank=True,
+        help_text=("The line items purchased by the customer."),
     )
     locale = models.CharField(
         max_length=255,
@@ -85,6 +116,49 @@ class Session(StripeModel):
         help_text="The list of payment method types (e.g. card) that this "
         "Checkout Session is allowed to accept."
     )
+    payment_status = StripeEnumField(
+        enum=enums.SessionPaymentStatus,
+        null=True,
+        blank=True,
+        help_text="The payment status of the Checkout Session, one of paid, unpaid, or no_payment_required. You can use this value to decide when to fulfill your customer's order.",
+    )
+    setup_intent = StripeForeignKey(
+        "SetupIntent",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        help_text=("The ID of the SetupIntent for Checkout Sessions in setup mode."),
+    )
+    shipping_address_collection = JSONField(
+        null=True,
+        blank=True,
+        help_text=(
+            "When set, provides configuration for Checkout to collect a shipping address from a customer."
+        ),
+    )
+    shipping_cost = JSONField(
+        null=True,
+        blank=True,
+        help_text=(
+            "The details of the customer cost of shipping, including the customer chosen ShippingRate."
+        ),
+    )
+    shipping_details = JSONField(
+        null=True,
+        blank=True,
+        help_text=("Shipping information for this Checkout Session."),
+    )
+    shipping_options = JSONField(
+        null=True,
+        blank=True,
+        help_text=("The shipping rate options applied to this Session."),
+    )
+    status = StripeEnumField(
+        enum=enums.SessionStatus,
+        null=True,
+        blank=True,
+        help_text="The status of the Checkout Session, one of open, complete, or expired.",
+    )
     submit_type = StripeEnumField(
         enum=enums.SubmitTypeStatus,
         blank=True,
@@ -103,6 +177,19 @@ class Session(StripeModel):
         help_text=(
             "The URL the customer will be directed to after the payment or subscription"
             "creation is successful."
+        ),
+    )
+    total_details = JSONField(
+        null=True,
+        blank=True,
+        help_text=("Tax and discount details for the computed total amount."),
+    )
+    url = models.TextField(
+        max_length=5000,
+        blank=True,
+        null=True,
+        help_text=(
+            "The URL to the Checkout Session. Redirect customers to this URL to take them to Checkout. If you’re using Custom Domains, the URL will use your subdomain. Otherwise, it’ll use checkout.stripe.com. This value is only present when the session is active."
         ),
     )
 

@@ -141,6 +141,7 @@ from . import (
     FAKE_PRICE,
     FAKE_PRODUCT,
     FAKE_SESSION_I,
+    FAKE_SETUP_INTENT_II,
     FAKE_STANDARD_ACCOUNT,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED,
@@ -829,6 +830,11 @@ class TestCheckoutEvents(EventTestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
+        "stripe.SetupIntent.retrieve",
+        return_value=deepcopy(FAKE_SETUP_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.PaymentIntent.retrieve",
         return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
         autospec=True,
@@ -838,6 +844,7 @@ class TestCheckoutEvents(EventTestCase):
         self,
         event_retrieve_mock,
         payment_intent_retrieve_mock,
+        setup_intent_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
         invoice_item_retrieve_mock,
@@ -897,6 +904,11 @@ class TestCheckoutEvents(EventTestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
+        "stripe.SetupIntent.retrieve",
+        return_value=deepcopy(FAKE_SETUP_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.PaymentIntent.retrieve",
         return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
         autospec=True,
@@ -906,6 +918,7 @@ class TestCheckoutEvents(EventTestCase):
         self,
         event_retrieve_mock,
         payment_intent_retrieve_mock,
+        setup_intent_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
         invoice_item_retrieve_mock,
@@ -967,6 +980,11 @@ class TestCheckoutEvents(EventTestCase):
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     @patch(
+        "stripe.SetupIntent.retrieve",
+        return_value=deepcopy(FAKE_SETUP_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.PaymentIntent.retrieve",
         return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
         autospec=True,
@@ -976,6 +994,7 @@ class TestCheckoutEvents(EventTestCase):
         self,
         event_retrieve_mock,
         payment_intent_retrieve_mock,
+        setup_intent_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
         invoice_item_retrieve_mock,
@@ -1037,6 +1056,11 @@ class TestCheckoutEvents(EventTestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SetupIntent.retrieve",
+        return_value=deepcopy(FAKE_SETUP_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.PaymentIntent.retrieve",
         return_value=FAKE_PAYMENT_INTENT_I,
         autospec=True,
@@ -1046,6 +1070,7 @@ class TestCheckoutEvents(EventTestCase):
         self,
         event_retrieve_mock,
         payment_intent_retrieve_mock,
+        setup_intent_retrieve_mock,
         customer_modify_mock,
         invoice_retrieve_mock,
         invoice_item_retrieve_mock,

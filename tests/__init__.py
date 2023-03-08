@@ -638,9 +638,12 @@ FAKE_SETUP_INTENT_DESTINATION_CHARGE = load_fixture(
 FAKE_SESSION_I = {
     "id": "cs_test_OAgNmy75Td25OeREvKUs8XZ7SjMPO9qAplqHO1sBaEjOg9fYbaeMh2nA",
     "object": "checkout.session",
+    "amount_total": 1500,
+    "amount_subtotal": 1500,
     "billing_address_collection": None,
     "cancel_url": "https://example.com/cancel",
     "client_reference_id": None,
+    "currency": "usd",
     "customer": "cus_6lsBvm5rJ0zyHc",
     "customer_email": None,
     "display_items": [
@@ -661,11 +664,20 @@ FAKE_SESSION_I = {
     "mode": None,
     "payment_intent": FAKE_PAYMENT_INTENT_I["id"],
     "payment_method_types": ["card"],
-    "setup_intent": None,
+    "payment_status": "unpaid",
+    "setup_intent": FAKE_SETUP_INTENT_II["id"],
+    "shipping_address_collection": {},
+    "shipping_cost": {},
+    "shipping_details": {},
+    "shipping_options": {},
+    "status": "open",
     "submit_type": None,
     "subscription": None,
     "success_url": "https://example.com/success",
     "metadata": {},
+    "line_tems": {},
+    "url": "",
+    "total_details": {},
 }
 
 
