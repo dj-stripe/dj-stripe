@@ -1008,6 +1008,26 @@ class PaymentMethod(StripeModel):
         else:
             self.customer = None
 
+    def api_retrieve(self, api_key=None, stripe_account=None):
+        # PaymentMethod manipulated through a customer or account.
+
+        api_key = api_key or self.default_api_key
+
+        if self.customer:
+            return stripe.Customer.retrieve_payment_method(
+                self.customer.id,
+                self.id,
+                expand=self.expand_fields,
+                stripe_account=stripe_account,
+                api_key=api_key,
+            )
+
+        raise ImpossibleAPIRequest(
+            f"Can't retrieve {self.__class__} without a customer object."
+            " This may happen if not all customer objects are in the db."
+            ' Please run "python manage.py djstripe_sync_models Account Customer" as a potential fix.'
+        )
+
     @classmethod
     def attach(
         cls,
