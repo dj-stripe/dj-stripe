@@ -2,6 +2,7 @@
 Module for creating re-usable fixtures to be used across the test suite
 """
 import os
+import time
 
 import pytest
 import stripe
@@ -189,3 +190,14 @@ def platform_account_fixture(django_db_setup, django_db_blocker, configure_setti
         )
 
         yield account_json, account_instance
+
+
+@pytest.fixture(autouse=True)
+def slow_down_tests(request):
+    """Adds a 5 second delay to every test when using
+    the stripe_api to avoid running into RateLimit
+    and other related issues."""
+    for m in request.node.iter_markers():
+        if m.name == "stripe_api":
+            time.sleep(5)
+            break
