@@ -839,7 +839,7 @@ class TestAccountSTRIPE:
         """Ensure the expected default account is returned."""
         account = Account.get_default_account(api_key=settings.STRIPE_SECRET_KEY)
 
-        assert account.id == "acct_1ItQ7cJSZQVUcJYg"
+        assert account.id == "acct_1IKVu0Ij6g3bgR0q"
 
         assert account.djstripe_owner_account == account
         assert account.djstripe_owner_account == platform_account_fixture[1]
@@ -882,14 +882,14 @@ class TestAccountSTRIPE:
     @pytest.mark.parametrize(
         "business_profile_update, settings_dashboard_update, expected_account_str",
         [
-            ({}, {}, "<id=acct_1ItQ7cJSZQVUcJYg>"),
+            ({}, {}, "<id=acct_1IKVu0Ij6g3bgR0q>"),
             ({}, {"display_name": "some display name"}, "some display name"),
             (
                 {"name": "some business name"},
                 {"display_name": ""},
                 "some business name",
             ),
-            ({"name": ""}, {"display_name": ""}, "<id=acct_1ItQ7cJSZQVUcJYg>"),
+            ({"name": ""}, {"display_name": ""}, "<id=acct_1IKVu0Ij6g3bgR0q>"),
         ],
     )
     def test_account_str(
