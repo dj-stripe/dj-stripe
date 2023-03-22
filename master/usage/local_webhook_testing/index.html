@@ -172,7 +172,7 @@ or by running <code>stripe listen --print-secret</code>.</p>
 it can be passed as an HTTP header;
 dj-stripe looks for a header called <code>X-Djstripe-Webhook-Secret</code>:</p>
 <div class="highlight"><pre><span></span><code>stripe<span class="w"> </span>listen<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--forward-to<span class="w"> </span>http://localhost:8000/stripe/webhook/&lt;UUID&gt;<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--forward-to<span class="w"> </span>http://localhost:8000/djstripe/webhook/&lt;UUID&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-H<span class="w"> </span><span class="s2">&quot;x-djstripe-webhook-secret: </span><span class="k">$(</span>stripe<span class="w"> </span>listen<span class="w"> </span>--print-secret<span class="k">)</span><span class="s2">&quot;</span>
 </code></pre></div>
 <p>From now on, whenever you make changes on the Stripe Dashboard,
