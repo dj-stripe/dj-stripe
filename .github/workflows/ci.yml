@@ -64,7 +64,7 @@ jobs:
         run: poetry install --with ci
 
       - name: Test with tox for ${{ matrix.python-version }}
-        run: STRIPE_TEST_SECRET_KEY=${{ env.STRIPE_TEST_SECRET_KEY }} poetry run tox -- -- -m stripe_api
+        run: STRIPE_TEST_SECRET_KEY=${{ env.STRIPE_TEST_SECRET_KEY }} poetry run tox -- -- -m stripe_api --cov-fail-under=55
 
       - name: Convert coverage
         run: poetry run coverage xml
