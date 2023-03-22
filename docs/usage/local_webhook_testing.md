@@ -24,7 +24,7 @@ dj-stripe looks for a header called `X-Djstripe-Webhook-Secret`:
 
 ```sh
 stripe listen \
-  --forward-to http://localhost:8000/stripe/webhook/<UUID> \
+  --forward-to http://localhost:8000/djstripe/webhook/<UUID> \
   -H "x-djstripe-webhook-secret: $(stripe listen --print-secret)"
 ```
 
