@@ -1090,3 +1090,13 @@ class IdempotencyKey(models.Model):
     @property
     def is_expired(self) -> bool:
         return timezone.now() > self.created + timedelta(hours=24)
+
+    @staticmethod
+    def update_action_field(uuid, stripe_obj):
+        # Update the action of the idempotency_key by appending stripe_obj.id to it
+        idempotency_key_object_qs = IdempotencyKey.objects.filter(uuid=uuid)
+        if idempotency_key_object_qs.exists():
+            idempotency_key_object = idempotency_key_object_qs.get()
+            if idempotency_key_object.action.split(":")[-1] == "":
+                idempotency_key_object.action += stripe_obj["id"]
+                idempotency_key_object.save()

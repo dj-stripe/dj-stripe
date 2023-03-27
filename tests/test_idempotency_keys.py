@@ -39,3 +39,20 @@ class IdempotencyKeyTest(TestCase):
 
         self.assertEqual(IdempotencyKey.objects.count(), 1)
         self.assertEqual(str(IdempotencyKey.objects.get().uuid), valid_key)
+
+    def test_update_action_field(self):
+        """Test for the update_action_field staticmethod of the
+        IdempotencyKey class."""
+        stripe_obj = {"id": "fakefakefake_0001"}
+        # create idempotency key
+        uuid = djstripe_settings.create_idempotency_key("customer", "create", False)
+        key_obj = IdempotencyKey.objects.get(uuid=uuid)
+        action = key_obj.action
+
+        # Invoke update_action_field()
+        IdempotencyKey.update_action_field(uuid, stripe_obj)
+
+        key_obj.refresh_from_db()
+
+        # assert action got updated with the id of the json passed
+        assert key_obj.action == f"{action}{stripe_obj['id']}"
