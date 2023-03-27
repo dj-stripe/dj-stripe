@@ -316,7 +316,9 @@ class TransferReversal(StripeModel):
         return str(self.transfer)
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(
+        cls, idempotency_key=None, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
         """
         Call the stripe API's create operation for this model.
         :param api_key: The api key to use for this request. \

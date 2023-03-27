@@ -204,7 +204,10 @@ class StripeModel(StripeBaseModel):
         )
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    @classmethod
+    def _api_create(
+        cls, idempotency_key=None, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
         """
         Call the stripe API's create operation for this model.
 

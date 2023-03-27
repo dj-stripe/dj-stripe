@@ -178,13 +178,9 @@ class LegacySourceMixin:
         return account, customer, kwargs
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
-        # OVERRIDING the parent version of this function
-        # Cards & Bank Accounts must be manipulated through a customer or account.
-
-        account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
-            **kwargs
-        )
+    def _api_create(
+        cls, idempotency_key=None, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
 
         # First we try to retrieve by customer attribute,
         # then by account attribute
