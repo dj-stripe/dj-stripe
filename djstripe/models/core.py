@@ -403,6 +403,7 @@ class Charge(StripeModel):
         reason: str = None,
         api_key: str = None,
         stripe_account: str = None,
+        idempotency_key: str = None,
     ) -> "Refund":
         """
         Initiate a refund. Returns the refund object.
@@ -426,6 +427,7 @@ class Charge(StripeModel):
             reason=reason,
             api_key=api_key or self.default_api_key,
             stripe_account=stripe_account,
+            idempotency_key=idempotency_key,
         )
 
         return Refund.sync_from_stripe_data(
