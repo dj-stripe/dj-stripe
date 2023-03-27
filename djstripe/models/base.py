@@ -216,6 +216,7 @@ class StripeModel(StripeBaseModel):
                 object_type=cls.__name__.lower(),
                 action=action,
                 livemode=djstripe_settings.STRIPE_LIVE_MODE,
+                stripe_obj_id=kwargs.get("stripe_obj_id", ""),
             )
 
         return idempotency_key
