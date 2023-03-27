@@ -8,6 +8,7 @@ import pytest
 from django.test.testcases import TestCase
 
 from djstripe.models import Transfer, TransferReversal
+from djstripe.models.base import IdempotencyKey
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -144,14 +145,24 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         transfer_get_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-        TransferReversal._api_create(
-            id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"]
+        reversal_obj_id = FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0][
+            "transfer"
+        ]["id"]
+        TransferReversal._api_create(id=reversal_obj_id)
+
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"transferreversal:create:{reversal_obj_id}",
+            livemode=False,
         )
+        idempotency_key = str(idempotency_key.uuid)
 
         transfer_reversal_create_mock.assert_called_once_with(
             id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
+            metadata={"idempotency_key": idempotency_key},
         )
 
     @patch("stripe.Transfer.list_reversals", autospec=True)

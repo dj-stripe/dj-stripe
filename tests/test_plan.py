@@ -10,6 +10,7 @@ from django.test import TestCase
 
 from djstripe.enums import PriceUsageType
 from djstripe.models import Plan, Product
+from djstripe.models.base import IdempotencyKey
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -45,11 +46,22 @@ class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         plan = Plan.create(**fake_plan)
 
-        expected_create_kwargs = deepcopy(FAKE_PLAN)
-        expected_create_kwargs["api_key"] = djstripe_settings.STRIPE_SECRET_KEY
-        expected_create_kwargs["stripe_version"] = djstripe_settings.STRIPE_API_VERSION
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"plan:create:{fake_plan['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
 
-        plan_create_mock.assert_called_once_with(**expected_create_kwargs)
+        expected_create_kwargs = deepcopy(FAKE_PLAN)
+        expected_create_kwargs["metadata"]["idempotency_key"] = idempotency_key
+
+        plan_create_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
+            **expected_create_kwargs,
+        )
 
         self.assert_fks(
             plan,
@@ -71,12 +83,21 @@ class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         plan = Plan.create(**fake_plan)
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"plan:create:{fake_plan['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         expected_create_kwargs = deepcopy(FAKE_PLAN)
         expected_create_kwargs["product"] = self.stripe_product
+        expected_create_kwargs["metadata"]["idempotency_key"] = idempotency_key
 
         plan_create_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
             **expected_create_kwargs,
         )
 
@@ -102,10 +123,21 @@ class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         plan = Plan.create(**fake_plan)
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"plan:create:{fake_plan['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
+        expected_create_kwargs = deepcopy(FAKE_PLAN)
+        expected_create_kwargs["metadata"]["idempotency_key"] = idempotency_key
+
         plan_create_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **FAKE_PLAN,
+            idempotency_key=idempotency_key,
+            **expected_create_kwargs,
         )
 
         self.assert_fks(
@@ -129,12 +161,21 @@ class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         plan = Plan.create(**fake_plan)
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"plan:create:{fake_plan['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         expected_create_kwargs = deepcopy(FAKE_PLAN)
         expected_create_kwargs["metadata"] = metadata
+        expected_create_kwargs["metadata"]["idempotency_key"] = idempotency_key
 
         plan_create_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
             **expected_create_kwargs,
         )
 

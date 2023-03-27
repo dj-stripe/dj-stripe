@@ -3,7 +3,7 @@ import warnings
 from typing import Optional, Union
 
 import stripe
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
@@ -26,7 +26,7 @@ from ..fields import (
 from ..managers import SubscriptionManager
 from ..settings import djstripe_settings
 from ..utils import QuerySetMock, get_friendly_currency_amount, get_id_from_stripe_data
-from .base import StripeModel
+from .base import IdempotencyKey, StripeModel
 from .core import Customer
 
 logger = logging.getLogger(__name__)
@@ -2385,7 +2385,9 @@ class TaxId(StripeModel):
         verbose_name = "Tax ID"
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(
+        cls, idempotency_key=None, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
         """
         Call the stripe API's create operation for this model.
 
@@ -2393,16 +2395,31 @@ class TaxId(StripeModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        with transaction.atomic():
+            # Add or create idempotency_key to kwargs
+            kwargs, idempotency_key = cls.add_idempotency_key_to_metadata(
+                action="create", idempotency_key=idempotency_key, **kwargs
+            )
 
-        if not kwargs.get("id"):
-            raise KeyError("Customer Object ID is missing")
+            if not kwargs.get("id"):
+                raise KeyError("Customer Object ID is missing")
 
-        try:
-            Customer.objects.get(id=kwargs["id"])
-        except Customer.DoesNotExist:
-            raise
+            try:
+                Customer.objects.get(id=kwargs["id"])
+            except Customer.DoesNotExist:
+                raise
 
-        return stripe.Customer.create_tax_id(api_key=api_key, **kwargs)
+            stripe_obj = stripe.Customer.create_tax_id(
+                api_key=api_key,
+                idempotency_key=idempotency_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                **kwargs,
+            )
+
+            # Update the action of the idempotency_key by appending stripe_obj.id to it
+            IdempotencyKey.update_action_field(idempotency_key, stripe_obj)
+
+            return stripe_obj
 
     def api_retrieve(self, api_key=None, stripe_account=None):
         """
@@ -2551,7 +2568,9 @@ class UsageRecord(StripeModel):
         return f"Usage for {self.subscription_item} ({self.action}) is {self.quantity}"
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(
+        cls, idempotency_key=None, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
         """
         Call the stripe API's create operation for this model.
 
@@ -2559,24 +2578,35 @@ class UsageRecord(StripeModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        with transaction.atomic():
+            # Add or create idempotency_key to kwargs
+            kwargs, idempotency_key = cls.add_idempotency_key_to_metadata(
+                action="create", idempotency_key=idempotency_key, **kwargs
+            )
 
-        if not kwargs.get("id"):
-            raise KeyError("SubscriptionItem Object ID is missing")
+            if not kwargs.get("id"):
+                raise KeyError("SubscriptionItem Object ID is missing")
 
-        try:
-            SubscriptionItem.objects.get(id=kwargs["id"])
-        except SubscriptionItem.DoesNotExist:
-            raise
+            try:
+                SubscriptionItem.objects.get(id=kwargs["id"])
+            except SubscriptionItem.DoesNotExist:
+                raise
 
-        usage_stripe_data = stripe.SubscriptionItem.create_usage_record(
-            api_key=api_key, **kwargs
-        )
+            usage_stripe_data = stripe.SubscriptionItem.create_usage_record(
+                api_key=api_key,
+                idempotency_key=idempotency_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                **kwargs,
+            )
 
-        # ! Hack: there is no way to retrieve a UsageRecord object from Stripe,
-        # ! which is why we create and sync it right here
-        cls.sync_from_stripe_data(usage_stripe_data, api_key=api_key)
+            # Update the action of the idempotency_key by appending usage_stripe_data.id to it
+            IdempotencyKey.update_action_field(idempotency_key, usage_stripe_data)
 
-        return usage_stripe_data
+            # ! Hack: there is no way to retrieve a UsageRecord object from Stripe,
+            # ! which is why we create and sync it right here
+            cls.sync_from_stripe_data(usage_stripe_data, api_key=api_key)
+
+            return usage_stripe_data
 
     @classmethod
     def create(cls, **kwargs):

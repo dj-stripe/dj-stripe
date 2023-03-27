@@ -13,6 +13,8 @@ from stripe.error import InvalidRequestError
 from djstripe import enums
 from djstripe.exceptions import StripeObjectManipulationException
 from djstripe.models import Account, Card, Customer
+from djstripe.models.base import IdempotencyKey
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_CARD,
@@ -270,25 +272,79 @@ class CardTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             Card.api_list(account="fish")
 
     @patch(
+        "tests.Sources",
+        autospec=True,
+    )
+    @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test__api_create_with_account_absent(self, customer_retrieve_mock):
+    def test__api_create_with_account_absent(
+        self, customer_retrieve_mock, sources_mock
+    ):
+        # Need to patch tests.Sources.create method
+        sources_create_mock = sources_mock.return_value.create
+        sources_create_mock.return_value = FAKE_CUSTOMER["sources"]["data"][0]
+
         stripe_card = Card._api_create(customer=self.customer, source=FAKE_CARD["id"])
+
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"card:create:{FAKE_CARD['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
 
         self.assertEqual(FAKE_CARD, stripe_card)
 
+        sources_create_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
+            source=FAKE_CARD["id"],
+            metadata={"idempotency_key": idempotency_key},
+        )
+
+    @patch(
+        "tests.ExternalAccounts",
+        autospec=True,
+    )
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
         autospec=True,
     )
-    def test__api_create_with_customer_absent(self, account_retrieve_mock):
+    def test__api_create_with_customer_absent(
+        self, account_retrieve_mock, external_accounts_mock
+    ):
+        # Need to patch tests.Sources.create method
+        external_accounts_create_mock = external_accounts_mock.return_value.create
+        external_accounts_create_mock.return_value = FAKE_CARD_IV
+
         stripe_card = Card._api_create(
             account=self.custom_account, source=FAKE_CARD_IV["id"]
         )
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"card:create:{FAKE_CARD_IV['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         self.assertEqual(FAKE_CARD_IV, stripe_card)
 
+        external_accounts_create_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
+            source=FAKE_CARD_IV["id"],
+            metadata={"idempotency_key": idempotency_key},
+        )
+
+    @patch(
+        "tests.Sources",
+        autospec=True,
+    )
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
@@ -298,10 +354,14 @@ class CardTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     def test__api_create_with_customer_and_account(
-        self, account_retrieve_mock, customer_retrieve_mock
+        self, account_retrieve_mock, customer_retrieve_mock, sources_mock
     ):
         FAKE_CARD_DICT = deepcopy(FAKE_CARD)
         FAKE_CARD_DICT["account"] = FAKE_CUSTOM_ACCOUNT["id"]
+
+        # Need to patch tests.Sources.create method
+        sources_create_mock = sources_mock.return_value.create
+        sources_create_mock.return_value = FAKE_CUSTOMER["sources"]["data"][0]
 
         stripe_card = Card._api_create(
             account=self.custom_account,
@@ -309,7 +369,22 @@ class CardTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             source=FAKE_CARD_DICT["id"],
         )
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"card:create:{FAKE_CARD_DICT['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         self.assertEqual(FAKE_CARD, stripe_card)
+
+        sources_create_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
+            source=FAKE_CARD_DICT["id"],
+            metadata={"idempotency_key": idempotency_key},
+        )
 
     @patch(
         "stripe.Customer.delete_source",

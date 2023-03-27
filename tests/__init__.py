@@ -215,7 +215,7 @@ class ExternalAccounts(object):
     def __init__(self, external_account_fakes):
         self.external_account_fakes = external_account_fakes
 
-    def create(self, source, api_key=None):
+    def create(self, source, api_key=None, **kwargs):
         for fake_external_account in self.external_account_fakes:
             if fake_external_account["id"] == source:
                 return fake_external_account
@@ -1312,7 +1312,7 @@ class Sources(object):
     def __init__(self, card_fakes):
         self.card_fakes = card_fakes
 
-    def create(self, source, api_key=None):
+    def create(self, source, **kwargs):
         for fake_card in self.card_fakes:
             if fake_card["id"] == source:
                 return fake_card

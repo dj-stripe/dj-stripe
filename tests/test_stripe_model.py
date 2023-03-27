@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.test import TestCase
 
+from djstripe.fields import JSONField
 from djstripe.models import Account, Customer, StripeModel
 from djstripe.settings import djstripe_settings
 
@@ -15,6 +16,10 @@ pytestmark = pytest.mark.django_db
 class ExampleStripeModel(StripeModel):
     # exists to avoid "Abstract models cannot be instantiated." error
     pass
+
+
+class ExampleStripeModelWithoutMetadata(StripeModel):
+    metadata = None
 
 
 class TestStripeModelExceptions(TestCase):
@@ -296,3 +301,35 @@ def test__find_owner_account_for_webhook_event_trigger(
             mock_get_or_retrieve_for_api_key.assert_called_once_with(
                 djstripe_settings.STRIPE_SECRET_KEY
             )
+
+
+@pytest.mark.parametrize(
+    "idempotency_key", [None, "3f7bccda-e547-46af-a363-d3024eed300e"]
+)
+@pytest.mark.parametrize("model_has_metadata", [True, False])
+def test_add_idempotency_key_to_metadata(model_has_metadata, idempotency_key):
+    """Test to ensure metadata gets populated
+    for models that have the metadata key."""
+
+    if model_has_metadata:
+        cls = ExampleStripeModel
+    else:
+        cls = ExampleStripeModelWithoutMetadata
+
+    # Invoke add_idempotency_key_to_metadata
+    output_kwargs, output_idempotency_key = cls.add_idempotency_key_to_metadata(
+        action="create", idempotency_key=idempotency_key
+    )
+
+    if model_has_metadata and idempotency_key:
+        assert output_idempotency_key == idempotency_key
+        assert output_kwargs["metadata"] == {"idempotency_key": output_idempotency_key}
+    elif model_has_metadata and not idempotency_key:
+        assert output_idempotency_key != idempotency_key
+        assert output_kwargs["metadata"] == {"idempotency_key": output_idempotency_key}
+    elif not model_has_metadata and idempotency_key:
+        assert output_idempotency_key == idempotency_key
+        assert output_kwargs.get("metadata") is None
+    else:
+        assert output_idempotency_key != idempotency_key
+        assert output_kwargs.get("metadata") is None
