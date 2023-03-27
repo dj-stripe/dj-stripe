@@ -170,8 +170,8 @@ class DjstripeSettings:
     def _get_idempotency_key(self, object_type, action, livemode) -> str:
         from .models import IdempotencyKey
 
-        action = f"{object_type}:{action}"
-        idempotency_key, _created = IdempotencyKey.objects.get_or_create(
+        action = f"{object_type}:{action}:{stripe_obj_id}"
+        idempotency_key = IdempotencyKey.objects.create(
             action=action, livemode=livemode
         )
         return str(idempotency_key.uuid)

@@ -10,19 +10,13 @@ from djstripe.utils import clear_expired_idempotency_keys
 
 class IdempotencyKeyTest(TestCase):
     def test_generate_idempotency_key(self):
-        key1 = djstripe_settings.get_idempotency_key("customer", "create:1", False)
-        key2 = djstripe_settings.get_idempotency_key("customer", "create:1", False)
-        self.assertTrue(key1 == key2)
+        key1 = djstripe_settings.create_idempotency_key("customer", "create:1", False)
+        key2 = djstripe_settings.create_idempotency_key("customer", "create:2", False)
+        self.assertTrue(key1 != key2)
 
-        key3 = djstripe_settings.get_idempotency_key("customer", "create:2", False)
-        self.assertTrue(key1 != key3)
-
-        key4 = djstripe_settings.get_idempotency_key("charge", "create:1", False)
-        self.assertTrue(key1 != key4)
-
-        self.assertEqual(IdempotencyKey.objects.count(), 3)
+        self.assertEqual(IdempotencyKey.objects.count(), 2)
         key1_obj = IdempotencyKey.objects.get(
-            action="customer:create:1", livemode=False
+            action="customer:create:1:", livemode=False
         )
         self.assertFalse(key1_obj.is_expired)
         self.assertEqual(str(key1_obj), str(key1_obj.uuid))
