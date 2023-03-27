@@ -27,7 +27,7 @@ from ..managers import ChargeManager
 from ..settings import djstripe_settings
 from ..signals import WEBHOOK_SIGNALS
 from ..utils import get_friendly_currency_amount, get_id_from_stripe_data
-from .base import IdempotencyKey, StripeModel, logger
+from .base import StripeModel, logger
 
 
 def _sanitise_price(price=None, plan=None, **kwargs):
@@ -1137,13 +1137,6 @@ class Customer(StripeModel):
         # toggle the deleted flag on Customer to indicate it has been
         # deleted upstream in Stripe
         self.deleted = True
-
-        if self.subscriber:
-            # Delete the idempotency key used by Customer.create()
-            # So re-creating a customer for this subscriber before the key expires
-            # doesn't return the older Customer data
-            idempotency_key_action = f"customer:create:{self.subscriber.pk}"
-            IdempotencyKey.objects.filter(action=idempotency_key_action).delete()
 
         self.subscriber = None
 

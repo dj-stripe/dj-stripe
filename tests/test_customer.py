@@ -485,32 +485,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(customer.sources.count(), 0)
 
     @patch(
-        "stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER_II), autospec=True
-    )
-    def test_customer_purge_deletes_idempotency_key(self, customer_api_create_fake):
-        # We need to call Customer.get_or_create (which setUp doesn't)
-        # to get an idempotency key
-        user = get_user_model().objects.create_user(
-            username="blah", email=FAKE_CUSTOMER_II["email"]
-        )
-        idempotency_key_action = f"customer:create:{user.pk}"
-        self.assertFalse(
-            IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
-        )
-
-        customer, created = Customer.get_or_create(user)
-        self.assertTrue(
-            IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
-        )
-
-        with patch("stripe.Customer.delete", autospec=True):
-            customer.purge()
-
-        self.assertFalse(
-            IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
-        )
-
-    @patch(
         "stripe.Customer.delete_source",
         autospec=True,
     )
