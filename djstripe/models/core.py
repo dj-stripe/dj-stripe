@@ -983,7 +983,7 @@ class Customer(StripeModel):
         description=None,
         discountable=None,
         invoice=None,
-        metadata=None,
+        metadata={},
         subscription=None,
     ):
         """
