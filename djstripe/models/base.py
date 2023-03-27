@@ -301,6 +301,16 @@ class StripeModel(StripeBaseModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
+        kwargs, idempotency_key = self.__class__.add_idempotency_key_to_metadata(
+            action="update",
+            idempotency_key=idempotency_key,
+            stripe_obj_id=self.id,
+            **kwargs,
+        )
+
+        # Remove stripe_obj_id if it exists
+        kwargs.pop("stripe_obj_id", None)
+
         return self.stripe_class.modify(
             self.id,
             api_key=api_key,
