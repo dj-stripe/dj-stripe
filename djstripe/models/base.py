@@ -292,6 +292,12 @@ class StripeModel(StripeBaseModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
+        idempotency_key = self.__class__.get_or_create_idempotency_key(
+            action="update",
+            idempotency_key=idempotency_key,
+            stripe_obj_id=self.id,
+        )
+
         return self.stripe_class.modify(
             self.id,
             api_key=api_key,
