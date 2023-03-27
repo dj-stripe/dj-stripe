@@ -283,7 +283,9 @@ class StripeModel(StripeBaseModel):
             **kwargs,
         )
 
-    def _api_update(self, api_key=None, stripe_account=None, **kwargs):
+    def _api_update(
+        self, idempotency_key=None, api_key=None, stripe_account=None, **kwargs
+    ):
         """
         Call the stripe API's modify operation for this model
 
@@ -302,6 +304,7 @@ class StripeModel(StripeBaseModel):
         return self.stripe_class.modify(
             self.id,
             api_key=api_key,
+            idempotency_key=idempotency_key,
             stripe_account=stripe_account,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,
