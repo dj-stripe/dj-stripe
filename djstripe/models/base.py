@@ -3,6 +3,7 @@ import uuid
 from datetime import timedelta
 from typing import Dict, List, Optional, Type
 
+from django.core.exceptions import FieldDoesNotExist
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from stripe.api_resources.abstract.api_resource import APIResource
@@ -204,6 +205,21 @@ class StripeModel(StripeBaseModel):
         )
 
     @classmethod
+    def get_or_create_idempotency_key(cls, action, idempotency_key):
+        """
+        Creates and returns an idempotency_key if not given.
+        """
+        # Prefer passed in idempotency_key.
+        if not idempotency_key:
+            # Create idempotency_key
+            idempotency_key = djstripe_settings.create_idempotency_key(
+                object_type=cls.__name__.lower(),
+                action=action,
+                livemode=djstripe_settings.STRIPE_LIVE_MODE,
+            )
+
+        return idempotency_key
+
     @classmethod
     def _api_create(
         cls, idempotency_key=None, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs

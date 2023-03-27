@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.test import TestCase
 
+from djstripe.fields import JSONField
 from djstripe.models import Account, Customer, StripeModel
 from djstripe.settings import djstripe_settings
 
@@ -296,3 +297,21 @@ def test__find_owner_account_for_webhook_event_trigger(
             mock_get_or_retrieve_for_api_key.assert_called_once_with(
                 djstripe_settings.STRIPE_SECRET_KEY
             )
+
+
+@pytest.mark.parametrize(
+    "idempotency_key", [None, "3f7bccda-e547-46af-a363-d3024eed300e"]
+)
+@pytest.mark.parametrize("model_has_metadata", [True, False])
+def test_get_or_create_idempotency_key(model_has_metadata, idempotency_key):
+    """Test to ensure idempotency gets generated when not given."""
+
+    # Invoke get_or_create_idempotency_key
+    output_idempotency_key = ExampleStripeModel.get_or_create_idempotency_key(
+        action="create", idempotency_key=idempotency_key
+    )
+
+    if idempotency_key:
+        assert output_idempotency_key == idempotency_key
+    else:
+        assert output_idempotency_key != idempotency_key
