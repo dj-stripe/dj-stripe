@@ -3,7 +3,7 @@ import warnings
 from typing import Optional, Union
 
 import stripe
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
@@ -2395,16 +2395,31 @@ class TaxId(StripeModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        with transaction.atomic():
+            # Get or Create idempotency_key
+            idempotency_key = cls.get_or_create_idempotency_key(
+                action="create", idempotency_key=idempotency_key
+            )
 
-        if not kwargs.get("id"):
-            raise KeyError("Customer Object ID is missing")
+            if not kwargs.get("id"):
+                raise KeyError("Customer Object ID is missing")
 
-        try:
-            Customer.objects.get(id=kwargs["id"])
-        except Customer.DoesNotExist:
-            raise
+            try:
+                Customer.objects.get(id=kwargs["id"])
+            except Customer.DoesNotExist:
+                raise
 
-        return stripe.Customer.create_tax_id(api_key=api_key, **kwargs)
+            stripe_obj = stripe.Customer.create_tax_id(
+                api_key=api_key,
+                idempotency_key=idempotency_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                **kwargs,
+            )
+
+            # Update the action of the idempotency_key by appending stripe_obj.id to it
+            IdempotencyKey.update_action_field(idempotency_key, stripe_obj)
+
+            return stripe_obj
 
     def api_retrieve(self, api_key=None, stripe_account=None):
         """
