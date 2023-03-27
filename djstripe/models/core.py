@@ -835,7 +835,7 @@ class Customer(StripeModel):
             return cls.objects.get(subscriber=subscriber, livemode=livemode), False
         except cls.DoesNotExist:
             action = f"create:{subscriber.pk}"
-            idempotency_key = djstripe_settings.get_idempotency_key(
+            idempotency_key = djstripe_settings.create_idempotency_key(
                 "customer", action, livemode
             )
             return (

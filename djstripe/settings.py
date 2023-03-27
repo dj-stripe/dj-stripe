@@ -57,9 +57,9 @@ class DjstripeSettings:
         )
 
     @property
-    def get_idempotency_key(self):
+    def create_idempotency_key(self):
         return self.get_callback_function(
-            "DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK", self._get_idempotency_key
+            "DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK", self._create_idempotency_key
         )
 
     @property
@@ -167,7 +167,9 @@ class DjstripeSettings:
 
         return func
 
-    def _get_idempotency_key(self, object_type, action, livemode) -> str:
+    def _create_idempotency_key(
+        self, object_type, action, livemode, stripe_obj_id=""
+    ) -> str:
         from .models import IdempotencyKey
 
         action = f"{object_type}:{action}:{stripe_obj_id}"

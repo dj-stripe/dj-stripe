@@ -51,7 +51,7 @@ switch an older installation to "id", the easiest way is to wipe the djstripe db
 sync again from scratch. This is obviously not ideal, and we will design a proper
 migration path before 3.0.
 
-## DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK (=djstripe.settings.djstripe_settings.\_get_idempotency_key)
+## DJSTRIPE_IDEMPOTENCY_KEY_CALLBACK (=djstripe.settings.djstripe_settings.\_create_idempotency_key)
 
 A function which will return an idempotency key for a particular object_type and action
 pair. By default, this is set to a function which will create a
@@ -62,7 +62,7 @@ get.
 The function takes the following signature:
 
 ```py
-def get_idempotency_key(object_type: str, action: str, livemode: bool):
+def create_idempotency_key(object_type: str, action: str, livemode: bool):
     return "<idempotency key>"
 ```
 

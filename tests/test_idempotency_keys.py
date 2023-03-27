@@ -22,14 +22,16 @@ class IdempotencyKeyTest(TestCase):
         self.assertEqual(str(key1_obj), str(key1_obj.uuid))
 
     def test_clear_expired_idempotency_keys(self):
-        expired_key = djstripe_settings.get_idempotency_key(
+        expired_key = djstripe_settings.create_idempotency_key(
             "customer", "create:1", False
         )
         expired_key_obj = IdempotencyKey.objects.get(uuid=expired_key)
         expired_key_obj.created = now() - timedelta(hours=25)
         expired_key_obj.save()
 
-        valid_key = djstripe_settings.get_idempotency_key("customer", "create:2", False)
+        valid_key = djstripe_settings.create_idempotency_key(
+            "customer", "create:2", False
+        )
 
         self.assertEqual(IdempotencyKey.objects.count(), 2)
 
