@@ -26,7 +26,7 @@ from ..fields import (
 from ..managers import SubscriptionManager
 from ..settings import djstripe_settings
 from ..utils import QuerySetMock, get_friendly_currency_amount, get_id_from_stripe_data
-from .base import StripeModel
+from .base import IdempotencyKey, StripeModel
 from .core import Customer
 
 logger = logging.getLogger(__name__)
@@ -2578,24 +2578,35 @@ class UsageRecord(StripeModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        with transaction.atomic():
+            # Get or Create idempotency_key
+            idempotency_key = cls.get_or_create_idempotency_key(
+                action="create", idempotency_key=idempotency_key
+            )
 
-        if not kwargs.get("id"):
-            raise KeyError("SubscriptionItem Object ID is missing")
+            if not kwargs.get("id"):
+                raise KeyError("SubscriptionItem Object ID is missing")
 
-        try:
-            SubscriptionItem.objects.get(id=kwargs["id"])
-        except SubscriptionItem.DoesNotExist:
-            raise
+            try:
+                SubscriptionItem.objects.get(id=kwargs["id"])
+            except SubscriptionItem.DoesNotExist:
+                raise
 
-        usage_stripe_data = stripe.SubscriptionItem.create_usage_record(
-            api_key=api_key, **kwargs
-        )
+            usage_stripe_data = stripe.SubscriptionItem.create_usage_record(
+                api_key=api_key,
+                idempotency_key=idempotency_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                **kwargs,
+            )
 
-        # ! Hack: there is no way to retrieve a UsageRecord object from Stripe,
-        # ! which is why we create and sync it right here
-        cls.sync_from_stripe_data(usage_stripe_data, api_key=api_key)
+            # Update the action of the idempotency_key by appending usage_stripe_data.id to it
+            IdempotencyKey.update_action_field(idempotency_key, usage_stripe_data)
 
-        return usage_stripe_data
+            # ! Hack: there is no way to retrieve a UsageRecord object from Stripe,
+            # ! which is why we create and sync it right here
+            cls.sync_from_stripe_data(usage_stripe_data, api_key=api_key)
+
+            return usage_stripe_data
 
     @classmethod
     def create(cls, **kwargs):
