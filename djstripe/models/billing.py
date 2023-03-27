@@ -1831,7 +1831,9 @@ class Subscription(StripeModel):
             kwargs["status"] = "all"
         return super().api_list(api_key=api_key, **kwargs)
 
-    def update(self, plan: Union[StripeModel, str] = None, **kwargs):
+    def update(
+        self, plan: Union[StripeModel, str] = None, idempotency_key=None, **kwargs
+    ):
         """
         See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 
@@ -1847,7 +1849,9 @@ class Subscription(StripeModel):
         if plan is not None and isinstance(plan, StripeModel):
             plan = plan.id
 
-        stripe_subscription = self._api_update(plan=plan, **kwargs)
+        stripe_subscription = self._api_update(
+            plan=plan, idempotency_key=idempotency_key, **kwargs
+        )
 
         api_key = kwargs.get("api_key") or self.default_api_key
         return Subscription.sync_from_stripe_data(stripe_subscription, api_key=api_key)
