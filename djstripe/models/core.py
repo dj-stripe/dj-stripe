@@ -1241,7 +1241,7 @@ class Customer(StripeModel):
         else:
             return subscriptions.first()
 
-    def send_invoice(self):
+    def send_invoice(self, idempotency_key=None):
         """
         Pay and send the customer's latest invoice.
 
@@ -1251,7 +1251,9 @@ class Customer(StripeModel):
         from .billing import Invoice
 
         try:
-            invoice = Invoice._api_create(customer=self.id)
+            invoice = Invoice._api_create(
+                customer=self.id, idempotency_key=idempotency_key
+            )
             invoice.pay()
             return True
         except InvalidRequestError:  # TODO: Check this for a more
