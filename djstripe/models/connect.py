@@ -1,5 +1,5 @@
 import stripe
-from django.db import models
+from django.db import models, transaction
 
 from djstripe.utils import get_friendly_currency_amount
 
@@ -15,7 +15,7 @@ from ..fields import (
 )
 from ..managers import TransferManager
 from ..settings import djstripe_settings
-from .base import StripeBaseModel, StripeModel
+from .base import IdempotencyKey, StripeBaseModel, StripeModel
 
 
 # TODO Implement Full Webhook event support for ApplicationFee and ApplicationFee Refund Objects
@@ -325,20 +325,31 @@ class TransferReversal(StripeModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        with transaction.atomic():
+            # Get or Create idempotency_key
+            idempotency_key = cls.get_or_create_idempotency_key(
+                action="create", idempotency_key=idempotency_key
+            )
 
-        if not kwargs.get("id"):
-            raise KeyError("Transfer Object ID is missing")
+            if not kwargs.get("id"):
+                raise KeyError("Transfer Object ID is missing")
 
-        try:
-            Transfer.objects.get(id=kwargs["id"])
-        except Transfer.DoesNotExist:
-            raise
+            try:
+                Transfer.objects.get(id=kwargs["id"])
+            except Transfer.DoesNotExist:
+                raise
 
-        return stripe.Transfer.create_reversal(
-            api_key=api_key,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **kwargs,
-        )
+            stripe_obj = stripe.Transfer.create_reversal(
+                api_key=api_key,
+                idempotency_key=idempotency_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                **kwargs,
+            )
+
+            # Update the action of the idempotency_key by appending stripe_obj.id to it
+            IdempotencyKey.update_action_field(idempotency_key, stripe_obj)
+
+            return stripe_obj
 
     def api_retrieve(self, api_key=None, stripe_account=None):
         """
