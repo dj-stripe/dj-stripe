@@ -1876,7 +1876,7 @@ class Subscription(StripeModel):
 
         return self.update(proration_behavior="none", trial_end=period_end)
 
-    def cancel(self, at_period_end: bool = False, **kwargs):
+    def cancel(self, at_period_end: bool = False, idempotency_key=None, **kwargs):
         """
         Cancels this subscription. If you set the at_period_end parameter to true,
         the subscription will remain active until the end of the period, at which point
@@ -1916,7 +1916,9 @@ class Subscription(StripeModel):
             at_period_end = False
 
         if at_period_end:
-            stripe_subscription = self._api_update(cancel_at_period_end=True)
+            stripe_subscription = self._api_update(
+                cancel_at_period_end=True, idempotency_key=idempotency_key
+            )
         else:
             try:
                 stripe_subscription = self._api_delete(**kwargs)
