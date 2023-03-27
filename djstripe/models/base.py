@@ -231,12 +231,23 @@ class StripeModel(StripeBaseModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        with transaction.atomic():
+            # Get or Create idempotency_key
+            idempotency_key = cls.get_or_create_idempotency_key(
+                action="create", idempotency_key=idempotency_key
+            )
 
-        return cls.stripe_class.create(
-            api_key=api_key,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **kwargs,
-        )
+            stripe_obj = cls.stripe_class.create(
+                api_key=api_key,
+                idempotency_key=idempotency_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                **kwargs,
+            )
+
+            # Update the action of the idempotency_key by appending stripe_obj.id to it
+            IdempotencyKey.update_action_field(idempotency_key, stripe_obj)
+
+            return stripe_obj
 
     def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
         """
