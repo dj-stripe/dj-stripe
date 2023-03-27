@@ -2243,7 +2243,7 @@ class SubscriptionSchedule(StripeModel):
 
         return SubscriptionSchedule.sync_from_stripe_data(stripe_subscription_schedule)
 
-    def update(self, api_key=None, stripe_account=None, **kwargs):
+    def update(self, api_key=None, stripe_account=None, idempotency_key=None, **kwargs):
         """
         Updates an existing subscription schedule
         and returns the updated SubscriptionSchedule.
@@ -2255,7 +2255,10 @@ class SubscriptionSchedule(StripeModel):
         :type stripe_account: string
         """
         stripe_subscription_schedule = self._api_update(
-            api_key=api_key, stripe_account=stripe_account, **kwargs
+            api_key=api_key,
+            stripe_account=stripe_account,
+            idempotency_key=idempotency_key,
+            **kwargs,
         )
         return SubscriptionSchedule.sync_from_stripe_data(stripe_subscription_schedule)
 
