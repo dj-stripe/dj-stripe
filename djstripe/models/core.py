@@ -987,6 +987,7 @@ class Customer(StripeModel):
         invoice=None,
         metadata={},
         subscription=None,
+        idempotency_key=None,
     ):
         """
         Adds an arbitrary charge or credit to the customer's upcoming invoice.
@@ -1049,6 +1050,7 @@ class Customer(StripeModel):
             invoice=invoice,
             metadata=metadata,
             subscription=subscription,
+            idempotency_key=idempotency_key,
         )
 
         return InvoiceItem.sync_from_stripe_data(
