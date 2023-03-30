@@ -23,6 +23,7 @@ from ..fields import (
     StripeIdField,
     StripeQuantumCurrencyAmountField,
 )
+from ..http_client import djstripe_client
 from ..managers import ChargeManager
 from ..settings import djstripe_settings
 from ..signals import WEBHOOK_SIGNALS
@@ -780,8 +781,8 @@ class Customer(StripeModel):
     )
     date_purged = models.DateTimeField(null=True, editable=False)
 
-    class Meta(StripeModel.Meta):
-        unique_together = ("subscriber", "livemode", "djstripe_owner_account")
+    # class Meta(StripeModel.Meta):
+    #     unique_together = ("subscriber", "livemode", "djstripe_owner_account")
 
     def __str__(self):
         if self.subscriber:
@@ -1913,8 +1914,9 @@ class PaymentIntent(StripeModel):
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
+        stripe_obj = self.api_retrieve(api_key=api_key)
 
-        return self.api_retrieve(api_key=api_key).cancel(**kwargs)
+        return djstripe_client._request_with_retries(stripe_obj.cancel, **kwargs)
 
     def _api_confirm(self, api_key=None, **kwargs):
         """
@@ -1930,7 +1932,9 @@ class PaymentIntent(StripeModel):
         """
         api_key = api_key or self.default_api_key
 
-        return self.api_retrieve(api_key=api_key).confirm(**kwargs)
+        stripe_obj = self.api_retrieve(api_key=api_key)
+
+        return djstripe_client._request_with_retries(stripe_obj.confirm, **kwargs)
 
 
 class SetupIntent(StripeModel):

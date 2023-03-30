@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from stripe.error import InvalidRequestError, PermissionError
 
 from djstripe import models
+from djstripe.http_client import djstripe_client
 
 from . import FAKE_CUSTOMER, FAKE_PLATFORM_ACCOUNT
 
@@ -180,7 +181,8 @@ def platform_account_fixture(django_db_setup, django_db_blocker, configure_setti
     # See: https://pytest-django.readthedocs.io/en/latest/database.html#populate-the-test-database-if-you-don-t-use-transactional-or-live-server
     with django_db_blocker.unblock():
         # setup_stuff
-        account_json = stripe.Account.retrieve(
+        account_json = djstripe_client._request_with_retries(
+            stripe.Account.retrieve,
             api_key=settings.STRIPE_SECRET_KEY,
         )
         account_instance = models.Account.sync_from_stripe_data(

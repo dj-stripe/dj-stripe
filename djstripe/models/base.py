@@ -10,6 +10,8 @@ from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
 from stripe.util import convert_to_stripe_object
 
+from djstripe.http_client import DjStripeHTTPClient
+
 from ..exceptions import ImpossibleAPIRequest
 from ..fields import (
     JSONField,
@@ -18,6 +20,7 @@ from ..fields import (
     StripeIdField,
     StripePercentField,
 )
+from ..http_client import djstripe_client
 from ..managers import StripeModelManager
 from ..settings import djstripe_settings
 from ..utils import get_id_from_stripe_data
@@ -34,6 +37,7 @@ class StripeBaseModel(models.Model):
     class Meta:
         abstract = True
 
+    # TODO Need to test retries on paginated requests
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         """
@@ -48,7 +52,8 @@ class StripeBaseModel(models.Model):
         :returns: an iterator over all items in the query
         """
 
-        return cls.stripe_class.list(
+        return djstripe_client._request_with_retries(
+            cls.stripe_class.list,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,
@@ -197,7 +202,8 @@ class StripeModel(StripeBaseModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.retrieve(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.retrieve,
             id=self.id,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -248,7 +254,8 @@ class StripeModel(StripeBaseModel):
                 action="create", idempotency_key=idempotency_key, **kwargs
             )
 
-            stripe_obj = cls.stripe_class.create(
+            stripe_obj = djstripe_client._request_with_retries(
+                cls.stripe_class.create,
                 api_key=api_key,
                 idempotency_key=idempotency_key,
                 stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -276,7 +283,8 @@ class StripeModel(StripeBaseModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.delete(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.delete,
             self.id,
             api_key=api_key,
             stripe_account=stripe_account,
@@ -312,7 +320,8 @@ class StripeModel(StripeBaseModel):
         # Remove stripe_obj_id if it exists
         kwargs.pop("stripe_obj_id", None)
 
-        return self.stripe_class.modify(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.modify,
             self.id,
             api_key=api_key,
             idempotency_key=idempotency_key,
@@ -1112,8 +1121,11 @@ class StripeModel(StripeBaseModel):
             "api_key",
             djstripe_settings.get_default_api_key(livemode=kwargs.get("livemode")),
         )
-        data = cls.stripe_class.retrieve(
-            id=id, stripe_version=djstripe_settings.STRIPE_API_VERSION, **kwargs
+        data = djstripe_client._request_with_retries(
+            cls.stripe_class.retrieve,
+            id=id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
         instance = cls.sync_from_stripe_data(data, api_key=kwargs.get("api_key"))
         return instance

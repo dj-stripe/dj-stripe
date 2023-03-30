@@ -23,6 +23,7 @@ from ..fields import (
     StripePercentField,
     StripeQuantumCurrencyAmountField,
 )
+from ..http_client import djstripe_client
 from ..managers import SubscriptionManager
 from ..settings import djstripe_settings
 from ..utils import QuerySetMock, get_friendly_currency_amount, get_id_from_stripe_data
@@ -692,7 +693,8 @@ class BaseInvoice(StripeModel):
             subscription_plan = subscription_plan.id
 
         try:
-            upcoming_stripe_invoice = cls.stripe_class.upcoming(
+            upcoming_stripe_invoice = djstripe_client._request_with_retries(
+                cls.stripe_class.upcoming,
                 api_key=api_key,
                 customer=customer,
                 subscription=subscription,
@@ -1284,11 +1286,13 @@ class LineItem(StripeModel):
         # get expand parameter that needs to be passed to invoice.lines.list call
         expand_fields = kwargs.pop("expand")
 
-        invoice = Invoice.stripe_class.retrieve(invoice_id, api_key=api_key, **kwargs)
+        invoice = djstripe_client._request_with_retries(
+            Invoice.stripe_class.retrieve, invoice_id, api_key=api_key, **kwargs
+        )
 
         # iterate over all the line items on the current invoice
-        return invoice.lines.list(
-            api_key=api_key, expand=expand_fields, **kwargs
+        return djstripe_client._request_with_retries(
+            invoice.lines.list, api_key=api_key, expand=expand_fields, **kwargs
         ).auto_paging_iter()
 
 
@@ -2211,7 +2215,8 @@ class SubscriptionSchedule(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        stripe_subscription_schedule = self.stripe_class.release(
+        stripe_subscription_schedule = djstripe_client._request_with_retries(
+            self.stripe_class.release,
             self.id,
             api_key=api_key,
             stripe_account=stripe_account,
@@ -2239,7 +2244,8 @@ class SubscriptionSchedule(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        stripe_subscription_schedule = self.stripe_class.cancel(
+        stripe_subscription_schedule = djstripe_client._request_with_retries(
+            self.stripe_class.cancel,
             self.id,
             api_key=api_key,
             stripe_account=stripe_account,
@@ -2418,7 +2424,8 @@ class TaxId(StripeModel):
             except Customer.DoesNotExist:
                 raise
 
-            stripe_obj = stripe.Customer.create_tax_id(
+            stripe_obj = djstripe_client._request_with_retries(
+                stripe.Customer.create_tax_id,
                 api_key=api_key,
                 idempotency_key=idempotency_key,
                 stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -2447,7 +2454,8 @@ class TaxId(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return stripe.Customer.retrieve_tax_id(
+        return djstripe_client._request_with_retries(
+            stripe.Customer.retrieve_tax_id,
             id=id,
             nested_id=nested_id,
             api_key=api_key or self.default_api_key,
@@ -2466,7 +2474,8 @@ class TaxId(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
-        return stripe.Customer.list_tax_ids(
+        return djstripe_client._request_with_retries(
+            stripe.Customer.list_tax_ids,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,
@@ -2601,7 +2610,8 @@ class UsageRecord(StripeModel):
             except SubscriptionItem.DoesNotExist:
                 raise
 
-            usage_stripe_data = stripe.SubscriptionItem.create_usage_record(
+            usage_stripe_data = djstripe_client._request_with_retries(
+                stripe.SubscriptionItem.create_usage_record,
                 api_key=api_key,
                 idempotency_key=idempotency_key,
                 stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -2706,7 +2716,8 @@ class UsageRecordSummary(StripeModel):
         except SubscriptionItem.DoesNotExist:
             raise
 
-        return stripe.SubscriptionItem.list_usage_record_summaries(
+        return djstripe_client._request_with_retries(
+            stripe.SubscriptionItem.list_usage_record_summaries,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,

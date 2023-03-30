@@ -33,6 +33,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import models as django_models
 
 from ... import enums, models
+from ...http_client import djstripe_client
 from ...models.base import StripeBaseModel
 from ...settings import djstripe_settings
 
@@ -151,7 +152,8 @@ class Command(BaseCommand):
                     == models.Account.get_default_account(api_key=api_key.secret).id
                 ):
                     # special case, since own account isn't returned by Account.api_list
-                    stripe_obj = models.Account.stripe_class.retrieve(
+                    stripe_obj = djstripe_client._request_with_retries(
+                        models.Account.stripe_class.retrieve,
                         api_key=api_key.secret,
                         stripe_version=djstripe_settings.STRIPE_API_VERSION,
                     )
@@ -209,7 +211,8 @@ class Command(BaseCommand):
         accs_set = set()
 
         # special case, since own account isn't returned by Account.api_list
-        stripe_platform_obj = models.Account.stripe_class.retrieve(
+        stripe_platform_obj = djstripe_client._request_with_retries(
+            models.Account.stripe_class.retrieve,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
@@ -513,8 +516,8 @@ class Command(BaseCommand):
             instance, models.Account
         ):
             # fetch all Card and BankAccount objects associated with the instance
-            items = models.Account.stripe_class.list_external_accounts(
-                **kwargs
+            items = djstripe_client._request_with_retries(
+                models.Account.stripe_class.list_external_accounts, **kwargs
             ).auto_paging_iter()
 
             self.start_sync(items, instance, api_key=api_key)
@@ -523,8 +526,8 @@ class Command(BaseCommand):
                 kwargs["object"] = object
 
                 # fetch all Card and BankAccount objects associated with the instance
-                items = models.Customer.stripe_class.list_sources(
-                    **kwargs
+                items = djstripe_client._request_with_retries(
+                    models.Customer.stripe_class.list_sources, **kwargs
                 ).auto_paging_iter()
 
                 self.start_sync(items, instance, api_key=api_key)

@@ -13,6 +13,7 @@ from ..fields import (
     StripeIdField,
     StripeQuantumCurrencyAmountField,
 )
+from ..http_client import djstripe_client
 from ..managers import TransferManager
 from ..settings import djstripe_settings
 from .base import IdempotencyKey, StripeBaseModel, StripeModel
@@ -164,7 +165,8 @@ class CountrySpec(StripeBaseModel):
         if api_key is None:
             api_key = djstripe_settings.get_default_api_key(livemode=None)
 
-        return self.stripe_class.retrieve(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.retrieve,
             id=self.id,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -339,7 +341,8 @@ class TransferReversal(StripeModel):
             except Transfer.DoesNotExist:
                 raise
 
-            stripe_obj = stripe.Transfer.create_reversal(
+            stripe_obj = djstripe_client._request_with_retries(
+                stripe.Transfer.create_reversal,
                 api_key=api_key,
                 idempotency_key=idempotency_key,
                 stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -368,7 +371,8 @@ class TransferReversal(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return stripe.Transfer.retrieve_reversal(
+        return djstripe_client._request_with_retries(
+            stripe.Transfer.retrieve_reversal,
             id=id,
             nested_id=nested_id,
             api_key=api_key or self.default_api_key,
@@ -387,7 +391,8 @@ class TransferReversal(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
-        return stripe.Transfer.list_reversals(
+        return djstripe_client._request_with_retries(
+            stripe.Transfer.list_reversals,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,

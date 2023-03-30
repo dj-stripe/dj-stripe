@@ -13,6 +13,7 @@ from ..fields import (
     StripeEnumField,
     StripeForeignKey,
 )
+from ..http_client import djstripe_client
 from ..settings import djstripe_settings
 from ..utils import get_id_from_stripe_data
 from .account import Account
@@ -198,7 +199,8 @@ class LegacySourceMixin:
             if customer and account:
                 try:
                     # retrieve by customer
-                    stripe_obj = customer.api_retrieve(api_key=api_key).sources.create(
+                    stripe_obj = djstripe_client._request_with_retries(
+                        customer.api_retrieve(api_key=api_key).sources.create,
                         api_key=api_key,
                         idempotency_key=idempotency_key,
                         stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -208,9 +210,10 @@ class LegacySourceMixin:
                 except Exception as customer_exc:
                     try:
                         # retrieve by account
-                        stripe_obj = account.api_retrieve(
-                            api_key=api_key
-                        ).external_accounts.create(
+                        stripe_obj = djstripe_client._request_with_retries(
+                            account.api_retrieve(
+                                api_key=api_key
+                            ).external_accounts.create,
                             api_key=api_key,
                             idempotency_key=idempotency_key,
                             stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -221,7 +224,8 @@ class LegacySourceMixin:
                         raise customer_exc
 
             if customer and not account:
-                stripe_obj = customer.api_retrieve(api_key=api_key).sources.create(
+                stripe_obj = djstripe_client._request_with_retries(
+                    customer.api_retrieve(api_key=api_key).sources.create,
                     api_key=api_key,
                     idempotency_key=idempotency_key,
                     stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -229,9 +233,8 @@ class LegacySourceMixin:
                 )
 
             if account and not customer:
-                stripe_obj = account.api_retrieve(
-                    api_key=api_key
-                ).external_accounts.create(
+                stripe_obj = djstripe_client._request_with_retries(
+                    account.api_retrieve(api_key=api_key).external_accounts.create,
                     api_key=api_key,
                     idempotency_key=idempotency_key,
                     stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -259,35 +262,35 @@ class LegacySourceMixin:
         if customer and account:
             try:
                 # retrieve by customer
-                return (
-                    customer.api_retrieve(api_key=api_key)
-                    .sources.list(object=object_name, **clean_kwargs)
-                    .auto_paging_iter()
-                )
+                return djstripe_client._request_with_retries(
+                    customer.api_retrieve(api_key=api_key).sources.list,
+                    object=object_name,
+                    **clean_kwargs,
+                ).auto_paging_iter()
             except Exception as customer_exc:
                 try:
                     # retrieve by account
-                    return (
-                        account.api_retrieve(api_key=api_key)
-                        .external_accounts.list(object=object_name, **clean_kwargs)
-                        .auto_paging_iter()
-                    )
+                    return djstripe_client._request_with_retries(
+                        account.api_retrieve(api_key=api_key).external_accounts.list,
+                        object=object_name,
+                        **clean_kwargs,
+                    ).auto_paging_iter()
                 except Exception:
                     raise customer_exc
 
         if customer:
-            return (
-                customer.api_retrieve(api_key=api_key)
-                .sources.list(object=object_name, **clean_kwargs)
-                .auto_paging_iter()
-            )
+            return djstripe_client._request_with_retries(
+                customer.api_retrieve(api_key=api_key).sources.list,
+                object=object_name,
+                **clean_kwargs,
+            ).auto_paging_iter()
 
         if account:
-            return (
-                account.api_retrieve(api_key=api_key)
-                .external_accounts.list(object=object_name, **clean_kwargs)
-                .auto_paging_iter()
-            )
+            return djstripe_client._request_with_retries(
+                account.api_retrieve(api_key=api_key).external_accounts.list,
+                object=object_name,
+                **clean_kwargs,
+            ).auto_paging_iter()
 
         raise ImpossibleAPIRequest(
             f"Can't list {object_name} without a customer or account object."
@@ -331,7 +334,8 @@ class LegacySourceMixin:
         api_key = api_key or self.default_api_key
 
         if self.customer:
-            return stripe.Customer.retrieve_source(
+            return djstripe_client._request_with_retries(
+                stripe.Customer.retrieve_source,
                 self.customer.id,
                 self.id,
                 expand=self.expand_fields,
@@ -342,7 +346,8 @@ class LegacySourceMixin:
 
         # try to retrieve by account attribute if retrieval by customer fails.
         if self.account:
-            return stripe.Account.retrieve_external_account(
+            return djstripe_client._request_with_retries(
+                stripe.Account.retrieve_external_account,
                 self.account.id,
                 self.id,
                 expand=self.expand_fields,
@@ -367,7 +372,8 @@ class LegacySourceMixin:
             stripe_account = self._get_stripe_account_id(api_key)
 
         if self.customer:
-            return stripe.Customer.delete_source(
+            return djstripe_client._request_with_retries(
+                stripe.Customer.delete_source,
                 self.customer.id,
                 self.id,
                 api_key=api_key,
@@ -376,7 +382,8 @@ class LegacySourceMixin:
             )
 
         if self.account:
-            return stripe.Account.delete_external_account(
+            return djstripe_client._request_with_retries(
+                stripe.Account.delete_external_account,
                 self.account.id,
                 self.id,
                 api_key=api_key,
@@ -816,7 +823,8 @@ class Source(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
-        return Customer.stripe_class.list_sources(
+        return djstripe_client._request_with_retries(
+            Customer.stripe_class.list_sources,
             object="source",
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
