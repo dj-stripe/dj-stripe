@@ -520,7 +520,7 @@ class TestAccountSTRIPE:
         """Ensure sync_from_stripe_data() on Account model works as expected."""
 
         # Create Account on Stripe.
-        account_json = stripe.Account.create(
+        account_json = Account._api_create(
             type="standard",
             country="US",
             email="jenny.standard.rosen@example.com",
@@ -541,9 +541,7 @@ class TestAccountSTRIPE:
         # deleted created Account
         finally:
             # try to delete
-            stripe.Account.delete(
-                account_json["id"], api_key=settings.STRIPE_TEST_SECRET_KEY
-            )
+            account_instance._api_delete(api_key=settings.STRIPE_TEST_SECRET_KEY)
 
     @pytest.mark.parametrize(
         "account",

@@ -9,6 +9,7 @@ import stripe
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from stripe.error import InvalidRequestError, PermissionError
+from stripe.http_client import HTTPClient
 
 from djstripe import models
 from djstripe.http_client import djstripe_client
@@ -194,12 +195,17 @@ def platform_account_fixture(django_db_setup, django_db_blocker, configure_setti
         yield account_json, account_instance
 
 
-# @pytest.fixture(autouse=True)
-# def slow_down_tests(request):
-#     """Adds a 5 second delay to every test when using
-#     the stripe_api to avoid running into RateLimit
-#     and other related issues."""
-#     for m in request.node.iter_markers():
-#         if m.name == "stripe_api":
-#             time.sleep(5)
-#             break
+@pytest.fixture(autouse=True)
+def update_stripe_max_network_retries(request):
+    for m in request.node.iter_markers():
+        if m.name == "stripe_api":
+            HTTPClient._max_network_retries = lambda _: 10
+
+
+@pytest.fixture(autouse=True)
+def update_stripe_default_attrbutes(request):
+    HTTPClient._max_network_retries = lambda _: 5
+    for m in request.node.iter_markers():
+        if m.name == "stripe_api":
+            HTTPClient.INITIAL_DELAY = 1
+            HTTPClient.MAX_DELAY = 15

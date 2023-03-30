@@ -670,7 +670,9 @@ class Card(LegacySourceMixin, StripeModel):
         }
         card.update(kwargs)
 
-        return stripe.Token.create(api_key=api_key, card=card)
+        return djstripe_client._request_with_retries(
+            stripe.Token.create, api_key=api_key, card=card
+        )
 
 
 class Source(StripeModel):
@@ -1070,8 +1072,11 @@ class PaymentMethod(StripeModel):
             # key cached in the Stripe object
             extra_kwargs = {"api_key": api_key}
 
-        stripe_payment_method = stripe.PaymentMethod.attach(
-            payment_method, customer=customer, **extra_kwargs
+        stripe_payment_method = djstripe_client._request_with_retries(
+            stripe.PaymentMethod.attach,
+            payment_method,
+            customer=customer,
+            **extra_kwargs,
         )
         return cls.sync_from_stripe_data(stripe_payment_method, api_key=api_key)
 

@@ -4,22 +4,7 @@ import time
 class DjStripeHTTPClient:
     """ """
 
-    def __init__(self) -> None:
-        print("INITIALISING djstripe_client")
-
-    # todo need to also handle the error below
-
-    #   rbody = '{\n  "error": {\n    "message": "Sorry, you\'re creating accounts too quickly. You should limit your requests to less...ttps://dashboard.stripe.com/test/logs/req_ZAVDH9HMp5H38K?t=1679369008",\n    "type": "invalid_request_error"\n  }\n}\n'
-    #   rcode = 400
-    #   resp = OrderedDict([('error', OrderedDict([('message', "Sorry, you're creating accounts too quickly. You should limit your re...url', 'https://dashboard.stripe.com/test/logs/req_ZAVDH9HMp5H38K?t=1679369008'), ('type', 'invalid_request_error')]))])
-    #   rheaders = {'Server': 'nginx', 'Date': 'Tue, 21 Mar 2023 03:23:28 GMT', 'Content-Type': 'application/json', 'Content-Length': '34...: 'false', 'Stripe-Version': '2020-08-27', 'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload'}
-
-    #   rbody = '{"error":{"code":"rate_limit","doc_url":"https://stripe.com/docs/error-codes/rate-limit","message":"Testmode request ...mode. You can learn more about rate limits here https://stripe.com/docs/rate-limits.","type":"invalid_request_error"}}'
-    #   rcode = 429
-    #   resp = OrderedDict([('error', OrderedDict([('code', 'rate_limit'), ('doc_url', 'https://stripe.com/docs/error-codes/rate-limi...ou can learn more about rate limits here https://stripe.com/docs/rate-limits.'), ('type', 'invalid_request_error')]))])
-    #   rheaders = {'Server': 'nginx', 'Date': 'Tue, 21 Mar 2023 03:23:39 GMT', 'Content-Type': 'application/json', 'Content-Length': '30...no-store', 'Stripe-Version': '2020-08-27', 'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload'}
-
-    def _should_retry(self, stripe_default_client, error, num_retries):
+    def _should_retry(self, stripe_default_client, error, num_retries, kwargs_dict):
         max_network_retries = stripe_default_client._max_network_retries() or 3
 
         print(
@@ -33,6 +18,14 @@ class DjStripeHTTPClient:
         message = error.user_message
 
         print(f"http_status: {http_status}, headers: {headers}, message: {message}")
+
+        if headers is not None and headers.get("idempotent-replayed") == "true":
+            # https://github.com/stripe/stripe-ruby/pull/907
+            # Stripe simply replays the error if a previous erroneous request was made
+            # Hence resetting the idempotency_key to create a "new" request
+            kwargs_dict["idempotency_key"] = kwargs_dict.get(
+                "metadata", {"idempotency_key": None}
+            )["idempotency_key"] = None
 
         # TODO IN case of too many accounts creation error stripe-should-retry header is sent back as False!
         # TODO Need to bypass the headers block in case of pytest and set different values for max delay and initial delay params
@@ -50,13 +43,10 @@ class DjStripeHTTPClient:
         if http_status == 429 or (
             http_status == 400 and "limit your requests" in message
         ):
-            stripe_default_client.INITIAL_DELAY = 1.25
-            stripe_default_client.MAX_DELAY = 5
             return True
 
         return False
 
-    # todo this needs to also support callbacks
     def _request_with_retries(
         self,
         func,
@@ -79,7 +69,7 @@ class DjStripeHTTPClient:
             except Exception as e:
                 error = e
 
-            if self._should_retry(default_http_client, error, num_retries):
+            if self._should_retry(default_http_client, error, num_retries, kwargs):
                 num_retries += 1
                 sleep_time = default_http_client._sleep_time_seconds(num_retries)
 
@@ -91,5 +81,4 @@ class DjStripeHTTPClient:
                 raise error
 
 
-print("About to initialise djstripe_client")
 djstripe_client = DjStripeHTTPClient()
