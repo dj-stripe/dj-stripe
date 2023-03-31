@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Dj-Stripe Team" /><link rel="canonical" href="https://dj-stripe.github.io/dj-stripe/2.7/history/2_7_x/" />
       <link rel="shortcut icon" href="../../img/favicon.ico" />
-    <title>dj-stripe 2.7.2 (2022-10-21) - Dj-Stripe</title>
+    <title>dj-stripe 2.7.3 (2022-11-26) - Dj-Stripe</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
@@ -14,7 +14,7 @@
     
       <script>
         // Current page data
-        var mkdocs_page_name = "dj-stripe 2.7.2 (2022-10-21)";
+        var mkdocs_page_name = "dj-stripe 2.7.3 (2022-11-26)";
         var mkdocs_page_input_path = "history/2_7_x.md";
         var mkdocs_page_url = "/dj-stripe/2.7/history/2_7_x/";
       </script>
@@ -141,7 +141,7 @@
         <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" alt="Docs"></a> &raquo;</li>
-      <li>dj-stripe 2.7.2 (2022-10-21)</li>
+      <li>dj-stripe 2.7.3 (2022-11-26)</li>
     <li class="wy-breadcrumbs-aside">
           <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/history/2_7_x.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
@@ -151,7 +151,17 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
             <div class="section" itemprop="articleBody">
               
-                <h1 id="dj-stripe-272-2022-10-21">dj-stripe 2.7.2 (2022-10-21)</h1>
+                <h1 id="dj-stripe-273-2022-11-26">dj-stripe 2.7.3 (2022-11-26)</h1>
+<p>Due to Stripe dropping support for the <code>Order</code> model, we have had to restrict the Stripe
+SDK to versions below 5.0.0.</p>
+<p>This release thus fixes the following error:</p>
+<div class="highlight"><pre><span></span><code>AttributeError: module &#39;stripe&#39; has no attribute &#39;Order&#39;
+</code></pre></div>
+<p>More info:
+<a href="https://github.com/dj-stripe/dj-stripe/issues/1842">https://github.com/dj-stripe/dj-stripe/issues/1842</a></p>
+<p>If you are on an older version of dj-stripe and cannot upgrade, you may simply install
+an older version of the Stripe SDK, for example with <code>pip install stripe&lt;5.0.0</code>.</p>
+<h1 id="dj-stripe-272-2022-10-21">dj-stripe 2.7.2 (2022-10-21)</h1>
 <h2 id="release-notes">Release notes</h2>
 <ul>
 <li>Fix installing with Poetry on Django 4.0 and higher</li>
