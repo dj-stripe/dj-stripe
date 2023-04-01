@@ -7,7 +7,7 @@ from urllib.parse import urljoin
 from django import forms
 from django.contrib.admin import helpers
 from django.urls import reverse
-from stripe.error import AuthenticationError, InvalidRequestError
+from stripe.error import AuthenticationError, InvalidRequestError, PermissionError
 
 from djstripe import enums, models, utils
 from djstripe.signals import ENABLED_EVENTS
@@ -55,12 +55,19 @@ class APIKeyAdminCreateForm(forms.ModelForm):
 
         if not self.errors:
             if (
-                self.instance.type == enums.APIKeyType.secret
+                self.instance.type
+                in (
+                    enums.APIKeyType.secret,
+                    enums.APIKeyType.restricted,
+                )
                 and self.instance.djstripe_owner_account is None
             ):
                 try:
                     self.instance.refresh_account()
                 except AuthenticationError as e:
+                    self.add_error("secret", str(e))
+                # Abandon Key Creation if the given key doesn't allow Accounts to be retrieved from Stripe
+                except PermissionError as e:
                     self.add_error("secret", str(e))
 
 
