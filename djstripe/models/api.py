@@ -86,7 +86,10 @@ class APIKey(StripeModel):
     def refresh_account(self, commit=True):
         from .account import Account
 
-        if self.type != APIKeyType.secret:
+        if self.type not in (
+            APIKeyType.secret,
+            APIKeyType.restricted,
+        ):
             return
 
         account_data = Account.stripe_class.retrieve(
