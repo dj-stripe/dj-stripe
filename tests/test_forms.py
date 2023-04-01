@@ -80,9 +80,8 @@ class TestAPIKeyAdminCreateForm(CreateAccountMixin):
 
         if secret.startswith("sk_"):
             assert form.instance.type == enums.APIKeyType.secret
-            assert (
-                form.instance.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]
-            )
+
         elif secret.startswith("rk_"):
             assert form.instance.type == enums.APIKeyType.restricted
-            assert form.instance.djstripe_owner_account is None
+
+        assert form.instance.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]
