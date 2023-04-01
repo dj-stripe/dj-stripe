@@ -99,6 +99,15 @@ class APIKeyTest(CreateAccountMixin, TestCase):
             livemode=False,
             djstripe_owner_account=self.account,
         )
+
+        self.apikey_restricted_test = APIKey.objects.create(
+            type=APIKeyType.secret,
+            name="Test Restricted Secret Key",
+            secret=RK_TEST,
+            livemode=False,
+            djstripe_owner_account=self.account,
+        )
+
         self.apikey_live = APIKey.objects.create(
             type=APIKeyType.secret,
             name="Live Secret Key",
@@ -150,10 +159,15 @@ class APIKeyTest(CreateAccountMixin, TestCase):
         autospec=True,
     )
     def test_refresh_account(self, fileupload_retrieve_mock, account_retrieve_mock):
-        # remove djstripe_owner_account field
-        self.apikey_test.djstripe_owner_account = None
-        self.apikey_test.save()
+        for key in (
+            "apikey_test",
+            "apikey_restricted_test",
+        ):
+            # remove djstripe_owner_account field
+            instance = getattr(self, key)
+            instance.djstripe_owner_account = None
+            instance.save()
 
-        # invoke refresh_Account()
-        self.apikey_test.refresh_account()
-        assert self.apikey_test.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]
+            # invoke refresh_Account()
+            instance.refresh_account()
+            assert instance.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]
