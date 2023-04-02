@@ -50,8 +50,7 @@ data regardless.
 ### I'm using environment variables. Do I need to change anything?
 
 Not at this time. The settings `STRIPE_LIVE_SECRET_KEY` and `STRIPE_TEST_SECRET_KEY` can
-still be used. Their values will however be automatically saved to the database at the
-earliest opportunity.
+still be used.
 
 ### What about public keys?
 
