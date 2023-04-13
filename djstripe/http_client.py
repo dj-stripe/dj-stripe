@@ -53,6 +53,9 @@ class DjStripeHTTPClient:
                 return True
 
         # Retry on Rate Limit errors.
+        if error.code == "rate_limit":
+            return True
+
         # Retry on Lock Timeout errors
         if error.code == "lock_timeout":
             return True
