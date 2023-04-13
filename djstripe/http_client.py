@@ -32,17 +32,12 @@ class DjStripeHTTPClient:
                 "metadata", {"idempotency_key": None}
             )["idempotency_key"] = None
 
-        # TODO IN case of too many accounts creation error stripe-should-retry header is sent back as False!
-        # TODO Need to bypass the headers block in case of pytest and set different values for max delay and initial delay params
-        # # The API may ask us not to retry (eg; if doing so would be a no-op)
-        # # or advise us to retry (eg; in cases of lock timeouts); we defer to that.
-        # #
-        # # Note that we expect the headers object to be a CaseInsensitiveDict, as is the case with the requests library.
-        # if headers is not None and "stripe-should-retry" in headers:
-        #     if headers["stripe-should-retry"] == "false":
-        #         return False
-        #     if headers["stripe-should-retry"] == "true":
-        #         return True
+        # We retry for limit your requests exception only when running test
+        if DjStripeHTTPClient._is_test:
+            # Should only be retried when running in pytest
+            # Happens when accounts are created rapidly.
+            if http_status == 400 and "limit your requests" in message:
+                return True
 
         # Retry on Rate Limit errors.
         if http_status == 429 or (
