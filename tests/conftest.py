@@ -12,7 +12,7 @@ from stripe.error import InvalidRequestError, PermissionError
 from stripe.http_client import HTTPClient
 
 from djstripe import models
-from djstripe.http_client import djstripe_client
+from djstripe.http_client import DjStripeHTTPClient, djstripe_client
 
 from . import FAKE_CUSTOMER, FAKE_PLATFORM_ACCOUNT
 
@@ -196,16 +196,10 @@ def platform_account_fixture(django_db_setup, django_db_blocker, configure_setti
 
 
 @pytest.fixture(autouse=True)
-def update_stripe_max_network_retries(request):
-    for m in request.node.iter_markers():
-        if m.name == "stripe_api":
-            HTTPClient._max_network_retries = lambda _: 10
-
-
-@pytest.fixture(autouse=True)
 def update_stripe_default_attrbutes(request):
     DjStripeHTTPClient._is_test = True
     for m in request.node.iter_markers():
         if m.name == "stripe_api":
             HTTPClient.INITIAL_DELAY = 1
             HTTPClient.MAX_DELAY = 15
+            HTTPClient._max_network_retries = lambda _: 10
