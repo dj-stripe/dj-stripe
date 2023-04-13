@@ -32,6 +32,19 @@ class DjStripeHTTPClient:
                 "metadata", {"idempotency_key": None}
             )["idempotency_key"] = None
 
+        # Do not check for headers in case of running tests as we create accounts very quickly
+        # and Stripe's test mode account creation limit is very low.
+        if not DjStripeHTTPClient._is_test:
+            # In case of too many accounts creation error stripe-should-retry header is sent back as False!
+            # The API may ask us not to retry (eg; if doing so would be a no-op)
+            # or advise us to retry (eg; in cases of lock timeouts); we defer to that.
+            # Note that we expect the headers object to be a CaseInsensitiveDict, as is the case with the requests library.
+            if headers is not None and "stripe-should-retry" in headers:
+                if headers["stripe-should-retry"] == "false":
+                    return False
+                if headers["stripe-should-retry"] == "true":
+                    return True
+
         # We retry for limit your requests exception only when running test
         if DjStripeHTTPClient._is_test:
             # Should only be retried when running in pytest
