@@ -2,14 +2,11 @@ import time
 
 
 class DjStripeHTTPClient:
-    """ """
+    """An HTTP client for all dj-stripe network calls to upstream Stripe."""
 
     def _should_retry(self, stripe_default_client, error, num_retries, kwargs_dict):
-        max_network_retries = stripe_default_client._max_network_retries() or 3
+        """Returns True if the given request must be retried. False otherwise."""
 
-        print(
-            f"Should Retry? retries: {num_retries}, max_retries: {max_network_retries}"
-        )
         if num_retries >= max_network_retries:
             return False
 
@@ -53,6 +50,8 @@ class DjStripeHTTPClient:
         id="",
         **kwargs,
     ) -> dict:
+        """Attempts HTTP requests with exponential backoff until the
+        limit for max network retried is reached."""
         from stripe import default_http_client
 
         num_retries = 0
