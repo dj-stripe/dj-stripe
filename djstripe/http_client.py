@@ -22,8 +22,6 @@ class DjStripeHTTPClient:
         headers = error.headers
         message = error.user_message
 
-        print(f"http_status: {http_status}, headers: {headers}, message: {message}")
-
         if headers is not None and headers.get("idempotent-replayed") == "true":
             # https://github.com/stripe/stripe-ruby/pull/907
             # Stripe simply replays the error if a previous erroneous request was made
@@ -81,7 +79,6 @@ class DjStripeHTTPClient:
                 else:
                     response = func(**kwargs)
 
-                print("GOT RESPONSE!")
                 return response
             except Exception as e:
                 error = e
@@ -89,9 +86,7 @@ class DjStripeHTTPClient:
             if self._should_retry(default_http_client, error, num_retries, kwargs):
                 num_retries += 1
                 sleep_time = default_http_client._sleep_time_seconds(num_retries)
-
-                print(f"retrying request {self}, {func}")
-                print(f"sleeping for {sleep_time} seconds")
+                # Sleep for some time
                 time.sleep(sleep_time)
 
             else:
