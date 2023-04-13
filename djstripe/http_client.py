@@ -4,6 +4,10 @@ import time
 class DjStripeHTTPClient:
     """An HTTP client for all dj-stripe network calls to upstream Stripe."""
 
+    # A class attribute to know if we are triggerring from within
+    # pytest or not. Need that to ignore a few Stripe errors.
+    _is_test = False
+
     def _should_retry(self, stripe_default_client, error, num_retries, kwargs_dict):
         """Returns True if the given request must be retried. False otherwise."""
 
