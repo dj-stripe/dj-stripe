@@ -7,6 +7,10 @@ class DjStripeHTTPClient:
     def _should_retry(self, stripe_default_client, error, num_retries, kwargs_dict):
         """Returns True if the given request must be retried. False otherwise."""
 
+        max_network_retries = (
+            getattr(stripe_default_client, "_max_network_retries", lambda: None)() or 3
+        )
+
         if num_retries >= max_network_retries:
             return False
 
