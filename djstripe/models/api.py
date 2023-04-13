@@ -9,6 +9,7 @@ from django.forms import ValidationError
 from ..enums import APIKeyType
 from ..exceptions import InvalidStripeAPIKey
 from ..fields import StripeEnumField
+from ..http_client import djstripe_client
 from ..settings import djstripe_settings
 from .base import StripeModel
 
@@ -92,7 +93,8 @@ class APIKey(StripeModel):
         ):
             return
 
-        account_data = Account.stripe_class.retrieve(
+        account_data = djstripe_client._request_with_retries(
+            Account.stripe_class.retrieve,
             api_key=self.secret,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )

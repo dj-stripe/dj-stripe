@@ -11,6 +11,8 @@ from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
+from .http_client import djstripe_client
+
 
 def get_supported_currency_choices(api_key):
     """
@@ -20,9 +22,11 @@ def get_supported_currency_choices(api_key):
     :param api_key: The api key associated with the account from which to pull data.
     :type api_key: str
     """
-    account = stripe.Account.retrieve(api_key=api_key)
-    supported_payment_currencies = stripe.CountrySpec.retrieve(
-        account["country"], api_key=api_key
+    account = djstripe_client._request_with_retries(
+        stripe.Account.retrieve, api_key=api_key
+    )
+    supported_payment_currencies = djstripe_client._request_with_retries(
+        stripe.CountrySpec.retrieve, account["country"], api_key=api_key
     )["supported_payment_currencies"]
 
     return [(currency, currency.upper()) for currency in supported_payment_currencies]

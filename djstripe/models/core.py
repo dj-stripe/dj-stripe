@@ -23,11 +23,12 @@ from ..fields import (
     StripeIdField,
     StripeQuantumCurrencyAmountField,
 )
+from ..http_client import djstripe_client
 from ..managers import ChargeManager
 from ..settings import djstripe_settings
 from ..signals import WEBHOOK_SIGNALS
 from ..utils import get_friendly_currency_amount, get_id_from_stripe_data
-from .base import IdempotencyKey, StripeModel, logger
+from .base import StripeModel, logger
 
 
 def _sanitise_price(price=None, plan=None, **kwargs):
@@ -403,6 +404,7 @@ class Charge(StripeModel):
         reason: str = None,
         api_key: str = None,
         stripe_account: str = None,
+        idempotency_key: str = None,
     ) -> "Refund":
         """
         Initiate a refund. Returns the refund object.
@@ -426,6 +428,7 @@ class Charge(StripeModel):
             reason=reason,
             api_key=api_key or self.default_api_key,
             stripe_account=stripe_account,
+            idempotency_key=idempotency_key,
         )
 
         return Refund.sync_from_stripe_data(
@@ -778,8 +781,8 @@ class Customer(StripeModel):
     )
     date_purged = models.DateTimeField(null=True, editable=False)
 
-    class Meta(StripeModel.Meta):
-        unique_together = ("subscriber", "livemode", "djstripe_owner_account")
+    # class Meta(StripeModel.Meta):
+    #     unique_together = ("subscriber", "livemode", "djstripe_owner_account")
 
     def __str__(self):
         if self.subscriber:
@@ -833,7 +836,7 @@ class Customer(StripeModel):
             return cls.objects.get(subscriber=subscriber, livemode=livemode), False
         except cls.DoesNotExist:
             action = f"create:{subscriber.pk}"
-            idempotency_key = djstripe_settings.get_idempotency_key(
+            idempotency_key = djstripe_settings.create_idempotency_key(
                 "customer", action, livemode
             )
             return (
@@ -983,8 +986,9 @@ class Customer(StripeModel):
         description=None,
         discountable=None,
         invoice=None,
-        metadata=None,
+        metadata={},
         subscription=None,
+        idempotency_key=None,
     ):
         """
         Adds an arbitrary charge or credit to the customer's upcoming invoice.
@@ -1047,6 +1051,7 @@ class Customer(StripeModel):
             invoice=invoice,
             metadata=metadata,
             subscription=subscription,
+            idempotency_key=idempotency_key,
         )
 
         return InvoiceItem.sync_from_stripe_data(
@@ -1133,13 +1138,6 @@ class Customer(StripeModel):
         # toggle the deleted flag on Customer to indicate it has been
         # deleted upstream in Stripe
         self.deleted = True
-
-        if self.subscriber:
-            # Delete the idempotency key used by Customer.create()
-            # So re-creating a customer for this subscriber before the key expires
-            # doesn't return the older Customer data
-            idempotency_key_action = f"customer:create:{self.subscriber.pk}"
-            IdempotencyKey.objects.filter(action=idempotency_key_action).delete()
 
         self.subscriber = None
 
@@ -1237,7 +1235,7 @@ class Customer(StripeModel):
         else:
             return subscriptions.first()
 
-    def send_invoice(self):
+    def send_invoice(self, idempotency_key=None):
         """
         Pay and send the customer's latest invoice.
 
@@ -1247,7 +1245,9 @@ class Customer(StripeModel):
         from .billing import Invoice
 
         try:
-            invoice = Invoice._api_create(customer=self.id)
+            invoice = Invoice._api_create(
+                customer=self.id, idempotency_key=idempotency_key
+            )
             invoice.pay()
             return True
         except InvalidRequestError:  # TODO: Check this for a more
@@ -1914,8 +1914,9 @@ class PaymentIntent(StripeModel):
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
+        stripe_obj = self.api_retrieve(api_key=api_key)
 
-        return self.api_retrieve(api_key=api_key).cancel(**kwargs)
+        return djstripe_client._request_with_retries(stripe_obj.cancel, **kwargs)
 
     def _api_confirm(self, api_key=None, **kwargs):
         """
@@ -1931,7 +1932,9 @@ class PaymentIntent(StripeModel):
         """
         api_key = api_key or self.default_api_key
 
-        return self.api_retrieve(api_key=api_key).confirm(**kwargs)
+        stripe_obj = self.api_retrieve(api_key=api_key)
+
+        return djstripe_client._request_with_retries(stripe_obj.confirm, **kwargs)
 
 
 class SetupIntent(StripeModel):

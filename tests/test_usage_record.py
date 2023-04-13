@@ -7,6 +7,7 @@ from unittest.mock import patch
 import pytest
 from django.test.testcases import TestCase
 
+from djstripe.models.base import IdempotencyKey
 from djstripe.models.billing import UsageRecord
 from djstripe.settings import djstripe_settings
 
@@ -167,10 +168,19 @@ class TestUsageRecord(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         UsageRecord._api_create(id=fake_usage_data["subscription_item"])
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"usagerecord:create:{fake_usage_data['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         # assert usage_record_creation_mock was called as expected
         usage_record_creation_mock.assert_called_once_with(
             id=fake_usage_data["subscription_item"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
         )
 
         # assert usage_record_creation_mock was called as expected

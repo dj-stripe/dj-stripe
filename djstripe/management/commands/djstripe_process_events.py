@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from ... import models
+from ...http_client import djstripe_client
 from ...mixins import VerbosityAwareOutputMixin
 from ...settings import djstripe_settings
 
@@ -69,7 +70,8 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
         # if no specific event IDs are specified.
         if event_ids:
             listed_events = (
-                models.Event.stripe_class.retrieve(
+                djstripe_client._request_with_retries(
+                    models.Event.stripe_class.retrieve,
                     id=event_id,
                     api_key=djstripe_settings.STRIPE_SECRET_KEY,
                     stripe_version=djstripe_settings.STRIPE_API_VERSION,

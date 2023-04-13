@@ -13,10 +13,11 @@ from ..fields import (
     StripeEnumField,
     StripeForeignKey,
 )
+from ..http_client import djstripe_client
 from ..settings import djstripe_settings
 from ..utils import get_id_from_stripe_data
 from .account import Account
-from .base import StripeModel, logger
+from .base import IdempotencyKey, StripeModel, logger
 from .core import Customer
 
 
@@ -178,40 +179,72 @@ class LegacySourceMixin:
         return account, customer, kwargs
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
-        # OVERRIDING the parent version of this function
-        # Cards & Bank Accounts must be manipulated through a customer or account.
+    def _api_create(
+        cls, idempotency_key=None, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
+        with transaction.atomic():
+            # Add or create idempotency_key to kwargs
+            kwargs, idempotency_key = cls.add_idempotency_key_to_metadata(
+                action="create", idempotency_key=idempotency_key, **kwargs
+            )
 
-        account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
-            **kwargs
-        )
+            # OVERRIDING the parent version of this function
+            # Cards & Bank Accounts must be manipulated through a customer or account.
+            account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
+                **kwargs
+            )
 
-        # First we try to retrieve by customer attribute,
-        # then by account attribute
-        if customer and account:
-            try:
-                # retrieve by customer
-                return customer.api_retrieve(api_key=api_key).sources.create(
-                    api_key=api_key, **clean_kwargs
-                )
-            except Exception as customer_exc:
+            # First we try to retrieve by customer attribute,
+            # then by account attribute
+            if customer and account:
                 try:
-                    # retrieve by account
-                    return account.api_retrieve(
-                        api_key=api_key
-                    ).external_accounts.create(api_key=api_key, **clean_kwargs)
-                except Exception:
-                    raise customer_exc
+                    # retrieve by customer
+                    stripe_obj = djstripe_client._request_with_retries(
+                        customer.api_retrieve(api_key=api_key).sources.create,
+                        api_key=api_key,
+                        idempotency_key=idempotency_key,
+                        stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                        **clean_kwargs,
+                    )
 
-        if customer:
-            return customer.api_retrieve(api_key=api_key).sources.create(
-                api_key=api_key, **clean_kwargs
-            )
+                except Exception as customer_exc:
+                    try:
+                        # retrieve by account
+                        stripe_obj = djstripe_client._request_with_retries(
+                            account.api_retrieve(
+                                api_key=api_key
+                            ).external_accounts.create,
+                            api_key=api_key,
+                            idempotency_key=idempotency_key,
+                            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                            **clean_kwargs,
+                        )
 
-        if account:
-            return account.api_retrieve(api_key=api_key).external_accounts.create(
-                api_key=api_key, **clean_kwargs
-            )
+                    except Exception:
+                        raise customer_exc
+
+            if customer and not account:
+                stripe_obj = djstripe_client._request_with_retries(
+                    customer.api_retrieve(api_key=api_key).sources.create,
+                    api_key=api_key,
+                    idempotency_key=idempotency_key,
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                    **clean_kwargs,
+                )
+
+            if account and not customer:
+                stripe_obj = djstripe_client._request_with_retries(
+                    account.api_retrieve(api_key=api_key).external_accounts.create,
+                    api_key=api_key,
+                    idempotency_key=idempotency_key,
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                    **clean_kwargs,
+                )
+
+            # Update the action of the idempotency_key by appending stripe_obj.id to it
+            IdempotencyKey.update_action_field(idempotency_key, stripe_obj)
+
+            return stripe_obj
 
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
@@ -229,35 +262,35 @@ class LegacySourceMixin:
         if customer and account:
             try:
                 # retrieve by customer
-                return (
-                    customer.api_retrieve(api_key=api_key)
-                    .sources.list(object=object_name, **clean_kwargs)
-                    .auto_paging_iter()
-                )
+                return djstripe_client._request_with_retries(
+                    customer.api_retrieve(api_key=api_key).sources.list,
+                    object=object_name,
+                    **clean_kwargs,
+                ).auto_paging_iter()
             except Exception as customer_exc:
                 try:
                     # retrieve by account
-                    return (
-                        account.api_retrieve(api_key=api_key)
-                        .external_accounts.list(object=object_name, **clean_kwargs)
-                        .auto_paging_iter()
-                    )
+                    return djstripe_client._request_with_retries(
+                        account.api_retrieve(api_key=api_key).external_accounts.list,
+                        object=object_name,
+                        **clean_kwargs,
+                    ).auto_paging_iter()
                 except Exception:
                     raise customer_exc
 
         if customer:
-            return (
-                customer.api_retrieve(api_key=api_key)
-                .sources.list(object=object_name, **clean_kwargs)
-                .auto_paging_iter()
-            )
+            return djstripe_client._request_with_retries(
+                customer.api_retrieve(api_key=api_key).sources.list,
+                object=object_name,
+                **clean_kwargs,
+            ).auto_paging_iter()
 
         if account:
-            return (
-                account.api_retrieve(api_key=api_key)
-                .external_accounts.list(object=object_name, **clean_kwargs)
-                .auto_paging_iter()
-            )
+            return djstripe_client._request_with_retries(
+                account.api_retrieve(api_key=api_key).external_accounts.list,
+                object=object_name,
+                **clean_kwargs,
+            ).auto_paging_iter()
 
         raise ImpossibleAPIRequest(
             f"Can't list {object_name} without a customer or account object."
@@ -301,7 +334,8 @@ class LegacySourceMixin:
         api_key = api_key or self.default_api_key
 
         if self.customer:
-            return stripe.Customer.retrieve_source(
+            return djstripe_client._request_with_retries(
+                stripe.Customer.retrieve_source,
                 self.customer.id,
                 self.id,
                 expand=self.expand_fields,
@@ -312,7 +346,8 @@ class LegacySourceMixin:
 
         # try to retrieve by account attribute if retrieval by customer fails.
         if self.account:
-            return stripe.Account.retrieve_external_account(
+            return djstripe_client._request_with_retries(
+                stripe.Account.retrieve_external_account,
                 self.account.id,
                 self.id,
                 expand=self.expand_fields,
@@ -337,7 +372,8 @@ class LegacySourceMixin:
             stripe_account = self._get_stripe_account_id(api_key)
 
         if self.customer:
-            return stripe.Customer.delete_source(
+            return djstripe_client._request_with_retries(
+                stripe.Customer.delete_source,
                 self.customer.id,
                 self.id,
                 api_key=api_key,
@@ -346,7 +382,8 @@ class LegacySourceMixin:
             )
 
         if self.account:
-            return stripe.Account.delete_external_account(
+            return djstripe_client._request_with_retries(
+                stripe.Account.delete_external_account,
                 self.account.id,
                 self.id,
                 api_key=api_key,
@@ -633,7 +670,9 @@ class Card(LegacySourceMixin, StripeModel):
         }
         card.update(kwargs)
 
-        return stripe.Token.create(api_key=api_key, card=card)
+        return djstripe_client._request_with_retries(
+            stripe.Token.create, api_key=api_key, card=card
+        )
 
 
 class Source(StripeModel):
@@ -786,7 +825,8 @@ class Source(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
-        return Customer.stripe_class.list_sources(
+        return djstripe_client._request_with_retries(
+            Customer.stripe_class.list_sources,
             object="source",
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -1032,8 +1072,11 @@ class PaymentMethod(StripeModel):
             # key cached in the Stripe object
             extra_kwargs = {"api_key": api_key}
 
-        stripe_payment_method = stripe.PaymentMethod.attach(
-            payment_method, customer=customer, **extra_kwargs
+        stripe_payment_method = djstripe_client._request_with_retries(
+            stripe.PaymentMethod.attach,
+            payment_method,
+            customer=customer,
+            **extra_kwargs,
         )
         return cls.sync_from_stripe_data(stripe_payment_method, api_key=api_key)
 

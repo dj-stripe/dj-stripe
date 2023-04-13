@@ -1,5 +1,5 @@
 import stripe
-from django.db import models
+from django.db import models, transaction
 
 from djstripe.utils import get_friendly_currency_amount
 
@@ -13,9 +13,10 @@ from ..fields import (
     StripeIdField,
     StripeQuantumCurrencyAmountField,
 )
+from ..http_client import djstripe_client
 from ..managers import TransferManager
 from ..settings import djstripe_settings
-from .base import StripeBaseModel, StripeModel
+from .base import IdempotencyKey, StripeBaseModel, StripeModel
 
 
 # TODO Implement Full Webhook event support for ApplicationFee and ApplicationFee Refund Objects
@@ -164,7 +165,8 @@ class CountrySpec(StripeBaseModel):
         if api_key is None:
             api_key = djstripe_settings.get_default_api_key(livemode=None)
 
-        return self.stripe_class.retrieve(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.retrieve,
             id=self.id,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -316,27 +318,41 @@ class TransferReversal(StripeModel):
         return str(self.transfer)
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(
+        cls, idempotency_key=None, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
         """
         Call the stripe API's create operation for this model.
         :param api_key: The api key to use for this request. \
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        with transaction.atomic():
+            # Add or create idempotency_key to kwargs
+            kwargs, idempotency_key = cls.add_idempotency_key_to_metadata(
+                action="create", idempotency_key=idempotency_key, **kwargs
+            )
 
-        if not kwargs.get("id"):
-            raise KeyError("Transfer Object ID is missing")
+            if not kwargs.get("id"):
+                raise KeyError("Transfer Object ID is missing")
 
-        try:
-            Transfer.objects.get(id=kwargs["id"])
-        except Transfer.DoesNotExist:
-            raise
+            try:
+                Transfer.objects.get(id=kwargs["id"])
+            except Transfer.DoesNotExist:
+                raise
 
-        return stripe.Transfer.create_reversal(
-            api_key=api_key,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **kwargs,
-        )
+            stripe_obj = djstripe_client._request_with_retries(
+                stripe.Transfer.create_reversal,
+                api_key=api_key,
+                idempotency_key=idempotency_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                **kwargs,
+            )
+
+            # Update the action of the idempotency_key by appending stripe_obj.id to it
+            IdempotencyKey.update_action_field(idempotency_key, stripe_obj)
+
+            return stripe_obj
 
     def api_retrieve(self, api_key=None, stripe_account=None):
         """
@@ -355,7 +371,8 @@ class TransferReversal(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return stripe.Transfer.retrieve_reversal(
+        return djstripe_client._request_with_retries(
+            stripe.Transfer.retrieve_reversal,
             id=id,
             nested_id=nested_id,
             api_key=api_key or self.default_api_key,
@@ -374,7 +391,8 @@ class TransferReversal(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
-        return stripe.Transfer.list_reversals(
+        return djstripe_client._request_with_retries(
+            stripe.Transfer.list_reversals,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,

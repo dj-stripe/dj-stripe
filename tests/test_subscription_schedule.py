@@ -10,6 +10,7 @@ from django.test import TestCase
 
 from djstripe.enums import SubscriptionScheduleStatus
 from djstripe.models import Invoice, SubscriptionSchedule
+from djstripe.models.base import IdempotencyKey
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -243,9 +244,18 @@ class SubscriptionScheduleTest(CreateAccountMixin, AssertStripeFksMixin, TestCas
         ) as patched__api_update:
             schedule.update()
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"subscriptionschedule:update:{FAKE_SUBSCRIPTION_SCHEDULE['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         patched__api_update.assert_called_once_with(
             FAKE_SUBSCRIPTION_SCHEDULE["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_account=schedule.djstripe_owner_account.id,
+            idempotency_key=idempotency_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            metadata={"idempotency_key": idempotency_key},
         )

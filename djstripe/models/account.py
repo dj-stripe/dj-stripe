@@ -4,6 +4,7 @@ from django.db import models, transaction
 from .. import enums
 from ..enums import APIKeyType
 from ..fields import JSONField, StripeCurrencyCodeField, StripeEnumField
+from ..http_client import djstripe_client
 from ..settings import djstripe_settings
 from .api import APIKey, get_api_key_details_by_prefix
 from .base import StripeModel, logger
@@ -131,8 +132,10 @@ class Account(StripeModel):
         if djstripe_settings.STRIPE_SECRET_KEY.startswith("rk_"):
             return None
 
-        account_data = cls.stripe_class.retrieve(
-            api_key=api_key, stripe_version=djstripe_settings.STRIPE_API_VERSION
+        account_data = djstripe_client._request_with_retries(
+            cls.stripe_class.retrieve,
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
         return cls._get_or_create_from_stripe_object(account_data, api_key=api_key)[0]
@@ -171,7 +174,8 @@ class Account(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.reject(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.reject,
             self.id,
             api_key=api_key,
             stripe_account=stripe_account,

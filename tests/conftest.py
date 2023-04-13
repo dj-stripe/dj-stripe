@@ -2,14 +2,17 @@
 Module for creating re-usable fixtures to be used across the test suite
 """
 import os
+import time
 
 import pytest
 import stripe
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from stripe.error import InvalidRequestError, PermissionError
+from stripe.http_client import HTTPClient
 
 from djstripe import models
+from djstripe.http_client import DjStripeHTTPClient, djstripe_client
 
 from . import FAKE_CUSTOMER, FAKE_PLATFORM_ACCOUNT
 
@@ -180,7 +183,8 @@ def platform_account_fixture(django_db_setup, django_db_blocker, configure_setti
     # See: https://pytest-django.readthedocs.io/en/latest/database.html#populate-the-test-database-if-you-don-t-use-transactional-or-live-server
     with django_db_blocker.unblock():
         # setup_stuff
-        account_json = stripe.Account.retrieve(
+        account_json = djstripe_client._request_with_retries(
+            stripe.Account.retrieve,
             api_key=settings.STRIPE_SECRET_KEY,
         )
         account_instance = models.Account.sync_from_stripe_data(
@@ -189,3 +193,13 @@ def platform_account_fixture(django_db_setup, django_db_blocker, configure_setti
         )
 
         yield account_json, account_instance
+
+
+@pytest.fixture(autouse=True)
+def update_stripe_default_attrbutes(request):
+    DjStripeHTTPClient._is_test = True
+    for m in request.node.iter_markers():
+        if m.name == "stripe_api":
+            HTTPClient.INITIAL_DELAY = 1
+            HTTPClient.MAX_DELAY = 15
+            HTTPClient._max_network_retries = lambda _: 10

@@ -520,7 +520,7 @@ class TestAccountSTRIPE:
         """Ensure sync_from_stripe_data() on Account model works as expected."""
 
         # Create Account on Stripe.
-        account_json = stripe.Account.create(
+        account_json = Account._api_create(
             type="standard",
             country="US",
             email="jenny.standard.rosen@example.com",
@@ -541,9 +541,7 @@ class TestAccountSTRIPE:
         # deleted created Account
         finally:
             # try to delete
-            stripe.Account.delete(
-                account_json["id"], api_key=settings.STRIPE_TEST_SECRET_KEY
-            )
+            account_instance._api_delete(api_key=settings.STRIPE_TEST_SECRET_KEY)
 
     @pytest.mark.parametrize(
         "account",
@@ -604,8 +602,8 @@ class TestAccountSTRIPE:
         """Ensure _attach_objects_post_save_hook() on Account model works as expected."""
         account_json, account_instance = request.getfixturevalue(account)
 
-        assert account_instance.branding_icon is not None
-        assert account_instance.branding_logo is not None
+        assert account_instance.branding_icon is None
+        assert account_instance.branding_logo is None
 
         with patch("djstripe.models.core.File") as mock_file:
             with patch.object(mock_file.return_value, "api_retrieve") as mock_retrieve:
@@ -638,8 +636,8 @@ class TestAccountSTRIPE:
         """Ensure _attach_objects_post_save_hook() on Account model raises Error as expected."""
         account_json, account_instance = request.getfixturevalue(account)
 
-        assert account_instance.branding_icon is not None
-        assert account_instance.branding_logo is not None
+        assert account_instance.branding_icon is None
+        assert account_instance.branding_logo is None
 
         with patch("djstripe.models.account.logger") as mock_logger:
             with patch("djstripe.models.core.File") as mock_file:
@@ -676,8 +674,8 @@ class TestAccountSTRIPE:
         """Ensure _attach_objects_post_save_hook() on Account model raises Error as expected."""
         account_json, account_instance = request.getfixturevalue(account)
 
-        assert account_instance.branding_icon is not None
-        assert account_instance.branding_logo is not None
+        assert account_instance.branding_icon is None
+        assert account_instance.branding_logo is None
 
         with pytest.raises(stripe.error.InvalidRequestError) as exc:
             with patch("djstripe.models.core.File") as mock_file:
@@ -705,8 +703,8 @@ class TestAccountSTRIPE:
         """Ensure _attach_objects_post_save_hook() on Account model raises Error as expected."""
         account_json, account_instance = request.getfixturevalue(account)
 
-        assert account_instance.branding_icon is not None
-        assert account_instance.branding_logo is not None
+        assert account_instance.branding_icon is None
+        assert account_instance.branding_logo is None
 
         # No exception is raised
         with patch("djstripe.models.core.File") as mock_file:
@@ -732,8 +730,8 @@ class TestAccountSTRIPE:
         """Ensure _attach_objects_post_save_hook() on Account model raises Error as expected."""
         account_json, account_instance = request.getfixturevalue(account)
 
-        assert account_instance.branding_icon is not None
-        assert account_instance.branding_logo is not None
+        assert account_instance.branding_icon is None
+        assert account_instance.branding_logo is None
 
         with patch("djstripe.models.account.logger") as mock_logger:
             with patch("djstripe.models.core.File") as mock_file:
@@ -839,7 +837,7 @@ class TestAccountSTRIPE:
         """Ensure the expected default account is returned."""
         account = Account.get_default_account(api_key=settings.STRIPE_SECRET_KEY)
 
-        assert account.id == "acct_1ItQ7cJSZQVUcJYg"
+        assert account.id == "acct_1IKVu0Ij6g3bgR0q"
 
         assert account.djstripe_owner_account == account
         assert account.djstripe_owner_account == platform_account_fixture[1]
@@ -872,24 +870,24 @@ class TestAccountSTRIPE:
     def test_branding_logo(self, platform_account_fixture):
         """Ensure Account model's branding_logo property works as expected."""
         account = platform_account_fixture[1]
-        assert account.branding_logo.id == "file_1J423CJSZQVUcJYg7AsfwjcQ"
+        assert account.branding_logo is None
 
     def test_branding_icon(self, platform_account_fixture):
         """Ensure Account model's branding_icon property works as expected."""
         account = platform_account_fixture[1]
-        assert account.branding_icon.id == "file_1J422OJSZQVUcJYgLYKEC9w6"
+        assert account.branding_icon is None
 
     @pytest.mark.parametrize(
         "business_profile_update, settings_dashboard_update, expected_account_str",
         [
-            ({}, {}, "<id=acct_1ItQ7cJSZQVUcJYg>"),
+            ({}, {}, "<id=acct_1IKVu0Ij6g3bgR0q>"),
             ({}, {"display_name": "some display name"}, "some display name"),
             (
                 {"name": "some business name"},
                 {"display_name": ""},
                 "some business name",
             ),
-            ({"name": ""}, {"display_name": ""}, "<id=acct_1ItQ7cJSZQVUcJYg>"),
+            ({"name": ""}, {"display_name": ""}, "<id=acct_1IKVu0Ij6g3bgR0q>"),
         ],
     )
     def test_account_str(

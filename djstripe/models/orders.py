@@ -12,6 +12,7 @@ from ..fields import (
     StripeForeignKey,
     StripeQuantumCurrencyAmountField,
 )
+from ..http_client import djstripe_client
 from ..settings import djstripe_settings
 from .base import StripeModel
 
@@ -159,7 +160,8 @@ class Order(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.cancel(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.cancel,
             self.id,
             api_key=api_key,
             stripe_account=stripe_account,
@@ -183,7 +185,8 @@ class Order(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.reopen(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.reopen,
             self.id,
             api_key=api_key,
             stripe_account=stripe_account,
@@ -211,7 +214,8 @@ class Order(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.submit(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.submit,
             self.id,
             api_key=api_key,
             stripe_account=stripe_account,

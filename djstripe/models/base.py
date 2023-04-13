@@ -3,11 +3,14 @@ import uuid
 from datetime import timedelta
 from typing import Dict, List, Optional, Type
 
+from django.core.exceptions import FieldDoesNotExist
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from stripe.api_resources.abstract.api_resource import APIResource
 from stripe.error import InvalidRequestError
 from stripe.util import convert_to_stripe_object
+
+from djstripe.http_client import DjStripeHTTPClient
 
 from ..exceptions import ImpossibleAPIRequest
 from ..fields import (
@@ -17,6 +20,7 @@ from ..fields import (
     StripeIdField,
     StripePercentField,
 )
+from ..http_client import djstripe_client
 from ..managers import StripeModelManager
 from ..settings import djstripe_settings
 from ..utils import get_id_from_stripe_data
@@ -33,6 +37,7 @@ class StripeBaseModel(models.Model):
     class Meta:
         abstract = True
 
+    # TODO Need to test retries on paginated requests
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         """
@@ -47,7 +52,8 @@ class StripeBaseModel(models.Model):
         :returns: an iterator over all items in the query
         """
 
-        return cls.stripe_class.list(
+        return djstripe_client._request_with_retries(
+            cls.stripe_class.list,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,
@@ -191,20 +197,51 @@ class StripeModel(StripeBaseModel):
             for which this request is being made.
         :type stripe_account: string
         """
+        api_key = api_key or self.default_api_key
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.retrieve(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.retrieve,
             id=self.id,
-            api_key=api_key or self.default_api_key,
+            api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=self.expand_fields,
             stripe_account=stripe_account,
         )
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def add_idempotency_key_to_metadata(cls, action, idempotency_key, **kwargs):
+        """
+        Adds idempotency_key to metadata dict in the kwargs dict and returns:
+        the updated kwargs, and the idempotency_key
+        """
+        # Prefer passed in idempotency_key.
+        if not idempotency_key:
+            # Create idempotency_key
+            idempotency_key = djstripe_settings.create_idempotency_key(
+                object_type=cls.__name__.lower(),
+                action=action,
+                livemode=djstripe_settings.STRIPE_LIVE_MODE,
+                stripe_obj_id=kwargs.get("stripe_obj_id", ""),
+            )
+        # Add idempotency_key in object's metadata if that key exists
+        try:
+            if cls._meta.get_field("metadata"):
+                metadata = kwargs.get("metadata", {})
+                metadata["idempotency_key"] = idempotency_key
+                kwargs["metadata"] = metadata
+
+        except FieldDoesNotExist:
+            pass
+
+        return kwargs, idempotency_key
+
+    @classmethod
+    def _api_create(
+        cls, idempotency_key=None, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs
+    ):
         """
         Call the stripe API's create operation for this model.
 
@@ -212,12 +249,23 @@ class StripeModel(StripeBaseModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        with transaction.atomic():
+            kwargs, idempotency_key = cls.add_idempotency_key_to_metadata(
+                action="create", idempotency_key=idempotency_key, **kwargs
+            )
 
-        return cls.stripe_class.create(
-            api_key=api_key,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **kwargs,
-        )
+            stripe_obj = djstripe_client._request_with_retries(
+                cls.stripe_class.create,
+                api_key=api_key,
+                idempotency_key=idempotency_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                **kwargs,
+            )
+
+            # Update the action of the idempotency_key by appending stripe_obj.id to it
+            IdempotencyKey.update_action_field(idempotency_key, stripe_obj)
+
+            return stripe_obj
 
     def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
         """
@@ -235,7 +283,8 @@ class StripeModel(StripeBaseModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.delete(
+        return djstripe_client._request_with_retries(
+            self.stripe_class.delete,
             self.id,
             api_key=api_key,
             stripe_account=stripe_account,
@@ -243,7 +292,9 @@ class StripeModel(StripeBaseModel):
             **kwargs,
         )
 
-    def _api_update(self, api_key=None, stripe_account=None, **kwargs):
+    def _api_update(
+        self, idempotency_key=None, api_key=None, stripe_account=None, **kwargs
+    ):
         """
         Call the stripe API's modify operation for this model
 
@@ -259,9 +310,21 @@ class StripeModel(StripeBaseModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.stripe_class.modify(
+        kwargs, idempotency_key = self.__class__.add_idempotency_key_to_metadata(
+            action="update",
+            idempotency_key=idempotency_key,
+            stripe_obj_id=self.id,
+            **kwargs,
+        )
+
+        # Remove stripe_obj_id if it exists
+        kwargs.pop("stripe_obj_id", None)
+
+        return djstripe_client._request_with_retries(
+            self.stripe_class.modify,
             self.id,
             api_key=api_key,
+            idempotency_key=idempotency_key,
             stripe_account=stripe_account,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,
@@ -1058,8 +1121,11 @@ class StripeModel(StripeBaseModel):
             "api_key",
             djstripe_settings.get_default_api_key(livemode=kwargs.get("livemode")),
         )
-        data = cls.stripe_class.retrieve(
-            id=id, stripe_version=djstripe_settings.STRIPE_API_VERSION, **kwargs
+        data = djstripe_client._request_with_retries(
+            cls.stripe_class.retrieve,
+            id=id,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
         instance = cls.sync_from_stripe_data(data, api_key=kwargs.get("api_key"))
         return instance
@@ -1078,12 +1144,19 @@ class IdempotencyKey(models.Model):
     )
     created = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ("action", "livemode")
-
     def __str__(self):
         return str(self.uuid)
 
     @property
     def is_expired(self) -> bool:
         return timezone.now() > self.created + timedelta(hours=24)
+
+    @staticmethod
+    def update_action_field(uuid, stripe_obj):
+        # Update the action of the idempotency_key by appending stripe_obj.id to it
+        idempotency_key_object_qs = IdempotencyKey.objects.filter(uuid=uuid)
+        if idempotency_key_object_qs.exists():
+            idempotency_key_object = idempotency_key_object_qs.get()
+            if idempotency_key_object.action.split(":")[-1] == "":
+                idempotency_key_object.action += stripe_obj["id"]
+                idempotency_key_object.save()

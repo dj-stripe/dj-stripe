@@ -15,6 +15,7 @@ from django.utils.functional import cached_property
 from .. import signals
 from ..enums import WebhookEndpointStatus
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
+from ..http_client import djstripe_client
 from ..settings import djstripe_settings
 from .base import StripeModel, logger
 from .core import Event
@@ -282,8 +283,12 @@ class WebhookEventTrigger(models.Model):
                 # for signature verification
                 secret = local_cli_signing_secret
 
-            stripe.WebhookSignature.verify_header(
-                self.body, signature, secret, tolerance
+            djstripe_client._request_with_retries(
+                stripe.WebhookSignature.verify_header,
+                self.body,
+                signature,
+                secret,
+                tolerance,
             )
         except stripe.error.SignatureVerificationError:
             logger.exception("Failed to verify header")

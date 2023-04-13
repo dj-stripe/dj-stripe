@@ -10,6 +10,7 @@ from django.test import TestCase
 
 from djstripe.enums import PriceType, PriceUsageType
 from djstripe.models import Price, Product
+from djstripe.models.base import IdempotencyKey
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -46,11 +47,20 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         price = Price.create(**fake_price)
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"price:create:{fake_price['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         expected_create_kwargs = deepcopy(FAKE_PRICE)
-        expected_create_kwargs["api_key"] = djstripe_settings.STRIPE_SECRET_KEY
+        expected_create_kwargs["metadata"]["idempotency_key"] = idempotency_key
 
         price_create_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
             **expected_create_kwargs,
         )
 
@@ -74,12 +84,21 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         price = Price.create(**fake_price)
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"price:create:{fake_price['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         expected_create_kwargs = deepcopy(FAKE_PRICE)
         expected_create_kwargs["product"] = self.stripe_product
+        expected_create_kwargs["metadata"]["idempotency_key"] = idempotency_key
 
         price_create_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
             **expected_create_kwargs,
         )
 
@@ -105,10 +124,21 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         price = Price.create(**fake_price)
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"price:create:{fake_price['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
+        expected_create_kwargs = deepcopy(FAKE_PRICE)
+        expected_create_kwargs["metadata"]["idempotency_key"] = idempotency_key
+
         price_create_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **FAKE_PRICE,
+            idempotency_key=idempotency_key,
+            **expected_create_kwargs,
         )
 
         self.assert_fks(
@@ -132,12 +162,21 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         price = Price.create(**fake_price)
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"price:create:{fake_price['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         expected_create_kwargs = deepcopy(FAKE_PRICE)
         expected_create_kwargs["metadata"] = metadata
+        expected_create_kwargs["metadata"]["idempotency_key"] = idempotency_key
 
         price_create_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
             **expected_create_kwargs,
         )
 

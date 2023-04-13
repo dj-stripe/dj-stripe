@@ -12,6 +12,8 @@ from django.test import TestCase
 from djstripe import enums
 from djstripe.exceptions import StripeObjectManipulationException
 from djstripe.models import BankAccount, Customer
+from djstripe.models.base import IdempotencyKey
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BANK_ACCOUNT_IV,
@@ -292,17 +294,46 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             BankAccount.api_list(account="fish")
 
     @patch(
+        "tests.Sources",
+        autospec=True,
+    )
+    @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER_IV),
         autospec=True,
     )
-    def test__api_create_with_account_absent(self, customer_retrieve_mock):
+    def test__api_create_with_account_absent(
+        self, customer_retrieve_mock, sources_mock
+    ):
+        # Need to patch tests.Sources.create method
+        sources_create_mock = sources_mock.return_value.create
+        sources_create_mock.return_value = FAKE_CUSTOMER_IV["sources"]["data"][0]
+
         stripe_bank_account = BankAccount._api_create(
             customer=self.customer, source=FAKE_BANK_ACCOUNT_SOURCE["id"]
         )
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"bankaccount:create:{FAKE_BANK_ACCOUNT_SOURCE['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         self.assertEqual(FAKE_BANK_ACCOUNT_SOURCE, stripe_bank_account)
 
+        sources_create_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
+            source=FAKE_BANK_ACCOUNT_SOURCE["id"],
+            metadata={"idempotency_key": idempotency_key},
+        )
+
+    @patch(
+        "tests.Sources",
+        autospec=True,
+    )
     @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER_IV),
@@ -314,10 +345,14 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     def test__api_create_with_customer_and_account(
-        self, account_retrieve_mock, customer_retrieve_mock
+        self, account_retrieve_mock, customer_retrieve_mock, sources_mock
     ):
         FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_SOURCE)
         FAKE_BANK_ACCOUNT_DICT["account"] = FAKE_CUSTOM_ACCOUNT["id"]
+
+        # Need to patch tests.Sources.create method
+        sources_create_mock = sources_mock.return_value.create
+        sources_create_mock.return_value = FAKE_CUSTOMER_IV["sources"]["data"][0]
 
         stripe_bank_account = BankAccount._api_create(
             account=self.custom_account,
@@ -325,8 +360,27 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             source=FAKE_BANK_ACCOUNT_DICT["id"],
         )
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"bankaccount:create:{FAKE_BANK_ACCOUNT_SOURCE['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         self.assertEqual(FAKE_BANK_ACCOUNT_SOURCE, stripe_bank_account)
 
+        sources_create_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
+            source=FAKE_BANK_ACCOUNT_SOURCE["id"],
+            metadata={"idempotency_key": idempotency_key},
+        )
+
+    @patch(
+        "tests.ExternalAccounts",
+        autospec=True,
+    )
     @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER_IV),
@@ -338,13 +392,32 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     def test__api_create_with_customer_absent(
-        self, account_retrieve_mock, customer_retrieve_mock
+        self, account_retrieve_mock, customer_retrieve_mock, external_accounts_mock
     ):
+        # Need to patch tests.Sources.create method
+        external_accounts_create_mock = external_accounts_mock.return_value.create
+        external_accounts_create_mock.return_value = FAKE_BANK_ACCOUNT_IV
+
         stripe_bank_account = BankAccount._api_create(
             account=self.custom_account, source=FAKE_BANK_ACCOUNT_IV["id"]
         )
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"bankaccount:create:{FAKE_BANK_ACCOUNT_IV['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         self.assertEqual(FAKE_BANK_ACCOUNT_IV, stripe_bank_account)
+
+        external_accounts_create_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
+            source=FAKE_BANK_ACCOUNT_IV["id"],
+            metadata={"idempotency_key": idempotency_key},
+        )
 
     @patch(
         "stripe.Customer.delete_source",
