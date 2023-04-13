@@ -204,7 +204,7 @@ def update_stripe_max_network_retries(request):
 
 @pytest.fixture(autouse=True)
 def update_stripe_default_attrbutes(request):
-    HTTPClient._max_network_retries = lambda _: 5
+    DjStripeHTTPClient._is_test = True
     for m in request.node.iter_markers():
         if m.name == "stripe_api":
             HTTPClient.INITIAL_DELAY = 1
