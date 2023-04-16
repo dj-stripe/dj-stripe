@@ -2047,7 +2047,6 @@ class SetupIntent(StripeModel):
         )
 
 
-# TODO Add Tests
 class Payout(StripeModel):
     """
     A Payout object is created when you receive funds from Stripe, or when you initiate
@@ -2126,14 +2125,21 @@ class Payout(StripeModel):
             "`instant` is only supported for payouts to debit cards."
         ),
     )
-    # TODO: `original_payout` impl as OneToOne, with `reversed_by` reverse relation
-    # original_payout = StripeForeignKey(
-    #     "Payout",
-    #     on_delete=models.SET_NULL,
-    #     null=True,
-    #     blank=True,
-    #     help_text="If the payout reverses another, this is the original payout.",
-    # )
+    original_payout = models.OneToOneField(
+        "Payout",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="If this payout reverses another, this is the ID of the original payout.",
+    )
+    reversed_by = models.OneToOneField(
+        "Payout",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="If this payout was reversed, this is the ID of the payout that reverses this payout.",
+        related_name="reversed_payout",
+    )
     source_type = StripeEnumField(
         enum=enums.PayoutSourceType,
         help_text="The source balance this payout came from.",
