@@ -785,13 +785,13 @@ example, <code>"http://localhost:12111"</code> if you are running
         <span class="k">if</span> <span class="ow">not</span> <span class="n">func</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">default</span>
 
-        <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">func</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">func</span> <span class="o">=</span> <span class="n">import_string</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">setting_name</span><span class="si">}</span><span class="s2"> must be callable.&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">func</span>
@@ -1340,13 +1340,13 @@ a failed import causing ImportError to be raised.</p>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">func</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">default</span>
 
-    <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">func</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">func</span> <span class="o">=</span> <span class="n">import_string</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">ImproperlyConfigured</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">setting_name</span><span class="si">}</span><span class="s2"> must be callable.&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">func</span>

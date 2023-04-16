@@ -219,6 +219,8 @@ To upgrade from an older version, first upgrade to dj-stripe 2.5.0.</p>
 <li>Added missing <code>payment_status</code> model field to Checkout Sessions.</li>
 <li>Added missing <code>status</code> model field to Checkout Sessions.</li>
 <li>Added support for running tests using the actual Stripe API. It will take a while to replace all existing tests with the actual API. By default tests will run using mocks, but <code>-m stripe_api</code> can be added to use the actual API.</li>
+<li>Added <code>original_payout</code> model field to <code>Payout</code> model.</li>
+<li>Added <code>reversed_by</code> model field to <code>Payout</code> model.</li>
 </ul>
               
             </div>
