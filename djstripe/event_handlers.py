@@ -140,6 +140,16 @@ def customer_source_webhook_handler(event):
             _handle_crud_like_event(target_cls=models.Card, event=event)
 
 
+@webhooks.handler("identity.verification_session")
+def identity_verification_session_handler(event):
+    """
+    Handle updates to Stripe Identity Verification Session objects.
+
+    Docs: https://stripe.com/docs/api/identity/verification_sessions
+    """
+    _handle_crud_like_event(target_cls=models.VerificationSession, event=event)
+
+
 @webhooks.handler("customer.subscription")
 def customer_subscription_webhook_handler(event):
     """Handle updates to customer subscription objects.
