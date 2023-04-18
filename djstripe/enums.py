@@ -861,6 +861,26 @@ class UsageAction(Enum):
     set = _("set")
 
 
+class VerificationSessionStatus(Enum):
+    """
+    https://stripe.com/docs/api/identity/verification_sessions/object#identity_verification_session_object-status
+    """
+
+    requires_input = _("Requires input")
+    processing = _("Processing")
+    verified = _("Verified")
+    canceled = _("Canceled")
+
+
+class VerificationType(Enum):
+    """
+    https://stripe.com/docs/api/identity/verification_sessions/object#identity_verification_session_object-type
+    """
+
+    document = _("Document")
+    id_number = _("ID number")
+
+
 class WebhookEndpointStatus(Enum):
     enabled = _("enabled")
     disabled = _("disabled")

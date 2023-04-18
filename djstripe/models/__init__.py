@@ -45,6 +45,7 @@ from .core import (
     Refund,
     SetupIntent,
 )
+from .identity import VerificationReport, VerificationSession
 from .orders import Order
 from .payment_methods import (
     BankAccount,
@@ -108,6 +109,8 @@ __all__ = [
     "UpcomingInvoice",
     "UsageRecord",
     "UsageRecordSummary",
+    "VerificationReport",
+    "VerificationSession",
     "WebhookEndpoint",
     "WebhookEventTrigger",
 ]
