@@ -205,7 +205,7 @@ class StripeModel(StripeBaseModel):
         )
 
     @classmethod
-    def get_or_create_idempotency_key(cls, action, idempotency_key):
+    def get_or_create_idempotency_key(cls, action, idempotency_key, stripe_obj_id=""):
         """
         Creates and returns an idempotency_key if not given.
         """
@@ -216,7 +216,7 @@ class StripeModel(StripeBaseModel):
                 object_type=cls.__name__.lower(),
                 action=action,
                 livemode=djstripe_settings.STRIPE_LIVE_MODE,
-                stripe_obj_id=kwargs.get("stripe_obj_id", ""),
+                stripe_obj_id=stripe_obj_id,
             )
 
         return idempotency_key
