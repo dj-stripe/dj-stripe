@@ -164,6 +164,7 @@ To upgrade from an older version, first upgrade to dj-stripe 2.5.0.</p>
 <li>Python 3.7 is no longer supported. Python 3.8 or higher is required.</li>
 <li>Added <code>LineItem</code> model.</li>
 <li>Added <code>Discount</code> model.</li>
+<li>Added <code>SourceTransaction</code> model.</li>
 <li>New webhook signals are available:<ul>
 <li><code>djstripe.signals.webhook_pre_validate(instance, api_key)</code>: Fired before webhook validation</li>
 <li><code>djstripe.signals.webhook_post_validate(instance, api_key, valid)</code>: Fired after validation (even unsuccessful validations)</li>

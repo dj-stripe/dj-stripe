@@ -534,6 +534,12 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.enums.SourceTransactionStatus">SourceTransactionStatus</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.SourceTransactionStatus-attributes">Attributes</a>
+    </li>
+        </ul>
+    </li>
     <li class="toctree-l3"><a class="reference internal" href="#djstripe.enums.SourceType">SourceType</a>
         <ul>
     <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.SourceType-attributes">Attributes</a>
@@ -6363,15 +6369,15 @@
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">862</span>
-<span class="normal">863</span>
-<span class="normal">864</span>
-<span class="normal">865</span>
-<span class="normal">866</span>
-<span class="normal">867</span>
-<span class="normal">868</span>
-<span class="normal">869</span>
-<span class="normal">870</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripePaymentMethodType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">869</span>
+<span class="normal">870</span>
+<span class="normal">871</span>
+<span class="normal">872</span>
+<span class="normal">873</span>
+<span class="normal">874</span>
+<span class="normal">875</span>
+<span class="normal">876</span>
+<span class="normal">877</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripePaymentMethodType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A djstripe-specific enum for the DjStripePaymentMethod model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -12363,10 +12369,10 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">810</span>
-<span class="normal">811</span>
-<span class="normal">812</span>
-<span class="normal">813</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ShippingRateTaxBehavior</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">817</span>
+<span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ShippingRateTaxBehavior</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">inclusive</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Inclusive&quot;</span><span class="p">)</span>
     <span class="n">exclusive</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Exclusive&quot;</span><span class="p">)</span>
     <span class="n">unspecified</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Unspecified&quot;</span><span class="p">)</span>
@@ -12469,8 +12475,8 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">806</span>
-<span class="normal">807</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ShippingRateType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">813</span>
+<span class="normal">814</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">ShippingRateType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">fixed_amount</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Fixed Amount&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
         </details>
@@ -13132,6 +13138,133 @@ and SetupIntents.</p>
 
 
 
+<h3 id="djstripe.enums.SourceTransactionStatus" class="doc doc-heading">
+        <code>djstripe.enums.SourceTransactionStatus</code>
+
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+      <p class="doc doc-class-bases">
+        Bases: <code><a class="autorefs autorefs-internal" title="djstripe.enums.Enum" href="#djstripe.enums.Enum">Enum</a></code></p>
+
+
+
+        <details class="quote">
+          <summary>Source code in <code>djstripe/enums.py</code></summary>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SourceTransactionStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="n">pending</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Pending&quot;</span><span class="p">)</span>
+    <span class="n">succeeded</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Succeeded&quot;</span><span class="p">)</span>
+    <span class="n">chargeable</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Chargeable&quot;</span><span class="p">)</span>
+    <span class="n">failed</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Failed&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+        </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+<h4 id="djstripe.enums.SourceTransactionStatus-attributes">Attributes</h4>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.SourceTransactionStatus.chargeable" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">SourceTransactionStatus</span><span class="o">.</span><span class="n">chargeable</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Chargeable&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.SourceTransactionStatus.failed" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">SourceTransactionStatus</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Failed&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.SourceTransactionStatus.pending" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">SourceTransactionStatus</span><span class="o">.</span><span class="n">pending</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Pending&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+<h5 id="djstripe.enums.SourceTransactionStatus.succeeded" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">SourceTransactionStatus</span><span class="o">.</span><span class="n">succeeded</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Succeeded&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
 <h3 id="djstripe.enums.SourceType" class="doc doc-heading">
         <code>djstripe.enums.SourceType</code>
 
@@ -13716,11 +13849,11 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">770</span>
-<span class="normal">771</span>
-<span class="normal">772</span>
-<span class="normal">773</span>
-<span class="normal">774</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubmitTypeStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">777</span>
+<span class="normal">778</span>
+<span class="normal">779</span>
+<span class="normal">780</span>
+<span class="normal">781</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubmitTypeStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">auto</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Auto&quot;</span><span class="p">)</span>
     <span class="n">book</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Book&quot;</span><span class="p">)</span>
     <span class="n">donate</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;donate&quot;</span><span class="p">)</span>
@@ -13843,10 +13976,10 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">800</span>
-<span class="normal">801</span>
-<span class="normal">802</span>
-<span class="normal">803</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionProrationBehavior</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">807</span>
+<span class="normal">808</span>
+<span class="normal">809</span>
+<span class="normal">810</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionProrationBehavior</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">create_prorations</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Create prorations&quot;</span><span class="p">)</span>
     <span class="n">always_invoice</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Always invoice&quot;</span><span class="p">)</span>
     <span class="n">none</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">)</span>
@@ -13949,9 +14082,9 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">777</span>
-<span class="normal">778</span>
-<span class="normal">779</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionScheduleEndBehavior</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">784</span>
+<span class="normal">785</span>
+<span class="normal">786</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionScheduleEndBehavior</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">release</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Release&quot;</span><span class="p">)</span>
     <span class="n">cancel</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Cancel&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -14034,12 +14167,12 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">782</span>
-<span class="normal">783</span>
-<span class="normal">784</span>
-<span class="normal">785</span>
-<span class="normal">786</span>
-<span class="normal">787</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionScheduleStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">789</span>
+<span class="normal">790</span>
+<span class="normal">791</span>
+<span class="normal">792</span>
+<span class="normal">793</span>
+<span class="normal">794</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionScheduleStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">not_started</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Not started&quot;</span><span class="p">)</span>
     <span class="n">active</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Active&quot;</span><span class="p">)</span>
     <span class="n">completed</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Completed&quot;</span><span class="p">)</span>
@@ -14182,14 +14315,14 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">790</span>
-<span class="normal">791</span>
-<span class="normal">792</span>
-<span class="normal">793</span>
-<span class="normal">794</span>
-<span class="normal">795</span>
-<span class="normal">796</span>
-<span class="normal">797</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span>
+<span class="normal">802</span>
+<span class="normal">803</span>
+<span class="normal">804</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">SubscriptionStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">incomplete</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Incomplete&quot;</span><span class="p">)</span>
     <span class="n">incomplete_expired</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Incomplete Expired&quot;</span><span class="p">)</span>
     <span class="n">trialing</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Trialing&quot;</span><span class="p">)</span>
@@ -14372,14 +14505,7 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">816</span>
-<span class="normal">817</span>
-<span class="normal">818</span>
-<span class="normal">819</span>
-<span class="normal">820</span>
-<span class="normal">821</span>
-<span class="normal">822</span>
-<span class="normal">823</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">823</span>
 <span class="normal">824</span>
 <span class="normal">825</span>
 <span class="normal">826</span>
@@ -14405,7 +14531,14 @@ and SetupIntents.</p>
 <span class="normal">846</span>
 <span class="normal">847</span>
 <span class="normal">848</span>
-<span class="normal">849</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TaxIdType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="normal">849</span>
+<span class="normal">850</span>
+<span class="normal">851</span>
+<span class="normal">852</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">TaxIdType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">ae_trn</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;AE TRN&quot;</span><span class="p">)</span>
     <span class="n">au_abn</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;AU ABN&quot;</span><span class="p">)</span>
     <span class="n">br_cnp</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;BR CNP&quot;</span><span class="p">)</span>
@@ -15108,9 +15241,9 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">852</span>
-<span class="normal">853</span>
-<span class="normal">854</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">UsageAction</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">UsageAction</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">increment</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;increment&quot;</span><span class="p">)</span>
     <span class="nb">set</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;set&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -15193,9 +15326,9 @@ and SetupIntents.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/enums.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">857</span>
-<span class="normal">858</span>
-<span class="normal">859</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEndpointStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEndpointStatus</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
     <span class="n">enabled</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;enabled&quot;</span><span class="p">)</span>
     <span class="n">disabled</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;disabled&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
