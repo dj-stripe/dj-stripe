@@ -81,9 +81,11 @@ class StripeModel(StripeBaseModel):
         null=True,
         default=None,
         blank=True,
-        help_text="Null here indicates that the livemode status is unknown or was "
-        "previously unrecorded. Otherwise, this field indicates whether this record "
-        "comes from Stripe test mode or live mode operation.",
+        help_text=(
+            "Null here indicates that the livemode status is unknown or was previously"
+            " unrecorded. Otherwise, this field indicates whether this record comes"
+            " from Stripe test mode or live mode operation."
+        ),
     )
     created = StripeDateTimeField(
         null=True,
@@ -93,9 +95,11 @@ class StripeModel(StripeBaseModel):
     metadata = JSONField(
         null=True,
         blank=True,
-        help_text="A set of key/value pairs that you can attach to an object. "
-        "It can be useful for storing additional information about an object in "
-        "a structured format.",
+        help_text=(
+            "A set of key/value pairs that you can attach to an object. "
+            "It can be useful for storing additional information about an object in "
+            "a structured format."
+        ),
     )
     description = models.TextField(
         null=True, blank=True, help_text="A description of this object."
@@ -696,7 +700,8 @@ class StripeModel(StripeBaseModel):
             # An empty field - We need to return nothing here because there is
             # no way of knowing what needs to be fetched!
             raise RuntimeError(
-                f"dj-stripe encountered an empty field {cls.__name__}.{field_name} = {field}"
+                f"dj-stripe encountered an empty field {cls.__name__}.{field_name} ="
+                f" {field}"
             )
         elif id_ == field:
             # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}

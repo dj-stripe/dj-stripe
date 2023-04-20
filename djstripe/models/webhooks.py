@@ -28,12 +28,15 @@ class WebhookEndpoint(StripeModel):
     api_version = models.CharField(
         max_length=64,
         blank=True,
-        help_text="The API version events are rendered as for this webhook endpoint. Defaults to the configured Stripe API Version.",
+        help_text=(
+            "The API version events are rendered as for this webhook endpoint. Defaults"
+            " to the configured Stripe API Version."
+        ),
     )
     enabled_events = JSONField(
         help_text=(
-            "The list of events to enable for this endpoint. "
-            "['*'] indicates that all events are enabled, except those that require explicit selection."
+            "The list of events to enable for this endpoint. ['*'] indicates that all"
+            " events are enabled, except those that require explicit selection."
         )
     )
     secret = models.CharField(

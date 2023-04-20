@@ -65,7 +65,10 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         webhookeventtrigger = WebhookEventTrigger.objects.first()
 
         self.assertEqual(
-            f"id={webhookeventtrigger.id}, valid={webhookeventtrigger.valid}, processed={webhookeventtrigger.processed}",
+            (
+                f"id={webhookeventtrigger.id}, valid={webhookeventtrigger.valid},"
+                f" processed={webhookeventtrigger.processed}"
+            ),
             str(webhookeventtrigger),
         )
 

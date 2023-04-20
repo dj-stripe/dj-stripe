@@ -28,7 +28,10 @@ class TaxRateTest(CreateAccountMixin, TestCase):
         tax_rate = TaxRate.sync_from_stripe_data(deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT))
 
         self.assertEqual(
-            f"{FAKE_TAX_RATE_EXAMPLE_1_VAT['display_name']} at {FAKE_TAX_RATE_EXAMPLE_1_VAT['percentage']:.4f}%",
+            (
+                f"{FAKE_TAX_RATE_EXAMPLE_1_VAT['display_name']} at"
+                f" {FAKE_TAX_RATE_EXAMPLE_1_VAT['percentage']:.4f}%"
+            ),
             str(tax_rate),
         )
 

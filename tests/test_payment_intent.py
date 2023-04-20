@@ -129,7 +129,8 @@ class TestStrPaymentIntent:
         if has_account and has_customer:
             assert (
                 str(pi)
-                == "$1,902.00 USD (The funds are in your account.) for dj-stripe by Michael Smith"
+                == "$1,902.00 USD (The funds are in your account.) for dj-stripe by"
+                " Michael Smith"
             )
 
         elif has_account and not has_customer:

@@ -66,14 +66,18 @@ class Account(StripeModel):
         max_length=255,
         default="",
         blank=True,
-        help_text="Internal-only description of the product sold or service provided "
-        "by the business. It's used by Stripe for risk and underwriting purposes.",
+        help_text=(
+            "Internal-only description of the product sold or service provided "
+            "by the business. It's used by Stripe for risk and underwriting purposes."
+        ),
     )
     requirements = JSONField(
         null=True,
         blank=True,
-        help_text="Information about the requirements for the account, "
-        "including what information needs to be collected, and by when.",
+        help_text=(
+            "Information about the requirements for the account, "
+            "including what information needs to be collected, and by when."
+        ),
     )
     settings = JSONField(
         null=True,
@@ -263,7 +267,8 @@ class Account(StripeModel):
                 except stripe.error.PermissionError:
                     # No permission to retrieve the data with the key
                     logger.warning(
-                        f"Cannot retrieve business branding {field} for acct {self.id} with the key."
+                        f"Cannot retrieve business branding {field} for acct"
+                        f" {self.id} with the key."
                     )
                 except stripe.error.InvalidRequestError as e:
                     if "a similar object exists in" in str(e):

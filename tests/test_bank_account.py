@@ -73,7 +73,8 @@ class TestStrBankAccount:
                 default = True
 
             assert (
-                f"{fake_stripe_data['bank_name']} {fake_stripe_data['routing_number']} ({bankaccount.human_readable_status}) {'Default' if default else ''} {fake_stripe_data['currency']}"
+                f"{fake_stripe_data['bank_name']} {fake_stripe_data['routing_number']} ({bankaccount.human_readable_status})"
+                f" {'Default' if default else ''} {fake_stripe_data['currency']}"
                 == str(bankaccount)
             )
         if not has_account and not has_customer:
@@ -245,8 +246,9 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
     def test_api_call_no_customer_and_no_account(self):
         exception_message = (
-            "BankAccount objects must be manipulated through either a Stripe Connected Account or a customer. "
-            "Pass a Customer or an Account object into this call."
+            "BankAccount objects must be manipulated through either a Stripe Connected"
+            " Account or a customer. Pass a Customer or an Account object into this"
+            " call."
         )
 
         with self.assertRaisesMessage(
@@ -277,8 +279,8 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
     def test_api_call_bad_account(self):
         exception_message = (
-            "BankAccount objects must be manipulated through a Stripe Connected Account. "
-            "Pass an Account object into this call."
+            "BankAccount objects must be manipulated through a Stripe Connected"
+            " Account. Pass an Account object into this call."
         )
 
         with self.assertRaisesMessage(

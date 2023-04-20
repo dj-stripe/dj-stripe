@@ -34,7 +34,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -56,7 +61,10 @@ class Migration(migrations.Migration):
                     "api_version",
                     models.CharField(
                         blank=True,
-                        help_text="The API version events are rendered as for this webhook endpoint.",
+                        help_text=(
+                            "The API version events are rendered as for this webhook"
+                            " endpoint."
+                        ),
                         max_length=10,
                     ),
                 ),
@@ -68,7 +76,10 @@ class Migration(migrations.Migration):
                     "secret",
                     models.CharField(
                         blank=True,
-                        help_text="The endpoint's secret, used to generate webhook signatures.",
+                        help_text=(
+                            "The endpoint's secret, used to generate webhook"
+                            " signatures."
+                        ),
                         max_length=256,
                         editable=False,
                     ),
@@ -110,7 +121,9 @@ class Migration(migrations.Migration):
                         null=True,
                         unique=True,
                         default=uuid.uuid4,
-                        help_text="A UUID specific to dj-stripe generated for the endpoint",
+                        help_text=(
+                            "A UUID specific to dj-stripe generated for the endpoint"
+                        ),
                     ),
                 ),
             ],
@@ -133,7 +146,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -156,7 +174,10 @@ class Migration(migrations.Migration):
                 (
                     "total_usage",
                     models.PositiveIntegerField(
-                        help_text="The quantity of the plan to which the customer should be subscribed."
+                        help_text=(
+                            "The quantity of the plan to which the customer should be"
+                            " subscribed."
+                        )
                     ),
                 ),
                 (
@@ -188,7 +209,9 @@ class Migration(migrations.Migration):
                         related_name="usage_record_summaries",
                         to="djstripe.subscriptionitem",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The subscription item this usage record contains data for.",
+                        help_text=(
+                            "The subscription item this usage record contains data for."
+                        ),
                     ),
                 ),
             ],
@@ -213,7 +236,10 @@ class Migration(migrations.Migration):
             field=models.BooleanField(
                 blank=True,
                 default=False,
-                help_text="Whether the Customer instance has been deleted upstream in Stripe or not.",
+                help_text=(
+                    "Whether the Customer instance has been deleted upstream in Stripe"
+                    " or not."
+                ),
                 null=True,
             ),
         ),
@@ -226,7 +252,10 @@ class Migration(migrations.Migration):
                 related_name="disputes",
                 to="djstripe.balancetransaction",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                help_text="Balance transaction that describes the impact on your account balance.",
+                help_text=(
+                    "Balance transaction that describes the impact on your account"
+                    " balance."
+                ),
             ),
         ),
         migrations.AddField(
@@ -362,7 +391,10 @@ class Migration(migrations.Migration):
             field=models.BooleanField(
                 blank=True,
                 default=False,
-                help_text="Whether or not the latest charge for the customer's latest invoice has failed.",
+                help_text=(
+                    "Whether or not the latest charge for the customer's latest invoice"
+                    " has failed."
+                ),
                 null=True,
             ),
         ),

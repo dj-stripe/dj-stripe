@@ -49,8 +49,10 @@ class Command(BaseCommand):
             "args",
             metavar="ModelName",
             nargs="*",
-            help="restricts sync to these model names (default is to sync all "
-            "supported models)",
+            help=(
+                "restricts sync to these model names (default is to sync all "
+                "supported models)"
+            ),
         )
         # Named (optional) arguments
         parser.add_argument(
@@ -93,7 +95,8 @@ class Command(BaseCommand):
 
             if not api_qs.exists():
                 self.stderr.write(
-                    "You don't have any API Keys in the database. Did you forget to add them?"
+                    "You don't have any API Keys in the database. Did you forget to add"
+                    " them?"
                 )
                 return
 
@@ -161,7 +164,9 @@ class Command(BaseCommand):
                         stripe_obj, api_key=api_key.secret
                     )
                     self.stdout.write(
-                        f"  id={djstripe_obj.id}, pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account} for {api_key})"
+                        f"  id={djstripe_obj.id},"
+                        f" pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account} for"
+                        f" {api_key})"
                     )
 
                     # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
@@ -180,7 +185,9 @@ class Command(BaseCommand):
                                 stripe_obj, api_key=api_key.secret
                             )
                             self.stdout.write(
-                                f"  id={djstripe_obj.id}, pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account} for {api_key})"
+                                f"  id={djstripe_obj.id},"
+                                f" pk={djstripe_obj.pk} ({djstripe_obj} on"
+                                f" {stripe_account} for {api_key})"
                             )
                             # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
                             self.sync_bank_accounts_and_cards(
@@ -568,7 +575,8 @@ class Command(BaseCommand):
             item_obj = model.sync_from_stripe_data(item, api_key=api_key)
 
             self.stdout.write(
-                f"\tSyncing {model._meta.verbose_name} ({instance}): id={item_obj.id}, pk={item_obj.pk}"
+                f"\tSyncing {model._meta.verbose_name} ({instance}): id={item_obj.id},"
+                f" pk={item_obj.pk}"
             )
 
         if bank_count + card_count > 0:

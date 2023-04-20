@@ -67,13 +67,16 @@ class Session(StripeModel):
     currency = StripeCurrencyCodeField(
         null=True,
         blank=True,
-        help_text="Three-letter ISO currency code, in lowercase. Must be a supported currency.",
+        help_text=(
+            "Three-letter ISO currency code, in lowercase. Must be a supported"
+            " currency."
+        ),
     )
     customer = StripeForeignKey(
         "Customer",
         null=True,
         on_delete=models.SET_NULL,
-        help_text=("Customer this Checkout is for if one exists."),
+        help_text="Customer this Checkout is for if one exists.",
     )
     customer_email = models.CharField(
         max_length=255,
@@ -85,12 +88,12 @@ class Session(StripeModel):
     display_items = JSONField(
         null=True,
         blank=True,
-        help_text=("The line items, plans, or SKUs purchased by the customer."),
+        help_text="The line items, plans, or SKUs purchased by the customer.",
     )
     line_items = JSONField(
         null=True,
         blank=True,
-        help_text=("The line items purchased by the customer."),
+        help_text="The line items purchased by the customer.",
     )
     locale = models.CharField(
         max_length=255,
@@ -103,73 +106,86 @@ class Session(StripeModel):
     mode = StripeEnumField(
         enum=enums.SessionMode,
         blank=True,
-        help_text="The mode of the Checkout Session, "
-        "one of payment, setup, or subscription.",
+        help_text=(
+            "The mode of the Checkout Session, one of payment, setup, or subscription."
+        ),
     )
     payment_intent = StripeForeignKey(
         "PaymentIntent",
         null=True,
         on_delete=models.SET_NULL,
-        help_text=("PaymentIntent created if SKUs or line items were provided."),
+        help_text="PaymentIntent created if SKUs or line items were provided.",
     )
     payment_method_types = JSONField(
-        help_text="The list of payment method types (e.g. card) that this "
-        "Checkout Session is allowed to accept."
+        help_text=(
+            "The list of payment method types (e.g. card) that this "
+            "Checkout Session is allowed to accept."
+        )
     )
     payment_status = StripeEnumField(
         enum=enums.SessionPaymentStatus,
         null=True,
         blank=True,
-        help_text="The payment status of the Checkout Session, one of paid, unpaid, or no_payment_required. You can use this value to decide when to fulfill your customer's order.",
+        help_text=(
+            "The payment status of the Checkout Session, one of paid, unpaid, or"
+            " no_payment_required. You can use this value to decide when to fulfill"
+            " your customer's order."
+        ),
     )
     setup_intent = StripeForeignKey(
         "SetupIntent",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        help_text=("The ID of the SetupIntent for Checkout Sessions in setup mode."),
+        help_text="The ID of the SetupIntent for Checkout Sessions in setup mode.",
     )
     shipping_address_collection = JSONField(
         null=True,
         blank=True,
         help_text=(
-            "When set, provides configuration for Checkout to collect a shipping address from a customer."
+            "When set, provides configuration for Checkout to collect a shipping"
+            " address from a customer."
         ),
     )
     shipping_cost = JSONField(
         null=True,
         blank=True,
         help_text=(
-            "The details of the customer cost of shipping, including the customer chosen ShippingRate."
+            "The details of the customer cost of shipping, including the customer"
+            " chosen ShippingRate."
         ),
     )
     shipping_details = JSONField(
         null=True,
         blank=True,
-        help_text=("Shipping information for this Checkout Session."),
+        help_text="Shipping information for this Checkout Session.",
     )
     shipping_options = JSONField(
         null=True,
         blank=True,
-        help_text=("The shipping rate options applied to this Session."),
+        help_text="The shipping rate options applied to this Session.",
     )
     status = StripeEnumField(
         enum=enums.SessionStatus,
         null=True,
         blank=True,
-        help_text="The status of the Checkout Session, one of open, complete, or expired.",
+        help_text=(
+            "The status of the Checkout Session, one of open, complete, or expired."
+        ),
     )
     submit_type = StripeEnumField(
         enum=enums.SubmitTypeStatus,
         blank=True,
-        help_text="Describes the type of transaction being performed by Checkout"
-        "in order to customize relevant text on the page, such as the submit button.",
+        help_text=(
+            "Describes the type of transaction being performed by Checkoutin order to"
+            " customize relevant text on the page, such as the submit button."
+        ),
     )
     subscription = StripeForeignKey(
         "Subscription",
         null=True,
         on_delete=models.SET_NULL,
-        help_text=("Subscription created if one or more plans were provided."),
+        help_text="Subscription created if one or more plans were provided.",
     )
     success_url = models.TextField(
         max_length=5000,
@@ -182,14 +198,17 @@ class Session(StripeModel):
     total_details = JSONField(
         null=True,
         blank=True,
-        help_text=("Tax and discount details for the computed total amount."),
+        help_text="Tax and discount details for the computed total amount.",
     )
     url = models.TextField(
         max_length=5000,
         blank=True,
         null=True,
         help_text=(
-            "The URL to the Checkout Session. Redirect customers to this URL to take them to Checkout. If you’re using Custom Domains, the URL will use your subdomain. Otherwise, it’ll use checkout.stripe.com. This value is only present when the session is active."
+            "The URL to the Checkout Session. Redirect customers to this URL to take"
+            " them to Checkout. If you’re using Custom Domains, the URL will use your"
+            " subdomain. Otherwise, it’ll use checkout.stripe.com. This value is only"
+            " present when the session is active."
         ),
     )
 

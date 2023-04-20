@@ -470,7 +470,11 @@ class TestAdminRegisteredModelsChildrenOfStripeModel(TestCase):
 
                 # sub-classes of StripeModel
                 if model.__name__ not in self.ignore_models:
-                    if model.__name__ in ("UsageRecordSummary", "LineItem", "SourceTransaction"):
+                    if model.__name__ in (
+                        "UsageRecordSummary",
+                        "LineItem",
+                        "SourceTransaction",
+                    ):
                         assert "_resync_instances" not in actions
                         assert "_sync_all_instances" in actions
                     elif model.__name__ == "Subscription":
@@ -972,7 +976,8 @@ class TestCustomActionMixin:
             ).choices == [("_sync_all_instances", "_sync_all_instances")]
         else:
             assert context.get("info") == [
-                f'Custom action model: <a href="/admin/fields/customactionmodel/{instance.pk}/change/">&lt;id=test&gt;</a>'
+                "Custom action model: <a"
+                f' href="/admin/fields/customactionmodel/{instance.pk}/change/">&lt;id=test&gt;</a>'
             ]
 
             assertQuerysetEqual(

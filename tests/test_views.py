@@ -230,7 +230,10 @@ class TestConfirmCustomActionView(CreateAccountMixin):
         # assert user got redirected to the action page with the error rendered
         assertContains(
             response,
-            '<ul class="messagelist">\n              <li class="error">* This field is required.</li>\n            </ul>',
+            (
+                '<ul class="messagelist">\n              <li class="error">* This field'
+                " is required.</li>\n            </ul>"
+            ),
             html=True,
         )
 

@@ -42,14 +42,26 @@ def check_stripe_api_key(app_configs=None, **kwargs):
         api_qs = APIKey.objects.all()
 
         if not api_qs.exists():
-            msg = "You don't have any API Keys in the database. Did you forget to add them?"
-            hint = "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from the Django Admin."
+            msg = (
+                "You don't have any API Keys in the database. Did you forget to add"
+                " them?"
+            )
+            hint = (
+                "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from"
+                " the Django Admin."
+            )
             messages.append(checks.Info(msg, hint=hint, id="djstripe.I001"))
 
             # Keys not in admin but in settings
             if djstripe_settings.STRIPE_SECRET_KEY:
-                msg = "Your keys are defined in the settings files. You can now add and manage them directly from the django admin."
-                hint = "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from the Django Admin."
+                msg = (
+                    "Your keys are defined in the settings files. You can now add and"
+                    " manage them directly from the django admin."
+                )
+                hint = (
+                    "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly"
+                    " from the Django Admin."
+                )
                 messages.append(checks.Info(msg, hint=hint, id="djstripe.I002"))
 
                 # Ensure keys defined in settings files are valid
@@ -57,8 +69,15 @@ def check_stripe_api_key(app_configs=None, **kwargs):
 
         # Keys in admin and in settings
         elif djstripe_settings.STRIPE_SECRET_KEY:
-            msg = "Your keys are defined in the settings files and are also in the admin. You can now add and manage them directly from the django admin."
-            hint = "We suggest adding STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from the Django Admin. And removing them from the settings files."
+            msg = (
+                "Your keys are defined in the settings files and are also in the admin."
+                " You can now add and manage them directly from the django admin."
+            )
+            hint = (
+                "We suggest adding STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY"
+                " directly from the Django Admin. And removing them from the settings"
+                " files."
+            )
             messages.append(checks.Info(msg, hint=hint, id="djstripe.I002"))
 
             # Ensure keys defined in settings files are valid
@@ -124,8 +143,10 @@ def check_stripe_api_host(app_configs=None, **kwargs):
     if not settings.DEBUG and hasattr(settings, "STRIPE_API_HOST"):
         messages.append(
             checks.Warning(
-                "STRIPE_API_HOST should not be set in production! "
-                "This is most likely unintended.",
+                (
+                    "STRIPE_API_HOST should not be set in production! "
+                    "This is most likely unintended."
+                ),
                 hint="Remove STRIPE_API_HOST from your Django settings.",
                 id="djstripe.W002",
             )
@@ -193,7 +214,10 @@ def _check_webhook_endpoint_validation(secret, messages, endpoint=None):
         messages.append(
             checks.Info(
                 f"DJSTRIPE_WEBHOOK_VALIDATION is set to 'verify_signature' {extra_msg}",
-                hint=f"Set {secret_attr} from Django shell or set DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'",
+                hint=(
+                    f"Set {secret_attr} from Django shell or set"
+                    " DJSTRIPE_WEBHOOK_VALIDATION='retrieve_event'"
+                ),
                 id="djstripe.I006",
             )
         )
@@ -217,8 +241,10 @@ def check_webhook_validation(app_configs=None, **kwargs):
     if djstripe_settings.WEBHOOK_VALIDATION is None:
         messages.append(
             checks.Warning(
-                "Webhook validation is disabled, this is a security risk if the "
-                "webhook view is enabled",
+                (
+                    "Webhook validation is disabled, this is a security risk if the "
+                    "webhook view is enabled"
+                ),
                 hint=f"Set {setting_name} to one of: {validation_options}",
                 id="djstripe.W004",
             )
@@ -302,8 +328,10 @@ def check_subscriber_key_length(app_configs=None, **kwargs):
     if key and len(key) > key_max_length:
         messages.append(
             checks.Error(
-                "DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY must be no more than "
-                f"{key_max_length} characters long",
+                (
+                    "DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY must be no more than "
+                    f"{key_max_length} characters long"
+                ),
                 hint=f"Current value: {key!r}",
                 id="djstripe.E001",
             )
@@ -322,7 +350,7 @@ def check_djstripe_settings_foreign_key_to_field(app_configs=None, **kwargs):
     setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
     hint = (
         f'Set {setting_name} to "id" if this is a new installation, '
-        f'otherwise set it to "djstripe_id".'
+        'otherwise set it to "djstripe_id".'
     )
     messages = []
 
@@ -366,7 +394,10 @@ def check_webhook_event_callback_accepts_api_key(app_configs=None, **kwargs):
         # Deprecated in 2.8.0. Raise a warning.
         messages.append(
             checks.Warning(
-                "DJSTRIPE_WEBHOOK_EVENT_CALLBACK is deprecated. See release notes for details.",
+                (
+                    "DJSTRIPE_WEBHOOK_EVENT_CALLBACK is deprecated. See release notes"
+                    " for details."
+                ),
                 hint=(
                     "If you need to trigger a function during webhook processing, "
                     "you can use djstripe.signals instead.\n"
@@ -387,7 +418,10 @@ def check_webhook_event_callback_accepts_api_key(app_configs=None, **kwargs):
             messages.append(
                 checks.Error(
                     f"{callable} accepts {signature_sz} arguments.",
-                    hint="You may have forgotten to add api_key parameter to your custom callback.",
+                    hint=(
+                        "You may have forgotten to add api_key parameter to your custom"
+                        " callback."
+                    ),
                     id="djstripe.E004",
                 )
             )

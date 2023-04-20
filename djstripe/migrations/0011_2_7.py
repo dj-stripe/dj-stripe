@@ -47,7 +47,10 @@ class Migration(migrations.Migration):
             name="api_version",
             field=models.CharField(
                 blank=True,
-                help_text="the API version at which the event data was rendered. Blank for old entries only, all new entries will have this value",
+                help_text=(
+                    "the API version at which the event data was rendered. Blank for"
+                    " old entries only, all new entries will have this value"
+                ),
                 max_length=64,
             ),
         ),
@@ -57,7 +60,10 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 max_length=64,
                 blank=True,
-                help_text="The API version events are rendered as for this webhook endpoint. Defaults to the configured Stripe API Version.",
+                help_text=(
+                    "The API version events are rendered as for this webhook endpoint."
+                    " Defaults to the configured Stripe API Version."
+                ),
             ),
         ),
         migrations.AddField(
@@ -70,7 +76,9 @@ class Migration(migrations.Migration):
             name="subscription",
             field=models.ForeignKey(
                 blank=True,
-                help_text="ID of the subscription managed by the subscription schedule.",
+                help_text=(
+                    "ID of the subscription managed by the subscription schedule."
+                ),
                 null=True,
                 on_delete=django.db.models.deletion.SET_NULL,
                 related_name="subscriptions",
@@ -103,7 +111,9 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 blank=True,
                 default="",
-                help_text="The high-level tax type, such as vat, gst, sales_tax or custom.",
+                help_text=(
+                    "The high-level tax type, such as vat, gst, sales_tax or custom."
+                ),
                 max_length=50,
             ),
         ),
@@ -144,7 +154,11 @@ class Migration(migrations.Migration):
                 blank=True,
                 default="create_prorations",
                 enum=djstripe.enums.SubscriptionProrationBehavior,
-                help_text="Determines how to handle prorations when the billing cycle changes (e.g., when switching plans, resetting billing_cycle_anchor=now, or starting a trial), or if an item’s quantity changes",
+                help_text=(
+                    "Determines how to handle prorations when the billing cycle changes"
+                    " (e.g., when switching plans, resetting billing_cycle_anchor=now,"
+                    " or starting a trial), or if an item’s quantity changes"
+                ),
                 max_length=17,
             ),
         ),
@@ -153,7 +167,15 @@ class Migration(migrations.Migration):
             name="proration_date",
             field=djstripe.fields.StripeDateTimeField(
                 blank=True,
-                help_text="If set, the proration will be calculated as though the subscription was updated at the given time. This can be used to apply exactly the same proration that was previewed with upcoming invoice endpoint. It can also be used to implement custom proration logic, such as prorating by day instead of by second, by providing the time that you wish to use for proration calculations",
+                help_text=(
+                    "If set, the proration will be calculated as though the"
+                    " subscription was updated at the given time. This can be used to"
+                    " apply exactly the same proration that was previewed with upcoming"
+                    " invoice endpoint. It can also be used to implement custom"
+                    " proration logic, such as prorating by day instead of by second,"
+                    " by providing the time that you wish to use for proration"
+                    " calculations"
+                ),
                 null=True,
             ),
         ),
@@ -164,7 +186,11 @@ class Migration(migrations.Migration):
                 blank=True,
                 default="create_prorations",
                 enum=djstripe.enums.SubscriptionProrationBehavior,
-                help_text="Determines how to handle prorations when the billing cycle changes (e.g., when switching plans, resetting billing_cycle_anchor=now, or starting a trial), or if an item’s quantity changes",
+                help_text=(
+                    "Determines how to handle prorations when the billing cycle changes"
+                    " (e.g., when switching plans, resetting billing_cycle_anchor=now,"
+                    " or starting a trial), or if an item’s quantity changes"
+                ),
                 max_length=17,
             ),
         ),
@@ -173,7 +199,15 @@ class Migration(migrations.Migration):
             name="proration_date",
             field=djstripe.fields.StripeDateTimeField(
                 blank=True,
-                help_text="If set, the proration will be calculated as though the subscription was updated at the given time. This can be used to apply exactly the same proration that was previewed with upcoming invoice endpoint. It can also be used to implement custom proration logic, such as prorating by day instead of by second, by providing the time that you wish to use for proration calculations",
+                help_text=(
+                    "If set, the proration will be calculated as though the"
+                    " subscription was updated at the given time. This can be used to"
+                    " apply exactly the same proration that was previewed with upcoming"
+                    " invoice endpoint. It can also be used to implement custom"
+                    " proration logic, such as prorating by day instead of by second,"
+                    " by providing the time that you wish to use for proration"
+                    " calculations"
+                ),
                 null=True,
             ),
         ),
@@ -199,7 +233,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -250,7 +289,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -268,7 +312,10 @@ class Migration(migrations.Migration):
                     "application",
                     models.CharField(
                         blank=True,
-                        help_text="ID of the Connect application that created the Order, if any.",
+                        help_text=(
+                            "ID of the Connect application that created the Order, if"
+                            " any."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -277,7 +324,10 @@ class Migration(migrations.Migration):
                 (
                     "client_secret",
                     models.TextField(
-                        help_text="The client secret of this PaymentIntent. Used for client-side retrieval using a publishable key.",
+                        help_text=(
+                            "The client secret of this PaymentIntent. Used for"
+                            " client-side retrieval using a publishable key."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -287,7 +337,10 @@ class Migration(migrations.Migration):
                     "ip_address",
                     models.GenericIPAddressField(
                         blank=True,
-                        help_text="A recent IP address of the purchaser used for tax reporting and tax location inference.",
+                        help_text=(
+                            "A recent IP address of the purchaser used for tax"
+                            " reporting and tax location inference."
+                        ),
                         null=True,
                     ),
                 ),
@@ -333,7 +386,10 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.paymentintent",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="ID of the payment intent associated with this order. Null when the order is open.",
+                        help_text=(
+                            "ID of the payment intent associated with this order. Null"
+                            " when the order is open."
+                        ),
                     ),
                 ),
             ],
@@ -359,7 +415,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -369,7 +430,10 @@ class Migration(migrations.Migration):
                     "active",
                     models.BooleanField(
                         default=True,
-                        help_text="Whether the shipping rate can be used for new purchases. Defaults to true",
+                        help_text=(
+                            "Whether the shipping rate can be used for new purchases."
+                            " Defaults to true"
+                        ),
                     ),
                 ),
                 (
@@ -377,7 +441,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="The name of the shipping rate, meant to be displayable to the customer. This will appear on CheckoutSessions.",
+                        help_text=(
+                            "The name of the shipping rate, meant to be displayable to"
+                            " the customer. This will appear on CheckoutSessions."
+                        ),
                         max_length=50,
                     ),
                 ),

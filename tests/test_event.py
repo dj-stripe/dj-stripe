@@ -38,7 +38,10 @@ class EventTest(CreateAccountMixin, TestCase):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
 
         self.assertEqual(
-            f"type={FAKE_EVENT_TRANSFER_CREATED['type']}, id={FAKE_EVENT_TRANSFER_CREATED['id']}",
+            (
+                f"type={FAKE_EVENT_TRANSFER_CREATED['type']},"
+                f" id={FAKE_EVENT_TRANSFER_CREATED['id']}"
+            ),
             str(event),
         )
 

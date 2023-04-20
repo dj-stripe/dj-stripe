@@ -230,8 +230,10 @@ class TestAccount(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertEqual(
             account.get_stripe_dashboard_url(),
-            f"https://dashboard.stripe.com/{account.id}/"
-            f"{'test/' if not account.livemode else ''}dashboard",
+            (
+                f"https://dashboard.stripe.com/{account.id}/"
+                f"{'test/' if not account.livemode else ''}dashboard"
+            ),
         )
 
 
@@ -658,10 +660,12 @@ class TestAccountSTRIPE:
         mock_logger.warning.assert_has_calls(
             [
                 call(
-                    f"Cannot retrieve business branding icon for acct {account_instance.id} with the key."
+                    "Cannot retrieve business branding icon for acct"
+                    f" {account_instance.id} with the key."
                 ),
                 call(
-                    f"Cannot retrieve business branding logo for acct {account_instance.id} with the key."
+                    "Cannot retrieve business branding logo for acct"
+                    f" {account_instance.id} with the key."
                 ),
             ]
         )
@@ -797,8 +801,9 @@ class TestAccountSTRIPE:
             djstripe_account.save()
             djstripe_account.refresh_from_db()
 
-        assert djstripe_account.get_stripe_dashboard_url() == (
-            f"https://dashboard.stripe.com/{djstripe_account.id}/"
+        assert (
+            djstripe_account.get_stripe_dashboard_url()
+            == f"https://dashboard.stripe.com/{djstripe_account.id}/"
             f"{'test/' if not djstripe_account.livemode else ''}dashboard"
         )
 

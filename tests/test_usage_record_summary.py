@@ -226,7 +226,11 @@ class TestUsageRecordSummary(CreateAccountMixin, AssertStripeFksMixin, TestCase)
 
         self.assertEqual(
             str(usage_record_summary),
-            f"Usage Summary for {str(usage_record_summary.subscription_item)} ({str(usage_record_summary.invoice)}) is {fake_usage_data['data'][1]['total_usage']}",
+            (
+                "Usage Summary for"
+                f" {str(usage_record_summary.subscription_item)} ({str(usage_record_summary.invoice)})"
+                f" is {fake_usage_data['data'][1]['total_usage']}"
+            ),
         )
 
     @patch(

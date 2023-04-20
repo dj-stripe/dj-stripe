@@ -27,7 +27,10 @@ class Migration(migrations.Migration):
             name="account",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="The external account the charge was made on behalf of. Null here indicates that this value was never set.",
+                help_text=(
+                    "The external account the charge was made on behalf of. Null here"
+                    " indicates that this value was never set."
+                ),
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="cards",
@@ -39,7 +42,10 @@ class Migration(migrations.Migration):
             model_name="card",
             name="default_for_currency",
             field=models.BooleanField(
-                help_text="Whether this external account (Card) is the default account for its currency.",
+                help_text=(
+                    "Whether this external account (Card) is the default account for"
+                    " its currency."
+                ),
                 null=True,
             ),
         ),
@@ -48,7 +54,10 @@ class Migration(migrations.Migration):
             name="account",
             field=djstripe.fields.StripeForeignKey(
                 blank=True,
-                help_text="The external account the charge was made on behalf of. Null here indicates that this value was never set.",
+                help_text=(
+                    "The external account the charge was made on behalf of. Null here"
+                    " indicates that this value was never set."
+                ),
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="bank_accounts",
@@ -60,7 +69,10 @@ class Migration(migrations.Migration):
             model_name="bankaccount",
             name="default_for_currency",
             field=models.BooleanField(
-                help_text="Whether this external account (BankAccount) is the default account for its currency.",
+                help_text=(
+                    "Whether this external account (BankAccount) is the default account"
+                    " for its currency."
+                ),
                 null=True,
             ),
         ),
@@ -85,7 +97,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -101,7 +118,11 @@ class Migration(migrations.Migration):
                     "metadata",
                     djstripe.fields.JSONField(
                         blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
+                        help_text=(
+                            "A set of key/value pairs that you can attach to an object."
+                            " It can be useful for storing additional information about"
+                            " an object in a structured format."
+                        ),
                         null=True,
                     ),
                 ),
@@ -167,7 +188,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -183,7 +209,11 @@ class Migration(migrations.Migration):
                     "metadata",
                     djstripe.fields.JSONField(
                         blank=True,
-                        help_text="A set of key/value pairs that you can attach to an object. It can be useful for storing additional information about an object in a structured format.",
+                        help_text=(
+                            "A set of key/value pairs that you can attach to an object."
+                            " It can be useful for storing additional information about"
+                            " an object in a structured format."
+                        ),
                         null=True,
                     ),
                 ),
@@ -196,20 +226,28 @@ class Migration(migrations.Migration):
                 (
                     "customer_acceptance",
                     djstripe.fields.JSONField(
-                        help_text="Details about the customer's acceptance of the mandate."
+                        help_text=(
+                            "Details about the customer's acceptance of the mandate."
+                        )
                     ),
                 ),
                 (
                     "payment_method_details",
                     djstripe.fields.JSONField(
-                        help_text="Additional mandate information specific to the payment method type."
+                        help_text=(
+                            "Additional mandate information specific to the payment"
+                            " method type."
+                        )
                     ),
                 ),
                 (
                     "status",
                     djstripe.fields.StripeEnumField(
                         enum=djstripe.enums.MandateStatus,
-                        help_text="The status of the mandate, which indicates whether it can be used to initiate a payment.",
+                        help_text=(
+                            "The status of the mandate, which indicates whether it can"
+                            " be used to initiate a payment."
+                        ),
                         max_length=8,
                     ),
                 ),
@@ -217,7 +255,10 @@ class Migration(migrations.Migration):
                     "type",
                     djstripe.fields.StripeEnumField(
                         enum=djstripe.enums.MandateType,
-                        help_text="The status of the mandate, which indicates whether it can be used to initiate a payment.",
+                        help_text=(
+                            "The status of the mandate, which indicates whether it can"
+                            " be used to initiate a payment."
+                        ),
                         max_length=10,
                     ),
                 ),
@@ -225,7 +266,10 @@ class Migration(migrations.Migration):
                     "multi_use",
                     djstripe.fields.JSONField(
                         blank=True,
-                        help_text="If this is a `multi_use` mandate, this hash contains details about the mandate.",
+                        help_text=(
+                            "If this is a `multi_use` mandate, this hash contains"
+                            " details about the mandate."
+                        ),
                         null=True,
                     ),
                 ),
@@ -233,7 +277,10 @@ class Migration(migrations.Migration):
                     "single_use",
                     djstripe.fields.JSONField(
                         blank=True,
-                        help_text="If this is a `single_use` mandate, this hash contains details about the mandate.",
+                        help_text=(
+                            "If this is a `single_use` mandate, this hash contains"
+                            " details about the mandate."
+                        ),
                         null=True,
                     ),
                 ),

@@ -39,8 +39,8 @@ class TestBalanceTransactionStr(CreateAccountMixin):
             modified_balance_transaction
         )
         assert (
-            str(balance_transaction)
-            == f"$20.00 USD ({BalanceTransactionStatus.humanize(modified_balance_transaction['status'])})"
+            str(balance_transaction) == "$20.00 USD"
+            f" ({BalanceTransactionStatus.humanize(modified_balance_transaction['status'])})"
         )
 
 

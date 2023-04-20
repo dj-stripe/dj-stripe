@@ -567,10 +567,12 @@ class PayoutFailureCode(Enum):
         "Your bank notified us that the bank account holder name on file is incorrect."
     )
     incorrect_account_holder_address = _(
-        "Your bank notified us that the bank account holder address on file is incorrect."
+        "Your bank notified us that the bank account holder address on file is"
+        " incorrect."
     )
     incorrect_account_holder_tax_id = _(
-        "Your bank notified us that the bank account holder tax ID on file is incorrect."
+        "Your bank notified us that the bank account holder tax ID on file is"
+        " incorrect."
     )
     invalid_currency = _("Bank account does not support currency.")
     no_account = _("Bank account could not be located.")

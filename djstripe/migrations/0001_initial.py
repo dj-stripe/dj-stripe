@@ -59,7 +59,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -103,7 +108,10 @@ class Migration(migrations.Migration):
                 (
                     "details_submitted",
                     models.BooleanField(
-                        help_text="Whether account details have been submitted. Standard accounts cannot receive payouts before this is true."
+                        help_text=(
+                            "Whether account details have been submitted. Standard"
+                            " accounts cannot receive payouts before this is true."
+                        )
                     ),
                 ),
                 (
@@ -125,7 +133,11 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="Internal-only description of the product sold or service provided by the business. It's used by Stripe for risk and underwriting purposes.",
+                        help_text=(
+                            "Internal-only description of the product sold or service"
+                            " provided by the business. It's used by Stripe for risk"
+                            " and underwriting purposes."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -156,7 +168,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -186,7 +203,11 @@ class Migration(migrations.Migration):
                     "captured",
                     models.BooleanField(
                         default=False,
-                        help_text="If the charge was created without capturing, this boolean represents whether or not it is still uncaptured or has since been captured.",
+                        help_text=(
+                            "If the charge was created without capturing, this boolean"
+                            " represents whether or not it is still uncaptured or has"
+                            " since been captured."
+                        ),
                     ),
                 ),
                 ("currency", djstripe.fields.StripeCurrencyCodeField(max_length=3)),
@@ -204,7 +225,10 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="Message to user further explaining reason for charge failure if available.",
+                        help_text=(
+                            "Message to user further explaining reason for charge"
+                            " failure if available."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -214,7 +238,10 @@ class Migration(migrations.Migration):
                     "paid",
                     models.BooleanField(
                         default=False,
-                        help_text="True if the charge succeeded, or was successfully authorized for later capture, False otherwise.",
+                        help_text=(
+                            "True if the charge succeeded, or was successfully"
+                            " authorized for later capture, False otherwise."
+                        ),
                     ),
                 ),
                 (
@@ -226,7 +253,10 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="The email address that the receipt for this charge was sent to.",
+                        help_text=(
+                            "The email address that the receipt for this charge was"
+                            " sent to."
+                        ),
                         max_length=800,
                     ),
                 ),
@@ -235,7 +265,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="The transaction number that appears on email receipts sent for this charge.",
+                        help_text=(
+                            "The transaction number that appears on email receipts sent"
+                            " for this charge."
+                        ),
                         max_length=14,
                     ),
                 ),
@@ -244,7 +277,13 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="This is the URL to view the receipt for this charge. The receipt is kept up-to-date to the latest state of the charge, including any refunds. If the charge is for an Invoice, the receipt will be stylized as an Invoice receipt.",
+                        help_text=(
+                            "This is the URL to view the receipt for this charge. The"
+                            " receipt is kept up-to-date to the latest state of the"
+                            " charge, including any refunds. If the charge is for an"
+                            " Invoice, the receipt will be stylized as an Invoice"
+                            " receipt."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -252,7 +291,11 @@ class Migration(migrations.Migration):
                     "refunded",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether or not the charge has been fully refunded. If the charge is only partially refunded, this attribute will still be false.",
+                        help_text=(
+                            "Whether or not the charge has been fully refunded. If the"
+                            " charge is only partially refunded, this attribute will"
+                            " still be false."
+                        ),
                     ),
                 ),
                 ("shipping", djstripe.fields.JSONField(blank=True, null=True)),
@@ -260,7 +303,12 @@ class Migration(migrations.Migration):
                     "statement_descriptor",
                     models.CharField(
                         blank=True,
-                        help_text="For card charges, use statement_descriptor_suffix instead. Otherwise, you can use this value as the complete description of a charge on your customers' statements. Must contain at least one letter, maximum 22 characters.",
+                        help_text=(
+                            "For card charges, use statement_descriptor_suffix instead."
+                            " Otherwise, you can use this value as the complete"
+                            " description of a charge on your customers' statements."
+                            " Must contain at least one letter, maximum 22 characters."
+                        ),
                         max_length=22,
                         null=True,
                     ),
@@ -275,7 +323,10 @@ class Migration(migrations.Migration):
                     "transfer_group",
                     models.CharField(
                         blank=True,
-                        help_text="A string that identifies this transaction as part of a group.",
+                        help_text=(
+                            "A string that identifies this transaction as part of a"
+                            " group."
+                        ),
                         max_length=255,
                         null=True,
                     ),
@@ -289,7 +340,10 @@ class Migration(migrations.Migration):
                         related_name="charges",
                         to="djstripe.account",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The account (if any) the charge was made on behalf of without triggering an automatic transfer.",
+                        help_text=(
+                            "The account (if any) the charge was made on behalf of"
+                            " without triggering an automatic transfer."
+                        ),
                     ),
                 ),
                 (
@@ -302,7 +356,9 @@ class Migration(migrations.Migration):
                     "application",
                     models.CharField(
                         blank=True,
-                        help_text="ID of the Connect application that created the charge.",
+                        help_text=(
+                            "ID of the Connect application that created the charge."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -320,7 +376,13 @@ class Migration(migrations.Migration):
                     "calculated_statement_descriptor",
                     models.CharField(
                         default="",
-                        help_text="The full statement descriptor that is passed to card networks, and that is displayed on your customers' credit card and bank statements. Allows you to see what the statement descriptor looks like after the static and dynamic portions are combined.",
+                        help_text=(
+                            "The full statement descriptor that is passed to card"
+                            " networks, and that is displayed on your customers' credit"
+                            " card and bank statements. Allows you to see what the"
+                            " statement descriptor looks like after the static and"
+                            " dynamic portions are combined."
+                        ),
                         max_length=22,
                     ),
                 ),
@@ -334,7 +396,13 @@ class Migration(migrations.Migration):
                     "statement_descriptor_suffix",
                     models.CharField(
                         blank=True,
-                        help_text="Provides information about the charge that customers see on their statements. Concatenated with the prefix (shortened descriptor) or statement descriptor that's set on the account to form the complete statement descriptor. Maximum 22 characters for the concatenated descriptor.",
+                        help_text=(
+                            "Provides information about the charge that customers see"
+                            " on their statements. Concatenated with the prefix"
+                            " (shortened descriptor) or statement descriptor that's set"
+                            " on the account to form the complete statement descriptor."
+                            " Maximum 22 characters for the concatenated descriptor."
+                        ),
                         max_length=22,
                         null=True,
                     ),
@@ -360,7 +428,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -397,7 +470,10 @@ class Migration(migrations.Migration):
                     "duration_in_months",
                     models.PositiveIntegerField(
                         blank=True,
-                        help_text="If `duration` is `repeating`, the number of months the coupon applies.",
+                        help_text=(
+                            "If `duration` is `repeating`, the number of months the"
+                            " coupon applies."
+                        ),
                         null=True,
                     ),
                 ),
@@ -405,7 +481,10 @@ class Migration(migrations.Migration):
                     "max_redemptions",
                     models.PositiveIntegerField(
                         blank=True,
-                        help_text="Maximum number of times this coupon can be redeemed, in total, before it is no longer valid.",
+                        help_text=(
+                            "Maximum number of times this coupon can be redeemed, in"
+                            " total, before it is no longer valid."
+                        ),
                         null=True,
                     ),
                 ),
@@ -431,7 +510,10 @@ class Migration(migrations.Migration):
                     models.PositiveIntegerField(
                         default=0,
                         editable=False,
-                        help_text="Number of times this coupon has been applied to a customer.",
+                        help_text=(
+                            "Number of times this coupon has been applied to a"
+                            " customer."
+                        ),
                     ),
                 ),
                 (
@@ -439,7 +521,10 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="Name of the coupon displayed to customers on for instance invoices or receipts.",
+                        help_text=(
+                            "Name of the coupon displayed to customers on for instance"
+                            " invoices or receipts."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -475,7 +560,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -523,7 +613,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -551,7 +646,10 @@ class Migration(migrations.Migration):
                     "delinquent",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether or not the latest charge for the customer's latest invoice has failed.",
+                        help_text=(
+                            "Whether or not the latest charge for the customer's latest"
+                            " invoice has failed."
+                        ),
                     ),
                 ),
                 (
@@ -604,7 +702,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="The prefix for the customer used to generate unique invoice numbers.",
+                        help_text=(
+                            "The prefix for the customer used to generate unique"
+                            " invoice numbers."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -643,7 +744,10 @@ class Migration(migrations.Migration):
                         related_name="+",
                         to="djstripe.paymentmethod",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="default payment method used for subscriptions and invoices for the customer.",
+                        help_text=(
+                            "default payment method used for subscriptions and invoices"
+                            " for the customer."
+                        ),
                     ),
                 ),
                 (
@@ -680,7 +784,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -701,7 +810,12 @@ class Migration(migrations.Migration):
                 (
                     "is_charge_refundable",
                     models.BooleanField(
-                        help_text="If true, it is still possible to refund the disputed payment. Once the payment has been fully refunded, no further funds will be withdrawn from your Stripe account as a result of this dispute."
+                        help_text=(
+                            "If true, it is still possible to refund the disputed"
+                            " payment. Once the payment has been fully refunded, no"
+                            " further funds will be withdrawn from your Stripe account"
+                            " as a result of this dispute."
+                        )
                     ),
                 ),
                 (
@@ -745,7 +859,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -763,7 +882,11 @@ class Migration(migrations.Migration):
                     "api_version",
                     models.CharField(
                         blank=True,
-                        help_text="the API version at which the event data was rendered. Blank for old entries only, all new entries will have this value",
+                        help_text=(
+                            "the API version at which the event data was rendered."
+                            " Blank for old entries only, all new entries will have"
+                            " this value"
+                        ),
                         max_length=15,
                     ),
                 ),
@@ -773,7 +896,13 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="Information about the request that triggered this event, for traceability purposes. If empty string then this is an old entry without that data. If Null then this is not an old entry, but a Stripe 'automated' event with no associated request.",
+                        help_text=(
+                            "Information about the request that triggered this event,"
+                            " for traceability purposes. If empty string then this is"
+                            " an old entry without that data. If Null then this is not"
+                            " an old entry, but a Stripe 'automated' event with no"
+                            " associated request."
+                        ),
                         max_length=50,
                     ),
                 ),
@@ -813,7 +942,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -830,7 +964,10 @@ class Migration(migrations.Migration):
                 (
                     "filename",
                     models.CharField(
-                        help_text="A filename for the file, suitable for saving to a filesystem.",
+                        help_text=(
+                            "A filename for the file, suitable for saving to a"
+                            " filesystem."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -855,7 +992,9 @@ class Migration(migrations.Migration):
                 (
                     "url",
                     models.CharField(
-                        help_text="A read-only URL where the uploaded file can be accessed.",
+                        help_text=(
+                            "A read-only URL where the uploaded file can be accessed."
+                        ),
                         max_length=200,
                     ),
                 ),
@@ -898,7 +1037,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -959,7 +1103,10 @@ class Migration(migrations.Migration):
                     "interval_count",
                     models.PositiveIntegerField(
                         blank=True,
-                        help_text="The number of intervals (specified in the interval property) between each subscription billing.",
+                        help_text=(
+                            "The number of intervals (specified in the interval"
+                            " property) between each subscription billing."
+                        ),
                         null=True,
                     ),
                 ),
@@ -968,7 +1115,9 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="A brief description of the plan, hidden from customers.",
+                        help_text=(
+                            "A brief description of the plan, hidden from customers."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -987,7 +1136,11 @@ class Migration(migrations.Migration):
                     "trial_period_days",
                     models.IntegerField(
                         blank=True,
-                        help_text="Number of trial period days granted when subscribing a customer to this plan. Null if the plan has no trial period.",
+                        help_text=(
+                            "Number of trial period days granted when subscribing a"
+                            " customer to this plan. Null if the plan has no trial"
+                            " period."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1017,7 +1170,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1034,7 +1192,10 @@ class Migration(migrations.Migration):
                 (
                     "name",
                     models.TextField(
-                        help_text="The product's name, meant to be displayable to the customer. Applicable to both `service` and `good` types.",
+                        help_text=(
+                            "The product's name, meant to be displayable to the"
+                            " customer. Applicable to both `service` and `good` types."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -1047,7 +1208,10 @@ class Migration(migrations.Migration):
                 (
                     "active",
                     models.BooleanField(
-                        help_text="Whether the product is currently available for purchase. Only applicable to products of `type=good`.",
+                        help_text=(
+                            "Whether the product is currently available for purchase."
+                            " Only applicable to products of `type=good`."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1057,7 +1221,11 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="A short one-line description of the product, meant to be displayableto the customer. Only applicable to products of `type=good`.",
+                        help_text=(
+                            "A short one-line description of the product, meant to be"
+                            " displayableto the customer. Only applicable to products"
+                            " of `type=good`."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -1071,7 +1239,10 @@ class Migration(migrations.Migration):
                     "shippable",
                     models.BooleanField(
                         blank=True,
-                        help_text="Whether this product is a shipped good. Only applicable to products of `type=good`.",
+                        help_text=(
+                            "Whether this product is a shipped good. Only applicable to"
+                            " products of `type=good`."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1079,7 +1250,10 @@ class Migration(migrations.Migration):
                     "url",
                     models.CharField(
                         blank=True,
-                        help_text="A URL of a publicly-accessible webpage for this product. Only applicable to products of `type=good`.",
+                        help_text=(
+                            "A URL of a publicly-accessible webpage for this product."
+                            " Only applicable to products of `type=good`."
+                        ),
                         max_length=799,
                         null=True,
                     ),
@@ -1089,7 +1263,13 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="Extra information about a product which will appear on your customer's credit card statement. In the case that multiple products are billed at once, the first statement descriptor will be used. Only available on products of type=`service`.",
+                        help_text=(
+                            "Extra information about a product which will appear on"
+                            " your customer's credit card statement. In the case that"
+                            " multiple products are billed at once, the first statement"
+                            " descriptor will be used. Only available on products of"
+                            " type=`service`."
+                        ),
                         max_length=22,
                     ),
                 ),
@@ -1123,7 +1303,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1164,7 +1349,14 @@ class Migration(migrations.Migration):
                     "cancel_at_period_end",
                     models.BooleanField(
                         default=False,
-                        help_text="If the subscription has been canceled with the ``at_period_end`` flag set to true, ``cancel_at_period_end`` on the subscription will be true. You can use this attribute to determine whether a subscription that has a status of active is scheduled to be canceled at the end of the current period.",
+                        help_text=(
+                            "If the subscription has been canceled with the"
+                            " ``at_period_end`` flag set to true,"
+                            " ``cancel_at_period_end`` on the subscription will be"
+                            " true. You can use this attribute to determine whether a"
+                            " subscription that has a status of active is scheduled to"
+                            " be canceled at the end of the current period."
+                        ),
                     ),
                 ),
                 (
@@ -1177,7 +1369,11 @@ class Migration(migrations.Migration):
                     "days_until_due",
                     models.IntegerField(
                         blank=True,
-                        help_text="Number of days a customer has to pay invoices generated by this subscription. This value will be `null` for subscriptions where `billing=charge_automatically`.",
+                        help_text=(
+                            "Number of days a customer has to pay invoices generated by"
+                            " this subscription. This value will be `null` for"
+                            " subscriptions where `billing=charge_automatically`."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1199,7 +1395,10 @@ class Migration(migrations.Migration):
                     "quantity",
                     models.IntegerField(
                         blank=True,
-                        help_text="The quantity applied to this subscription. This value will be `null` for multi-plan subscriptions",
+                        help_text=(
+                            "The quantity applied to this subscription. This value will"
+                            " be `null` for multi-plan subscriptions"
+                        ),
                         null=True,
                     ),
                 ),
@@ -1248,7 +1447,10 @@ class Migration(migrations.Migration):
                     "plan",
                     models.ForeignKey(
                         blank=True,
-                        help_text="The plan associated with this subscription. This value will be `null` for multi-plan subscriptions",
+                        help_text=(
+                            "The plan associated with this subscription. This value"
+                            " will be `null` for multi-plan subscriptions"
+                        ),
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="subscriptions",
@@ -1281,7 +1483,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1319,7 +1526,11 @@ class Migration(migrations.Migration):
                     "reversed",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether or not the transfer has been fully reversed. If the transfer is only partially reversed, this attribute will still be false.",
+                        help_text=(
+                            "Whether or not the transfer has been fully reversed. If"
+                            " the transfer is only partially reversed, this attribute"
+                            " will still be false."
+                        ),
                     ),
                 ),
                 (
@@ -1337,7 +1548,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="A string that identifies this transaction as part of a group.",
+                        help_text=(
+                            "A string that identifies this transaction as part of a"
+                            " group."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -1360,14 +1574,19 @@ class Migration(migrations.Migration):
                     "valid",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether or not the webhook event has passed validation",
+                        help_text=(
+                            "Whether or not the webhook event has passed validation"
+                        ),
                     ),
                 ),
                 (
                     "processed",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether or not the webhook event has been successfully processed",
+                        help_text=(
+                            "Whether or not the webhook event has been successfully"
+                            " processed"
+                        ),
                     ),
                 ),
                 ("exception", models.CharField(blank=True, max_length=128)),
@@ -1375,14 +1594,18 @@ class Migration(migrations.Migration):
                     "traceback",
                     models.TextField(
                         blank=True,
-                        help_text="Traceback if an exception was thrown during processing",
+                        help_text=(
+                            "Traceback if an exception was thrown during processing"
+                        ),
                     ),
                 ),
                 (
                     "djstripe_version",
                     models.CharField(
                         default=djstripe.models.webhooks._get_version,
-                        help_text="The version of dj-stripe when the webhook was received",
+                        help_text=(
+                            "The version of dj-stripe when the webhook was received"
+                        ),
                         max_length=32,
                     ),
                 ),
@@ -1411,7 +1634,10 @@ class Migration(migrations.Migration):
                 related_name="payment_methods",
                 to="djstripe.customer",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                help_text="Customer to which this PaymentMethod is saved. This will not be set when the PaymentMethod has not been saved to a Customer.",
+                help_text=(
+                    "Customer to which this PaymentMethod is saved. This will not be"
+                    " set when the PaymentMethod has not been saved to a Customer."
+                ),
             ),
         ),
         migrations.AddField(
@@ -1441,7 +1667,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1482,14 +1713,27 @@ class Migration(migrations.Migration):
                 (
                     "attempt_count",
                     models.IntegerField(
-                        help_text="Number of payment attempts made for this invoice, from the perspective of the payment retry schedule. Any payment attempt counts as the first attempt, and subsequently only automatic retries increment the attempt count. In other words, manual payment attempts after the first attempt do not affect the retry schedule."
+                        help_text=(
+                            "Number of payment attempts made for this invoice, from the"
+                            " perspective of the payment retry schedule. Any payment"
+                            " attempt counts as the first attempt, and subsequently"
+                            " only automatic retries increment the attempt count. In"
+                            " other words, manual payment attempts after the first"
+                            " attempt do not affect the retry schedule."
+                        )
                     ),
                 ),
                 (
                     "attempted",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether or not an attempt has been made to pay the invoice. An invoice is not attempted until 1 hour after the ``invoice.created`` webhook, for example, so you might not want to display that invoice as unpaid to your users.",
+                        help_text=(
+                            "Whether or not an attempt has been made to pay the"
+                            " invoice. An invoice is not attempted until 1 hour after"
+                            " the ``invoice.created`` webhook, for example, so you"
+                            " might not want to display that invoice as unpaid to your"
+                            " users."
+                        ),
                     ),
                 ),
                 (
@@ -1514,7 +1758,11 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="The URL for the hosted invoice page, which allows customers to view and pay an invoice. If the invoice has not been frozen yet, this will be null.",
+                        help_text=(
+                            "The URL for the hosted invoice page, which allows"
+                            " customers to view and pay an invoice. If the invoice has"
+                            " not been frozen yet, this will be null."
+                        ),
                         max_length=799,
                     ),
                 ),
@@ -1523,7 +1771,10 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="The link to download the PDF for the invoice. If the invoice has not been frozen yet, this will be null.",
+                        help_text=(
+                            "The link to download the PDF for the invoice. If the"
+                            " invoice has not been frozen yet, this will be null."
+                        ),
                         max_length=799,
                     ),
                 ),
@@ -1536,7 +1787,11 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="A unique, identifying string that appears on emails sent to the customer for this invoice. This starts with the customer's unique invoice_prefix if it is specified.",
+                        help_text=(
+                            "A unique, identifying string that appears on emails sent"
+                            " to the customer for this invoice. This starts with the"
+                            " customer's unique invoice_prefix if it is specified."
+                        ),
                         max_length=64,
                     ),
                 ),
@@ -1544,7 +1799,12 @@ class Migration(migrations.Migration):
                     "paid",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether payment was successfully collected for this invoice. An invoice can be paid (most commonly) with a charge or with credit from the customer's account balance.",
+                        help_text=(
+                            "Whether payment was successfully collected for this"
+                            " invoice. An invoice can be paid (most commonly) with a"
+                            " charge or with credit from the customer's account"
+                            " balance."
+                        ),
                     ),
                 ),
                 ("period_end", djstripe.fields.StripeDateTimeField()),
@@ -1553,7 +1813,10 @@ class Migration(migrations.Migration):
                     "receipt_number",
                     models.CharField(
                         blank=True,
-                        help_text="This is the transaction number that appears on email receipts sent for this invoice.",
+                        help_text=(
+                            "This is the transaction number that appears on email"
+                            " receipts sent for this invoice."
+                        ),
                         max_length=64,
                         null=True,
                     ),
@@ -1567,7 +1830,15 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.",
+                        help_text=(
+                            "An arbitrary string to be displayed on your customer's"
+                            " credit card statement. The statement description may not"
+                            " include <>\"' characters, and will appear on your"
+                            " customer's statement in capital letters. Non-ASCII"
+                            " characters are automatically stripped. While most banks"
+                            " display this information consistently, some may display"
+                            " it incorrectly or not at all."
+                        ),
                         max_length=22,
                     ),
                 ),
@@ -1615,7 +1886,9 @@ class Migration(migrations.Migration):
                 (
                     "charge",
                     models.OneToOneField(
-                        help_text="The latest charge generated for this invoice, if any.",
+                        help_text=(
+                            "The latest charge generated for this invoice, if any."
+                        ),
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="latest_%(class)s",
@@ -1640,13 +1913,20 @@ class Migration(migrations.Migration):
                         related_name="%(class)ss",
                         to="djstripe.subscription",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The subscription that this invoice was prepared for, if any.",
+                        help_text=(
+                            "The subscription that this invoice was prepared for, if"
+                            " any."
+                        ),
                     ),
                 ),
                 (
                     "auto_advance",
                     models.BooleanField(
-                        help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice's state will not automatically advance without an explicit action.",
+                        help_text=(
+                            "Controls whether Stripe will perform automatic collection"
+                            " of the invoice. When false, the invoice's state will not"
+                            " automatically advance without an explicit action."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1659,7 +1939,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="The country of the business associated with this invoice, most often the business creating the invoice.",
+                        help_text=(
+                            "The country of the business associated with this invoice,"
+                            " most often the business creating the invoice."
+                        ),
                         max_length=2,
                     ),
                 ),
@@ -1667,7 +1950,10 @@ class Migration(migrations.Migration):
                     "account_name",
                     models.TextField(
                         blank=True,
-                        help_text="The public name of the business associated with this invoice, most often the business creating the invoice.",
+                        help_text=(
+                            "The public name of the business associated with this"
+                            " invoice, most often the business creating the invoice."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -1688,7 +1974,11 @@ class Migration(migrations.Migration):
                     "customer_email",
                     models.TextField(
                         blank=True,
-                        help_text="The customer's email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text=(
+                            "The customer's email. Until the invoice is finalized, this"
+                            " field will equal customer.email. Once the invoice is"
+                            " finalized, this field will no longer be updated."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -1696,7 +1986,11 @@ class Migration(migrations.Migration):
                     "customer_name",
                     models.TextField(
                         blank=True,
-                        help_text="The customer's name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text=(
+                            "The customer's name. Until the invoice is finalized, this"
+                            " field will equal customer.name. Once the invoice is"
+                            " finalized, this field will no longer be updated."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -1704,7 +1998,12 @@ class Migration(migrations.Migration):
                     "customer_phone",
                     models.TextField(
                         blank=True,
-                        help_text="The customer's phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text=(
+                            "The customer's phone number. Until the invoice is"
+                            " finalized, this field will equal customer.phone. Once the"
+                            " invoice is finalized, this field will no longer be"
+                            " updated."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -1839,7 +2138,10 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.CASCADE,
                 to="djstripe.transfer",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                help_text="The transfer to the `destination` account (only applicable if the charge was created using the `destination` parameter).",
+                help_text=(
+                    "The transfer to the `destination` account (only applicable if the"
+                    " charge was created using the `destination` parameter)."
+                ),
             ),
         ),
         migrations.CreateModel(
@@ -1857,7 +2159,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -1875,7 +2182,10 @@ class Migration(migrations.Migration):
                     "account_holder_name",
                     models.TextField(
                         blank=True,
-                        help_text="The name of the person or business that owns the bank account.",
+                        help_text=(
+                            "The name of the person or business that owns the bank"
+                            " account."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -1888,14 +2198,20 @@ class Migration(migrations.Migration):
                 (
                     "bank_name",
                     models.CharField(
-                        help_text="Name of the bank associated with the routing number (e.g., `WELLS FARGO`).",
+                        help_text=(
+                            "Name of the bank associated with the routing number (e.g.,"
+                            " `WELLS FARGO`)."
+                        ),
                         max_length=255,
                     ),
                 ),
                 (
                     "country",
                     models.CharField(
-                        help_text="Two-letter ISO code representing the country the bank account is located in.",
+                        help_text=(
+                            "Two-letter ISO code representing the country the bank"
+                            " account is located in."
+                        ),
                         max_length=2,
                     ),
                 ),
@@ -1903,14 +2219,21 @@ class Migration(migrations.Migration):
                 (
                     "default_for_currency",
                     models.BooleanField(
-                        help_text="Whether this external account is the default account for its currency.",
+                        help_text=(
+                            "Whether this external account is the default account for"
+                            " its currency."
+                        ),
                         null=True,
                     ),
                 ),
                 (
                     "fingerprint",
                     models.CharField(
-                        help_text="Uniquely identifies this particular bank account. You can use this attribute to check whether two bank accounts are the same.",
+                        help_text=(
+                            "Uniquely identifies this particular bank account. You can"
+                            " use this attribute to check whether two bank accounts are"
+                            " the same."
+                        ),
                         max_length=16,
                     ),
                 ),
@@ -1978,7 +2301,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -2051,7 +2379,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -2071,7 +2404,11 @@ class Migration(migrations.Migration):
                 (
                     "refunded",
                     models.BooleanField(
-                        help_text="Whether the fee has been fully refunded. If the fee is only partially refunded, this attribute will still be false."
+                        help_text=(
+                            "Whether the fee has been fully refunded. If the fee is"
+                            " only partially refunded, this attribute will still be"
+                            " false."
+                        )
                     ),
                 ),
                 (
@@ -2080,7 +2417,10 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.balancetransaction",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="Balance transaction that describes the impact on your account balance.",
+                        help_text=(
+                            "Balance transaction that describes the impact on your"
+                            " account balance."
+                        ),
                     ),
                 ),
                 (
@@ -2114,7 +2454,10 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.balancetransaction",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                help_text="The balance transaction that describes the impact of this charge on your account balance (not including refunds or disputes).",
+                help_text=(
+                    "The balance transaction that describes the impact of this charge"
+                    " on your account balance (not including refunds or disputes)."
+                ),
             ),
         ),
         migrations.AddField(
@@ -2126,7 +2469,10 @@ class Migration(migrations.Migration):
                 on_delete=django.db.models.deletion.SET_NULL,
                 to="djstripe.balancetransaction",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                help_text="Balance transaction that describes the impact on your account balance.",
+                help_text=(
+                    "Balance transaction that describes the impact on your account"
+                    " balance."
+                ),
             ),
         ),
         migrations.CreateModel(
@@ -2144,7 +2490,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -2162,7 +2513,10 @@ class Migration(migrations.Migration):
                     "application",
                     models.CharField(
                         blank=True,
-                        help_text="ID of the Connect application that created the SetupIntent.",
+                        help_text=(
+                            "ID of the Connect application that created the"
+                            " SetupIntent."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -2178,7 +2532,10 @@ class Migration(migrations.Migration):
                     "client_secret",
                     models.TextField(
                         blank=True,
-                        help_text="The client secret of this SetupIntent. Used for client-side retrieval using a publishable key.",
+                        help_text=(
+                            "The client secret of this SetupIntent. Used for"
+                            " client-side retrieval using a publishable key."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -2207,7 +2564,9 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.customer",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="Customer this SetupIntent belongs to, if one exists.",
+                        help_text=(
+                            "Customer this SetupIntent belongs to, if one exists."
+                        ),
                     ),
                 ),
                 (
@@ -2219,7 +2578,9 @@ class Migration(migrations.Migration):
                         related_name="setup_intents",
                         to="djstripe.account",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The account (if any) for which the setup is intended.",
+                        help_text=(
+                            "The account (if any) for which the setup is intended."
+                        ),
                     ),
                 ),
                 (
@@ -2262,7 +2623,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -2299,7 +2665,10 @@ class Migration(migrations.Migration):
                 (
                     "client_secret",
                     models.TextField(
-                        help_text="The client secret of this PaymentIntent. Used for client-side retrieval using a publishable key.",
+                        help_text=(
+                            "The client secret of this PaymentIntent. Used for"
+                            " client-side retrieval using a publishable key."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -2315,7 +2684,10 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="An arbitrary string attached to the object. Often useful for displaying to users.",
+                        help_text=(
+                            "An arbitrary string attached to the object. Often useful"
+                            " for displaying to users."
+                        ),
                         max_length=1000,
                     ),
                 ),
@@ -2329,7 +2701,10 @@ class Migration(migrations.Migration):
                     "receipt_email",
                     models.CharField(
                         blank=True,
-                        help_text="Email address that the receipt for the resulting payment will be sent to.",
+                        help_text=(
+                            "Email address that the receipt for the resulting payment"
+                            " will be sent to."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -2347,7 +2722,12 @@ class Migration(migrations.Migration):
                     "statement_descriptor",
                     models.CharField(
                         blank=True,
-                        help_text="For non-card charges, you can use this value as the complete description that appears on your customers' statements. Must contain at least one letter, maximum 22 characters.",
+                        help_text=(
+                            "For non-card charges, you can use this value as the"
+                            " complete description that appears on your customers'"
+                            " statements. Must contain at least one letter, maximum 22"
+                            " characters."
+                        ),
                         max_length=22,
                     ),
                 ),
@@ -2362,7 +2742,11 @@ class Migration(migrations.Migration):
                     "transfer_group",
                     models.CharField(
                         blank=True,
-                        help_text="A string that identifies the resulting payment as part of a group. See the PaymentIntents Connect usage guide for details.",
+                        help_text=(
+                            "A string that identifies the resulting payment as part of"
+                            " a group. See the PaymentIntents Connect usage guide for"
+                            " details."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -2385,7 +2769,10 @@ class Migration(migrations.Migration):
                         related_name="payment_intents",
                         to="djstripe.account",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The account (if any) for which the funds of the PaymentIntent are intended.",
+                        help_text=(
+                            "The account (if any) for which the funds of the"
+                            " PaymentIntent are intended."
+                        ),
                     ),
                 ),
                 (
@@ -2429,7 +2816,12 @@ class Migration(migrations.Migration):
             model_name="invoice",
             name="payment_intent",
             field=models.OneToOneField(
-                help_text="The PaymentIntent associated with this invoice. The PaymentIntent is generated when the invoice is finalized, and can then be used to pay the invoice.Note that voiding an invoice will cancel the PaymentIntent",
+                help_text=(
+                    "The PaymentIntent associated with this invoice. The PaymentIntent"
+                    " is generated when the invoice is finalized, and can then be used"
+                    " to pay the invoice.Note that voiding an invoice will cancel the"
+                    " PaymentIntent"
+                ),
                 null=True,
                 on_delete=django.db.models.deletion.CASCADE,
                 to="djstripe.paymentintent",
@@ -2445,7 +2837,12 @@ class Migration(migrations.Migration):
                 related_name="setup_intents",
                 to="djstripe.setupintent",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                help_text="We can use this SetupIntent to collect user authentication when creating a subscription without immediate payment or updating a subscription's payment method, allowing you to optimize for off-session payments.",
+                help_text=(
+                    "We can use this SetupIntent to collect user authentication when"
+                    " creating a subscription without immediate payment or updating a"
+                    " subscription's payment method, allowing you to optimize for"
+                    " off-session payments."
+                ),
             ),
         ),
         migrations.AddField(
@@ -2470,7 +2867,12 @@ class Migration(migrations.Migration):
                 related_name="+",
                 to="djstripe.paymentmethod",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription's default payment method, if any, or to the default payment method in the customer's invoice settings.",
+                help_text=(
+                    "Default payment method for the invoice. It must belong to the"
+                    " customer associated with the invoice. If not set, defaults to the"
+                    " subscription's default payment method, if any, or to the default"
+                    " payment method in the customer's invoice settings."
+                ),
             ),
         ),
         migrations.CreateModel(
@@ -2487,7 +2889,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -2506,7 +2913,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="The country of the business associated with this invoice, most often the business creating the invoice.",
+                        help_text=(
+                            "The country of the business associated with this invoice,"
+                            " most often the business creating the invoice."
+                        ),
                         max_length=2,
                     ),
                 ),
@@ -2514,7 +2924,10 @@ class Migration(migrations.Migration):
                     "account_name",
                     models.TextField(
                         blank=True,
-                        help_text="The public name of the business associated with this invoice, most often the business creating the invoice.",
+                        help_text=(
+                            "The public name of the business associated with this"
+                            " invoice, most often the business creating the invoice."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -2545,20 +2958,37 @@ class Migration(migrations.Migration):
                 (
                     "attempt_count",
                     models.IntegerField(
-                        help_text="Number of payment attempts made for this invoice, from the perspective of the payment retry schedule. Any payment attempt counts as the first attempt, and subsequently only automatic retries increment the attempt count. In other words, manual payment attempts after the first attempt do not affect the retry schedule."
+                        help_text=(
+                            "Number of payment attempts made for this invoice, from the"
+                            " perspective of the payment retry schedule. Any payment"
+                            " attempt counts as the first attempt, and subsequently"
+                            " only automatic retries increment the attempt count. In"
+                            " other words, manual payment attempts after the first"
+                            " attempt do not affect the retry schedule."
+                        )
                     ),
                 ),
                 (
                     "attempted",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether or not an attempt has been made to pay the invoice. An invoice is not attempted until 1 hour after the ``invoice.created`` webhook, for example, so you might not want to display that invoice as unpaid to your users.",
+                        help_text=(
+                            "Whether or not an attempt has been made to pay the"
+                            " invoice. An invoice is not attempted until 1 hour after"
+                            " the ``invoice.created`` webhook, for example, so you"
+                            " might not want to display that invoice as unpaid to your"
+                            " users."
+                        ),
                     ),
                 ),
                 (
                     "auto_advance",
                     models.BooleanField(
-                        help_text="Controls whether Stripe will perform automatic collection of the invoice. When false, the invoice's state will not automatically advance without an explicit action.",
+                        help_text=(
+                            "Controls whether Stripe will perform automatic collection"
+                            " of the invoice. When false, the invoice's state will not"
+                            " automatically advance without an explicit action."
+                        ),
                         null=True,
                     ),
                 ),
@@ -2585,7 +3015,11 @@ class Migration(migrations.Migration):
                     "customer_email",
                     models.TextField(
                         blank=True,
-                        help_text="The customer's email. Until the invoice is finalized, this field will equal customer.email. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text=(
+                            "The customer's email. Until the invoice is finalized, this"
+                            " field will equal customer.email. Once the invoice is"
+                            " finalized, this field will no longer be updated."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -2593,7 +3027,11 @@ class Migration(migrations.Migration):
                     "customer_name",
                     models.TextField(
                         blank=True,
-                        help_text="The customer's name. Until the invoice is finalized, this field will equal customer.name. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text=(
+                            "The customer's name. Until the invoice is finalized, this"
+                            " field will equal customer.name. Once the invoice is"
+                            " finalized, this field will no longer be updated."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -2601,7 +3039,12 @@ class Migration(migrations.Migration):
                     "customer_phone",
                     models.TextField(
                         blank=True,
-                        help_text="The customer's phone number. Until the invoice is finalized, this field will equal customer.phone. Once the invoice is finalized, this field will no longer be updated.",
+                        help_text=(
+                            "The customer's phone number. Until the invoice is"
+                            " finalized, this field will equal customer.phone. Once the"
+                            " invoice is finalized, this field will no longer be"
+                            " updated."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -2633,7 +3076,11 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="The URL for the hosted invoice page, which allows customers to view and pay an invoice. If the invoice has not been frozen yet, this will be null.",
+                        help_text=(
+                            "The URL for the hosted invoice page, which allows"
+                            " customers to view and pay an invoice. If the invoice has"
+                            " not been frozen yet, this will be null."
+                        ),
                         max_length=799,
                     ),
                 ),
@@ -2642,7 +3089,10 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="The link to download the PDF for the invoice. If the invoice has not been frozen yet, this will be null.",
+                        help_text=(
+                            "The link to download the PDF for the invoice. If the"
+                            " invoice has not been frozen yet, this will be null."
+                        ),
                         max_length=799,
                     ),
                 ),
@@ -2655,7 +3105,11 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="A unique, identifying string that appears on emails sent to the customer for this invoice. This starts with the customer's unique invoice_prefix if it is specified.",
+                        help_text=(
+                            "A unique, identifying string that appears on emails sent"
+                            " to the customer for this invoice. This starts with the"
+                            " customer's unique invoice_prefix if it is specified."
+                        ),
                         max_length=64,
                     ),
                 ),
@@ -2663,7 +3117,12 @@ class Migration(migrations.Migration):
                     "paid",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether payment was successfully collected for this invoice. An invoice can be paid (most commonly) with a charge or with credit from the customer's account balance.",
+                        help_text=(
+                            "Whether payment was successfully collected for this"
+                            " invoice. An invoice can be paid (most commonly) with a"
+                            " charge or with credit from the customer's account"
+                            " balance."
+                        ),
                     ),
                 ),
                 ("period_end", djstripe.fields.StripeDateTimeField()),
@@ -2684,7 +3143,10 @@ class Migration(migrations.Migration):
                     "receipt_number",
                     models.CharField(
                         blank=True,
-                        help_text="This is the transaction number that appears on email receipts sent for this invoice.",
+                        help_text=(
+                            "This is the transaction number that appears on email"
+                            " receipts sent for this invoice."
+                        ),
                         max_length=64,
                         null=True,
                     ),
@@ -2698,7 +3160,15 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="An arbitrary string to be displayed on your customer's credit card statement. The statement description may not include <>\"' characters, and will appear on your customer's statement in capital letters. Non-ASCII characters are automatically stripped. While most banks display this information consistently, some may display it incorrectly or not at all.",
+                        help_text=(
+                            "An arbitrary string to be displayed on your customer's"
+                            " credit card statement. The statement description may not"
+                            " include <>\"' characters, and will appear on your"
+                            " customer's statement in capital letters. Non-ASCII"
+                            " characters are automatically stripped. While most banks"
+                            " display this information consistently, some may display"
+                            " it incorrectly or not at all."
+                        ),
                         max_length=22,
                     ),
                 ),
@@ -2751,7 +3221,9 @@ class Migration(migrations.Migration):
                 (
                     "charge",
                     models.OneToOneField(
-                        help_text="The latest charge generated for this invoice, if any.",
+                        help_text=(
+                            "The latest charge generated for this invoice, if any."
+                        ),
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="latest_%(class)s",
@@ -2777,13 +3249,24 @@ class Migration(migrations.Migration):
                         related_name="+",
                         to="djstripe.paymentmethod",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="Default payment method for the invoice. It must belong to the customer associated with the invoice. If not set, defaults to the subscription's default payment method, if any, or to the default payment method in the customer's invoice settings.",
+                        help_text=(
+                            "Default payment method for the invoice. It must belong to"
+                            " the customer associated with the invoice. If not set,"
+                            " defaults to the subscription's default payment method, if"
+                            " any, or to the default payment method in the customer's"
+                            " invoice settings."
+                        ),
                     ),
                 ),
                 (
                     "payment_intent",
                     models.OneToOneField(
-                        help_text="The PaymentIntent associated with this invoice. The PaymentIntent is generated when the invoice is finalized, and can then be used to pay the invoice.Note that voiding an invoice will cancel the PaymentIntent",
+                        help_text=(
+                            "The PaymentIntent associated with this invoice. The"
+                            " PaymentIntent is generated when the invoice is finalized,"
+                            " and can then be used to pay the invoice.Note that voiding"
+                            " an invoice will cancel the PaymentIntent"
+                        ),
                         null=True,
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.paymentintent",
@@ -2797,7 +3280,10 @@ class Migration(migrations.Migration):
                         related_name="%(class)ss",
                         to="djstripe.subscription",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The subscription that this invoice was prepared for, if any.",
+                        help_text=(
+                            "The subscription that this invoice was prepared for, if"
+                            " any."
+                        ),
                     ),
                 ),
                 (
@@ -2848,7 +3334,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -2866,7 +3357,12 @@ class Migration(migrations.Migration):
                     "active",
                     models.BooleanField(
                         default=True,
-                        help_text="Defaults to true. When set to false, this tax rate cannot be applied to objects in the API, but will still be applied to subscriptions and invoices that already have it set.",
+                        help_text=(
+                            "Defaults to true. When set to false, this tax rate cannot"
+                            " be applied to objects in the API, but will still be"
+                            " applied to subscriptions and invoices that already have"
+                            " it set."
+                        ),
                     ),
                 ),
                 (
@@ -2874,14 +3370,20 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="The display name of the tax rates as it will appear to your customer on their receipt email, PDF, and the hosted invoice page.",
+                        help_text=(
+                            "The display name of the tax rates as it will appear to"
+                            " your customer on their receipt email, PDF, and the hosted"
+                            " invoice page."
+                        ),
                         max_length=50,
                     ),
                 ),
                 (
                     "inclusive",
                     models.BooleanField(
-                        help_text="This specifies if the tax rate is inclusive or exclusive."
+                        help_text=(
+                            "This specifies if the tax rate is inclusive or exclusive."
+                        )
                     ),
                 ),
                 (
@@ -2938,7 +3440,11 @@ class Migration(migrations.Migration):
             field=models.ManyToManyField(
                 blank=True,
                 db_table="djstripe_djstripesubscriptiondefaulttaxrate",
-                help_text="The tax rates that will apply to any subscription item that does not have tax_rates set. Invoices created will have their default_tax_rates populated from the subscription.",
+                help_text=(
+                    "The tax rates that will apply to any subscription item that does"
+                    " not have tax_rates set. Invoices created will have their"
+                    " default_tax_rates populated from the subscription."
+                ),
                 related_name="+",
                 to="djstripe.TaxRate",
             ),
@@ -2976,7 +3482,9 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.taxrate",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The tax rate that was applied to get this tax amount.",
+                        help_text=(
+                            "The tax rate that was applied to get this tax amount."
+                        ),
                     ),
                 ),
             ],
@@ -3016,7 +3524,9 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.taxrate",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The tax rate that was applied to get this tax amount.",
+                        help_text=(
+                            "The tax rate that was applied to get this tax amount."
+                        ),
                     ),
                 ),
             ],
@@ -3032,7 +3542,12 @@ class Migration(migrations.Migration):
                 related_name="+",
                 to="djstripe.paymentmethod",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                help_text="The default payment method for the subscription. It must belong to the customer associated with the subscription. If not set, invoices will use the default payment method in the customer's invoice settings.",
+                help_text=(
+                    "The default payment method for the subscription. It must belong to"
+                    " the customer associated with the subscription. If not set,"
+                    " invoices will use the default payment method in the customer's"
+                    " invoice settings."
+                ),
             ),
         ),
         migrations.AddField(
@@ -3072,7 +3587,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -3088,7 +3608,10 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.CASCADE,
                         to="djstripe.balancetransaction",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="Balance transaction that describes the impact on your account balance.",
+                        help_text=(
+                            "Balance transaction that describes the impact on your"
+                            " account balance."
+                        ),
                     ),
                 ),
                 (
@@ -3130,7 +3653,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -3227,7 +3755,9 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="Two-letter ISO code representing the country of the card.",
+                        help_text=(
+                            "Two-letter ISO code representing the country of the card."
+                        ),
                         max_length=2,
                     ),
                 ),
@@ -3245,7 +3775,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="(For tokenized numbers only.) The last four digits of the device account number.",
+                        help_text=(
+                            "(For tokenized numbers only.) The last four digits of the"
+                            " device account number."
+                        ),
                         max_length=4,
                     ),
                 ),
@@ -3408,7 +3941,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -3447,7 +3985,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="The transaction number that appears on email receipts sent for this charge.",
+                        help_text=(
+                            "The transaction number that appears on email receipts sent"
+                            " for this charge."
+                        ),
                         max_length=9,
                     ),
                 ),
@@ -3474,7 +4015,10 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.balancetransaction",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="Balance transaction that describes the impact on your account balance.",
+                        help_text=(
+                            "Balance transaction that describes the impact on your"
+                            " account balance."
+                        ),
                     ),
                 ),
                 (
@@ -3486,7 +4030,11 @@ class Migration(migrations.Migration):
                         related_name="failure_refunds",
                         to="djstripe.balancetransaction",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="If the refund failed, this balance transaction describes the adjustment made on your account balance that reverses the initial balance transaction.",
+                        help_text=(
+                            "If the refund failed, this balance transaction describes"
+                            " the adjustment made on your account balance that reverses"
+                            " the initial balance transaction."
+                        ),
                     ),
                 ),
                 (
@@ -3518,7 +4066,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -3557,7 +4110,9 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.fileupload",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The file object representing the results of the query.",
+                        help_text=(
+                            "The file object representing the results of the query."
+                        ),
                     ),
                 ),
                 (
@@ -3589,7 +4144,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -3615,7 +4175,10 @@ class Migration(migrations.Migration):
                     "cancel_url",
                     models.TextField(
                         blank=True,
-                        help_text="The URL the customer will be directed to if theydecide to cancel payment and return to your website.",
+                        help_text=(
+                            "The URL the customer will be directed to if theydecide to"
+                            " cancel payment and return to your website."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -3623,7 +4186,11 @@ class Migration(migrations.Migration):
                     "client_reference_id",
                     models.TextField(
                         blank=True,
-                        help_text="A unique string to reference the Checkout Session.This can be a customer ID, a cart ID, or similar, andcan be used to reconcile the session with your internal systems.",
+                        help_text=(
+                            "A unique string to reference the Checkout Session.This can"
+                            " be a customer ID, a cart ID, or similar, andcan be used"
+                            " to reconcile the session with your internal systems."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -3631,7 +4198,10 @@ class Migration(migrations.Migration):
                     "customer_email",
                     models.CharField(
                         blank=True,
-                        help_text="If provided, this value will be used when the Customer object is created.",
+                        help_text=(
+                            "If provided, this value will be used when the Customer"
+                            " object is created."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -3640,7 +4210,10 @@ class Migration(migrations.Migration):
                     "locale",
                     models.CharField(
                         blank=True,
-                        help_text="The IETF language tag of the locale Checkout is displayed in.If blank or auto, the browser's locale is used.",
+                        help_text=(
+                            "The IETF language tag of the locale Checkout is displayed"
+                            " in.If blank or auto, the browser's locale is used."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -3655,7 +4228,10 @@ class Migration(migrations.Migration):
                     "success_url",
                     models.TextField(
                         blank=True,
-                        help_text="The URL the customer will be directed to after the payment or subscriptioncreation is successful.",
+                        help_text=(
+                            "The URL the customer will be directed to after the payment"
+                            " or subscriptioncreation is successful."
+                        ),
                         max_length=5000,
                     ),
                 ),
@@ -3676,7 +4252,9 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.paymentintent",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="PaymentIntent created if SKUs or line items were provided.",
+                        help_text=(
+                            "PaymentIntent created if SKUs or line items were provided."
+                        ),
                     ),
                 ),
                 (
@@ -3686,7 +4264,9 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.subscription",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="Subscription created if one or more plans were provided.",
+                        help_text=(
+                            "Subscription created if one or more plans were provided."
+                        ),
                     ),
                 ),
                 (
@@ -3724,7 +4304,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -3747,7 +4332,10 @@ class Migration(migrations.Migration):
                 (
                     "client_secret",
                     models.CharField(
-                        help_text="The client secret of the source. Used for client-side retrieval using a publishable key.",
+                        help_text=(
+                            "The client secret of the source. Used for client-side"
+                            " retrieval using a publishable key."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -3769,7 +4357,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="Extra information about a source. This will appear on your customer's statement every time you charge the source.",
+                        help_text=(
+                            "Extra information about a source. This will appear on your"
+                            " customer's statement every time you charge the source."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -3847,7 +4438,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -3865,7 +4461,10 @@ class Migration(migrations.Migration):
                     "quantity",
                     models.PositiveIntegerField(
                         blank=True,
-                        help_text="The quantity of the plan to which the customer should be subscribed.",
+                        help_text=(
+                            "The quantity of the plan to which the customer should be"
+                            " subscribed."
+                        ),
                         null=True,
                     ),
                 ),
@@ -3893,7 +4492,11 @@ class Migration(migrations.Migration):
                     models.ManyToManyField(
                         blank=True,
                         db_table="djstripe_djstripesubscriptionitemtaxrate",
-                        help_text="The tax rates which apply to this subscription_item. When set, the default_tax_rates on the subscription do not apply to this subscription_item.",
+                        help_text=(
+                            "The tax rates which apply to this subscription_item. When"
+                            " set, the default_tax_rates on the subscription do not"
+                            " apply to this subscription_item."
+                        ),
                         related_name="+",
                         to="djstripe.TaxRate",
                     ),
@@ -3943,7 +4546,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -3968,7 +4576,10 @@ class Migration(migrations.Migration):
                         related_name="transfer_reversals",
                         to="djstripe.balancetransaction",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="Balance transaction that describes the impact on your account balance.",
+                        help_text=(
+                            "Balance transaction that describes the impact on your"
+                            " account balance."
+                        ),
                     ),
                 ),
                 (
@@ -4010,7 +4621,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -4027,7 +4643,10 @@ class Migration(migrations.Migration):
                 (
                     "quantity",
                     models.PositiveIntegerField(
-                        help_text="The quantity of the plan to which the customer should be subscribed."
+                        help_text=(
+                            "The quantity of the plan to which the customer should be"
+                            " subscribed."
+                        )
                     ),
                 ),
                 (
@@ -4037,7 +4656,9 @@ class Migration(migrations.Migration):
                         related_name="usage_records",
                         to="djstripe.subscriptionitem",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The subscription item this usage record contains data for.",
+                        help_text=(
+                            "The subscription item this usage record contains data for."
+                        ),
                     ),
                 ),
                 (
@@ -4069,7 +4690,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -4094,7 +4720,9 @@ class Migration(migrations.Migration):
                     "nickname",
                     models.CharField(
                         blank=True,
-                        help_text="A brief description of the plan, hidden from customers.",
+                        help_text=(
+                            "A brief description of the plan, hidden from customers."
+                        ),
                         max_length=250,
                     ),
                 ),
@@ -4161,7 +4789,10 @@ class Migration(migrations.Migration):
                     "lookup_key",
                     models.CharField(
                         blank=True,
-                        help_text="A lookup key used to retrieve prices dynamically from a static string.",
+                        help_text=(
+                            "A lookup key used to retrieve prices dynamically from a"
+                            " static string."
+                        ),
                         max_length=250,
                         null=True,
                     ),
@@ -4200,7 +4831,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -4210,7 +4846,10 @@ class Migration(migrations.Migration):
                 (
                     "country",
                     models.CharField(
-                        help_text="Two-letter ISO code representing the country of the tax ID.",
+                        help_text=(
+                            "Two-letter ISO code representing the country of the"
+                            " tax ID."
+                        ),
                         max_length=2,
                     ),
                 ),
@@ -4263,7 +4902,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -4289,7 +4933,10 @@ class Migration(migrations.Migration):
                     "discountable",
                     models.BooleanField(
                         default=False,
-                        help_text="If True, discounts will apply to this invoice item. Always False for prorations.",
+                        help_text=(
+                            "If True, discounts will apply to this invoice item. Always"
+                            " False for prorations."
+                        ),
                     ),
                 ),
                 ("period", djstripe.fields.JSONField()),
@@ -4299,14 +4946,21 @@ class Migration(migrations.Migration):
                     "proration",
                     models.BooleanField(
                         default=False,
-                        help_text="Whether or not the invoice item was created automatically as a proration adjustment when the customer switched plans.",
+                        help_text=(
+                            "Whether or not the invoice item was created automatically"
+                            " as a proration adjustment when the customer switched"
+                            " plans."
+                        ),
                     ),
                 ),
                 (
                     "quantity",
                     models.IntegerField(
                         blank=True,
-                        help_text="If the invoice item is a proration, the quantity of the subscription for which the proration was computed.",
+                        help_text=(
+                            "If the invoice item is a proration, the quantity of the"
+                            " subscription for which the proration was computed."
+                        ),
                         null=True,
                     ),
                 ),
@@ -4334,7 +4988,10 @@ class Migration(migrations.Migration):
                 (
                     "plan",
                     models.ForeignKey(
-                        help_text="If the invoice item is a proration, the plan of the subscription for which the proration was computed.",
+                        help_text=(
+                            "If the invoice item is a proration, the plan of the"
+                            " subscription for which the proration was computed."
+                        ),
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.plan",
@@ -4348,7 +5005,10 @@ class Migration(migrations.Migration):
                         related_name="invoiceitems",
                         to="djstripe.subscription",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="The subscription that this invoice item has been created for, if any.",
+                        help_text=(
+                            "The subscription that this invoice item has been created"
+                            " for, if any."
+                        ),
                     ),
                 ),
                 (
@@ -4356,7 +5016,11 @@ class Migration(migrations.Migration):
                     models.ManyToManyField(
                         blank=True,
                         db_table="djstripe_djstripeinvoiceitemtaxrate",
-                        help_text="The tax rates which apply to this invoice item. When set, the default_tax_rates on the invoice do not apply to this invoice item.",
+                        help_text=(
+                            "The tax rates which apply to this invoice item. When set,"
+                            " the default_tax_rates on the invoice do not apply to this"
+                            " invoice item."
+                        ),
                         related_name="+",
                         to="djstripe.TaxRate",
                     ),
@@ -4387,7 +5051,10 @@ class Migration(migrations.Migration):
                 (
                     "price",
                     models.ForeignKey(
-                        help_text="If the invoice item is a proration, the price of the subscription for which the proration was computed.",
+                        help_text=(
+                            "If the invoice item is a proration, the price of the"
+                            " subscription for which the proration was computed."
+                        ),
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="invoiceitems",
@@ -4412,7 +5079,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -4478,7 +5150,10 @@ class Migration(migrations.Migration):
                     "released_subscription",
                     models.ForeignKey(
                         blank=True,
-                        help_text="The subscription once managed by this subscription schedule (if it is released).",
+                        help_text=(
+                            "The subscription once managed by this subscription"
+                            " schedule (if it is released)."
+                        ),
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="released_schedules",
@@ -4519,7 +5194,12 @@ class Migration(migrations.Migration):
                     models.BooleanField(
                         blank=True,
                         default=None,
-                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        help_text=(
+                            "Null here indicates that the livemode status is unknown or"
+                            " was previously unrecorded. Otherwise, this field"
+                            " indicates whether this record comes from Stripe test mode"
+                            " or live mode operation."
+                        ),
                         null=True,
                     ),
                 ),
@@ -4555,7 +5235,10 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         default="",
-                        help_text="Message to user further explaining reason for payout failure if available.",
+                        help_text=(
+                            "Message to user further explaining reason for payout"
+                            " failure if available."
+                        ),
                     ),
                 ),
                 (
@@ -4569,7 +5252,10 @@ class Migration(migrations.Migration):
                     models.CharField(
                         blank=True,
                         default="",
-                        help_text="Extra information about a payout to be displayed on the user's bank statement.",
+                        help_text=(
+                            "Extra information about a payout to be displayed on the"
+                            " user's bank statement."
+                        ),
                         max_length=255,
                     ),
                 ),
@@ -4602,7 +5288,10 @@ class Migration(migrations.Migration):
                         on_delete=django.db.models.deletion.SET_NULL,
                         to="djstripe.balancetransaction",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="Balance transaction that describes the impact on your account balance.",
+                        help_text=(
+                            "Balance transaction that describes the impact on your"
+                            " account balance."
+                        ),
                     ),
                 ),
                 (
@@ -4614,7 +5303,12 @@ class Migration(migrations.Migration):
                         related_name="failure_payouts",
                         to="djstripe.balancetransaction",
                         to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                        help_text="If the payout failed or was canceled, this will be the balance transaction that reversed the initial balance transaction, and puts the funds from the failed payout back in your balance.",
+                        help_text=(
+                            "If the payout failed or was canceled, this will be the"
+                            " balance transaction that reversed the initial balance"
+                            " transaction, and puts the funds from the failed payout"
+                            " back in your balance."
+                        ),
                     ),
                 ),
                 (
@@ -4631,7 +5325,10 @@ class Migration(migrations.Migration):
                 (
                     "automatic",
                     models.BooleanField(
-                        help_text="`true` if the payout was created by an automated payout schedule, and `false` if it was requested manually.",
+                        help_text=(
+                            "`true` if the payout was created by an automated payout"
+                            " schedule, and `false` if it was requested manually."
+                        ),
                     ),
                 ),
                 (
@@ -4654,7 +5351,10 @@ class Migration(migrations.Migration):
                 related_name="+",
                 to="djstripe.transfer",
                 to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
-                help_text="The transfer which created this charge. Only present if the charge came from another Stripe account.",
+                help_text=(
+                    "The transfer which created this charge. Only present if the charge"
+                    " came from another Stripe account."
+                ),
             ),
         ),
         migrations.AddField(

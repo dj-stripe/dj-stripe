@@ -36,7 +36,9 @@ class TestTaxIdStr(CreateAccountMixin, TestCase):
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
         self.assertEqual(
             str(tax_id),
-            f"{enums.TaxIdType.humanize(FAKE_TAX_ID['type'])} {FAKE_TAX_ID['value']} ({FAKE_TAX_ID['verification']['status']})",
+            (
+                f"{enums.TaxIdType.humanize(FAKE_TAX_ID['type'])} {FAKE_TAX_ID['value']} ({FAKE_TAX_ID['verification']['status']})"
+            ),
         )
 
 

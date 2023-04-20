@@ -22,7 +22,6 @@ from . import (
 
 class SourceTransactionTest(AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         user = get_user_model().objects.create_user(
             username="arnav13", email="arnav13@gmail.com"
         )
@@ -60,7 +59,10 @@ class SourceTransactionTest(AssertStripeFksMixin, TestCase):
             deepcopy(FAKE_SOURCE_TRANSACTION)
         )
         self.assertEqual(
-            f"Source Transaction status={sourcetransaction.status}, source={sourcetransaction.source.id}",
+            (
+                f"Source Transaction status={sourcetransaction.status},"
+                f" source={sourcetransaction.source.id}"
+            ),
             str(sourcetransaction),
         )
 

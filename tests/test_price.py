@@ -256,7 +256,7 @@ class TestStrPrice(CreateAccountMixin):
 
         if not fake_price_data["recurring"]:
             price = Price.sync_from_stripe_data(fake_price_data)
-            assert (f"{price.human_readable_price} for {FAKE_PRODUCT['name']}") == str(
+            assert f"{price.human_readable_price} for {FAKE_PRODUCT['name']}" == str(
                 price
             )
 

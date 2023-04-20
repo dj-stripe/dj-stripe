@@ -39,16 +39,19 @@ class ApplicationFee(StripeModel):
     )
     amount = StripeQuantumCurrencyAmountField(help_text="Amount earned, in cents.")
     amount_refunded = StripeQuantumCurrencyAmountField(
-        help_text="Amount in cents refunded (can be less than the amount attribute "
-        "on the fee if a partial refund was issued)"
+        help_text=(
+            "Amount in cents refunded (can be less than the amount attribute "
+            "on the fee if a partial refund was issued)"
+        )
     )
     # TODO application = ...
     # balance_transaction exists on the platform account
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
-        help_text="Balance transaction that describes the impact on your account"
-        " balance.",
+        help_text=(
+            "Balance transaction that describes the impact on your account balance."
+        ),
     )
     # charge exists on the Stripe Connected Account and not the Platform Account
     charge = StripeForeignKey(
@@ -84,8 +87,9 @@ class ApplicationFeeRefund(StripeModel):
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
-        help_text="Balance transaction that describes the impact on your account "
-        "balance.",
+        help_text=(
+            "Balance transaction that describes the impact on your account balance."
+        ),
     )
     currency = StripeCurrencyCodeField()
     fee = StripeForeignKey(
@@ -112,12 +116,14 @@ class CountrySpec(StripeBaseModel):
         )
     )
     supported_bank_account_currencies = JSONField(
-        help_text="Currencies that can be accepted in the specific country"
-        " (for transfers)."
+        help_text=(
+            "Currencies that can be accepted in the specific country (for transfers)."
+        )
     )
     supported_payment_currencies = JSONField(
-        help_text="Currencies that can be accepted in the specified country"
-        " (for payments)."
+        help_text=(
+            "Currencies that can be accepted in the specified country (for payments)."
+        )
     )
     supported_payment_methods = JSONField(
         help_text="Payment methods available in the specified country."
@@ -190,42 +196,53 @@ class Transfer(StripeModel):
     amount_reversed = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
-        help_text="The amount (as decimal) reversed (can be less than the amount "
-        "attribute on the transfer if a partial reversal was issued).",
+        help_text=(
+            "The amount (as decimal) reversed (can be less than the amount "
+            "attribute on the transfer if a partial reversal was issued)."
+        ),
     )
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        help_text="Balance transaction that describes the impact on your account"
-        " balance.",
+        help_text=(
+            "Balance transaction that describes the impact on your account balance."
+        ),
     )
     currency = StripeCurrencyCodeField()
 
     destination = StripeIdField(
         max_length=255,
         null=True,
-        help_text="ID of the bank account, card, or Stripe account the transfer was sent to.",
+        help_text=(
+            "ID of the bank account, card, or Stripe account the transfer was sent to."
+        ),
     )
 
     # todo implement payment model (for some reason py ids are showing up in the charge model)
     destination_payment = StripeIdField(
         null=True,
         blank=True,
-        help_text="If the destination is a Stripe account, this will be the ID of the "
-        "payment that the destination account received for the transfer.",
+        help_text=(
+            "If the destination is a Stripe account, this will be the ID of the "
+            "payment that the destination account received for the transfer."
+        ),
     )
     reversed = models.BooleanField(
         default=False,
-        help_text="Whether or not the transfer has been fully reversed. "
-        "If the transfer is only partially reversed, this attribute will still "
-        "be false.",
+        help_text=(
+            "Whether or not the transfer has been fully reversed. "
+            "If the transfer is only partially reversed, this attribute will still "
+            "be false."
+        ),
     )
     source_transaction = StripeIdField(
         null=True,
-        help_text="ID of the charge (or other transaction) that was used to fund "
-        "the transfer. If null, the transfer was funded from the available balance.",
+        help_text=(
+            "ID of the charge (or other transaction) that was used to fund "
+            "the transfer. If null, the transfer was funded from the available balance."
+        ),
     )
     source_type = StripeEnumField(
         enum=enums.LegacySourceType,
@@ -301,8 +318,9 @@ class TransferReversal(StripeModel):
         null=True,
         blank=True,
         related_name="transfer_reversals",
-        help_text="Balance transaction that describes the impact on your account "
-        "balance.",
+        help_text=(
+            "Balance transaction that describes the impact on your account balance."
+        ),
     )
     currency = StripeCurrencyCodeField()
     transfer = StripeForeignKey(

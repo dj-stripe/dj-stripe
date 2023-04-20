@@ -155,7 +155,8 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     ):
         transfer = Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
 
-        assert transfer.get_stripe_dashboard_url() == (
-            f"{transfer._get_base_stripe_dashboard_url()}"
+        assert (
+            transfer.get_stripe_dashboard_url()
+            == f"{transfer._get_base_stripe_dashboard_url()}"
             f"connect/{transfer.stripe_dashboard_item_name}/{transfer.id}"
         )

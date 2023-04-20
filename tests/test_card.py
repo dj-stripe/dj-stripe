@@ -76,7 +76,8 @@ class TestStrCard:
                 default = True
 
             assert (
-                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} {fake_stripe_data['last4']} {'Default' if default else ''} Expires {fake_stripe_data['exp_month']} {fake_stripe_data['exp_year']}"
+                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} {fake_stripe_data['last4']} {'Default' if default else ''} Expires"
+                f" {fake_stripe_data['exp_month']} {fake_stripe_data['exp_year']}"
                 == str(card)
             )
 
@@ -223,8 +224,8 @@ class CardTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
     def test_api_call_no_customer_and_no_account(self):
         exception_message = (
-            "Card objects must be manipulated through either a Stripe Connected Account or a customer. "
-            "Pass a Customer or an Account object into this call."
+            "Card objects must be manipulated through either a Stripe Connected Account"
+            " or a customer. Pass a Customer or an Account object into this call."
         )
 
         with self.assertRaisesMessage(
