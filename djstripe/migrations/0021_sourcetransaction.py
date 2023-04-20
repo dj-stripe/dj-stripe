@@ -10,7 +10,7 @@ import djstripe.fields
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("djstripe", "0020_alter_session"),
+        ("djstripe", "0021_add_payout_original_payout"),
     ]
 
     operations = [
