@@ -10,7 +10,7 @@ authors = [
 readme = "docs/README.md"
 homepage = "https://dj-stripe.dev"
 repository = "https://github.com/dj-stripe/dj-stripe"
-documentation = "https://dj-stripe.github.io/dj-stripe/"
+documentation = "https://dj-stripe.dev/dj-stripe/"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
