@@ -8,6 +8,7 @@ from traceback import format_exc
 from uuid import uuid4
 
 import stripe
+from django.conf import settings
 from django.db import models
 from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
@@ -277,14 +278,8 @@ class WebhookEventTrigger(models.Model):
         # HTTP headers are case-insensitive, but we store them as a dict.
         headers = CaseInsensitiveMapping(self.headers)
         signature = headers.get("stripe-signature")
-        local_cli_signing_secret = headers.get("x-djstripe-webhook-secret")
-        try:
-            # check if the x-djstripe-webhook-secret Custom Header exists
-            if local_cli_signing_secret:
-                # Set Endpoint Signing Secret to the output of Stripe CLI
-                # for signature verification
-                secret = local_cli_signing_secret
 
+        try:
             stripe.WebhookSignature.verify_header(
                 self.body, signature, secret, tolerance
             )
@@ -325,6 +320,13 @@ class WebhookEventTrigger(models.Model):
             warnings.warn("WEBHOOK VALIDATION is disabled.")
             return True
         elif validation_method == "verify_signature":
+            if settings.DEBUG:
+                # In debug mode, allow overriding the webhook secret with
+                # the x-djstripe-webhook-secret header.
+                # (used for stripe cli webhook forwarding)
+                headers = CaseInsensitiveMapping(self.headers)
+                local_secret = headers.get("x-djstripe-webhook-secret")
+                secret = local_secret if local_secret else secret
             return self.verify_signature(secret=secret)
 
         livemode = local_data["livemode"]
