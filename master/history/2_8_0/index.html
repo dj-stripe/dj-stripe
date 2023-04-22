@@ -160,21 +160,11 @@ To upgrade from an older version, first upgrade to dj-stripe 2.5.0.</p>
 <h2 id="release-highlights">Release highlights</h2>
 <ul>
 <li>Python 3.11 is now supported.</li>
-<li>Django 4.1 is now supported.</li>
+<li>Django 4.1 and 4.2 are now supported.</li>
 <li>Python 3.7 is no longer supported. Python 3.8 or higher is required.</li>
 <li>Added <code>LineItem</code> model.</li>
 <li>Added <code>Discount</code> model.</li>
-<li>Added <code>SourceTransaction</code> model.</li>
-<li>New webhook signals are available:<ul>
-<li><code>djstripe.signals.webhook_pre_validate(instance, api_key)</code>: Fired before webhook validation</li>
-<li><code>djstripe.signals.webhook_post_validate(instance, api_key, valid)</code>: Fired after validation (even unsuccessful validations)</li>
-<li><code>djstripe.signals.webhook_pre_process(instance, api_key)</code>: Fired before webhook processing. Not fired if the validation failed.</li>
-<li><code>djstripe.signals.webhook_post_process(instance, api_key)</code>: Fired after webhook successful processing.</li>
-</ul>
-</li>
-<li><code>djstripe.signals.webhook_processing_error</code> now also takes <code>instance</code> and <code>api_key</code> arguments</li>
-<li><code>stripe.api_version</code> is no longer manipulated by dj-stripe.</li>
-<li>Resolved ambiguity between <code>LineItem</code> and <code>InvoiceItem</code> models. It was incorrectly assumed that the <code>lines</code> List object on <code>Invoice</code> and <code>UpcomingInvoice</code> models only return <code>InvoiceItem</code> objects. Moreover <code>LineItem</code> objects can also be of type <code>subscription</code> if the user adds a Subscription to their <code>Invoice</code> as a lineitem.</li>
+<li>Added <code>SourceTransaction</code>, <code>VerificationSession</code> and <code>VerificationReport</code> models.</li>
 </ul>
 <h2 id="deprecated-features">Deprecated features</h2>
 <ul>
@@ -199,29 +189,25 @@ To upgrade from an older version, first upgrade to dj-stripe 2.5.0.</p>
     to correctly create the desired refund. Note that the
     created <code>Refund</code> object is now returned as opposed to
     the <code>Charge</code> object.</li>
+<li>Resolved ambiguity between <code>LineItem</code> and <code>InvoiceItem</code> models. We previously
+    assumed that the <code>lines</code> List object on <code>Invoice</code> and <code>UpcomingInvoice</code> models only
+    return <code>InvoiceItem</code> objects. Moreover <code>LineItem</code> objects can also be of type
+    <code>subscription</code> if the user adds a Subscription to their <code>Invoice</code> as a lineitem.</li>
 </ul>
 <h2 id="other-changes">Other changes</h2>
 <ul>
-<li>Updated <code>check_stripe_api_key</code> django system check to not be a blocker for new dj-stripe users by raising Info warnings on the console. If the Stripe keys were not defined in the settings file, the <code>Critical</code> warning was preventing users to add them directly from the admin as mentioned in the docs. This was creating a chicken-egg situation where one could only add keys in the admin before they were defined in settings.</li>
-<li><code>check_stripe_api_key</code> will raise appropriate warnings on the console directing users to add keys directly from the django admin.</li>
-<li>Swapped Critical Error to Info for <code>_check_webhook_endpoint_validation</code> check to allow the users to use the django admin.</li>
-<li><code>LineItem</code> instances can also get synced using the <code>djstripe_sync_models</code> management command.</li>
-<li>Added missing <code>line_items</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>setup_intent</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>shipping_address_collection</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>shipping_cost</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>shipping_details</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>shipping_options</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>amount_total</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>amount_subtotal</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>url</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>total_details</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>currency</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>payment_status</code> model field to Checkout Sessions.</li>
-<li>Added missing <code>status</code> model field to Checkout Sessions.</li>
-<li>Added support for running tests using the actual Stripe API. It will take a while to replace all existing tests with the actual API. By default tests will run using mocks, but <code>-m stripe_api</code> can be added to use the actual API.</li>
-<li>Added <code>original_payout</code> model field to <code>Payout</code> model.</li>
-<li>Added <code>reversed_by</code> model field to <code>Payout</code> model.</li>
+<li>Updated the Stripe API key and webhook django system check to warning instead of critical.</li>
+<li>Added various missing model field to CheckoutSession and Payout models.</li>
+<li>Added support for running tests using the real Stripe API calls.</li>
+<li><code>stripe.api_version</code> is no longer manipulated by dj-stripe.</li>
+<li>New webhook signals are available:<ul>
+<li><code>djstripe.signals.webhook_pre_validate(instance, api_key)</code>: Fired before webhook validation</li>
+<li><code>djstripe.signals.webhook_post_validate(instance, api_key, valid)</code>: Fired after validation (even unsuccessful validations)</li>
+<li><code>djstripe.signals.webhook_pre_process(instance, api_key)</code>: Fired before webhook processing. Not fired if the validation failed.</li>
+<li><code>djstripe.signals.webhook_post_process(instance, api_key)</code>: Fired after webhook successful processing.</li>
+</ul>
+</li>
+<li><code>djstripe.signals.webhook_processing_error</code> now also takes <code>instance</code> and <code>api_key</code> arguments</li>
 </ul>
               
             </div>
