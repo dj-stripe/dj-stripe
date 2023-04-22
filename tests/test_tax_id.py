@@ -9,6 +9,7 @@ from django.test.testcases import TestCase
 
 from djstripe import enums
 from djstripe.models import Customer, TaxId
+from djstripe.models.base import IdempotencyKey
 from djstripe.settings import djstripe_settings
 
 from . import FAKE_CUSTOMER, FAKE_TAX_ID, AssertStripeFksMixin
@@ -89,12 +90,21 @@ class TestTransfer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             id=FAKE_CUSTOMER["id"], type=FAKE_TAX_ID["type"], value=FAKE_TAX_ID["value"]
         )
 
+        # Get just created IdempotencyKey
+        idempotency_key = IdempotencyKey.objects.get(
+            action=f"taxid:create:{FAKE_TAX_ID['id']}",
+            livemode=False,
+        )
+        idempotency_key = str(idempotency_key.uuid)
+
         assert STRIPE_DATA == FAKE_TAX_ID
         tax_id_create_mock.assert_called_once_with(
             id=FAKE_CUSTOMER["id"],
             type=FAKE_TAX_ID["type"],
             value=FAKE_TAX_ID["value"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            idempotency_key=idempotency_key,
         )
 
     # we are returning any value for the Customer.objects.get as we only need to avoid the Customer.DoesNotExist error
