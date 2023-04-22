@@ -8,6 +8,7 @@ from traceback import format_exc
 from uuid import uuid4
 
 import stripe
+from django.conf import settings
 from django.db import models
 from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
@@ -277,7 +278,11 @@ class WebhookEventTrigger(models.Model):
         local_cli_signing_secret = headers.get("x-djstripe-webhook-secret")
         try:
             # check if the x-djstripe-webhook-secret Custom Header exists
-            if local_cli_signing_secret:
+            # and the user has explicitly enabled the setting ENABLE_LOCAL_WEBHOOK_TESTING
+            if (
+                djstripe_settings.ENABLE_LOCAL_WEBHOOK_TESTING
+                and local_cli_signing_secret
+            ):
                 # Set Endpoint Signing Secret to the output of Stripe CLI
                 # for signature verification
                 secret = local_cli_signing_secret
