@@ -28381,8 +28381,8 @@ do actually want to instantiate the model and use relations.</p>
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">UpcomingInvoice</span><span class="o">.</span><span class="n">id</span></code>
   
   <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
       <small class="doc doc-label doc-label-property"><code>property</code></small>
+      <small class="doc doc-label doc-label-writable"><code>writable</code></small>
   </span>
 
 </h5>
@@ -34802,8 +34802,7 @@ unless the reopen method is called.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
-<span class="normal">25</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
@@ -34858,7 +34857,8 @@ unless the reopen method is called.</p>
 <span class="normal">77</span>
 <span class="normal">78</span>
 <span class="normal">79</span>
-<span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEndpoint</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
+<span class="normal">80</span>
+<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEndpoint</span><span class="p">(</span><span class="n">StripeModel</span><span class="p">):</span>
     <span class="n">stripe_class</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookEndpoint</span>
     <span class="n">stripe_dashboard_item_name</span> <span class="o">=</span> <span class="s2">&quot;webhooks&quot;</span>
 
@@ -35115,8 +35115,8 @@ unless the reopen method is called.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">66</span>
-<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">67</span>
+<span class="normal">68</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">djstripe_uuid</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -35157,8 +35157,7 @@ The 'valid' flag in this model monitors this.</p>
 
         <details class="quote">
           <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">115</span>
-<span class="normal">116</span>
+          <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
@@ -35394,7 +35393,9 @@ The 'valid' flag in this model monitors this.</p>
 <span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span>
-<span class="normal">352</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEventTrigger</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEventTrigger</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    An instance of a request that reached the server endpoint for Stripe webhooks.</span>
 
@@ -35559,14 +35560,8 @@ The 'valid' flag in this model monitors this.</p>
         <span class="c1"># HTTP headers are case-insensitive, but we store them as a dict.</span>
         <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
         <span class="n">signature</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stripe-signature&quot;</span><span class="p">)</span>
-        <span class="n">local_cli_signing_secret</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-djstripe-webhook-secret&quot;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># check if the x-djstripe-webhook-secret Custom Header exists</span>
-            <span class="k">if</span> <span class="n">local_cli_signing_secret</span><span class="p">:</span>
-                <span class="c1"># Set Endpoint Signing Secret to the output of Stripe CLI</span>
-                <span class="c1"># for signature verification</span>
-                <span class="n">secret</span> <span class="o">=</span> <span class="n">local_cli_signing_secret</span>
 
+        <span class="k">try</span><span class="p">:</span>
             <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookSignature</span><span class="o">.</span><span class="n">verify_header</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span>
             <span class="p">)</span>
@@ -35607,6 +35602,13 @@ The 'valid' flag in this model monitors this.</p>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;WEBHOOK VALIDATION is disabled.&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">validation_method</span> <span class="o">==</span> <span class="s2">&quot;verify_signature&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+                <span class="c1"># In debug mode, allow overriding the webhook secret with</span>
+                <span class="c1"># the x-djstripe-webhook-secret header.</span>
+                <span class="c1"># (used for stripe cli webhook forwarding)</span>
+                <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+                <span class="n">local_secret</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-djstripe-webhook-secret&quot;</span><span class="p">)</span>
+                <span class="n">secret</span> <span class="o">=</span> <span class="n">local_secret</span> <span class="k">if</span> <span class="n">local_secret</span> <span class="k">else</span> <span class="n">secret</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">verify_signature</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">)</span>
 
         <span class="n">livemode</span> <span class="o">=</span> <span class="n">local_data</span><span class="p">[</span><span class="s2">&quot;livemode&quot;</span><span class="p">]</span>
@@ -35946,8 +35948,8 @@ The 'valid' flag in this model monitors this.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">173</span>
-<span class="normal">174</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">174</span>
+<span class="normal">175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;id=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">, valid=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">valid</span><span class="si">}</span><span class="s2">, processed=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">processed</span><span class="si">}</span><span class="s2">&quot;</span>
 </code></pre></div></td></tr></table></div>
       </details>
@@ -35980,8 +35982,7 @@ request object.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">176</span>
-<span class="normal">177</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">177</span>
 <span class="normal">178</span>
 <span class="normal">179</span>
 <span class="normal">180</span>
@@ -36061,7 +36062,8 @@ request object.</p>
 <span class="normal">254</span>
 <span class="normal">255</span>
 <span class="normal">256</span>
-<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">257</span>
+<span class="normal">258</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span> <span class="nf">from_request</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">webhook_endpoint</span><span class="p">:</span> <span class="n">WebhookEndpoint</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create, validate and process a WebhookEventTrigger given a Django</span>
@@ -36163,12 +36165,12 @@ request object.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">259</span>
-<span class="normal">260</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">260</span>
 <span class="normal">261</span>
 <span class="normal">262</span>
 <span class="normal">263</span>
-<span class="normal">264</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@cached_property</span>
+<span class="normal">264</span>
+<span class="normal">265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@cached_property</span>
 <span class="k">def</span> <span class="nf">json_body</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
@@ -36194,9 +36196,7 @@ request object.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">344</span>
 <span class="normal">345</span>
 <span class="normal">346</span>
 <span class="normal">347</span>
@@ -36204,7 +36204,9 @@ request object.</p>
 <span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span>
-<span class="normal">352</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="c1"># Reset traceback and exception in case of reprocessing</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">traceback</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
@@ -36240,7 +36242,12 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">297</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
 <span class="normal">298</span>
 <span class="normal">299</span>
 <span class="normal">300</span>
@@ -36283,7 +36290,9 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 <span class="normal">337</span>
 <span class="normal">338</span>
 <span class="normal">339</span>
-<span class="normal">340</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">validate</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">,</span>
@@ -36314,6 +36323,13 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;WEBHOOK VALIDATION is disabled.&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">elif</span> <span class="n">validation_method</span> <span class="o">==</span> <span class="s2">&quot;verify_signature&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+            <span class="c1"># In debug mode, allow overriding the webhook secret with</span>
+            <span class="c1"># the x-djstripe-webhook-secret header.</span>
+            <span class="c1"># (used for stripe cli webhook forwarding)</span>
+            <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
+            <span class="n">local_secret</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-djstripe-webhook-secret&quot;</span><span class="p">)</span>
+            <span class="n">secret</span> <span class="o">=</span> <span class="n">local_secret</span> <span class="k">if</span> <span class="n">local_secret</span> <span class="k">else</span> <span class="n">secret</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">verify_signature</span><span class="p">(</span><span class="n">secret</span><span class="o">=</span><span class="n">secret</span><span class="p">)</span>
 
     <span class="n">livemode</span> <span class="o">=</span> <span class="n">local_data</span><span class="p">[</span><span class="s2">&quot;livemode&quot;</span><span class="p">]</span>
@@ -36347,8 +36363,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">271</span>
-<span class="normal">272</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">272</span>
 <span class="normal">273</span>
 <span class="normal">274</span>
 <span class="normal">275</span>
@@ -36366,12 +36381,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 <span class="normal">287</span>
 <span class="normal">288</span>
 <span class="normal">289</span>
-<span class="normal">290</span>
-<span class="normal">291</span>
-<span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
+<span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
@@ -36380,14 +36390,8 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
     <span class="c1"># HTTP headers are case-insensitive, but we store them as a dict.</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">CaseInsensitiveMapping</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
     <span class="n">signature</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;stripe-signature&quot;</span><span class="p">)</span>
-    <span class="n">local_cli_signing_secret</span> <span class="o">=</span> <span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-djstripe-webhook-secret&quot;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># check if the x-djstripe-webhook-secret Custom Header exists</span>
-        <span class="k">if</span> <span class="n">local_cli_signing_secret</span><span class="p">:</span>
-            <span class="c1"># Set Endpoint Signing Secret to the output of Stripe CLI</span>
-            <span class="c1"># for signature verification</span>
-            <span class="n">secret</span> <span class="o">=</span> <span class="n">local_cli_signing_secret</span>
 
+    <span class="k">try</span><span class="p">:</span>
         <span class="n">stripe</span><span class="o">.</span><span class="n">WebhookSignature</span><span class="o">.</span><span class="n">verify_header</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">body</span><span class="p">,</span> <span class="n">signature</span><span class="p">,</span> <span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span>
         <span class="p">)</span>
@@ -36430,8 +36434,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
       <details class="quote">
         <summary>Source code in <code>djstripe/models/webhooks.py</code></summary>
-        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 89</span>
-<span class="normal"> 90</span>
+        <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 90</span>
 <span class="normal"> 91</span>
 <span class="normal"> 92</span>
 <span class="normal"> 93</span>
@@ -36453,7 +36456,8 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
-<span class="normal">112</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_remote_ip</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+<span class="normal">112</span>
+<span class="normal">113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_remote_ip</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given the HTTPRequest object return the IP Address of the client</span>
 
 <span class="sd">    :param request: client request</span>
