@@ -199,6 +199,59 @@ class Coupon(StripeModel):
         return f"{self.human_readable_amount} {duration}"
 
 
+class PromotionCode(StripeModel):
+    """
+    A Promotion Code represents a customer-redeemable code for a coupon.
+    It can be used to create multiple codes for a single coupon.
+
+    Stripe documentation: https://stripe.com/docs/api/promotion_codes?lang=python
+    """
+
+    stripe_class = stripe.PromotionCode
+    expand_fields = ["customer", "restrictions.currency_options"]
+    stripe_dashboard_item_name = "promotion_codes"
+    description = None
+
+    active = models.BooleanField(
+        help_text="Whether the promotion code is currently active. A promotion code is only active if the coupon is also valid."
+    )
+    code = models.CharField(
+        max_length=500,
+        help_text="The customer-facing code. Regardless of case, this code must be unique across all active promotion codes for each customer.",
+    )
+    coupon = JSONField(
+        help_text="The coupon for this promotion code.",
+    )
+    customer = StripeForeignKey(
+        "Customer",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text="The customer that this promotion code can be used for. If empty, this promotion code can be used by all customers.",
+    )
+    expires_at = StripeDateTimeField(
+        null=True,
+        blank=True,
+        help_text="The timestamp at which this promotion code will expire.",
+    )
+    max_redemptions = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        help_text="The maximum number of times this promotion code can be redeemed.",
+    )
+    times_redeemed = models.PositiveIntegerField(
+        help_text="The number of times this promotion code has been used."
+    )
+    restrictions = JSONField(
+        null=True,
+        blank=True,
+        help_text="Settings that restrict the redemption of the promotion code.",
+    )
+
+    def __str__(self):
+        return self.code
+
+
 class Discount(StripeModel):
     """
     A discount represents the actual application of a coupon or promotion code.
