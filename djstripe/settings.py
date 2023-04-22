@@ -80,6 +80,10 @@ class DjstripeSettings:
     def WEBHOOK_SECRET(self):
         return getattr(settings, "DJSTRIPE_WEBHOOK_SECRET", "")
 
+    @property
+    def ENABLE_LOCAL_WEBHOOK_TESTING(self):
+        return getattr(settings, "DJSTRIPE_ENABLE_LOCAL_WEBHOOK_TESTING", False)
+
     # Webhook event callbacks allow an application to take control of what happens
     # when an event from Stripe is received.  One suggestion is to put the event
     # onto a task queue (such as celery) for asynchronous processing.
