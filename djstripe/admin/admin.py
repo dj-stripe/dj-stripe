@@ -367,6 +367,20 @@ class PayoutAdmin(StripeModelAdmin):
         )
 
 
+@admin.register(models.PromotionCode)
+class PromotionCodeAdmin(StripeModelAdmin):
+    list_display = (
+        "active",
+        "customer",
+        "coupon",
+        "code",
+        "expires_at",
+        "max_redemptions",
+        "times_redeemed",
+    )
+    list_filter = ("expires_at", "active")
+
+
 @admin.register(models.SetupIntent)
 class SetupIntentAdmin(StripeModelAdmin):
     list_display = (
