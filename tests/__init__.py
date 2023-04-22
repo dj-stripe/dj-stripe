@@ -1894,6 +1894,11 @@ FAKE_WEBHOOK_ENDPOINT_1 = WebhookEndpointDict(
 )
 
 
+FAKE_PROMOTION_CODE = load_fixture("promotion_code_fakefakefakefake0001.json")
+FAKE_PROMOTION_CODE["coupon"] = deepcopy(FAKE_COUPON)
+FAKE_PROMOTION_CODE["customer"] = deepcopy(FAKE_CUSTOMER)
+
+
 class PayoutDict(StripeItem):
     pass
 

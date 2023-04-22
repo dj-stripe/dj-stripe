@@ -1,0 +1,22 @@
+{
+    "id": "promo_1MzXMjJSZQVUcJYgrdptPwvg",
+    "livemode": false,
+    "object": "promotion_code",
+    "created": 1557995177,
+    "metadata": {},
+    "active": true,
+    "code": "test1",
+    "expires_at": 1558995177,
+    "max_redemptions": 1,
+    "times_redeemed": 0,
+    "restrictions": {
+        "minimum_amount": 500,
+        "currency_options": {
+            "usd": {
+                "minimum_amount": 500
+            }
+        },
+        "first_time_transaction": true,
+        "minimum_amount_currency": "usd"
+    }
+}
