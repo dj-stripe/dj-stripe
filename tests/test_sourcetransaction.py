@@ -18,9 +18,10 @@ from . import (
     FAKE_SOURCE_TRANSACTION,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 
-class SourceTransactionTest(AssertStripeFksMixin, TestCase):
+class SourceTransactionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         user = get_user_model().objects.create_user(
             username="arnav13", email="arnav13@gmail.com"
@@ -59,10 +60,7 @@ class SourceTransactionTest(AssertStripeFksMixin, TestCase):
             deepcopy(FAKE_SOURCE_TRANSACTION)
         )
         self.assertEqual(
-            (
-                f"Source Transaction status={sourcetransaction.status},"
-                f" source={sourcetransaction.source.id}"
-            ),
+            f"Source Transaction status={sourcetransaction.status}, source={sourcetransaction.source.id}",
             str(sourcetransaction),
         )
 
@@ -94,7 +92,7 @@ class SourceTransactionTest(AssertStripeFksMixin, TestCase):
         # invoke the api_list classmethod
         SourceTransaction.api_list(id=self.source.id)
         source_transaction_list_mock.assert_called_once_with(
-            id=FAKE_SOURCE["id"],
+            FAKE_SOURCE["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
         )
 

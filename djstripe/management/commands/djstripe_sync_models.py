@@ -367,6 +367,7 @@ class Command(BaseCommand):
 
         return all_list_kwargs
 
+    @staticmethod
     def get_list_kwargs_srctxn(default_list_kwargs):
         """Returns sequence of kwargs to sync SourceTransactions for
         all Stripe Accounts"""
