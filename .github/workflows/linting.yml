@@ -38,7 +38,7 @@ jobs:
             python_version: "3.11"
 
       - name: Install pre-commit
-        run: poetry install --with dev
+        run: poetry install --with dev -E postgres
 
       - name: Run pre-commit
         run: poetry run pre-commit run --all-files --show-diff-on-failure
