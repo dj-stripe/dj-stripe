@@ -59,10 +59,7 @@ class SourceTransactionTest(AssertStripeFksMixin, TestCase):
             deepcopy(FAKE_SOURCE_TRANSACTION)
         )
         self.assertEqual(
-            (
-                f"Source Transaction status={sourcetransaction.status},"
-                f" source={sourcetransaction.source.id}"
-            ),
+            f"Source Transaction status={sourcetransaction.status}, source={sourcetransaction.source.id}",
             str(sourcetransaction),
         )
 

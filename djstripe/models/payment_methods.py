@@ -848,9 +848,8 @@ class SourceTransaction(StripeModel):
         null=True,
         blank=True,
         help_text=(
-            "Amount (as decimal) associated with the ACH Credit Transfer. This is the"
-            " amount your customer has sent for which the source will be chargeable"
-            " once ready. "
+            "Amount (as decimal) associated with the ACH Credit Transfer. "
+            "This is the amount your customer has sent for which the source will be chargeable once ready. "
         ),
     )
     currency = StripeCurrencyCodeField()
@@ -870,10 +869,8 @@ class SourceTransaction(StripeModel):
     )
     status = StripeEnumField(
         enum=enums.SourceTransactionStatus,
-        help_text=(
-            "The status of the ACH Credit Transfer. Only `chargeable` sources can be"
-            " used to create a charge."
-        ),
+        help_text="The status of the ACH Credit Transfer. Only `chargeable` sources can be used "
+        "to create a charge.",
     )
 
     def __str__(self):
