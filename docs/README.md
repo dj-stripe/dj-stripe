@@ -60,7 +60,7 @@ See [installation](https://dj-stripe.dev/dj-stripe/2.7/installation/) instructio
 
 You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
 
-We've been bringing dj-stripe to the world for over 7 years and are excited to be able to start
+We've been bringing dj-stripe to the world for over 10 years and are excited to be able to start
 dedicating some real resources to the project.
 
 Your sponsorship helps us keep a team of maintainers actively working to improve dj-stripe and
