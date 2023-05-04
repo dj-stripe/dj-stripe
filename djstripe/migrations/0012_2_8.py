@@ -307,15 +307,6 @@ class Migration(migrations.Migration):
                 blank=True, default="", enum=djstripe.enums.BusinessType, max_length=17
             ),
         ),
-        migrations.AlterField(
-            model_name="payout",
-            name="destination",
-            field=djstripe.fields.PaymentMethodForeignKey(
-                null=True,
-                on_delete=django.db.models.deletion.PROTECT,
-                to="djstripe.djstripepaymentmethod",
-            ),
-        ),
         migrations.CreateModel(
             name="VerificationSession",
             fields=[
