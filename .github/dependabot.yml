@@ -12,3 +12,7 @@ updates:
     commit-message:
       # Prefix all commit messages with "[actions] " (no colon, but a trailing whitespace)
       prefix: "[actions] "
+    # Labels on pull requests for version updates only
+    labels:
+      - "update"
+      - "action dependencies"
