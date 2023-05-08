@@ -26,3 +26,7 @@ updates:
     commit-message:
       # Prefix all commit messages with "[python] " (no colon, but a trailing whitespace)
       prefix: "[python] "
+    # Labels on pull requests for version updates only
+    labels:
+      - "update"
+      - "pip dependencies"
