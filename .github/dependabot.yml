@@ -23,3 +23,6 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
+    commit-message:
+      # Prefix all commit messages with "[python] " (no colon, but a trailing whitespace)
+      prefix: "[python] "
