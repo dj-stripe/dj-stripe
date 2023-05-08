@@ -16,3 +16,10 @@ updates:
     labels:
       - "update"
       - "action dependencies"
+
+
+  # Update python packages
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
