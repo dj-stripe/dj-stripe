@@ -13,7 +13,7 @@ class EarlyFraudWarning(StripeModel):
     An early fraud warning indicates that the card issuer has
     notified us that a charge may be fraudulent.
 
-    Stripe API reference: https://stripe.com/docs/api/radar/early_fraud_warnings
+    Stripe API reference: https://stripe.com/docs/api/radar/early_fraud_warnings?lang=python
     """
 
     expand_fields = ["charge", "payment_intent"]
