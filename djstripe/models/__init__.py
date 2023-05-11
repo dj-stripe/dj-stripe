@@ -45,6 +45,7 @@ from .core import (
     Refund,
     SetupIntent,
 )
+from .fraud import EarlyFraudWarning
 from .identity import VerificationReport, VerificationSession
 from .orders import Order
 from .payment_methods import (
@@ -73,6 +74,7 @@ __all__ = [
     "Discount",
     "Dispute",
     "DjstripePaymentMethod",
+    "EarlyFraudWarning",
     "Event",
     "File",
     "FileLink",

@@ -2525,3 +2525,14 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["data"]["previous_attributes"] = {
     "released_at": None,
     "status": "not_started",
 }
+
+
+class EarlyFraudWarningDict(StripeItem):
+    pass
+
+
+FAKE_EARLY_FRAUD_WARNING = EarlyFraudWarningDict(
+    load_fixture("early_fraud_warning_fake_issfr_fakefakefakefakefake0001.json")
+)
+FAKE_EARLY_FRAUD_WARNING["charge"] = deepcopy(FAKE_CHARGE)
+FAKE_EARLY_FRAUD_WARNING["payment_intent"] = deepcopy(FAKE_PAYMENT_INTENT_I)
