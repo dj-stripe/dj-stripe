@@ -897,3 +897,15 @@ class DjstripePaymentMethodType(Enum):
     card = _("Card")
     bank_account = _("Bank account")
     source = _("Source")
+
+
+class ReviewReasons(Enum):
+    """The reason the review is currently open or closed."""
+
+    rule = _("Rule")
+    manual = _("Manual")
+    approved = _("Approved")
+    refunded = _("Refunded")
+    refunded_as_fraud = _("Refunded as Fraud")
+    dispute = _("Dispute")
+    redact = _("Redact")
