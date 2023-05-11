@@ -2525,3 +2525,14 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["data"]["previous_attributes"] = {
     "released_at": None,
     "status": "not_started",
 }
+
+
+class ReviewDict(StripeItem):
+    pass
+
+
+FAKE_REVIEW_WARNING = ReviewDict(
+    load_fixture("review_fake_prv_fakefakefakefakefake0001.json")
+)
+FAKE_REVIEW_WARNING["charge"] = deepcopy(FAKE_CHARGE)
+FAKE_REVIEW_WARNING["payment_intent"] = deepcopy(FAKE_PAYMENT_INTENT_I)

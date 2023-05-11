@@ -45,6 +45,7 @@ from .core import (
     Refund,
     SetupIntent,
 )
+from .fraud import Review
 from .identity import VerificationReport, VerificationSession
 from .orders import Order
 from .payment_methods import (
@@ -91,6 +92,7 @@ __all__ = [
     "Price",
     "Product",
     "Refund",
+    "Review",
     "ShippingRate",
     "ScheduledQueryRun",
     "SetupIntent",
