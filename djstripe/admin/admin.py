@@ -557,6 +557,12 @@ class RefundAdmin(StripeModelAdmin):
         return super().get_queryset(request).select_related("charge")
 
 
+@admin.register(models.Review)
+class ReviewAdmin(ReadOnlyMixin, StripeModelAdmin):
+    list_display = ("charge", "payment_intent", "reason", "open")
+    list_filter = ("reason", "open", "created", "closed_reason", "opened_reason")
+
+
 @admin.register(models.Source)
 class SourceAdmin(StripeModelAdmin):
     list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
