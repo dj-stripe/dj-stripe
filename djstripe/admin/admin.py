@@ -285,6 +285,12 @@ class EventAdmin(ReadOnlyMixin, StripeModelAdmin):
     search_fields = ("request_id",)
 
 
+@admin.register(models.EarlyFraudWarning)
+class EarlyFraudWarningAdmin(ReadOnlyMixin, StripeModelAdmin):
+    list_display = ("charge", "payment_intent", "fraud_type", "actionable")
+    list_filter = ("fraud_type", "created", "actionable")
+
+
 @admin.register(models.File)
 class FileAdmin(StripeModelAdmin):
     list_display = ("purpose", "size", "type")
