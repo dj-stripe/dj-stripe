@@ -909,3 +909,13 @@ class ReviewReasons(Enum):
     refunded_as_fraud = _("Refunded as Fraud")
     dispute = _("Dispute")
     redact = _("Redact")
+
+
+class ReviewClosedReasons(Enum):
+    """The reason the review was closed, or null if it has not yet been closed."""
+
+    approved = _("Approved")
+    refunded = _("Refunded")
+    refunded_as_fraud = _("Refunded as Fraud")
+    disputed = _("Disputed")
+    redacted = _("Redacted")
