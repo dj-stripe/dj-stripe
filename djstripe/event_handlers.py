@@ -265,6 +265,19 @@ def dispute_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.Dispute, event=event)
 
 
+@webhooks.handler("radar.early_fraud_warning")
+def source_transaction_webhook_handler(event):
+    """Handle notifications for the EarlyFraudWarning objects
+    - early_fraud_warning: https://stripe.com/docs/api/radar/early_fraud_warnings
+    """
+    # will recieve all events of the type radar.early_fraud_warning.Y so
+    # need to ensure the data object is related to EarlyFraudWarning Object
+    target_object_type = event.data.get("object", {}).get("object", {})
+
+    if target_object_type == "early_fraud_warning":
+        _handle_crud_like_event(target_cls=models.EarlyFraudWarning, event=event)
+
+
 @webhooks.handler("source")
 def source_webhook_handler(event):
     """Handle updates to Source objects
