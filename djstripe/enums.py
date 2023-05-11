@@ -897,3 +897,15 @@ class DjstripePaymentMethodType(Enum):
     card = _("Card")
     bank_account = _("Bank account")
     source = _("Source")
+
+
+class EarlyFraudWarningFraudTypes(Enum):
+    """The type of fraud labelled by the issuer."""
+
+    card_never_received = _("Card Never Received")
+    fraudulent_card_application = _("Fraudulent Card Application")
+    made_with_counterfeit_card = _("Made with Counterfeit Card")
+    made_with_lost_card = _("Made with Lost Card")
+    made_with_stolen_card = _("Made with Stolen Card")
+    misc = _("Miscallenous")
+    unauthorized_use_of_card = _("Unauthorized Use of Card")
