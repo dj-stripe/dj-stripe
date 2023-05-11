@@ -8,7 +8,6 @@ import pytest
 from django.test.testcases import TestCase
 
 from djstripe.models.fraud import EarlyFraudWarning
-from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_ACCOUNT,
