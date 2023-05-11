@@ -1,0 +1,8 @@
+{
+    "id": "issfr_1N68ieJSZQVUcJYgqWI2udNV",
+    "object": "radar.early_fraud_warning",
+    "actionable": true,
+    "created": 123456789,
+    "fraud_type": "misc",
+    "livemode": false
+}
