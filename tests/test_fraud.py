@@ -8,6 +8,7 @@ import pytest
 from django.test.testcases import TestCase
 
 from djstripe.models.fraud import Review
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_ACCOUNT,
@@ -210,3 +211,96 @@ class TestReview(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         fake_review_warning = Review.sync_from_stripe_data(fake_review_warning_data)
 
         self.assertEqual(str(fake_review_warning), "(True) for $20.00 USD (Succeeded))")
+
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_ACCOUNT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER),
+        autospec=True,
+    )
+    @patch(
+        "stripe.BalanceTransaction.retrieve",
+        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
+    )
+    @patch(
+        "stripe.PaymentIntent.retrieve",
+        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+        autospec=True,
+    )
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Charge.retrieve",
+        return_value=deepcopy(FAKE_CHARGE),
+        autospec=True,
+    )
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Subscription.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION),
+        autospec=True,
+    )
+    # stripe modifies approve() at compile time, which is why
+    # another stripe classmethod is decorated.
+    # See Here:
+    # https://github.com/stripe/stripe-python/blob/master/stripe/api_resources/review.py#L39
+    # https://github.com/stripe/stripe-python/blob/master/stripe/api_resources/abstract/custom_method.py#L35
+    @patch(
+        "stripe.Review._cls_approve",
+        return_value=deepcopy(FAKE_REVIEW_WARNING),
+        autospec=True,
+    )
+    def test_approve(
+        self,
+        review_approve_mock,
+        subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
+        product_retrieve_mock,
+        plan_retrieve_mock,
+        paymentmethod_card_retrieve_mock,
+        charge_retrieve_mock,
+        payment_intent_retrieve_mock,
+        invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
+        balance_transaction_retrieve_mock,
+        customer_retrieve_mock,
+        account_retrieve_mock,
+    ):
+        # Create Review Object
+        fake_review_warning_data = deepcopy(FAKE_REVIEW_WARNING)
+
+        fake_review_warning = Review.sync_from_stripe_data(fake_review_warning_data)
+
+        # Invoke approve
+        fake_review_warning.approve()
+
+        review_approve_mock.assert_called_once_with(
+            "prv_1N6QVaJSZQVUcJYg2ozEL1bt",
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            stripe_account=fake_review_warning.djstripe_owner_account.id,
+        )
