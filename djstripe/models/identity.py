@@ -22,7 +22,11 @@ class VerificationSession(StripeModel):
     """
 
     stripe_class = stripe.identity.VerificationSession
+    expand_fields = ["verified_outputs", "last_verification_report"]
+    # TODO this is a guess
+    stripe_dashboard_item_name = "verification_sessions"
 
+    description = None
     last_error = JSONField(
         null=True,
         blank=True,
@@ -38,6 +42,11 @@ class VerificationSession(StripeModel):
         help_text=_(
             "ID of the most recent VerificationReport. Learn more about accessing detailed verification results."
         ),
+    )
+    options = JSONField(
+        null=True,
+        blank=True,
+        help_text=_("A set of options for the session's verification checks."),
     )
     redaction = JSONField(
         null=True,
@@ -82,7 +91,11 @@ class VerificationReport(StripeModel):
     """
 
     stripe_class = stripe.identity.VerificationReport
+    # TODO this is a guess
+    stripe_dashboard_item_name = "verification_reports"
 
+    description = None
+    metadata = None
     document = JSONField(
         null=True,
         blank=True,
@@ -102,3 +115,10 @@ class VerificationReport(StripeModel):
         help_text=_("Result of the selfie check for this report."),
     )
     type = StripeEnumField(enum=enums.VerificationType, help_text=_("Type of report."))
+    verification_session = StripeForeignKey(
+        "djstripe.VerificationSession",
+        help_text=_("ID of the VerificationSession that created this report."),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )

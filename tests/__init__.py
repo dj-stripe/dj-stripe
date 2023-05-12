@@ -2525,3 +2525,24 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["data"]["previous_attributes"] = {
     "released_at": None,
     "status": "not_started",
 }
+
+
+class VerificationReportDict(StripeItem):
+    pass
+
+
+FAKE_VERIFICATION_REPORT = VerificationReportDict(
+    load_fixture("verification_report_vr_fakefakefakefake0001.json")
+)
+
+
+class VerificationSessionDict(StripeItem):
+    pass
+
+
+FAKE_VERIFICATION_SESSION = VerificationSessionDict(
+    load_fixture("verification_session_vS_fakefakefakefake0001.json")
+)
+FAKE_VERIFICATION_SESSION["last_verification_report"] = deepcopy(
+    FAKE_VERIFICATION_REPORT
+)
