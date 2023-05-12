@@ -83,8 +83,22 @@ class VerificationReport(StripeModel):
 
     stripe_class = stripe.identity.VerificationReport
 
-    document = JSONField(null=True, blank=True)
-    id_number = JSONField(null=True, blank=True)
-    options = JSONField(null=True, blank=True)
-    selfie = JSONField(null=True, blank=True)
-    type = StripeEnumField(enum=enums.VerificationType)
+    document = JSONField(
+        null=True,
+        blank=True,
+        help_text=_("Result of the document check for this report."),
+    )
+    id_number = JSONField(
+        null=True,
+        blank=True,
+        help_text=_("Result of the id number check for this report."),
+    )
+    options = JSONField(
+        null=True, blank=True, help_text=_("Configuration options for this report.")
+    )
+    selfie = JSONField(
+        null=True,
+        blank=True,
+        help_text=_("Result of the selfie check for this report."),
+    )
+    type = StripeEnumField(enum=enums.VerificationType, help_text=_("Type of report."))
