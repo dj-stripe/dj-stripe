@@ -1,5 +1,6 @@
 import stripe
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from .. import enums
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
@@ -22,14 +23,44 @@ class VerificationSession(StripeModel):
 
     stripe_class = stripe.identity.VerificationSession
 
-    last_error = JSONField(null=True, blank=True)
-    last_verification_report = StripeForeignKey(
-        "djstripe.VerificationReport", on_delete=models.SET_NULL, null=True, blank=True
+    last_error = JSONField(
+        null=True,
+        blank=True,
+        help_text=_(
+            "If present, this property tells you the last error encountered when processing the verification."
+        ),
     )
-    redaction = JSONField(null=True, blank=True)
-    verified_outputs = JSONField(null=True, blank=True)
-    status = StripeEnumField(enum=enums.VerificationSessionStatus)
-    type = StripeEnumField(enum=enums.VerificationType)
+    last_verification_report = StripeForeignKey(
+        "djstripe.VerificationReport",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text=_(
+            "ID of the most recent VerificationReport. Learn more about accessing detailed verification results."
+        ),
+    )
+    redaction = JSONField(
+        null=True,
+        blank=True,
+        help_text=_(
+            "Redaction status of this VerificationSession. If the VerificationSession is not redacted, this field will be null."
+        ),
+    )
+    verified_outputs = JSONField(
+        null=True,
+        blank=True,
+        help_text=_(
+            "The user's verified data. This field is not included by default. To include it in the response"
+        ),
+    )
+    status = StripeEnumField(
+        enum=enums.VerificationSessionStatus,
+        help_text=_("Status of this VerificationSession."),
+    )
+    type = StripeEnumField(
+        enum=enums.VerificationType,
+        help_text=_("The type of verification check to be performed."),
+    )
 
     # The following attributes are not stored because they are sensitive.
     url = None
