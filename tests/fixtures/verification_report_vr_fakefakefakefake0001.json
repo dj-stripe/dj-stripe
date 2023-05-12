@@ -1,0 +1,41 @@
+{
+    "id": "vr_1N6mTRJSZQVUcJYgIdcqsfMN",
+    "object": "identity.verification_report",
+    "created": 1683861413,
+    "livemode": false,
+    "options": {
+        "document": {},
+        "id_number": {}
+    },
+    "type": "document",
+    "verification_session": "vs_1N6mTRJSZQVUcJYgCH4bPpU6",
+    "document": {
+        "status": "verified",
+        "error": null,
+        "first_name": "Jenny",
+        "last_name": "Rosen",
+        "address": {
+            "line1": "1234 Main St.",
+            "city": "San Francisco",
+            "state": "CA",
+            "zip": "94111",
+            "country": "US"
+        },
+        "type": "driving_license",
+        "files": [
+            "file_NsXYZbV8M7OMeM00xp52hDqX",
+            "file_NsXYlatSgblmnN771X4l8l3t"
+        ],
+        "expiration_date": {
+            "month": 12,
+            "day": 1,
+            "year": 2025
+        },
+        "issued_date": {
+            "month": 12,
+            "day": 1,
+            "year": 2020
+        },
+        "issuing_country": "US"
+    }
+}
