@@ -1,0 +1,19 @@
+{
+    "id": "vs_1N6mTRJSZQVUcJYgCH4bPpU6",
+    "object": "identity.verification_session",
+    "client_secret": null,
+    "created": 1683861413,
+    "last_error": null,
+    "livemode": false,
+    "metadata": {},
+    "options": {
+        "document": {
+            "require_matching_selfie": true
+        }
+    },
+    "redaction": null,
+    "status": "verified",
+    "type": "document",
+    "url": null,
+    "verified_outputs": {}
+}
