@@ -2541,7 +2541,7 @@ class VerificationSessionDict(StripeItem):
 
 
 FAKE_VERIFICATION_SESSION = VerificationSessionDict(
-    load_fixture("verification_session_vS_fakefakefakefake0001.json")
+    load_fixture("verification_session_vs_fakefakefakefake0001.json")
 )
 FAKE_VERIFICATION_SESSION["last_verification_report"] = deepcopy(
     FAKE_VERIFICATION_REPORT
