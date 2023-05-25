@@ -327,7 +327,7 @@ class WebhookEventTrigger(models.Model):
                 headers = CaseInsensitiveMapping(self.headers)
                 local_secret = headers.get("x-djstripe-webhook-secret")
                 secret = local_secret if local_secret else secret
-            return self.verify_signature(secret=secret)
+            return self.verify_signature(secret=secret, tolerance=tolerance)
 
         livemode = local_data["livemode"]
         api_key = api_key or djstripe_settings.get_default_api_key(livemode)
