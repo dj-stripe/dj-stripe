@@ -225,7 +225,16 @@ class WebhookEventTrigger(models.Model):
         try:
             # Validate the webhook first
             signals.webhook_pre_validate.send(sender=cls, instance=obj)
-            obj.valid = obj.validate(secret=secret, api_key=api_key)
+
+            if webhook_endpoint:
+                # Default to Validation set by the Webhook Endpoint
+                obj.valid = obj.validate(
+                    secret=secret,
+                    api_key=api_key,
+                    validation_method=webhook_endpoint.validation,
+                )
+            else:
+                obj.valid = obj.validate(secret=secret, api_key=api_key)
             signals.webhook_post_validate.send(
                 sender=cls, instance=obj, valid=obj.valid
             )
@@ -320,7 +329,7 @@ class WebhookEventTrigger(models.Model):
             logger.info("Test webhook received and discarded: %s", local_data)
             return False
 
-        if validation_method is None:
+        if validation_method == "no_validation" or not validation_method:
             # validation disabled
             warnings.warn("WEBHOOK VALIDATION is disabled.")
             return True

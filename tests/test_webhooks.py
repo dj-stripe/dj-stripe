@@ -48,6 +48,17 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
             HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
         )
 
+    def _send_event_webhook_endpoint(self, event_data, uuid):
+        return Client().post(
+            reverse(
+                "djstripe:djstripe_webhook_by_uuid",
+                kwargs={"uuid": uuid},
+            ),
+            json.dumps(event_data),
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
+        )
+
     def test_webhook_test_event(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
         resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
@@ -72,6 +83,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
             str(webhookeventtrigger),
         )
 
+    # TODO Duplicate all these tests but for a webhookendpoint object
     @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event")
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
@@ -93,6 +105,37 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         invalid_event["data"]["valid"] = "not really"
 
         resp = self._send_event(invalid_event)
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
+
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
+        autospec=True,
+    )
+    def test_webhook_endpoint_retrieve_event_fail(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        # Create WebhookEndpoint
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        fake_webhook["validation"] = "retrieve_event"
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        invalid_event["id"] = "evt_invalid"
+        invalid_event["data"]["valid"] = "not really"
+
+        resp = self._send_event_webhook_endpoint(
+            invalid_event, webhook_endpoint.djstripe_uuid
+        )
 
         self.assertEqual(resp.status_code, 400)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
@@ -132,6 +175,44 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
             id=FAKE_EVENT_TRANSFER_CREATED["id"],
         )
 
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
+        autospec=True,
+    )
+    def test_webhook_endpoint_retrieve_event_pass(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        # Create WebhookEndpoint
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        fake_webhook["validation"] = "retrieve_event"
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        valid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        resp = self._send_event_webhook_endpoint(
+            valid_event, webhook_endpoint.djstripe_uuid
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        event_retrieve_mock.assert_called_once_with(
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=valid_event["api_version"],
+            id=valid_event["id"],
+        )
+
     @override_settings(
         DJSTRIPE_WEBHOOK_VALIDATION="verify_signature",
         DJSTRIPE_WEBHOOK_SECRET="whsec_XXXXX",
@@ -156,6 +237,43 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         invalid_event["data"]["valid"] = "not really"
 
         resp = self._send_event(invalid_event)
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
+
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
+        autospec=True,
+    )
+    def test_webhook_endpoint_invalid_verify_signature_fail(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        # Create WebhookEndpoint
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        fake_webhook["secret"] = "whsec_XXXXX"
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        invalid_event["id"] = "evt_invalid"
+        invalid_event["data"]["valid"] = "not really"
+
+        resp = self._send_event_webhook_endpoint(
+            invalid_event, webhook_endpoint.djstripe_uuid
+        )
 
         self.assertEqual(resp.status_code, 400)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
@@ -192,6 +310,53 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         transfer__attach_object_post_save_hook_mock,
     ):
         resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
+        verify_header_mock.assert_called_once_with(
+            json.dumps(FAKE_EVENT_TRANSFER_CREATED),
+            "PLACEHOLDER",
+            djstripe_settings.WEBHOOK_SECRET,
+            djstripe_settings.WEBHOOK_TOLERANCE,
+        )
+        event_retrieve_mock.assert_not_called()
+
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.WebhookSignature.verify_header",
+        return_value=True,
+        autospec=True,
+    )
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
+        autospec=True,
+    )
+    def test_webhook_endpoint_invalid_verify_signature_pass(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        verify_header_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        # Create WebhookEndpoint
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        fake_webhook["secret"] = "whsec_XXXXX"
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        valid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        resp = self._send_event_webhook_endpoint(
+            valid_event, webhook_endpoint.djstripe_uuid
+        )
 
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
@@ -242,10 +407,71 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         event_retrieve_mock.assert_not_called()
         verify_header_mock.assert_not_called()
 
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch("stripe.WebhookSignature.verify_header", autospec=True)
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
+        autospec=True,
+    )
+    def test_webhook_endpoint_no_validation_pass(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        verify_header_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        # Create WebhookEndpoint
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        fake_webhook["validation"] = "no_validation"
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        invalid_event["id"] = "evt_invalid"
+        invalid_event["data"]["valid"] = "not really"
+
+        # ensure warning is raised
+        with pytest.warns(None, match=r"WEBHOOK VALIDATION is disabled."):
+            resp = self._send_event_webhook_endpoint(
+                invalid_event, webhook_endpoint.djstripe_uuid
+            )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue(Event.objects.filter(id="evt_invalid").exists())
+        event_retrieve_mock.assert_not_called()
+        verify_header_mock.assert_not_called()
+
     def test_webhook_no_signature(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
         resp = Client().post(
             reverse("djstripe:webhook"), "{}", content_type="application/json"
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(WebhookEventTrigger.objects.count(), 0)
+
+    def test_webhook_endpoint_no_signature(self):
+        # Create WebhookEndpoint
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        fake_webhook["secret"] = "whsec_XXX"
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        self.assertEqual(WebhookEventTrigger.objects.count(), 0)
+        resp = Client().post(
+            reverse(
+                "djstripe:djstripe_webhook_by_uuid",
+                kwargs={"uuid": webhook_endpoint.djstripe_uuid},
+            ),
+            "{}",
+            content_type="application/json",
         )
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
