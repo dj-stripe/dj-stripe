@@ -8,7 +8,7 @@ New Style `UUID` urls are also supported from `v2.7` onwards.
 For example:
 
 ```sh
-stripe listen --forward-to http://localhost:8000/stripe/webhook/<UUID>
+stripe listen --forward-to http://localhost:8000/stripe/webhook/<UUID>/
 ```
 
 The [signatures of events sent by Stripe to the webhooks are verified][signatures]
@@ -24,7 +24,7 @@ dj-stripe looks for a header called `X-Djstripe-Webhook-Secret`:
 
 ```sh
 stripe listen \
-  --forward-to http://localhost:8000/djstripe/webhook/<UUID> \
+  --forward-to http://localhost:8000/djstripe/webhook/<UUID>/ \
   -H "x-djstripe-webhook-secret: $(stripe listen --print-secret)"
 ```
 
