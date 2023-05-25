@@ -11,5 +11,5 @@ from djstripe.models import Customer
 
 user = get_user_model().objects.get(username="admin")
 customer, created = Customer.get_or_create(subscriber=user)
-customer.charge(Decimal("10.00"), currency="usd")  # Create charge for 10.00 USD
+customer.charge(1000, currency="usd")  # Create charge for 10.00 USD
 ```
