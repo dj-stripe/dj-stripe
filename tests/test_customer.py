@@ -740,14 +740,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             },
         )
 
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_cannot_charge(self, customer_retrieve_fake):
-        self.customer.date_purged = timezone.now()
-        with pytest.warns(DeprecationWarning):
-            self.assertFalse(self.customer.can_charge())
-
     def test_charge_accepts_only_integrals(self):
         with self.assertRaises(ValueError):
             self.customer.charge(decimal.Decimal("10"))
