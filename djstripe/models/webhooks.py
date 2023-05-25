@@ -14,7 +14,7 @@ from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
 from .. import signals
-from ..enums import WebhookEndpointStatus
+from ..enums import WebhookEndpointStatus, WebhookEndpointValidation
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
 from .base import StripeModel, logger
@@ -62,6 +62,11 @@ class WebhookEndpoint(StripeModel):
         unique=True,
         default=uuid4,
         help_text="A UUID specific to dj-stripe generated for the endpoint",
+    )
+    validation = StripeEnumField(
+        enum=WebhookEndpointValidation,
+        help_text="Controls which type of validation is done on webhooks",
+        default=WebhookEndpointValidation.verify_signature,
     )
 
     def __str__(self):
