@@ -158,6 +158,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             "connect",
             "api_version",
             "metadata",
+            "validation",
         )
 
     # Hook into _post_clean() instead of save().
