@@ -719,7 +719,9 @@ class BaseInvoice(StripeModel):
 
     def __str__(self):
         invoice_number = self.number or self.receipt_number or self.id
-        amount = get_friendly_currency_amount(self.amount_paid or 0, self.currency)
+        amount = get_friendly_currency_amount(
+            (self.amount_paid or 0) / 100, self.currency
+        )
         return f"Invoice #{invoice_number} for {amount} ({self.status})"
 
     @classmethod

@@ -6,7 +6,7 @@
     "created": 1629594221,
     "metadata": {},
     "description": "STRIPE PAYOUT",
-    "amount": "10.00",
+    "amount": 10,
     "arrival_date": 1629676800,
     "automatic": true,
     "balance_transaction": "txn_fake_ch_fakefakefakefakefake0001",

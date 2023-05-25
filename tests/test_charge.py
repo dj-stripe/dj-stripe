@@ -73,7 +73,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
     def test___str__(self):
         charge = Charge(
-            amount=50,
+            amount=5000,
             currency="usd",
             id="ch_test",
             status=ChargeStatus.failed,

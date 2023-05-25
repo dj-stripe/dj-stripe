@@ -387,7 +387,7 @@ class Charge(StripeModel):
     objects = ChargeManager()
 
     def __str__(self):
-        amount = get_friendly_currency_amount(self.amount, self.currency)
+        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
         return f"{amount} ({self.human_readable_status})"
 
     @property
