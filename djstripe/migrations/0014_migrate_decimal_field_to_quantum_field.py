@@ -6,9 +6,8 @@ import djstripe.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("djstripe", "0011_2_7"),
+        ("djstripe", "0013_2_8a"),
     ]
 
     operations = [
@@ -155,6 +154,13 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="charge",
             name="application_fee_amount",
+            field=djstripe.fields.StripeQuantumCurrencyAmountField(
+                blank=True, null=True
+            ),
+        ),
+        migrations.AlterField(
+            model_name="sourcetransaction",
+            name="amount",
             field=djstripe.fields.StripeQuantumCurrencyAmountField(
                 blank=True, null=True
             ),

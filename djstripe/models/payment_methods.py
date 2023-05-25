@@ -844,11 +844,11 @@ class SourceTransaction(StripeModel):
     ach_credit_transfer = JSONField(
         help_text="The data corresponding to the ach_credit_transfer type."
     )
-    amount = StripeDecimalCurrencyAmountField(
+    amount = StripeQuantumCurrencyAmountField(
         null=True,
         blank=True,
         help_text=(
-            "Amount (as decimal) associated with the ACH Credit Transfer. "
+            "Amount (in cents) associated with the ACH Credit Transfer. "
             "This is the amount your customer has sent for which the source will be chargeable once ready. "
         ),
     )

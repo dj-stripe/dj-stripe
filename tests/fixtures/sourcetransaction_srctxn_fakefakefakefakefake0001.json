@@ -1,7 +1,7 @@
 {
     "id": "srctxn_fakefakefakefakefake0001",
     "object": "source_transaction",
-    "amount": "10.00",
+    "amount": 10,
     "ach_credit_transfer": {
         "routing_number": "110000000",
         "last4": "2a66",
