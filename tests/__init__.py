@@ -1892,7 +1892,7 @@ class WebhookEndpointDict(StripeItem):
 
 
 FAKE_WEBHOOK_ENDPOINT_1 = WebhookEndpointDict(
-    load_fixture("webhook_endpoint_fake0001.json")
+    load_fixture("webhook_endpoint_fakefakefakefake0001.json")
 )
 
 
