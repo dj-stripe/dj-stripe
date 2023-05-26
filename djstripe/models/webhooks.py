@@ -224,7 +224,16 @@ class WebhookEventTrigger(models.Model):
         try:
             # Validate the webhook first
             signals.webhook_pre_validate.send(sender=cls, instance=obj)
-            obj.valid = obj.validate(secret=secret, api_key=api_key)
+
+            if webhook_endpoint:
+                # Default to per Webhook Endpoint Tolerance
+                obj.valid = obj.validate(
+                    secret=secret,
+                    api_key=api_key,
+                    tolerance=webhook_endpoint.tolerance,
+                )
+            else:
+                obj.valid = obj.validate(secret=secret, api_key=api_key)
             signals.webhook_post_validate.send(
                 sender=cls, instance=obj, valid=obj.valid
             )
