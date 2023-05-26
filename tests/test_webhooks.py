@@ -83,7 +83,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
             str(webhookeventtrigger),
         )
 
-    # TODO Duplicate all these tests but for a webhookendpoint object
     @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="retrieve_event")
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
