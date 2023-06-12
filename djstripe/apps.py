@@ -1,10 +1,10 @@
 """
 dj-stripe - Django + Stripe Made Easy
 """
-import pkg_resources
+from importlib.metadata import version
 from django.apps import AppConfig
 
-__version__ = pkg_resources.get_distribution("dj-stripe").version
+__version__ = version("dj-stripe")
 
 
 class DjstripeAppConfig(AppConfig):
