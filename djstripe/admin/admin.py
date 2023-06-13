@@ -835,15 +835,28 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
                 "metadata",
                 "api_version",
                 "djstripe_uuid",
+                "validation",
             ]
             if obj.djstripe_uuid:
-                core_fields = ["enabled", "base_url", "description"]
+                core_fields = [
+                    "enabled",
+                    "base_url",
+                    "description",
+                ]
             else:
-                core_fields = ["enabled", "description"]
+                core_fields = [
+                    "enabled",
+                    "description",
+                ]
         else:
             header_fields = ["djstripe_owner_account", "livemode"]
             core_fields = ["description", "base_url", "connect"]
-            advanced_fields = ["metadata", "api_version", "enabled_events"]
+            advanced_fields = [
+                "metadata",
+                "api_version",
+                "enabled_events",
+                "validation",
+            ]
 
         return [
             (None, {"fields": header_fields}),
