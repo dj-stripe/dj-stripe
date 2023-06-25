@@ -63,6 +63,10 @@ class WebhookEndpoint(StripeModel):
         default=uuid4,
         help_text="A UUID specific to dj-stripe generated for the endpoint",
     )
+    tolerance = models.PositiveSmallIntegerField(
+        help_text="Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you're doing.",
+        default=djstripe_settings.WEBHOOK_TOLERANCE,
+    )
 
     def __str__(self):
         return self.url or str(self.djstripe_uuid)
@@ -220,7 +224,16 @@ class WebhookEventTrigger(models.Model):
         try:
             # Validate the webhook first
             signals.webhook_pre_validate.send(sender=cls, instance=obj)
-            obj.valid = obj.validate(secret=secret, api_key=api_key)
+
+            if webhook_endpoint:
+                # Default to per Webhook Endpoint Tolerance
+                obj.valid = obj.validate(
+                    secret=secret,
+                    api_key=api_key,
+                    tolerance=webhook_endpoint.tolerance,
+                )
+            else:
+                obj.valid = obj.validate(secret=secret, api_key=api_key)
             signals.webhook_post_validate.send(
                 sender=cls, instance=obj, valid=obj.valid
             )

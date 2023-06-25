@@ -158,6 +158,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             "connect",
             "api_version",
             "metadata",
+            "tolerance",
         )
 
     # Hook into _post_clean() instead of save().
@@ -224,7 +225,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
 
     class Meta:
         model = models.WebhookEndpoint
-        fields = ("description", "base_url", "enabled_events", "metadata")
+        fields = ("description", "base_url", "enabled_events", "metadata", "tolerance")
 
     def get_initial_for_field(self, field, field_name):
         if field_name == "base_url":
