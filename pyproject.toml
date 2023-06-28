@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-stripe"
-version = "2.8.0-alpha.2"
+version = "2.8.0"
 description = "Django + Stripe made easy"
 license = "MIT"
 authors = [
