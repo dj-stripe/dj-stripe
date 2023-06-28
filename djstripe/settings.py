@@ -67,12 +67,6 @@ class DjstripeSettings:
         return getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 
     @property
-    def WEBHOOK_TOLERANCE(self):
-        return getattr(
-            settings, "DJSTRIPE_WEBHOOK_TOLERANCE", stripe.Webhook.DEFAULT_TOLERANCE
-        )
-
-    @property
     def WEBHOOK_VALIDATION(self):
         return getattr(settings, "DJSTRIPE_WEBHOOK_VALIDATION", "verify_signature")
 

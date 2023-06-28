@@ -135,10 +135,6 @@ This setting controls which type of validation is done on webhooks. Value can be
 `"retrieve_event"` for event retrieval (makes an extra HTTP request), or `None` for no
 validation at all.
 
-## DJSTRIPE_WEBHOOK_TOLERANCE (=300)
-
-Controls the milliseconds tolerance which wards against replay attacks. Leave this to
-its default value unless you know what you're doing.
 
 ## DJSTRIPE_WEBHOOK_EVENT_CALLBACK (=None)
 
