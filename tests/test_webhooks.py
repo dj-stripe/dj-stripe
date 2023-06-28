@@ -210,7 +210,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
             json.dumps(FAKE_EVENT_TRANSFER_CREATED),
             "PLACEHOLDER",
             djstripe_settings.WEBHOOK_SECRET,
-            djstripe_settings.WEBHOOK_TOLERANCE,
+            300,
         )
         event_retrieve_mock.assert_not_called()
 

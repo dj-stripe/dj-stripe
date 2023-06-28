@@ -65,7 +65,7 @@ class WebhookEndpoint(StripeModel):
     )
     tolerance = models.PositiveSmallIntegerField(
         help_text="Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you're doing.",
-        default=djstripe_settings.WEBHOOK_TOLERANCE,
+        default=stripe.Webhook.DEFAULT_TOLERANCE,
     )
 
     def __str__(self):
@@ -284,7 +284,7 @@ class WebhookEventTrigger(models.Model):
         return event_id and event_id.endswith("_00000000000000")
 
     def verify_signature(
-        self, secret: str, tolerance: int = djstripe_settings.WEBHOOK_TOLERANCE
+        self, secret: str, tolerance: int = stripe.Webhook.DEFAULT_TOLERANCE
     ) -> bool:
         if not secret:
             raise ValueError("Cannot verify event signature without a secret")
@@ -307,7 +307,7 @@ class WebhookEventTrigger(models.Model):
         self,
         api_key: str = None,
         secret: str = djstripe_settings.WEBHOOK_SECRET,
-        tolerance: int = djstripe_settings.WEBHOOK_TOLERANCE,
+        tolerance: int = stripe.Webhook.DEFAULT_TOLERANCE,
         validation_method=djstripe_settings.WEBHOOK_VALIDATION,
     ):
         """
