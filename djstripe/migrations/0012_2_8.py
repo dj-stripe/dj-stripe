@@ -300,6 +300,14 @@ class Migration(migrations.Migration):
             name="discounts",
             field=djstripe.fields.JSONField(blank=True, null=True),
         ),
+        migrations.AddField(
+            model_name="webhookendpoint",
+            name="tolerance",
+            field=models.PositiveSmallIntegerField(
+                default=300,
+                help_text="Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you're doing.",
+            ),
+        ),
         migrations.AlterField(
             model_name="account",
             name="business_type",

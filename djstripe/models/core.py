@@ -2154,7 +2154,8 @@ class Payout(StripeModel):
         ),
     )
     currency = StripeCurrencyCodeField()
-    destination = PaymentMethodForeignKey(
+    destination = StripeForeignKey(
+        "BankAccount",
         on_delete=models.PROTECT,
         null=True,
         help_text="Bank account or card the payout was sent to.",
