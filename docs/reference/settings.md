@@ -55,7 +55,7 @@ migration path before 3.0.
 
 _(Introduced in 2.6.0)_
 
-`DJSTRIPE_GET_REMOTE_IP` is a setting introduced in dj-stripe version 2.6.0. You are `not` required to set it unless you require more advanced strategies and/or filters to record the `client remote ip`. The [`default function`][djstripe.utils._get_remote_ip] can handle common django setups behind a proxy and relies on the HTTP header `HTTP_X_FORWARDED_FOR`. 
+`DJSTRIPE_GET_REMOTE_IP` is a setting introduced in dj-stripe version 2.6.0. You are `not` required to set it unless you require more advanced strategies and/or filters to record the `client remote ip`. The [`default function`][djstripe.utils._get_remote_ip] can handle common django setups behind a proxy and relies on the HTTP header `HTTP_X_FORWARDED_FOR`.
 
 `DJSTRIPE_GET_REMOTE_IP` should return a function with the following signature:
 
