@@ -8,7 +8,7 @@
     <title>Using Stripe Webhooks - Dj-Stripe</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
         <link href="../../css/version-select.css" rel="stylesheet" />
     
@@ -19,12 +19,11 @@
         var mkdocs_page_url = "/dj-stripe/2.7/usage/webhooks/";
       </script>
     
-    <script src="../../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -154,7 +153,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
           <li>Usage &raquo;</li>
-      <li>Using Stripe Webhooks</li>
+      <li class="breadcrumb-item active">Using Stripe Webhooks</li>
     <li class="wy-breadcrumbs-aside">
           <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/usage/webhooks.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
@@ -189,7 +188,6 @@ to validate incoming webhooks.</p>
 <p>dj-stripe provides the following settings to tune how your webhooks work:</p>
 <ul>
 <li><a class="autorefs autorefs-internal" href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION"><code>DJSTRIPE_WEBHOOK_VALIDATION</code></a></li>
-<li><a class="autorefs autorefs-internal" href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_TOLERANCE"><code>DJSTRIPE_WEBHOOK_TOLERANCE</code></a></li>
 <li><a class="autorefs autorefs-internal" href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK"><code>DJSTRIPE_WEBHOOK_EVENT_CALLBACK</code></a></li>
 </ul>
 <h2 id="advanced-usage">Advanced usage</h2>
@@ -286,15 +284,16 @@ transaction successfully commits (meaning the Event processing worked):</p>
     
   </span>
 </div>
-    <script>var base_url = '../..';</script>
-    <script src="../../js/theme_extra.js" defer></script>
-    <script src="../../js/theme.js" defer></script>
-      <script src="../../search/main.js" defer></script>
-      <script src="../../js/version-select.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+      <script src="../../js/version-select.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

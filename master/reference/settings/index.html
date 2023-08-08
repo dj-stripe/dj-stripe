@@ -8,7 +8,7 @@
     <title>Settings - Dj-Stripe</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
         <link href="../../css/version-select.css" rel="stylesheet" />
     
@@ -19,12 +19,11 @@
         var mkdocs_page_url = "/dj-stripe/2.7/reference/settings/";
       </script>
     
-    <script src="../../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -142,8 +141,6 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe_webhook_validation-verify_signature">DJSTRIPE_WEBHOOK_VALIDATION= (="verify_signature")</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#djstripe_webhook_tolerance-300">DJSTRIPE_WEBHOOK_TOLERANCE (=300)</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe_webhook_event_callback-none">DJSTRIPE_WEBHOOK_EVENT_CALLBACK (=None)</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#stripe_api_host-unset">STRIPE_API_HOST (= unset)</a>
@@ -190,7 +187,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
           <li>Reference &raquo;</li>
-      <li>Settings</li>
+      <li class="breadcrumb-item active">Settings</li>
     <li class="wy-breadcrumbs-aside">
           <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/reference/settings.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
@@ -296,9 +293,6 @@ verification</a>.</p>
 <code>"verify_signature"</code> for signature verification (recommended default),
 <code>"retrieve_event"</code> for event retrieval (makes an extra HTTP request), or <code>None</code> for no
 validation at all.</p>
-<h2 id="djstripe_webhook_tolerance-300">DJSTRIPE_WEBHOOK_TOLERANCE (=300)</h2>
-<p>Controls the milliseconds tolerance which wards against replay attacks. Leave this to
-its default value unless you know what you're doing.</p>
 <h2 id="djstripe_webhook_event_callback-none">DJSTRIPE_WEBHOOK_EVENT_CALLBACK (=None)</h2>
 <p>Webhook event callbacks allow an application to take control of what happens when an
 event from Stripe is received. It must be a callable or importable string to a callable
@@ -630,13 +624,7 @@ example, <code>"http://localhost:12111"</code> if you are running
 <span class="normal">233</span>
 <span class="normal">234</span>
 <span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripeSettings</span><span class="p">:</span>
+<span class="normal">236</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripeSettings</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Container for Dj-stripe settings</span>
 
 <span class="sd">    :return: Initialised settings for Dj-stripe.</span>
@@ -693,12 +681,6 @@ example, <code>"http://localhost:12111"</code> if you are running
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">DJSTRIPE_WEBHOOK_URL</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_WEBHOOK_URL&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;^webhook/$&quot;</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">WEBHOOK_TOLERANCE</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span>
-            <span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_WEBHOOK_TOLERANCE&quot;</span><span class="p">,</span> <span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span>
-        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">WEBHOOK_VALIDATION</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1097,25 +1079,6 @@ example, <code>"http://localhost:12111"</code> if you are running
 
 
 
-<h5 id="djstripe.settings.DjstripeSettings.WEBHOOK_TOLERANCE" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span></code>
-  
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-property"><code>property</code></small>
-  </span>
-
-</h5>
-
-
-  <div class="doc doc-contents ">
-  </div>
-
-</div>
-
-<div class="doc doc-object doc-attribute">
-
-
-
 <h5 id="djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION" class="doc doc-heading">
 <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">DjstripeSettings</span><span class="o">.</span><span class="n">WEBHOOK_VALIDATION</span></code>
   
@@ -1296,7 +1259,13 @@ a failed import causing ImportError to be raised.</p>
 
           <details class="quote">
             <summary> <code>djstripe/settings.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">139</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
 <span class="normal">140</span>
 <span class="normal">141</span>
 <span class="normal">142</span>
@@ -1319,13 +1288,7 @@ a failed import causing ImportError to be raised.</p>
 <span class="normal">159</span>
 <span class="normal">160</span>
 <span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_callback_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="normal">162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_callback_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setting_name</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Resolve a callback function based on a setting name.</span>
 
@@ -1378,19 +1341,19 @@ a failed import causing ImportError to be raised.</p>
 
           <details class="quote">
             <summary> <code>djstripe/settings.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">179</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
 <span class="normal">180</span>
 <span class="normal">181</span>
 <span class="normal">182</span>
 <span class="normal">183</span>
 <span class="normal">184</span>
-<span class="normal">185</span>
-<span class="normal">186</span>
-<span class="normal">187</span>
-<span class="normal">188</span>
-<span class="normal">189</span>
-<span class="normal">190</span>
-<span class="normal">191</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">185</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_default_api_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">livemode</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the default API key for a value of `livemode`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1430,7 +1393,13 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 
           <details class="quote">
             <summary> <code>djstripe/settings.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">197</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
 <span class="normal">198</span>
 <span class="normal">199</span>
 <span class="normal">200</span>
@@ -1469,13 +1438,7 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 <span class="normal">233</span>
 <span class="normal">234</span>
 <span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span>
-<span class="normal">239</span>
-<span class="normal">240</span>
-<span class="normal">241</span>
-<span class="normal">242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">236</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attempt to pull settings.DJSTRIPE_SUBSCRIBER_MODEL.</span>
 
@@ -1544,9 +1507,9 @@ DJSTRIPE_SUBSCRIBER_MODEL setting.</p>
 
           <details class="quote">
             <summary> <code>djstripe/settings.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model_string</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_subscriber_model_string</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the configured subscriber model as a module path string.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s2">&quot;DJSTRIPE_SUBSCRIBER_MODEL&quot;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">AUTH_USER_MODEL</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 </code></pre></div></td></tr></table></div>
@@ -1611,15 +1574,16 @@ filters: - "!^<em>[^</em>]"</p>
     
   </span>
 </div>
-    <script>var base_url = '../..';</script>
-    <script src="../../js/theme_extra.js" defer></script>
-    <script src="../../js/theme.js" defer></script>
-      <script src="../../search/main.js" defer></script>
-      <script src="../../js/version-select.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+      <script src="../../js/version-select.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>

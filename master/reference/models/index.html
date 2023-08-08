@@ -8,7 +8,7 @@
     <title>Models - Dj-Stripe</title>
     <link rel="stylesheet" href="../../css/theme.css" />
     <link rel="stylesheet" href="../../css/theme_extra.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
         <link href="../../assets/_mkdocstrings.css" rel="stylesheet" />
         <link href="../../css/version-select.css" rel="stylesheet" />
     
@@ -19,12 +19,11 @@
         var mkdocs_page_url = "/dj-stripe/2.7/reference/models/";
       </script>
     
-    <script src="../../js/jquery-3.6.0.min.js" defer></script>
     <!--[if lt IE 9]>
       <script src="../../js/html5shiv.min.js"></script>
     <![endif]-->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-      <script>hljs.initHighlightingOnLoad();</script> 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
 </head>
 
 <body class="wy-body-for-nav" role="document">
@@ -626,7 +625,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../.." class="icon icon-home" aria-label="Docs"></a> &raquo;</li>
           <li>Reference &raquo;</li>
-      <li>Models</li>
+      <li class="breadcrumb-item active">Models</li>
     <li class="wy-breadcrumbs-aside">
           <a href="https://github.com/dj-stripe/dj-stripe/edit/master/docs/reference/models.md" class="icon icon-github"> Edit on GitHub</a>
     </li>
@@ -35622,7 +35621,7 @@ unless the reopen method is called.</p>
     <span class="p">)</span>
     <span class="n">tolerance</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveSmallIntegerField</span><span class="p">(</span>
         <span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you&#39;re doing.&quot;</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -35818,7 +35817,7 @@ unless the reopen method is called.</p>
 
 
 <h5 id="djstripe.models.webhooks.WebhookEndpoint.tolerance" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEndpoint</span><span class="o">.</span><span class="n">tolerance</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveSmallIntegerField</span><span class="p">(</span><span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you&#39;re doing.&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEndpoint</span><span class="o">.</span><span class="n">tolerance</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">PositiveSmallIntegerField</span><span class="p">(</span><span class="n">help_text</span><span class="o">=</span><span class="s2">&quot;Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you&#39;re doing.&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
@@ -36324,7 +36323,7 @@ The 'valid' flag in this model monitors this.</p>
         <span class="k">return</span> <span class="n">event_id</span> <span class="ow">and</span> <span class="n">event_id</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_00000000000000&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot verify event signature without a secret&quot;</span><span class="p">)</span>
@@ -36347,7 +36346,7 @@ The 'valid' flag in this model monitors this.</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">,</span>
-        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span><span class="p">,</span>
         <span class="n">validation_method</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_VALIDATION</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -37037,7 +37036,7 @@ request object.</p>
 
 
 <h5 id="djstripe.models.webhooks.WebhookEventTrigger.validate" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">secret</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span><span class="p">,</span> <span class="n">validation_method</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_VALIDATION</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="n">api_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">secret</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span><span class="p">,</span> <span class="n">validation_method</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_VALIDATION</span><span class="p">)</span></code>
 
 </h5>
 
@@ -37105,7 +37104,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_SECRET</span><span class="p">,</span>
-    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span><span class="p">,</span>
+    <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span><span class="p">,</span>
     <span class="n">validation_method</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_VALIDATION</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -37164,7 +37163,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 
 
 <h5 id="djstripe.models.webhooks.WebhookEventTrigger.verify_signature" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">verify_signature</span><span class="p">(</span><span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">webhooks</span><span class="o">.</span><span class="n">WebhookEventTrigger</span><span class="o">.</span><span class="n">verify_signature</span><span class="p">(</span><span class="n">secret</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span><span class="p">)</span></code>
 
 </h5>
 
@@ -37192,7 +37191,7 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
 <span class="normal">301</span>
 <span class="normal">302</span>
 <span class="normal">303</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">verify_signature</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">djstripe_settings</span><span class="o">.</span><span class="n">WEBHOOK_TOLERANCE</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">secret</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">stripe</span><span class="o">.</span><span class="n">Webhook</span><span class="o">.</span><span class="n">DEFAULT_TOLERANCE</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">secret</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot verify event signature without a secret&quot;</span><span class="p">)</span>
@@ -37344,15 +37343,16 @@ and returns whether or not it matches the WebhookEventTrigger data.</p>
     
   </span>
 </div>
-    <script>var base_url = '../..';</script>
-    <script src="../../js/theme_extra.js" defer></script>
-    <script src="../../js/theme.js" defer></script>
-      <script src="../../search/main.js" defer></script>
-      <script src="../../js/version-select.js" defer></script>
-    <script defer>
-        window.onload = function () {
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+      <script src="../../js/version-select.js"></script>
+    <script>
+        jQuery(function () {
             SphinxRtdTheme.Navigation.enable(true);
-        };
+        });
     </script>
 
 </body>
