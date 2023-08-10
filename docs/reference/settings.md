@@ -153,7 +153,7 @@ def webhook_event_callback(event, api_key):
     """ Dispatches the event to celery for processing. """
     from . import tasks
     # Ansychronous hand-off to celery so that we can continue immediately
-    tasks.process_webhook_event.s(event.pk).apply_async()
+    tasks.process_webhook_event.s(event.pk, api_key).apply_async()
 ```
 
 ```py
@@ -162,7 +162,7 @@ from djstripe.models import WebhookEventTrigger
 from stripe.error import StripeError
 
 @shared_task(bind=True)
-def process_webhook_event(self, pk):
+def process_webhook_event(self, pk, api_key):
     """ Processes events from Stripe asynchronously. """
     logger.info(f"Processing Stripe event: {pk}")
     try:
@@ -170,10 +170,16 @@ def process_webhook_event(self, pk):
         obj = WebhookEventTrigger.objects.get(pk=pk)
         # process the event.
         # internally, this creates a Stripe WebhookEvent Object and invokes the respective Webhooks
-        event = obj.process()
-    except StripeError as exc:
-        logger.error(f"Failed to process Stripe event: {pk}. Retrying in 60 seconds.")
-        raise self.retry(exc=exc, countdown=60)  # retry after 60 seconds
+        try:
+            event = obj.process(save=False, api_key=api_key)
+            # only save the event if webhook process was successfuly, otherwise it won't retry
+            event.save()
+        except StripeError as exc:
+            # Mark the event as not processed
+            obj.processed = False
+            obj.save()
+            logger.error(f"Failed to process Stripe event: {pk}. Retrying in 60 seconds.")
+            raise self.retry(exc=exc, countdown=60)  # retry after 60 seconds
     except WebhookEventTrigger.DoesNotExist as exc:
         # This can happen in case the celery task got executed before the actual model got saved to the DB
         raise self.retry(exc=exc, countdown=10)  # retry after 10 seconds
