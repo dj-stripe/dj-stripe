@@ -4466,7 +4466,7 @@ charges that are associated with the same customer.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">subscriptions</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">send_invoice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">send_invoice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Pay and send the customer&#39;s latest invoice.</span>
 
@@ -4477,19 +4477,19 @@ charges that are associated with the same customer.</p>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">invoice</span> <span class="o">=</span> <span class="n">Invoice</span><span class="o">.</span><span class="n">_api_create</span><span class="p">(</span><span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-            <span class="n">invoice</span><span class="o">.</span><span class="n">pay</span><span class="p">()</span>
+            <span class="n">invoice</span><span class="o">.</span><span class="n">pay</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">except</span> <span class="n">InvalidRequestError</span><span class="p">:</span>  <span class="c1"># TODO: Check this for a more</span>
             <span class="c1">#                           specific error message.</span>
             <span class="k">return</span> <span class="kc">False</span>  <span class="c1"># There was nothing to invoice</span>
 
-    <span class="k">def</span> <span class="nf">retry_unpaid_invoices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">retry_unpaid_invoices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Attempt to retry collecting payment on the customer&#39;s unpaid invoices.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sync_invoices</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">invoice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">invoices</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">auto_advance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">&quot;paid&quot;</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">invoice</span><span class="o">.</span><span class="n">retry</span><span class="p">()</span>  <span class="c1"># Always retry unpaid invoices</span>
+                <span class="n">invoice</span><span class="o">.</span><span class="n">retry</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># Always retry unpaid invoices</span>
             <span class="k">except</span> <span class="n">InvalidRequestError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;Invoice is already paid&quot;</span><span class="p">:</span>
                     <span class="k">raise</span>
@@ -6269,7 +6269,7 @@ Stripe API and sync for all RelatedModels would fail</p>
 
 
 <h5 id="djstripe.models.core.Customer.retry_unpaid_invoices" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">retry_unpaid_invoices</span><span class="p">()</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">retry_unpaid_invoices</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h5>
 
@@ -6289,13 +6289,13 @@ Stripe API and sync for all RelatedModels would fail</p>
 <span class="normal">1323</span>
 <span class="normal">1324</span>
 <span class="normal">1325</span>
-<span class="normal">1326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">retry_unpaid_invoices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">retry_unpaid_invoices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Attempt to retry collecting payment on the customer&#39;s unpaid invoices.&quot;&quot;&quot;</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_sync_invoices</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">invoice</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">invoices</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">auto_advance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">exclude</span><span class="p">(</span><span class="n">status</span><span class="o">=</span><span class="s2">&quot;paid&quot;</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">invoice</span><span class="o">.</span><span class="n">retry</span><span class="p">()</span>  <span class="c1"># Always retry unpaid invoices</span>
+            <span class="n">invoice</span><span class="o">.</span><span class="n">retry</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># Always retry unpaid invoices</span>
         <span class="k">except</span> <span class="n">InvalidRequestError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;Invoice is already paid&quot;</span><span class="p">:</span>
                 <span class="k">raise</span>
@@ -6311,7 +6311,7 @@ Stripe API and sync for all RelatedModels would fail</p>
 
 
 <h5 id="djstripe.models.core.Customer.send_invoice" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">send_invoice</span><span class="p">()</span></code>
+<code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Customer</span><span class="o">.</span><span class="n">send_invoice</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
 </h5>
 
@@ -6339,7 +6339,7 @@ Stripe API and sync for all RelatedModels would fail</p>
 <span class="normal">1312</span>
 <span class="normal">1313</span>
 <span class="normal">1314</span>
-<span class="normal">1315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">send_invoice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">1315</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">send_invoice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pay and send the customer&#39;s latest invoice.</span>
 
@@ -6350,7 +6350,7 @@ Stripe API and sync for all RelatedModels would fail</p>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">invoice</span> <span class="o">=</span> <span class="n">Invoice</span><span class="o">.</span><span class="n">_api_create</span><span class="p">(</span><span class="n">customer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-        <span class="n">invoice</span><span class="o">.</span><span class="n">pay</span><span class="p">()</span>
+        <span class="n">invoice</span><span class="o">.</span><span class="n">pay</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="n">InvalidRequestError</span><span class="p">:</span>  <span class="c1"># TODO: Check this for a more</span>
         <span class="c1">#                           specific error message.</span>
