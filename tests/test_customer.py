@@ -199,6 +199,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         customer_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             email="",
+            name="",
             idempotency_key=None,
             metadata={},
             stripe_account=None,
