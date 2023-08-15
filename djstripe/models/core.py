@@ -1297,7 +1297,7 @@ class Customer(StripeModel):
         else:
             return subscriptions.first()
 
-    def send_invoice(self):
+    def send_invoice(self, **kwargs):
         """
         Pay and send the customer's latest invoice.
 
@@ -1308,19 +1308,19 @@ class Customer(StripeModel):
 
         try:
             invoice = Invoice._api_create(customer=self.id)
-            invoice.pay()
+            invoice.pay(**kwargs)
             return True
         except InvalidRequestError:  # TODO: Check this for a more
             #                           specific error message.
             return False  # There was nothing to invoice
 
-    def retry_unpaid_invoices(self):
+    def retry_unpaid_invoices(self, **kwargs):
         """Attempt to retry collecting payment on the customer's unpaid invoices."""
 
         self._sync_invoices()
         for invoice in self.invoices.filter(auto_advance=True).exclude(status="paid"):
             try:
-                invoice.retry()  # Always retry unpaid invoices
+                invoice.retry(**kwargs)  # Always retry unpaid invoices
             except InvalidRequestError as exc:
                 if str(exc) != "Invoice is already paid":
                     raise
