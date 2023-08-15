@@ -2,6 +2,7 @@
 dj-stripe - Django + Stripe Made Easy
 """
 from importlib.metadata import version
+
 from django.apps import AppConfig
 
 __version__ = version("dj-stripe")

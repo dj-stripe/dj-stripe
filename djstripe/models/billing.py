@@ -800,13 +800,13 @@ class BaseInvoice(StripeModel):
             api_key=api_key,
         )
 
-    def retry(self):
+    def retry(self, **kwargs):
         """Retry payment on this invoice if it isn't paid."""
 
         if self.status != enums.InvoiceStatus.paid and self.auto_advance:
             stripe_invoice = self.api_retrieve()
-            updated_stripe_invoice = (
-                stripe_invoice.pay()
+            updated_stripe_invoice = stripe_invoice.pay(
+                **kwargs
             )  # pay() throws an exception if the charge is not successful.
             type(self).sync_from_stripe_data(
                 updated_stripe_invoice, api_key=self.default_api_key
