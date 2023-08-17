@@ -197,6 +197,9 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             field_name = self._get_field_name(e.param)
             self.add_error(field_name, e.user_message)
 
+        except AuthenticationError as e:
+            self.add_error("__all__", e.user_message)
+
         return super()._post_clean()
 
 
@@ -261,5 +264,8 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
         except InvalidRequestError as e:
             field_name = self._get_field_name(e.param)
             self.add_error(field_name, e.user_message)
+
+        except AuthenticationError as e:
+            self.add_error("__all__", e.user_message)
 
         return super()._post_clean()
