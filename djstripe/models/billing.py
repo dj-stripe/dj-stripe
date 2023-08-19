@@ -2015,7 +2015,9 @@ class Subscription(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
-        if not kwargs.get("status"):
+        try:
+            kwargs["status"]
+        except KeyError:
             # special case: https://stripe.com/docs/api/subscriptions/list#list_subscriptions-status
             # See Issue: https://github.com/dj-stripe/dj-stripe/issues/1763
             kwargs["status"] = "all"

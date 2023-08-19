@@ -1151,7 +1151,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
     @patch("stripe.Subscription.list")
-    def test_api_list(self, subscription_list_mock):
+    def test_api_list_with_status_enum(self, subscription_list_mock):
         p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
         type(subscription_list_mock).auto_paging_iter = p
 
@@ -1160,6 +1160,20 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         subscription_list_mock.assert_called_once_with(
             status=SubscriptionStatus.canceled,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+        )
+
+    @patch("stripe.Subscription.list")
+    def test_api_list_with_status_None(self, subscription_list_mock):
+        p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
+        type(subscription_list_mock).auto_paging_iter = p
+
+        # invoke Subscription.api_list with status enum populated
+        Subscription.api_list(status=None)
+
+        subscription_list_mock.assert_called_once_with(
+            status=None,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
