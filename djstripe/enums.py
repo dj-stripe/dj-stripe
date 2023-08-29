@@ -323,12 +323,6 @@ class SessionStatus(Enum):
     expired = _("Expired")
 
 
-class SessionPaymentStatus(Enum):
-    paid = _("Paid")
-    unpaid = _("Unpaid")
-    no_payment_required = _("No Payment Required")
-
-
 class ConfirmationMethod(Enum):
     automatic = _("Automatic")
     manual = _("Manual")
@@ -737,11 +731,6 @@ class RefundStatus(Enum):
     canceled = _("Canceled")
 
 
-class SessionBillingAddressCollection(Enum):
-    auto = _("Auto")
-    required = _("Required")
-
-
 class SessionMode(Enum):
     payment = _("Payment")
     setup = _("Setup")
@@ -777,13 +766,6 @@ class SourceTransactionStatus(Enum):
     succeeded = _("Succeeded")
     chargeable = _("Chargeable")
     failed = _("Failed")
-
-
-class SubmitTypeStatus(Enum):
-    auto = _("Auto")
-    book = _("Book")
-    donate = _("donate")
-    pay = _("pay")
 
 
 class SubscriptionScheduleEndBehavior(Enum):
