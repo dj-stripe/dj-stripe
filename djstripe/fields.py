@@ -112,11 +112,8 @@ class StripeDecimalCurrencyAmountField(FieldDeconstructMixin, models.DecimalFiel
     """
 
     def __init__(self, *args, **kwargs):
-        """
-        Assign default args to this field. By contacting stripe support, some accounts
-        will have their limit raised to 11 digits
-        """
-        defaults = {"decimal_places": 2, "max_digits": 11}
+        # see https://github.com/dj-stripe/dj-stripe/pull/1786
+        defaults = {"decimal_places": 2, "max_digits": 14}
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
