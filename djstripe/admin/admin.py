@@ -720,12 +720,7 @@ class UsageRecordAdmin(StripeModelAdmin):
 
 @admin.register(models.UsageRecordSummary)
 class UsageRecordSummaryAdmin(StripeModelAdmin):
-    list_display = ("invoice", "subscription_item", "total_usage")
-
-    def get_queryset(self, request):
-        return (
-            super().get_queryset(request).select_related("invoice", "subscription_item")
-        )
+    pass
 
 
 @admin.register(models.WebhookEndpoint)
