@@ -63,6 +63,14 @@ class DjstripeSettings:
         )
 
     @property
+    def decimal_max_digits(self):
+        return 24
+
+    @property
+    def decimal_places(self):
+        return 12
+
+    @property
     def DJSTRIPE_WEBHOOK_URL(self):
         return getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
 
