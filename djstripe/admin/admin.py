@@ -481,34 +481,6 @@ class MandateAdmin(StripeModelAdmin):
         return actions
 
 
-@admin.register(models.Plan)
-class PlanAdmin(StripeModelAdmin):
-    radio_fields = {"interval": admin.HORIZONTAL}
-
-    def get_readonly_fields(self, request, obj=None):
-        readonly_fields = super().get_readonly_fields(request, obj)
-
-        if obj:
-            return (
-                *readonly_fields,
-                "amount",
-                "currency",
-                "interval",
-                "interval_count",
-                "trial_period_days",
-            )
-
-        return readonly_fields
-
-    def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("product")
-            .prefetch_related("subscriptions")
-        )
-
-
 @admin.register(models.Price)
 class PriceAdmin(StripeModelAdmin):
     list_display = ("product", "currency", "active")
@@ -644,7 +616,7 @@ class ShippingRateAdmin(StripeModelAdmin):
 
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
-    list_display = ("customer", "status", "get_product_name", "get_default_tax_rates")
+    list_display = ("customer", "status")
     list_filter = ("status", "cancel_at_period_end")
 
     inlines = (SubscriptionItemInline, SubscriptionScheduleInline, LineItemInline)
@@ -660,34 +632,6 @@ class SubscriptionAdmin(StripeModelAdmin):
         """Cancel a subscription."""
         context = self.get_admin_action_context(queryset, "_cancel", CustomActionForm)
         return render(request, "djstripe/admin/confirm_action.html", context)
-
-    def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related(
-                "customer",
-                "plan",
-                "plan__product",
-            )
-            .prefetch_related(
-                "customer__subscriptions",
-                "customer__subscriptions__plan",
-                "customer__subscriptions__plan__product",
-                "default_tax_rates",
-            )
-        )
-
-    @admin.display(description="Default Tax Rates")
-    def get_default_tax_rates(self, obj):
-        result = [str(tax_rate) for tax_rate in obj.default_tax_rates.all()]
-        if result:
-            return ", ".join(result)
-
-    @admin.display(description="Product Name")
-    def get_product_name(self, obj):
-        if obj.plan and obj.plan.product:
-            return obj.plan.product.name
 
 
 @admin.register(models.SubscriptionSchedule)
