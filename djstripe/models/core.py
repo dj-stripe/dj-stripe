@@ -1115,39 +1115,6 @@ class Customer(StripeModel):
             stripe_invoiceitem, api_key=self.default_api_key
         )
 
-    def add_card(self, source, set_default=True):
-        """
-        Adds a card to this customer's account.
-
-        :param source: Either a token, like the ones returned by our Stripe.js, or a
-            dictionary containing a user's credit card details.
-            Stripe will automatically validate the card.
-        :type source: string, dict
-        :param set_default: Whether or not to set the source as the customer's
-            default source
-        :type set_default: boolean
-
-        """
-        from .payment_methods import DjstripePaymentMethod
-
-        stripe_customer = self.api_retrieve()
-        new_stripe_payment_method = stripe_customer.sources.create(source=source)
-
-        if set_default:
-            stripe_customer.default_source = new_stripe_payment_method["id"]
-            stripe_customer.save()
-
-        new_payment_method = DjstripePaymentMethod.from_stripe_object(
-            new_stripe_payment_method
-        )
-
-        # Change the default source
-        if set_default:
-            self.default_source = new_payment_method
-            self.save()
-
-        return new_payment_method.resolve()
-
     def add_payment_method(self, payment_method, set_default=True):
         """
         Adds an already existing payment method to this customer's account
