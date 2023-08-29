@@ -83,19 +83,22 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
 
     def get_list_display(self, request):
         return (
-            ("__str__", "id", "djstripe_owner_account")
-            + self.list_display
-            + ("created", "livemode")
+            "__str__",
+            "id",
+            "djstripe_owner_account",
+            *self.list_display,
+            "created",
+            "livemode",
         )
 
     def get_list_filter(self, request):
-        return self.list_filter + ("created", "livemode")
+        return (*self.list_filter, "created", "livemode")
 
     def get_readonly_fields(self, request, obj=None):
-        return self.readonly_fields + ("id", "djstripe_owner_account", "created")
+        return (*self.readonly_fields, "id", "djstripe_owner_account", "created")
 
     def get_search_fields(self, request):
-        return self.search_fields + ("id",)
+        return (*self.search_fields, "id")
 
     def get_fieldsets(self, request, obj=None):
         common_fields = ("livemode", "id", "djstripe_owner_account", "created")
@@ -483,11 +486,11 @@ class PlanAdmin(StripeModelAdmin):
     radio_fields = {"interval": admin.HORIZONTAL}
 
     def get_readonly_fields(self, request, obj=None):
-        """Return extra readonly_fields."""
         readonly_fields = super().get_readonly_fields(request, obj)
 
         if obj:
-            readonly_fields += (
+            return (
+                *readonly_fields,
                 "amount",
                 "currency",
                 "interval",
