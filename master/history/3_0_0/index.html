@@ -157,11 +157,23 @@
 unsupported due to significant changes to the data models.</p>
 </div>
 <h2 id="release-highlights">Release highlights</h2>
+<ul>
+<li>[TODO BEFORE RELEASE] A new field <code>stripe_data</code> json field has been added to all
+    supported models. This field contains a copy of the entire object as-is in the Stripe
+    API.</li>
+</ul>
 <h2 id="breaking-changes">Breaking changes</h2>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>Many superfluous model fields have been removed, in favour of using <code>stripe_data</code>.
+We retain model fields for useful foreign keys and other frequently-used fields.</p>
+</div>
 <ul>
 <li>Migrations have been reset.</li>
 <li>Removed deprecated <code>DJSTRIPE_WEBHOOK_TOLERANCE</code> setting.</li>
 <li>Removed legacy <code>Customer.add_card()</code> method. Use <code>Custoner.add_payment_method()</code> instead.</li>
+<li>Most of the models visible in the Django Admin are now read-only. (Note: This does
+    not change anything functionally, as editing models was not replicated upstream.)</li>
 </ul>
 <h2 id="other-changes">Other changes</h2>
               
