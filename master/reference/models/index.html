@@ -10754,8 +10754,8 @@ and its usage is encouraged instead of Plan objects.</p>
     <span class="n">unit_amount_decimal</span> <span class="o">=</span> <span class="n">StripeDecimalCurrencyAmountField</span><span class="p">(</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">max_digits</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span>
-        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_max_digits</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_places</span><span class="p">,</span>
         <span class="n">help_text</span><span class="o">=</span><span class="p">(</span>
             <span class="s2">&quot;The unit amount in cents to be charged, represented as a decimal &quot;</span>
             <span class="s2">&quot;string with at most 12 decimal places.&quot;</span>
@@ -11249,7 +11249,7 @@ and its usage is encouraged instead of Plan objects.</p>
 
 
 <h5 id="djstripe.models.core.Price.unit_amount_decimal" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Price</span><span class="o">.</span><span class="n">unit_amount_decimal</span> <span class="o">=</span> <span class="n">StripeDecimalCurrencyAmountField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_digits</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.&#39;</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">Price</span><span class="o">.</span><span class="n">unit_amount_decimal</span> <span class="o">=</span> <span class="n">StripeDecimalCurrencyAmountField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_digits</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_max_digits</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_places</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.&#39;</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
@@ -20126,8 +20126,8 @@ or having Stripe tabulate your usage-based billing totals.</p>
     <span class="n">unit_amount_decimal</span> <span class="o">=</span> <span class="n">StripeDecimalCurrencyAmountField</span><span class="p">(</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">max_digits</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span>
-        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_max_digits</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_places</span><span class="p">,</span>
         <span class="n">help_text</span><span class="o">=</span><span class="p">(</span>
             <span class="s2">&quot;Same as `unit_amount`, but contains a decimal value with &quot;</span>
             <span class="s2">&quot;at most 12 decimal places.&quot;</span>
@@ -20597,7 +20597,7 @@ or having Stripe tabulate your usage-based billing totals.</p>
 
 
 <h5 id="djstripe.models.billing.InvoiceItem.unit_amount_decimal" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">InvoiceItem</span><span class="o">.</span><span class="n">unit_amount_decimal</span> <span class="o">=</span> <span class="n">StripeDecimalCurrencyAmountField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_digits</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Same as `unit_amount`, but contains a decimal value with at most 12 decimal places.&#39;</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">InvoiceItem</span><span class="o">.</span><span class="n">unit_amount_decimal</span> <span class="o">=</span> <span class="n">StripeDecimalCurrencyAmountField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_digits</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_max_digits</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_places</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;Same as `unit_amount`, but contains a decimal value with at most 12 decimal places.&#39;</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
@@ -22463,8 +22463,8 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
     <span class="n">amount_decimal</span> <span class="o">=</span> <span class="n">StripeDecimalCurrencyAmountField</span><span class="p">(</span>
         <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">max_digits</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span>
-        <span class="n">decimal_places</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+        <span class="n">max_digits</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_max_digits</span><span class="p">,</span>
+        <span class="n">decimal_places</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_places</span><span class="p">,</span>
         <span class="n">help_text</span><span class="o">=</span><span class="p">(</span>
             <span class="s2">&quot;The unit amount in cents to be charged, represented as a decimal &quot;</span>
             <span class="s2">&quot;string with at most 12 decimal places.&quot;</span>
@@ -22721,7 +22721,7 @@ You may want to upgrade to use the Price model instead of the Plan model.</p>
 
 
 <h5 id="djstripe.models.billing.Plan.amount_decimal" class="doc doc-heading">
-          <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Plan</span><span class="o">.</span><span class="n">amount_decimal</span> <span class="o">=</span> <span class="n">StripeDecimalCurrencyAmountField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_digits</span><span class="o">=</span><span class="mi">19</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.&#39;</span><span class="p">)</span></code>
+          <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">billing</span><span class="o">.</span><span class="n">Plan</span><span class="o">.</span><span class="n">amount_decimal</span> <span class="o">=</span> <span class="n">StripeDecimalCurrencyAmountField</span><span class="p">(</span><span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">max_digits</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_max_digits</span><span class="p">,</span> <span class="n">decimal_places</span><span class="o">=</span><span class="n">djstripe_settings</span><span class="o">.</span><span class="n">decimal_places</span><span class="p">,</span> <span class="n">help_text</span><span class="o">=</span><span class="s1">&#39;The unit amount in cents to be charged, represented as a decimal string with at most 12 decimal places.&#39;</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
