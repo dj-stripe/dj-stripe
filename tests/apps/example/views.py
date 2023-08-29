@@ -195,7 +195,7 @@ class PurchaseSubscriptionView(FormView):
         customer, created = models.Customer.get_or_create(subscriber=user)
 
         # Add the source as the customer's default card
-        customer.add_card(stripe_source)
+        customer.add_payment_method(stripe_source)
 
         # Using the Stripe API, create a subscription for this customer,
         # using the customer's default payment source
