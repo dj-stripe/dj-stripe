@@ -269,13 +269,6 @@ class BillingScheme(Enum):
     tiered = _("Tiered")
 
 
-class BusinessType(Enum):
-    individual = _("Individual")
-    company = _("Company")
-    non_profit = _("Non Profit")
-    government_entity = _("Government Entity")
-
-
 class CaptureMethod(Enum):
     automatic = _("Automatic")
     manual = _("Manual")

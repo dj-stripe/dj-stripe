@@ -117,8 +117,6 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
 @admin.register(models.Account)
 class AccountAdmin(StripeModelAdmin):
     list_display = ("business_url", "country", "default_currency")
-    list_filter = ("details_submitted",)
-    search_fields = ("settings", "business_profile")
 
 
 @admin.register(models.APIKey)
