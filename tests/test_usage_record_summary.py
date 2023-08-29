@@ -234,10 +234,6 @@ class TestUsageRecordSummary(CreateAccountMixin, AssertStripeFksMixin, TestCase)
         )
 
     @patch(
-        "stripe.SubscriptionItem.list_usage_record_summaries",
-        autospec=True,
-    )
-    @patch(
         "djstripe.models.billing.SubscriptionItem.objects.get",
         return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
     )

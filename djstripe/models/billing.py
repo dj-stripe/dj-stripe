@@ -2762,7 +2762,6 @@ class UsageRecord(StripeModel):
         related_name="usage_records",
         help_text="The subscription item this usage record contains data for.",
     )
-
     timestamp = StripeDateTimeField(
         null=True,
         blank=True,
@@ -2773,19 +2772,8 @@ class UsageRecord(StripeModel):
         ),
     )
 
-    action = StripeEnumField(
-        enum=enums.UsageAction,
-        default=enums.UsageAction.increment,
-        help_text=(
-            "When using increment the specified quantity will be added to the usage at"
-            " the specified timestamp. The set action will overwrite the usage quantity"
-            " at that timestamp. If the subscription has billing thresholds, increment"
-            " is the only allowed value."
-        ),
-    )
-
     def __str__(self):
-        return f"Usage for {self.subscription_item} ({self.action}) is {self.quantity}"
+        return f"Usage for {self.subscription_item}"
 
     @classmethod
     def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
@@ -2846,43 +2834,15 @@ class UsageRecordSummary(StripeModel):
         on_delete=models.CASCADE,
         related_name="usage_record_summaries",
     )
-    period = JSONField(
-        null=True,
-        blank=True,
-        help_text="Subscription Billing period for the SubscriptionItem",
-    )
-    period_end = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text="End of the Subscription Billing period for the SubscriptionItem",
-    )
-    period_start = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text="Start of the Subscription Billing period for the SubscriptionItem",
-    )
-    total_usage = models.PositiveIntegerField(
-        help_text="The quantity of the plan to which the customer should be subscribed."
-    )
     subscription_item = StripeForeignKey(
-        "SubscriptionItem",
+        SubscriptionItem,
         on_delete=models.CASCADE,
         related_name="usage_record_summaries",
         help_text="The subscription item this usage record contains data for.",
     )
 
     def __str__(self):
-        return (
-            f"Usage Summary for {self.subscription_item} ({self.invoice}) is"
-            f" {self.total_usage}"
-        )
-
-    @classmethod
-    def _manipulate_stripe_object_hook(cls, data):
-        data["period_start"] = data["period"]["start"]
-        data["period_end"] = data["period"]["end"]
-
-        return data
+        return f"Usage Summary for {self.subscription_item} ({self.invoice})"
 
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):

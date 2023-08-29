@@ -836,11 +836,6 @@ class TaxIdType(Enum):
     unknown = _("Unknown")
 
 
-class UsageAction(Enum):
-    increment = _("increment")
-    set = _("set")
-
-
 class VerificationSessionStatus(Enum):
     """
     https://stripe.com/docs/api/identity/verification_sessions/object#identity_verification_session_object-status
