@@ -513,7 +513,7 @@ class SetupIntentStatus(Enum):
 
 
 class PaymentMethodType(Enum):
-    acss_debit = _("Acss Dbit")
+    acss_debit = _("ACSS Dbit")
     affirm = _("Affirm")
     afterpay_clearpay = _("Afterpay Clearpay")
     alipay = _("Alipay")
@@ -524,6 +524,7 @@ class PaymentMethodType(Enum):
     boleto = _("Boleto")
     card = _("Card")
     card_present = _("Card present")
+    cashapp = _("Cash App")
     customer_balance = _("Customer Balance")
     eps = _("EPS")
     fpx = _("FPX")
@@ -537,12 +538,14 @@ class PaymentMethodType(Enum):
     oxxo = _("OXXO")
     p24 = _("Przelewy24")
     paynow = _("PayNow")
+    paypal = _("PayPal")
     pix = _("Pix")
     promptpay = _("PromptPay")
     sepa_debit = _("SEPA Direct Debit")
     sofort = _("SOFORT")
     us_bank_account = _("ACH Direct Debit")
     wechat_pay = _("Wechat Pay")
+    zip = _("Zip")
 
 
 class PayoutFailureCode(Enum):
