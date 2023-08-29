@@ -207,16 +207,6 @@ happens you can just call the official <code>stripe.Customer.subscribe()</code>.
 <li>[<code>form_valid view example</code>][tests.apps.example.views.PurchaseSubscriptionView.form_valid]</li>
 <li><a class="autorefs autorefs-internal" href="../../reference/models/#djstripe.models.core.Customer.add_payment_method"><code>djstripe.models.Customer.add_payment_method</code></a></li>
 </ul>
-<p>Note that PaymentMethods can be used instead of Cards/Source by
-substituting</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Add the payment method customer&#39;s default</span>
-<span class="n">customer</span><span class="o">.</span><span class="n">add_payment_method</span><span class="p">(</span><span class="n">payment_method</span><span class="p">)</span>
-</code></pre></div>
-<p>instead of</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Add the source as the customer&#39;s default card</span>
-<span class="n">customer</span><span class="o">.</span><span class="n">add_card</span><span class="p">(</span><span class="n">stripe_source</span><span class="p">)</span>
-</code></pre></div>
-<p>in the above example.</p>
 </div>
               
             </div>
