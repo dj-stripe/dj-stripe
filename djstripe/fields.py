@@ -134,7 +134,7 @@ class StripeEnumField(FieldDeconstructMixin, models.CharField):
     def __init__(self, enum, *args, **kwargs):
         self.enum = enum
         choices = enum.choices
-        defaults = {"choices": choices, "max_length": max(len(k) for k, v in choices)}
+        defaults = {"choices": choices, "max_length": 255}
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
