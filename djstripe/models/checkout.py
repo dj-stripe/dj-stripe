@@ -46,6 +46,7 @@ class Session(StripeModel):
             "This can be a customer ID, a cart ID, or similar, and"
             "can be used to reconcile the session with your internal systems."
         ),
+        db_index=True,
     )
     currency = StripeCurrencyCodeField(null=True, blank=True)
     customer = StripeForeignKey(
@@ -60,6 +61,7 @@ class Session(StripeModel):
         help_text=(
             "If provided, this value will be used when the Customer object is created."
         ),
+        db_index=True,
     )
     locale = models.CharField(
         max_length=255,
