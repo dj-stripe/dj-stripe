@@ -162,7 +162,7 @@ class TestTransfer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         tax_id_retrieve_mock.assert_called_once_with(
             id=FAKE_CUSTOMER["id"],
             nested_id=FAKE_TAX_ID["id"],
-            expand=[],
+            expand=["customer"],
             stripe_account=tax_id.djstripe_owner_account.id,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
