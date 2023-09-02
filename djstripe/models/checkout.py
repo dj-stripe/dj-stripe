@@ -1,3 +1,5 @@
+import typing as t
+
 import stripe
 from django.db import models
 
@@ -10,6 +12,7 @@ from ..fields import (
     StripeForeignKey,
     StripeQuantumCurrencyAmountField,
 )
+from ..models import Subscription
 from .base import StripeModel
 
 
@@ -92,9 +95,7 @@ class Session(StripeModel):
         return self.stripe_data.get("url") or ""
 
     @property
-    def subscription(self) -> "Subscription" | None:
-        from ..models import Subscription
-
+    def subscription(self) -> t.Optional["Subscription"]:
         subscription = self.stripe_data.get("subscription")
         if subscription and isinstance(subscription, str):
             return Subscription.objects.filter(id=subscription).first()
