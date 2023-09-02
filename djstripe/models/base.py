@@ -353,7 +353,9 @@ class StripeModel(StripeBaseModel):
                 % (manipulated_data.get("object", ""), cls.__name__)
             )
 
-        result = {}
+        # By default we put the  raw stripe data in the djstripe_data json field
+        result = {"djstripe_data": data}
+
         if current_ids is None:
             current_ids = set()
 
