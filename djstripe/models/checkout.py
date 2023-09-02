@@ -28,6 +28,9 @@ class Session(StripeModel):
         "line_items",
         "total_details.breakdown",
         "line_items.data.discounts",
+        "customer",
+        "payment_intent",
+        "subscription",
     ]
     stripe_class = stripe.checkout.Session
 
