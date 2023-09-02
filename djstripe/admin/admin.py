@@ -403,7 +403,7 @@ class SessionAdmin(StripeModelAdmin):
     search_fields = ("customer__id", "customer_email")
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related("customer", "subscription")
+        return super().get_queryset(request).select_related("customer")
 
 
 @admin.register(models.Invoice)
