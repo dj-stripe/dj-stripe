@@ -32,10 +32,12 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
   && rm -rf /var/lib/apt/lists/*
 
 # Install poetry
-RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
+RUN pip install poetry=="$POETRY_VERSION"
+
+# RUN curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/install-poetry.py | python -
 
 # Requirements are installed here to ensure they will be cached.
-COPY pyproject.toml .
+COPY poetry.lock pyproject.toml ./
 
 # Disable poetry managed virtualenvs and install all dependencies and sub-depenendencies but the project itself
 RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi --no-root --all-extras --with dev --with docs
