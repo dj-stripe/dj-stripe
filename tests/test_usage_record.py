@@ -115,10 +115,7 @@ class TestUsageRecord(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertEqual(
             str(usage_record),
-            (
-                "Usage for"
-                f" {str(usage_record.subscription_item)} ({fake_usage_data['action']})"
-            ),
+            ("Usage for" f" {str(usage_record.subscription_item)}"),
         )
 
     @patch(
