@@ -100,7 +100,6 @@ class APIKey(StripeModel):
         # Account needs to exist for things to work. Make a stub if necessary.
         account, created = Account.objects.get_or_create(
             id=account_data["id"],
-            defaults={"charges_enabled": False, "details_submitted": False},
         )
         if created:
             # If it's just been created, now we can sync the account.
