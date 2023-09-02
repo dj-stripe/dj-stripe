@@ -187,7 +187,6 @@ endpoint from the urls.py step above (e.g.
 <span class="w">    </span><span class="nv">STRIPE_TEST_SECRET_KEY</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>os.environ.get<span class="o">(</span><span class="s2">&quot;STRIPE_TEST_SECRET_KEY&quot;</span>,<span class="w"> </span><span class="s2">&quot;&lt;your secret key&gt;&quot;</span><span class="o">)</span>
 <span class="w">    </span><span class="nv">STRIPE_LIVE_MODE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>False<span class="w">  </span><span class="c1"># Change to True in production</span>
 <span class="w">    </span><span class="nv">DJSTRIPE_WEBHOOK_SECRET</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;whsec_xxx&quot;</span><span class="w">  </span><span class="c1"># Get it from the section in the Stripe dashboard where you added the webhook endpoint</span>
-<span class="w">    </span><span class="nv">DJSTRIPE_FOREIGN_KEY_TO_FIELD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;id&quot;</span>
 </code></pre></div></p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>

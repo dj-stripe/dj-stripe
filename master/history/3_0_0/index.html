@@ -174,6 +174,8 @@ We retain model fields for useful foreign keys and other frequently-used fields.
 <li>Removed legacy <code>Customer.add_card()</code> method. Use <code>Custoner.add_payment_method()</code> instead.</li>
 <li>Most of the models visible in the Django Admin are now read-only. (Note: This does
     not change anything functionally, as editing models was not replicated upstream.)</li>
+<li><code>DJSTRIPE_FOREIGN_KEY_TO_FIELD</code> setting has been removed, which drops support for
+    legacy <code>djstripe_id</code> foreign keys.</li>
 </ul>
 <h2 id="other-changes">Other changes</h2>
               
