@@ -1473,14 +1473,28 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             [
                 call(
                     api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
+                    expand=[
+                        "customer",
+                        "default_payment_method",
+                        "default_source",
+                        "latest_invoice",
+                        "pending_setup_intent",
+                        "schedule",
+                    ],
                     id=FAKE_SUBSCRIPTION["id"],
                     stripe_account=None,
                     stripe_version="2020-08-27",
                 ),
                 call(
                     api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
+                    expand=[
+                        "customer",
+                        "default_payment_method",
+                        "default_source",
+                        "latest_invoice",
+                        "pending_setup_intent",
+                        "schedule",
+                    ],
                     id=FAKE_SUBSCRIPTION["id"],
                     stripe_account=None,
                     stripe_version="2020-08-27",
@@ -1601,14 +1615,28 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             [
                 call(
                     api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
+                    expand=[
+                        "customer",
+                        "default_payment_method",
+                        "default_source",
+                        "latest_invoice",
+                        "pending_setup_intent",
+                        "schedule",
+                    ],
                     id=FAKE_SUBSCRIPTION["id"],
                     stripe_account=None,
                     stripe_version="2020-08-27",
                 ),
                 call(
                     api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
+                    expand=[
+                        "customer",
+                        "default_payment_method",
+                        "default_source",
+                        "latest_invoice",
+                        "pending_setup_intent",
+                        "schedule",
+                    ],
                     id=FAKE_SUBSCRIPTION["id"],
                     stripe_account=None,
                     stripe_version="2020-08-27",
@@ -1712,7 +1740,14 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         subscription_retrieve_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=[],
+            expand=[
+                "customer",
+                "default_payment_method",
+                "default_source",
+                "latest_invoice",
+                "pending_setup_intent",
+                "schedule",
+            ],
             id=FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"],
             stripe_account=None,
             stripe_version="2020-08-27",
