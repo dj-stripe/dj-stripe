@@ -2301,13 +2301,8 @@ class Price(StripeModel):
     unit_amount_decimal = StripeDecimalCurrencyAmountField(
         null=True,
         blank=True,
-<<<<<<< HEAD
         max_digits=djstripe_settings.decimal_max_digits,
         decimal_places=djstripe_settings.decimal_places,
-=======
-        max_digits=24,
-        decimal_places=12,
->>>>>>> c03c0840 (Updated max_digits from 19 to 24 for unit_amount_decimal and amount_decimal model fields)
         help_text=(
             "The unit amount in cents to be charged, represented as a decimal "
             "string with at most 12 decimal places."
