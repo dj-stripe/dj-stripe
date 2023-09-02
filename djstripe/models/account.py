@@ -3,7 +3,7 @@ from django.db import models, transaction
 
 from .. import enums
 from ..enums import APIKeyType
-from ..fields import JSONField, StripeCurrencyCodeField, StripeEnumField
+from ..fields import StripeCurrencyCodeField, StripeEnumField
 from ..settings import djstripe_settings
 from .api import APIKey, get_api_key_details_by_prefix
 from .base import StripeModel, logger
