@@ -413,12 +413,6 @@ class InvoiceStatus(Enum):
     void = _("Void")
 
 
-class InvoiceorLineItemType(Enum):
-    invoice_item = _("Invoice Item")
-    line_item = _("Line Item")
-    unsupported = _("Unsupported")
-
-
 class IntentUsage(Enum):
     on_session = _("On session")
     off_session = _("Off session")

@@ -11,7 +11,6 @@ from stripe.error import InvalidRequestError
 
 from .. import enums
 from ..fields import (
-    InvoiceOrLineItemForeignKey,
     JSONField,
     PaymentMethodForeignKey,
     StripeCurrencyCodeField,
@@ -218,22 +217,6 @@ class Discount(StripeModel):
     expand_fields = ["customer"]
     stripe_class = None
 
-    checkout_session = StripeForeignKey(
-        "Session",
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        help_text=(
-            "The Checkout session that this coupon is applied to, if it is applied to a"
-            " particular session in payment mode. Will not be present for subscription"
-            " mode."
-        ),
-    )
-    coupon = JSONField(
-        null=True,
-        blank=True,
-        help_text="Hash describing the coupon applied to create this discount.",
-    )
     customer = StripeForeignKey(
         "Customer",
         null=True,
@@ -241,15 +224,6 @@ class Discount(StripeModel):
         on_delete=models.CASCADE,
         help_text="The ID of the customer associated with this discount.",
         related_name="customer_discounts",
-    )
-    end = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If the coupon has a duration of repeating, the date that this discount"
-            " will end. If the coupon has a duration of once or forever, this attribute"
-            " will be null."
-        ),
     )
     invoice = StripeForeignKey(
         "Invoice",
@@ -262,25 +236,10 @@ class Discount(StripeModel):
         ),
         related_name="invoice_discounts",
     )
-    invoice_item = InvoiceOrLineItemForeignKey(
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        help_text=(
-            "The invoice item id (or invoice line item id for invoice line items of"
-            " type=‘subscription’) that the discount’s coupon was applied to, if it was"
-            " applied directly to a particular invoice item or invoice line item."
-        ),
-    )
     promotion_code = models.CharField(
         max_length=255,
         blank=True,
         help_text="The promotion code applied to create this discount.",
-    )
-    start = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text="Date that the coupon was applied.",
     )
     subscription = StripeForeignKey(
         "subscription",
@@ -1423,70 +1382,6 @@ class LineItem(StripeModel):
         ).auto_paging_iter()
 
 
-class InvoiceOrLineItem(models.Model):
-    """An Internal Model that abstracts InvoiceItem and lineItem
-    objects
-
-    Contains two fields: `id` and `type`:
-    - `id` is the id of the Stripe object.
-    - `type` can be `line_item`, `invoice_item` or `unsupported`
-    """
-
-    id = models.CharField(max_length=255, primary_key=True)
-    type = StripeEnumField(
-        enum=enums.InvoiceorLineItemType,
-        help_text=(
-            "Indicates whether the underlying model is LineItem or InvoiceItem. Can be"
-            " one of: 'invoice_item', 'line_item' or 'unsupported'"
-        ),
-    )
-
-    @classmethod
-    def _model_type(cls, id_):
-        if id_.startswith("ii"):
-            return InvoiceItem, "invoice_item"
-        elif id_.startswith("il"):
-            return LineItem, "line_item"
-        raise ValueError(f"Unknown object type with id: {id_}")
-
-    @classmethod
-    def _get_or_create_from_stripe_object(
-        cls,
-        data,
-        field_name="id",
-        refetch=True,
-        current_ids=None,
-        pending_relations=None,
-        save=True,
-        stripe_account=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
-    ):
-        raw_field_data = data.get(field_name)
-        id_ = get_id_from_stripe_data(raw_field_data)
-
-        try:
-            object_cls, object_type = cls._model_type(id_)
-        except ValueError:
-            # This may happen if we have object types we don't know about.
-            # Let's not make dj-stripe entirely unusable if that happens.
-            logger.warning(f"Unknown Object. Could not sync object with id: {id_}")
-            return cls.objects.get_or_create(id=id_, defaults={"type": "unsupported"})
-
-        # call model's _get_or_create_from_stripe_object to ensure
-        # that object exists before getting or creating its InvoiceorLineItem mapping
-        object_cls._get_or_create_from_stripe_object(
-            data,
-            field_name,
-            refetch=refetch,
-            current_ids=current_ids,
-            pending_relations=pending_relations,
-            stripe_account=stripe_account,
-            api_key=api_key,
-        )
-
-        return cls.objects.get_or_create(id=id_, defaults={"type": object_type})
-
-
 class Plan(StripeModel):
     """
     A subscription plan contains the pricing information for different
@@ -1501,128 +1396,6 @@ class Plan(StripeModel):
     stripe_class = stripe.Plan
     expand_fields = ["product", "tiers"]
     stripe_dashboard_item_name = "plans"
-
-    active = models.BooleanField(
-        help_text="Whether the plan can be used for new purchases."
-    )
-    aggregate_usage = StripeEnumField(
-        enum=enums.PlanAggregateUsage,
-        default="",
-        blank=True,
-        help_text=(
-            "Specifies a usage aggregation strategy for plans of usage_type=metered. "
-            "Allowed values are `sum` for summing up all usage during a period, "
-            "`last_during_period` for picking the last usage record reported within a "
-            "period, `last_ever` for picking the last usage record ever (across period "
-            "bounds) or max which picks the usage record with the maximum reported "
-            "usage during a period. Defaults to `sum`."
-        ),
-    )
-    amount = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text="Amount (as decimal) to be charged on the interval specified.",
-    )
-    amount_decimal = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        max_digits=djstripe_settings.decimal_max_digits,
-        decimal_places=djstripe_settings.decimal_places,
-        help_text=(
-            "The unit amount in cents to be charged, represented as a decimal "
-            "string with at most 12 decimal places."
-        ),
-    )
-    billing_scheme = StripeEnumField(
-        enum=enums.BillingScheme,
-        default="",
-        blank=True,
-        help_text=(
-            "Describes how to compute the price per period. "
-            "Either `per_unit` or `tiered`. "
-            "`per_unit` indicates that the fixed amount (specified in amount) "
-            "will be charged per unit in quantity "
-            "(for plans with `usage_type=licensed`), or per unit of total "
-            "usage (for plans with `usage_type=metered`). "
-            "`tiered` indicates that the unit pricing will be computed using "
-            "a tiering strategy as defined using the tiers and tiers_mode attributes."
-        ),
-    )
-    currency = StripeCurrencyCodeField()
-    interval = StripeEnumField(
-        enum=enums.PlanInterval,
-        help_text="The frequency with which a subscription should be billed.",
-    )
-    interval_count = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The number of intervals (specified in the interval property) "
-            "between each subscription billing."
-        ),
-    )
-    nickname = models.TextField(
-        max_length=5000,
-        default="",
-        blank=True,
-        help_text="A brief description of the plan, hidden from customers.",
-    )
-    product = StripeForeignKey(
-        "Product",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        help_text="The product whose pricing this plan determines.",
-    )
-    tiers = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Each element represents a pricing tier. "
-            "This parameter requires `billing_scheme` to be set to `tiered`."
-        ),
-    )
-    tiers_mode = StripeEnumField(
-        enum=enums.PriceTiersMode,
-        null=True,
-        blank=True,
-        help_text=(
-            "Defines if the tiering price should be `graduated` or `volume` based. "
-            "In `volume`-based tiering, the maximum quantity within a period "
-            "determines the per unit price, in `graduated` tiering pricing can "
-            "successively change as the quantity grows."
-        ),
-    )
-    transform_usage = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Apply a transformation to the reported usage or set quantity "
-            "before computing the billed price. Cannot be combined with `tiers`."
-        ),
-    )
-    trial_period_days = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Number of trial period days granted when subscribing a customer "
-            "to this plan. Null if the plan has no trial period."
-        ),
-    )
-    usage_type = StripeEnumField(
-        enum=enums.PriceUsageType,
-        default=enums.PriceUsageType.licensed,
-        help_text=(
-            "Configures how the quantity per period should be determined, "
-            "can be either `metered` or `licensed`. `licensed` will automatically "
-            "bill the `quantity` set for a plan when adding it to a subscription, "
-            "`metered` will aggregate the total usage based on usage records. "
-            "Defaults to `licensed`."
-        ),
-    )
-
-    class Meta(object):
-        ordering = ["amount"]
 
     @classmethod
     def get_or_create(cls, **kwargs):
@@ -1731,276 +1504,11 @@ class Subscription(StripeModel):
     stripe_class = stripe.Subscription
     stripe_dashboard_item_name = "subscriptions"
 
-    application_fee_percent = StripePercentField(
-        null=True,
-        blank=True,
-        help_text=(
-            "A positive decimal that represents the fee percentage of the "
-            "subscription invoice amount that will be transferred to the application "
-            "owner's Stripe account each billing period."
-        ),
-    )
-    billing_cycle_anchor = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Determines the date of the first full invoice, and, for plans "
-            "with `month` or `year` intervals, the day of the month for subsequent "
-            "invoices."
-        ),
-    )
-    billing_thresholds = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Define thresholds at which an invoice will be sent, and the "
-            "subscription advanced to a new billing period."
-        ),
-    )
-    cancel_at = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "A date in the future at which the subscription will automatically "
-            "get canceled."
-        ),
-    )
-    cancel_at_period_end = models.BooleanField(
-        default=False,
-        help_text=(
-            "If the subscription has been canceled with the ``at_period_end`` flag set"
-            " to true, ``cancel_at_period_end`` on the subscription will be true. You"
-            " can use this attribute to determine whether a subscription that has a"
-            " status of active is scheduled to be canceled at the end of the current"
-            " period."
-        ),
-    )
-    canceled_at = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If the subscription has been canceled, the date of that cancellation. If"
-            " the subscription was canceled with ``cancel_at_period_end``, canceled_at"
-            " will still reflect the date of the initial cancellation request, not the"
-            " end of the subscription period when the subscription is automatically"
-            " moved to a canceled state."
-        ),
-    )
-    collection_method = StripeEnumField(
-        enum=enums.InvoiceCollectionMethod,
-        help_text=(
-            "Either `charge_automatically`, or `send_invoice`. When charging"
-            " automatically, Stripe will attempt to pay this subscription at the end of"
-            " the cycle using the default source attached to the customer. When sending"
-            " an invoice, Stripe will email your customer an invoice with payment"
-            " instructions."
-        ),
-    )
-    current_period_end = StripeDateTimeField(
-        help_text=(
-            "End of the current period for which the subscription has been "
-            "invoiced. At the end of this period, a new invoice will be created."
-        )
-    )
-    current_period_start = StripeDateTimeField(
-        help_text=(
-            "Start of the current period for which the subscription has been invoiced."
-        )
-    )
     customer = StripeForeignKey(
         "Customer",
         on_delete=models.CASCADE,
         related_name="subscriptions",
         help_text="The customer associated with this subscription.",
-    )
-    days_until_due = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Number of days a customer has to pay invoices generated by this "
-            "subscription. This value will be `null` for subscriptions where "
-            "`billing=charge_automatically`."
-        ),
-    )
-    default_payment_method = StripeForeignKey(
-        "PaymentMethod",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="+",
-        help_text=(
-            "The default payment method for the subscription. "
-            "It must belong to the customer associated with the subscription. "
-            "If not set, invoices will use the default payment method in the "
-            "customer's invoice settings."
-        ),
-    )
-    default_source = PaymentMethodForeignKey(
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="subscriptions",
-        help_text=(
-            "The default payment source for the subscription. "
-            "It must belong to the customer associated with the subscription "
-            "and be in a chargeable state. If not set, defaults to the customer's "
-            "default source."
-        ),
-    )
-    default_tax_rates = models.ManyToManyField(
-        "TaxRate",
-        # explicitly specify the joining table name as though the joining model
-        # was defined with through="DjstripeSubscriptionDefaultTaxRate"
-        db_table="djstripe_djstripesubscriptiondefaulttaxrate",
-        related_name="+",
-        blank=True,
-        help_text=(
-            "The tax rates that will apply to any subscription item "
-            "that does not have tax_rates set. Invoices created will have their "
-            "default_tax_rates populated from the subscription."
-        ),
-    )
-    discount = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Describes the current discount applied to this subscription, if there is"
-            " one. When billing, a discount applied to a subscription overrides a"
-            " discount applied on a customer-wide basis."
-        ),
-    )
-    ended_at = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If the subscription has ended (either because it was canceled or "
-            "because the customer was switched to a subscription to a new plan), "
-            "the date the subscription ended."
-        ),
-    )
-    latest_invoice = StripeForeignKey(
-        "Invoice",
-        null=True,
-        blank=True,
-        related_name="+",
-        on_delete=models.SET_NULL,
-        help_text="The most recent invoice this subscription has generated.",
-    )
-    next_pending_invoice_item_invoice = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Specifies the approximate timestamp on which any pending "
-            "invoice items will be billed according to the schedule provided at "
-            "pending_invoice_item_interval."
-        ),
-    )
-    pause_collection = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If specified, payment collection for this subscription will be paused."
-        ),
-    )
-    pending_invoice_item_interval = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Specifies an interval for how often to bill for any "
-            "pending invoice items. It is analogous to calling Create an invoice "
-            "for the given subscription at the specified interval."
-        ),
-    )
-    pending_setup_intent = StripeForeignKey(
-        "SetupIntent",
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name="setup_intents",
-        help_text=(
-            "We can use this SetupIntent to collect user authentication "
-            "when creating a subscription without immediate payment or updating a "
-            "subscription's payment method, allowing you to "
-            "optimize for off-session payments."
-        ),
-    )
-    pending_update = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If specified, pending updates that will be applied to the "
-            "subscription once the latest_invoice has been paid."
-        ),
-    )
-    plan = models.ForeignKey(
-        "Plan",
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name="subscriptions",
-        help_text=(
-            "The plan associated with this subscription. This value will be "
-            "`null` for multi-plan subscriptions"
-        ),
-    )
-    proration_behavior = StripeEnumField(
-        enum=enums.SubscriptionProrationBehavior,
-        help_text=(
-            "Determines how to handle prorations when the billing cycle changes (e.g.,"
-            " when switching plans, resetting billing_cycle_anchor=now, or starting a"
-            " trial), or if an item’s quantity changes"
-        ),
-        default=enums.SubscriptionProrationBehavior.create_prorations,
-        blank=True,
-    )
-    proration_date = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If set, the proration will be calculated as though the subscription was"
-            " updated at the given time. This can be used to apply exactly the same"
-            " proration that was previewed with upcoming invoice endpoint. It can also"
-            " be used to implement custom proration logic, such as prorating by day"
-            " instead of by second, by providing the time that you wish to use for"
-            " proration calculations"
-        ),
-    )
-    quantity = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The quantity applied to this subscription. This value will be "
-            "`null` for multi-plan subscriptions"
-        ),
-    )
-    schedule = models.ForeignKey(
-        "SubscriptionSchedule",
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name="subscriptions",
-        help_text="The schedule associated with this subscription.",
-    )
-    start_date = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Date when the subscription was first created. The date "
-            "might differ from the created date due to backdating."
-        ),
-    )
-    status = StripeEnumField(
-        enum=enums.SubscriptionStatus, help_text="The status of this subscription."
-    )
-    trial_end = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text="If the subscription has a trial, the end of that trial.",
-    )
-    trial_start = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text="If the subscription has a trial, the beginning of that trial.",
     )
 
     objects = SubscriptionManager()
