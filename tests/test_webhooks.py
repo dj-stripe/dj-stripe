@@ -243,7 +243,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
     ):
         # Create WebhookEndpoint
         fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
-        fake_webhook["secret"] = "whsec_XXXXX"
+        fake_webhook["secret"] = "whsec_XXXXXY"
         fake_webhook["tolerance"] = 500
         webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
 
@@ -257,7 +257,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         verify_header_mock.assert_called_once_with(
             json.dumps(FAKE_EVENT_TRANSFER_CREATED),
             "PLACEHOLDER",
-            djstripe_settings.WEBHOOK_SECRET,
+            "whsec_XXXXXY",
             500,
         )
         event_retrieve_mock.assert_not_called()
