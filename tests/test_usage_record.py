@@ -118,7 +118,6 @@ class TestUsageRecord(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             (
                 "Usage for"
                 f" {str(usage_record.subscription_item)} ({fake_usage_data['action']})"
-                f" is {fake_usage_data['quantity']}"
             ),
         )
 
