@@ -341,41 +341,6 @@ def check_subscriber_key_length(app_configs=None, **kwargs):
 
 
 @checks.register("djstripe")
-def check_djstripe_settings_foreign_key_to_field(app_configs=None, **kwargs):
-    """
-    Check that DJSTRIPE_FOREIGN_KEY_TO_FIELD is set to a valid value.
-    """
-    from django.conf import settings
-
-    setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
-    hint = (
-        f'Set {setting_name} to "id" if this is a new installation, '
-        'otherwise set it to "djstripe_id".'
-    )
-    messages = []
-
-    if not hasattr(settings, setting_name):
-        messages.append(
-            checks.Error(
-                f"{setting_name} is not set.",
-                hint=hint,
-                id="djstripe.E002",
-            )
-        )
-    elif getattr(settings, setting_name) not in ("id", "djstripe_id"):
-        setting_value = getattr(settings, setting_name)
-        messages.append(
-            checks.Error(
-                f"{setting_value} is not a valid value for {setting_name}.",
-                hint=hint,
-                id="djstripe.E003",
-            )
-        )
-
-    return messages
-
-
-@checks.register("djstripe")
 def check_webhook_event_callback_accepts_api_key(app_configs=None, **kwargs):
     """
     Checks if the custom callback accepts atleast 2 mandatory positional arguments

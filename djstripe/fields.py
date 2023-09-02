@@ -30,27 +30,7 @@ class FieldDeconstructMixin:
 
 
 class StripeForeignKey(models.ForeignKey):
-    setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
-
-    def __init__(self, *args, **kwargs):
-        # The default value will only come into play if the check for
-        # that setting has been disabled.
-        kwargs["to_field"] = getattr(settings, self.setting_name, "id")
-        super().__init__(*args, **kwargs)
-
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        kwargs["to_field"] = SettingsReference(
-            getattr(settings, self.setting_name, "id"), self.setting_name
-        )
-        return name, path, args, kwargs
-
-    def get_default(self):
-        # Override to bypass a weird bug in Django
-        # https://stackoverflow.com/a/14390402/227443
-        if isinstance(self.remote_field.model, str):
-            return self._get_default()
-        return super().get_default()
+    pass
 
 
 class PaymentMethodForeignKey(FieldDeconstructMixin, models.ForeignKey):

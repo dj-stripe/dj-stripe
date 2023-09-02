@@ -111,10 +111,6 @@ STRIPE_TEST_SECRET_KEY = os.environ.get(
     "sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX",
 )
 
-DJSTRIPE_FOREIGN_KEY_TO_FIELD = (
-    "id" if os.environ.get("USE_NATIVE_STRIPE_ID", "") == "1" else "djstripe_id"
-)
-
 DJSTRIPE_WEBHOOK_VALIDATION = "verify_signature"
 DJSTRIPE_WEBHOOK_SECRET = os.environ.get("DJSTRIPE_TEST_WEBHOOK_SECRET", "whsec_XXXXX")
 
