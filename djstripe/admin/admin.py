@@ -253,8 +253,6 @@ class CustomerAdmin(StripeModelAdmin):
 class DiscountAdmin(ReadOnlyMixin, StripeModelAdmin):
     list_display = (
         "customer",
-        "coupon",
-        "invoice_item",
         "promotion_code",
         "subscription",
     )
