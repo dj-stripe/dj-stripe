@@ -29,6 +29,7 @@ class StripeBaseModel(models.Model):
 
     djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
     djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
+    djstripe_data = JSONField(default=dict)
 
     class Meta:
         abstract = True
