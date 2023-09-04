@@ -124,8 +124,9 @@ class Account(StripeModel):
         """
         The business's publicly available website.
         """
-        if self.business_profile:
-            return self.business_profile.get("url", "")
+        business_profile = self.stripe_data.get("business_profile")
+        if business_profile:
+            return business_profile.get("url", "")
         return ""
 
     @classmethod
@@ -151,8 +152,8 @@ class Account(StripeModel):
             return apikey_instance.djstripe_owner_account
 
     def __str__(self):
-        settings = self.settings or {}
-        business_profile = self.business_profile or {}
+        settings = self.stripe_data.get("settings") or {}
+        business_profile = self.stripe_data.get("business_profile") or {}
         return (
             settings.get("dashboard", {}).get("display_name")
             or business_profile.get("name")

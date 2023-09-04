@@ -29,6 +29,7 @@ class StripeBaseModel(models.Model):
 
     djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
     djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
+    stripe_data = JSONField(default=dict)
 
     class Meta:
         abstract = True
@@ -378,13 +379,19 @@ class StripeModel(StripeBaseModel):
                 % (manipulated_data.get("object", ""), cls.__name__)
             )
 
-        result = {}
+        # By default we put the  raw stripe data in the stripe_data json field
+        result = {"stripe_data": data}
+
         if current_ids is None:
             current_ids = set()
 
         # Iterate over all the fields that we know are related to Stripe,
         # let each field work its own magic
-        ignore_fields = ["date_purged", "subscriber"]  # XXX: Customer hack
+        ignore_fields = [
+            "date_purged",
+            "subscriber",
+            "stripe_data",
+        ]  # XXX: Customer hack
 
         # get all forward and reverse relations for given cls
         for field in cls._meta.get_fields():
