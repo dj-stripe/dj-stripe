@@ -256,7 +256,10 @@ class DiscountAdmin(ReadOnlyMixin, StripeModelAdmin):
         "promotion_code",
         "subscription",
     )
-    list_filter = ("customer", "start", "end", "promotion_code", "coupon")
+    list_filter = (
+        "customer",
+        "promotion_code",
+    )
 
     def get_actions(self, request):
         """
