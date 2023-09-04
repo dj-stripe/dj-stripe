@@ -616,7 +616,6 @@ class ShippingRateAdmin(StripeModelAdmin):
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer",)
-    list_filter = ("status", "cancel_at_period_end")
 
     inlines = (SubscriptionItemInline, SubscriptionScheduleInline, LineItemInline)
 
