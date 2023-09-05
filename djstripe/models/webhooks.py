@@ -58,7 +58,6 @@ class WebhookEndpoint(StripeModel):
     )
 
     djstripe_uuid = models.UUIDField(
-        null=True,
         unique=True,
         default=uuid4,
         help_text="A UUID specific to dj-stripe generated for the endpoint",
