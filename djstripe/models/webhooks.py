@@ -179,7 +179,7 @@ class WebhookEventTrigger(models.Model):
         return f"id={self.id}, valid={self.valid}, processed={self.processed}"
 
     @classmethod
-    def from_request(cls, request, *, webhook_endpoint: WebhookEndpoint = None):
+    def from_request(cls, request, *, webhook_endpoint: WebhookEndpoint):
         """
         Create, validate and process a WebhookEventTrigger given a Django
         request object.
@@ -197,17 +197,8 @@ class WebhookEventTrigger(models.Model):
 
         ip = get_remote_ip(request)
 
-        try:
-            data = json.loads(body)
-        except ValueError:
-            data = {}
-
-        if webhook_endpoint is None:
-            stripe_account = StripeModel._find_owner_account(data=data)
-            secret = djstripe_settings.WEBHOOK_SECRET
-        else:
-            stripe_account = webhook_endpoint.djstripe_owner_account
-            secret = webhook_endpoint.secret
+        stripe_account = webhook_endpoint.djstripe_owner_account
+        secret = webhook_endpoint.secret
 
         obj = cls.objects.create(
             headers=dict(request.headers),
@@ -225,21 +216,22 @@ class WebhookEventTrigger(models.Model):
             # Validate the webhook first
             signals.webhook_pre_validate.send(sender=cls, instance=obj)
 
-            if webhook_endpoint:
-                # Default to per Webhook Endpoint Tolerance
-                obj.valid = obj.validate(
-                    secret=secret,
-                    api_key=api_key,
-                    tolerance=webhook_endpoint.tolerance,
-                )
-            else:
-                obj.valid = obj.validate(secret=secret, api_key=api_key)
+            # Default to per Webhook Endpoint Tolerance
+            obj.valid = obj.validate(
+                secret=secret,
+                api_key=api_key,
+                tolerance=webhook_endpoint.tolerance,
+            )
+
+            # send post webhook validate signal
             signals.webhook_post_validate.send(
                 sender=cls, instance=obj, valid=obj.valid
             )
 
             if obj.valid:
                 signals.webhook_pre_process.send(sender=cls, instance=obj)
+
+                # todo this should be moved to per webhook endpoint callback
                 if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
                     # If WEBHOOK_EVENT_CALLBACK, pass it for processing
                     djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj, api_key=api_key)
