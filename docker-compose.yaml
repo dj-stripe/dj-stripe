@@ -101,7 +101,7 @@ services:
   stripe:
     image: stripe/stripe-cli:v1.17.2
     # new with uuid (for dj-stripe)
-    command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_41a30547f3aa245031507ab2b4898a07904bbf4c02b09b52b8d375412b0d9530", "--forward-to", "http://web:8000/djstripe/webhook/6be37840-dbc4-4646-9240-e78f5cf71439/"]
+    command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_41a30547f3aa245031507ab2b4898a07904bbf4c02b09b52b8d375412b0d9530", "--forward-to", "http://web:8000/djstripe/webhook/985ed5e9-828d-4359-a7c3-4aa80341821f/"]
     # # new with uuid (for Personal)
     # command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_41a30547f3aa245031507ab2b4898a07904bbf4c02b09b52b8d375412b0d9530", "--forward-to", "http://web:8000/djstripe/webhook/b1e24d53-cba6-4658-bea1-e5233b1dc004/"]
 
