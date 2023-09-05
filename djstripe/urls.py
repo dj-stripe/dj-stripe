@@ -16,11 +16,6 @@ app_name = "djstripe"
 
 urlpatterns = [
     # Webhook
-    re_path(
-        app_settings.DJSTRIPE_WEBHOOK_URL,
-        views.ProcessWebhookView.as_view(),
-        name="webhook",
-    ),
     path(
         "webhook/<uuid:uuid>/",
         views.ProcessWebhookView.as_view(),
