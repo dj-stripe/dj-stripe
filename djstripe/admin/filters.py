@@ -66,7 +66,7 @@ class CustomerSubscriptionStatusListFilter(admin.SimpleListFilter):
         statuses = [
             [x, x.replace("_", " ").title()]
             for x in models.Subscription.objects.values_list(
-                "status", flat=True
+                "djstripe_data__status", flat=True
             ).distinct()
         ]
         statuses.append(["none", "No Subscription"])
