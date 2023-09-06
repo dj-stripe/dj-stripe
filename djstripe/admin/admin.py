@@ -790,10 +790,8 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
         try:
             obj._api_delete()
         except InvalidRequestError as e:
-            if e.user_message.startswith("No such webhook endpoint: "):
-                # Webhook was already deleted in Stripe
-                pass
-            else:
+            # Error other than Webhook was already deleted in Stripe
+            if not e.user_message.startswith("No such webhook endpoint: "):
                 raise
 
         return super().delete_model(request, obj)
