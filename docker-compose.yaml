@@ -61,20 +61,6 @@ services:
         - STRIPE_PUBLIC_KEY=pk_test_51ItQ7cJSZQVUcJYgoSx1ZdKy5zhybSUiyJXWQno83L24EPUlFHeIe2QVe1RiB7kxvbjJ9SZ0G6R3fnfJTamauH1C00MyCpOqZ8
         # djstripe
         - STRIPE_SECRET_KEY=sk_test_51ItQ7cJSZQVUcJYgHMIKKvkqL6XNUHRI1kQcpoR9yEdOusA5rWpTXpXYnIqHpIvWlu5odQYNBDVwNSYTJN1HmtCC00RvEyLiZW
-        # # For UUID: 1c77437a-1692-4f4d-bb13-8accf9509181
-        - DJSTRIPE_TEST_WEBHOOK_SECRET=whsec_5wNQQwYbfwgVsGOXhPAId44UnAp6SYMc
-
-
-
-        # # # For UUID: b04655e4-6dc9-4f6b-bbaa-72d553dba648
-        # - DJSTRIPE_TEST_WEBHOOK_SECRET=whsec_atrQHypckSRYBOG2GAblEod47bPDJ0p2
-
-
-        # # # For UUID: 2247007f-a917-4cbf-a94a-e45a7934ca37
-        # - DJSTRIPE_TEST_WEBHOOK_SECRET=whsec_JuD2BGuVv9veVPJspO4l0mQfblPEqZ2p
-
-        # # # For UUID: 0bef45ee-10ab-47a8-9d2b-f5451da5dae2
-        # - DJSTRIPE_TEST_WEBHOOK_SECRET=whsec_kPQjj06VD4CgxVnvlMG1sXoOZf5k9iY9
         # # personal
         # - STRIPE_API_KEY=sk_test_51Fg9jUA3kq9o1aTczzVzC3jP1gU0BTsx8YfnOOzG3B6eL1BIcQcgSTBpqnmX3dCHIB58pyKr19YB6xT7tMLGEEj200mXR3NHUu
     ##############################################
@@ -101,7 +87,7 @@ services:
   stripe:
     image: stripe/stripe-cli:v1.17.2
     # new with uuid (for dj-stripe)
-    command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_41a30547f3aa245031507ab2b4898a07904bbf4c02b09b52b8d375412b0d9530", "--forward-to", "http://web:8000/djstripe/webhook/985ed5e9-828d-4359-a7c3-4aa80341821f/"]
+    command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_41a30547f3aa245031507ab2b4898a07904bbf4c02b09b52b8d375412b0d9530", "--forward-to", "http://web:8000/djstripe/webhook/d89f4af8-3ab2-49f3-9af8-19994cb0d271/"]
     # # new with uuid (for Personal)
     # command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_41a30547f3aa245031507ab2b4898a07904bbf4c02b09b52b8d375412b0d9530", "--forward-to", "http://web:8000/djstripe/webhook/b1e24d53-cba6-4658-bea1-e5233b1dc004/"]
 
