@@ -156,7 +156,16 @@ class APIKeyAdmin(admin.ModelAdmin):
             with transaction.atomic():
                 obj.save()
         except IntegrityError:
-            pass
+            # APIKey has already been created
+
+            # Get the name from the form
+            name = form.cleaned_data.get("name", "")
+            # Get APIKey from DB
+            instance = self.model.objects.get(secret=obj.secret)
+
+            # Update name of APIKey
+            instance.name = name
+            instance.save()
 
 
 @admin.register(models.BalanceTransaction)
