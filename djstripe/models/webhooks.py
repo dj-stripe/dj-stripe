@@ -80,9 +80,12 @@ class WebhookEndpoint(StripeModel):
         super()._attach_objects_hook(
             cls, data, current_ids=current_ids, api_key=api_key
         )
-
         self.djstripe_uuid = data.get("metadata", {}).get("djstripe_uuid")
-        self.tolerance = data.get("tolerance", stripe.Webhook.DEFAULT_TOLERANCE)
+
+        djstripe_tolerance = data.get("djstripe_tolerance")
+        # As djstripe_tolerance can be set to 0
+        if djstripe_tolerance is not None:
+            self.djstripe_tolerance = djstripe_tolerance
 
 
 def _get_version():
