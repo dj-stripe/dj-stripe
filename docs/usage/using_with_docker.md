@@ -40,7 +40,6 @@ services:
         # Stripe specific keys
         - STRIPE_PUBLIC_KEY=pk_test_******
         - STRIPE_SECRET_KEY=sk_test_******
-        - DJSTRIPE_TEST_WEBHOOK_SECRET=whsec_******
 
         # Database Specific Settings
         - DJSTRIPE_TEST_DB_VENDOR=postgres
