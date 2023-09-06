@@ -748,7 +748,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
                 "metadata",
                 "api_version",
                 "djstripe_uuid",
-                "tolerance",
+                "djstripe_tolerance",
             ]
             if obj.djstripe_uuid:
                 core_fields = [
@@ -768,7 +768,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
                 "metadata",
                 "api_version",
                 "enabled_events",
-                "tolerance",
+                "djstripe_tolerance",
             ]
 
         return [
