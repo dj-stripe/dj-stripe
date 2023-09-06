@@ -77,6 +77,12 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
         self.fields["description"].help_text = ""
         self.fields["description"].widget.attrs["rows"] = 3
 
+    def add_endpoint_tolerance(self):
+        """Add djstripe_tolerance from submitted form"""
+        self._stripe_data["djstripe_tolerance"] = self.cleaned_data.get(
+            "djstripe_tolerance"
+        )
+
     def _get_field_name(self, stripe_field: Optional[str]) -> Optional[str]:
         if stripe_field is None:
             return None
@@ -95,6 +101,8 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
         if self.instance.pk and not self._stripe_data.get("secret"):
             self._stripe_data["secret"] = self.instance.secret
 
+        # Add webhook tolerance from submitted form
+        self.add_endpoint_tolerance()
         # Retrieve the api key that was used to create the endpoint
         api_key = getattr(self, "_stripe_api_key", None)
         if api_key:
