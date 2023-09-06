@@ -223,7 +223,6 @@ class WebhookEventTrigger(models.Model):
             obj.valid = obj.validate(
                 secret=secret,
                 api_key=api_key,
-                tolerance=webhook_endpoint.tolerance,
             )
 
             # send post webhook validate signal
@@ -277,9 +276,7 @@ class WebhookEventTrigger(models.Model):
         event_id = self.json_body.get("id")
         return event_id and event_id.endswith("_00000000000000")
 
-    def verify_signature(
-        self, secret: str, tolerance: int = stripe.Webhook.DEFAULT_TOLERANCE
-    ) -> bool:
+    def verify_signature(self, secret: str, tolerance: int) -> bool:
         if not secret:
             raise ValueError("Cannot verify event signature without a secret")
 
@@ -299,9 +296,8 @@ class WebhookEventTrigger(models.Model):
 
     def validate(
         self,
-        api_key: str = None,
-        secret: str = djstripe_settings.WEBHOOK_SECRET,
-        tolerance: int = stripe.Webhook.DEFAULT_TOLERANCE,
+        api_key: str,
+        secret: str,
         validation_method=djstripe_settings.WEBHOOK_VALIDATION,
     ):
         """
@@ -335,7 +331,9 @@ class WebhookEventTrigger(models.Model):
                 headers = CaseInsensitiveMapping(self.headers)
                 local_secret = headers.get("x-djstripe-webhook-secret")
                 secret = local_secret if local_secret else secret
-            return self.verify_signature(secret=secret, tolerance=tolerance)
+            return self.verify_signature(
+                secret=secret, tolerance=self.webhook_endpoint.djstripe_tolerance
+            )
 
         livemode = local_data["livemode"]
         api_key = api_key or djstripe_settings.get_default_api_key(livemode)
