@@ -1,6 +1,7 @@
 """
 dj-stripe Webhook Tests.
 """
+
 import json
 import warnings
 from collections import defaultdict
@@ -145,7 +146,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
 
     @override_settings(
         DJSTRIPE_WEBHOOK_VALIDATION="verify_signature",
-        DJSTRIPE_WEBHOOK_SECRET="whsec_XXXXX",
     )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
@@ -173,7 +173,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
 
     @override_settings(
         DJSTRIPE_WEBHOOK_VALIDATION="verify_signature",
-        DJSTRIPE_WEBHOOK_SECRET="whsec_XXXXX",
     )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
@@ -206,12 +205,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
-        verify_header_mock.assert_called_once_with(
-            json.dumps(FAKE_EVENT_TRANSFER_CREATED),
-            "PLACEHOLDER",
-            djstripe_settings.WEBHOOK_SECRET,
-            300,
-        )
         event_retrieve_mock.assert_not_called()
 
     @patch.object(Transfer, "_attach_objects_post_save_hook")
@@ -254,12 +247,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
-        verify_header_mock.assert_called_once_with(
-            json.dumps(FAKE_EVENT_TRANSFER_CREATED),
-            "PLACEHOLDER",
-            djstripe_settings.WEBHOOK_SECRET,
-            500,
-        )
         event_retrieve_mock.assert_not_called()
 
     @patch.object(

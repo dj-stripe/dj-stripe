@@ -21,13 +21,6 @@ When saved from the admin, the endpoint will be created in Stripe with a dj-stri
 specific UUID which will be part of the URL, making it impossible to guess externally
 by brute-force.
 
-## Legacy setup
-
-Before dj-stripe 2.7.0, dj-stripe included a global webhook endpoint URL, which uses the
-setting [`DJSTRIPE_WEBHOOK_SECRET`][djstripe.settings.DjstripeSettings.WEBHOOK_SECRET]
-to validate incoming webhooks.
-
-This is not recommended as it makes the URL guessable, and may be removed in the future.
 
 ## Extra configuration
 
