@@ -83,17 +83,6 @@ If the model referenced in DJSTRIPE_SUBSCRIBER_MODEL is not created in the `__fi
 migration of an app you can specify the migration name to depend on here. For example:
 "0003_here_the_subscriber_model_was_added"
 
-## DJSTRIPE_WEBHOOK_URL (=r"^webhook/$")
-
-!!! warning
-
-    This setting is deprecated and will be removed in dj-stripe 2.9.
-
-This is where you can tell Stripe to send webhook responses. You can set this to what
-you want to prevent unnecessary hijinks from unfriendly people.
-
-As this is embedded in the URLConf, this must be a resolvable regular expression.
-
 ## DJSTRIPE_WEBHOOK_VALIDATION= (="verify_signature")
 
 This setting controls which type of validation is done on webhooks. Value can be
