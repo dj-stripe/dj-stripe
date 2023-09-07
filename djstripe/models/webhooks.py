@@ -92,6 +92,10 @@ class WebhookEndpoint(StripeModel):
         if djstripe_tolerance is not None:
             self.djstripe_tolerance = djstripe_tolerance
 
+        djstripe_validation_method = data.get("djstripe_validation_method")
+        if djstripe_validation_method:
+            self.djstripe_validation_method = djstripe_validation_method
+
 
 def _get_version():
     from ..apps import __version__
