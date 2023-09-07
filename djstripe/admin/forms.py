@@ -167,6 +167,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             "api_version",
             "metadata",
             "djstripe_tolerance",
+            "djstripe_validation_method",
         )
 
     # Hook into _post_clean() instead of save().
@@ -242,6 +243,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
             "enabled_events",
             "metadata",
             "djstripe_tolerance",
+            "djstripe_validation_method",
         )
 
     def get_initial_for_field(self, field, field_name):
