@@ -85,8 +85,6 @@
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-webhook-endpoint-in-dj-stripe">Setting up a new webhook endpoint in dj-stripe</a>
     </li>
-    <li class="toctree-l2"><a class="reference internal" href="#legacy-setup">Legacy setup</a>
-    </li>
     <li class="toctree-l2"><a class="reference internal" href="#extra-configuration">Extra configuration</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#advanced-usage">Advanced usage</a>
@@ -179,11 +177,6 @@ with such a value, so you will want to change it to a real website URL.</p>
 <p>When saved from the admin, the endpoint will be created in Stripe with a dj-stripe
 specific UUID which will be part of the URL, making it impossible to guess externally
 by brute-force.</p>
-<h2 id="legacy-setup">Legacy setup</h2>
-<p>Before dj-stripe 2.7.0, dj-stripe included a global webhook endpoint URL, which uses the
-setting <a class="autorefs autorefs-internal" href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_SECRET"><code>DJSTRIPE_WEBHOOK_SECRET</code></a>
-to validate incoming webhooks.</p>
-<p>This is not recommended as it makes the URL guessable, and may be removed in the future.</p>
 <h2 id="extra-configuration">Extra configuration</h2>
 <p>dj-stripe provides the following settings to tune how your webhooks work:</p>
 <ul>
