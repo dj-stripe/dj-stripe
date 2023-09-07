@@ -111,7 +111,6 @@ STRIPE_TEST_SECRET_KEY = os.environ.get(
     "sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX",
 )
 
-DJSTRIPE_WEBHOOK_VALIDATION = "verify_signature"
 
 STATIC_URL = "/static/"
 
