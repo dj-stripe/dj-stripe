@@ -303,7 +303,6 @@ class WebhookEventTrigger(models.Model):
         self,
         api_key: str,
         secret: str,
-        validation_method=djstripe_settings.WEBHOOK_VALIDATION,
     ):
         """
         The original contents of the Event message must be confirmed by
@@ -324,11 +323,13 @@ class WebhookEventTrigger(models.Model):
             logger.info("Test webhook received and discarded: %s", local_data)
             return False
 
-        if validation_method is None:
+        validation_method = self.webhook_endpoint.djstripe_validation_method
+
+        if validation_method == WebhookEndpointValidation.none:
             # validation disabled
             warnings.warn("WEBHOOK VALIDATION is disabled.")
             return True
-        elif validation_method == "verify_signature":
+        elif validation_method == WebhookEndpointValidation.verify_signature:
             if settings.DEBUG:
                 # In debug mode, allow overriding the webhook secret with
                 # the x-djstripe-webhook-secret header.
