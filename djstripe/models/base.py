@@ -356,7 +356,11 @@ class StripeModel(StripeBaseModel):
 
         # Iterate over all the fields that we know are related to Stripe,
         # let each field work its own magic
-        ignore_fields = ["date_purged", "subscriber"]  # XXX: Customer hack
+        ignore_fields = [
+            "date_purged",
+            "subscriber",
+            "stripe_data",
+        ]  # XXX: Customer hack
 
         # get all forward and reverse relations for given cls
         for field in cls._meta.get_fields():
