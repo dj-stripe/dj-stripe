@@ -14,7 +14,7 @@ from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
 from .. import signals
-from ..enums import WebhookEndpointStatus
+from ..enums import WebhookEndpointStatus, WebhookEndpointValidation
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
 from .base import StripeModel, logger
@@ -65,6 +65,11 @@ class WebhookEndpoint(StripeModel):
     djstripe_tolerance = models.PositiveSmallIntegerField(
         help_text="Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you're doing.",
         default=stripe.Webhook.DEFAULT_TOLERANCE,
+    )
+    djstripe_validation_method = StripeEnumField(
+        enum=WebhookEndpointValidation,
+        help_text="Controls the webhook validation method.",
+        default=WebhookEndpointValidation.verify_signature,
     )
 
     def __str__(self):
