@@ -29,7 +29,7 @@ class StripeBaseModel(models.Model):
 
     djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
     djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
-    djstripe_data = JSONField(default=dict)
+    stripe_data = JSONField(default=dict)
 
     class Meta:
         abstract = True
@@ -348,8 +348,8 @@ class StripeModel(StripeBaseModel):
                 % (manipulated_data.get("object", ""), cls.__name__)
             )
 
-        # By default we put the  raw stripe data in the djstripe_data json field
-        result = {"djstripe_data": data}
+        # By default we put the  raw stripe data in the stripe_data json field
+        result = {"stripe_data": data}
 
         if current_ids is None:
             current_ids = set()
