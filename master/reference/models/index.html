@@ -32166,8 +32166,8 @@ current e-mail address or if the account is enabled yet to make live charges.</p
             <span class="k">return</span> <span class="n">apikey_instance</span><span class="o">.</span><span class="n">djstripe_owner_account</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="ow">or</span> <span class="p">{}</span>
-        <span class="n">business_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">business_profile</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stripe_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;settings&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">business_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stripe_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;business_profile&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dashboard&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;display_name&quot;</span><span class="p">)</span>
             <span class="ow">or</span> <span class="n">business_profile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
@@ -32452,8 +32452,8 @@ current e-mail address or if the account is enabled yet to make live charges.</p
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
 <span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="ow">or</span> <span class="p">{}</span>
-    <span class="n">business_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">business_profile</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stripe_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;settings&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">business_profile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stripe_data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;business_profile&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="n">settings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dashboard&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;display_name&quot;</span><span class="p">)</span>
         <span class="ow">or</span> <span class="n">business_profile</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">)</span>
