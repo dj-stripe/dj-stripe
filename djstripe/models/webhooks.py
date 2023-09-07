@@ -14,7 +14,7 @@ from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
 from .. import signals
-from ..enums import WebhookEndpointStatus
+from ..enums import WebhookEndpointStatus, WebhookEndpointValidation
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
 from .base import StripeModel, logger
@@ -69,6 +69,11 @@ class WebhookEndpoint(StripeModel):
         ),
         default=stripe.Webhook.DEFAULT_TOLERANCE,
     )
+    djstripe_validation_method = StripeEnumField(
+        enum=WebhookEndpointValidation,
+        help_text="Controls the webhook validation method.",
+        default=WebhookEndpointValidation.verify_signature,
+    )
 
     def __str__(self):
         return self.url or str(self.djstripe_uuid)
@@ -89,6 +94,10 @@ class WebhookEndpoint(StripeModel):
         # As djstripe_tolerance can be set to 0
         if djstripe_tolerance is not None:
             self.djstripe_tolerance = djstripe_tolerance
+
+        djstripe_validation_method = data.get("djstripe_validation_method")
+        if djstripe_validation_method:
+            self.djstripe_validation_method = djstripe_validation_method
 
 
 def _get_version():
@@ -301,7 +310,6 @@ class WebhookEventTrigger(models.Model):
         self,
         api_key: str,
         secret: str,
-        validation_method=djstripe_settings.WEBHOOK_VALIDATION,
     ):
         """
         The original contents of the Event message must be confirmed by
@@ -322,11 +330,13 @@ class WebhookEventTrigger(models.Model):
             logger.info("Test webhook received and discarded: %s", local_data)
             return False
 
-        if validation_method is None:
+        validation_method = self.webhook_endpoint.djstripe_validation_method
+
+        if validation_method == WebhookEndpointValidation.none:
             # validation disabled
             warnings.warn("WEBHOOK VALIDATION is disabled.")
             return True
-        elif validation_method == "verify_signature":
+        elif validation_method == WebhookEndpointValidation.verify_signature:
             if settings.DEBUG:
                 # In debug mode, allow overriding the webhook secret with
                 # the x-djstripe-webhook-secret header.

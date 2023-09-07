@@ -715,6 +715,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
                 "api_version",
                 "djstripe_uuid",
                 "djstripe_tolerance",
+                "djstripe_validation_method",
             ]
             if obj.djstripe_uuid:
                 core_fields = [
@@ -735,6 +736,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
                 "api_version",
                 "enabled_events",
                 "djstripe_tolerance",
+                "djstripe_validation_method",
             ]
 
         return [

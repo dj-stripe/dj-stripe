@@ -84,6 +84,12 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
             "djstripe_tolerance"
         )
 
+    def add_endpoint_validation_method(self):
+        """Add djstripe_validation_method from submitted form"""
+        self._stripe_data["djstripe_validation_method"] = self.cleaned_data.get(
+            "djstripe_validation_method"
+        )
+
     def _get_field_name(self, stripe_field: Optional[str]) -> Optional[str]:
         if stripe_field is None:
             return None
@@ -102,8 +108,10 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
         if self.instance.pk and not self._stripe_data.get("secret"):
             self._stripe_data["secret"] = self.instance.secret
 
-        # Add webhook tolerance from submitted form
+        # Add webhook tolerance and validation method from submitted form
         self.add_endpoint_tolerance()
+        self.add_endpoint_validation_method()
+
         # Retrieve the api key that was used to create the endpoint
         api_key = getattr(self, "_stripe_api_key", None)
         if api_key:
@@ -168,6 +176,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             "api_version",
             "metadata",
             "djstripe_tolerance",
+            "djstripe_validation_method",
         )
 
     # Hook into _post_clean() instead of save().
@@ -243,6 +252,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
             "enabled_events",
             "metadata",
             "djstripe_tolerance",
+            "djstripe_validation_method",
         )
 
     def get_initial_for_field(self, field, field_name):

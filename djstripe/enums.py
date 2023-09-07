@@ -891,6 +891,14 @@ class WebhookEndpointStatus(Enum):
     disabled = _("disabled")
 
 
+class WebhookEndpointValidation(Enum):
+    """An enum to specific the choices for WebhookEndpoint Validation."""
+
+    verify_signature = _("Verify Signature")
+    retrieve_event = _("Retrieve Event")
+    none = _("None (NOT RECOMMENDED)")
+
+
 class DjstripePaymentMethodType(Enum):
     """
     A djstripe-specific enum for the DjStripePaymentMethod model.
