@@ -172,12 +172,15 @@ We retain model fields for useful foreign keys and other frequently-used fields.
 <li>Migrations have been reset.</li>
 <li>Removed deprecated <code>DJSTRIPE_WEBHOOK_TOLERANCE</code> setting.</li>
 <li>Removed deprecated <code>DJSTRIPE_WEBHOOK_SECRET</code> setting.</li>
+<li>Removed deprecated <code>DJSTRIPE_WEBHOOK_VALIDATION</code> setting.</li>
+<li>Removed deprecated <code>DJSTRIPE_WEBHOOK_URL</code> setting.</li>
 <li>Removed legacy <code>Customer.add_card()</code> method. Use <code>Custoner.add_payment_method()</code> instead.</li>
 <li>Most of the models visible in the Django Admin are now read-only. (Note: This does
     not change anything functionally, as editing models was not replicated upstream.)</li>
 <li><code>DJSTRIPE_FOREIGN_KEY_TO_FIELD</code> setting has been removed, which drops support for
     legacy <code>djstripe_id</code> foreign keys.</li>
 <li>Support for webhook endpoints without <code>UUID</code> has been dropped</li>
+<li>You can now configure validation method on a per webhook endpoint basis.</li>
 </ul>
 <h2 id="other-changes">Other changes</h2>
               

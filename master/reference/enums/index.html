@@ -575,6 +575,12 @@
     </li>
         </ul>
     </li>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.enums.WebhookEndpointValidation">WebhookEndpointValidation</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#djstripe.enums.WebhookEndpointValidation-attributes">Attributes</a>
+    </li>
+        </ul>
+    </li>
         </ul>
     </li>
     </ul>
@@ -6660,15 +6666,15 @@
 
             <details class="quote">
               <summary>Source code in <code>djstripe/enums.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">858</span>
-<span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span>
-<span class="normal">862</span>
-<span class="normal">863</span>
-<span class="normal">864</span>
-<span class="normal">865</span>
-<span class="normal">866</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripePaymentMethodType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">866</span>
+<span class="normal">867</span>
+<span class="normal">868</span>
+<span class="normal">869</span>
+<span class="normal">870</span>
+<span class="normal">871</span>
+<span class="normal">872</span>
+<span class="normal">873</span>
+<span class="normal">874</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DjstripePaymentMethodType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A djstripe-specific enum for the DjStripePaymentMethod model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -16039,6 +16045,124 @@ and SetupIntents.</p>
 
 <h5 id="djstripe.enums.WebhookEndpointStatus.enabled" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">WebhookEndpointStatus</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+
+
+
+
+  </div>
+
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+
+<h3 id="djstripe.enums.WebhookEndpointValidation" class="doc doc-heading">
+          <code>djstripe.enums.WebhookEndpointValidation</code>
+
+
+</h3>
+
+
+  <div class="doc doc-contents ">
+          <p class="doc doc-class-bases">
+            Bases: <code><a class="autorefs autorefs-internal" title="djstripe.enums.Enum" href="#djstripe.enums.Enum">Enum</a></code></p>
+
+  
+      <p>An enum to specific the choices for WebhookEndpoint Validation.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>djstripe/enums.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">WebhookEndpointValidation</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;An enum to specific the choices for WebhookEndpoint Validation.&quot;&quot;&quot;</span>
+
+    <span class="n">verify_signature</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Verify Signature&quot;</span><span class="p">)</span>
+    <span class="n">retrieve_event</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Retrieve Event&quot;</span><span class="p">)</span>
+    <span class="n">none</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;None (NOT RECOMMENDED)&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+
+  
+
+  <div class="doc doc-children">
+
+
+
+
+
+<h4 id="djstripe.enums.WebhookEndpointValidation-attributes">Attributes</h4>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h5 id="djstripe.enums.WebhookEndpointValidation.none" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">WebhookEndpointValidation</span><span class="o">.</span><span class="n">none</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;None (NOT RECOMMENDED)&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h5 id="djstripe.enums.WebhookEndpointValidation.retrieve_event" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">WebhookEndpointValidation</span><span class="o">.</span><span class="n">retrieve_event</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Retrieve Event&#39;</span><span class="p">)</span></code>
+  
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
+      <small class="doc doc-label doc-label-instance-attribute"><code>instance-attribute</code></small>
+  </span>
+
+</h5>
+
+
+  <div class="doc doc-contents ">
+  </div>
+
+</div>
+
+<div class="doc doc-object doc-attribute">
+
+
+
+
+<h5 id="djstripe.enums.WebhookEndpointValidation.verify_signature" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">enums</span><span class="o">.</span><span class="n">WebhookEndpointValidation</span><span class="o">.</span><span class="n">verify_signature</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s1">&#39;Verify Signature&#39;</span><span class="p">)</span></code>
   
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-class-attribute"><code>class-attribute</code></small>
