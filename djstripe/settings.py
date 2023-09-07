@@ -71,10 +71,6 @@ class DjstripeSettings:
         return 12
 
     @property
-    def DJSTRIPE_WEBHOOK_URL(self):
-        return getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
-
-    @property
     def WEBHOOK_VALIDATION(self):
         return getattr(settings, "DJSTRIPE_WEBHOOK_VALIDATION", "verify_signature")
 
