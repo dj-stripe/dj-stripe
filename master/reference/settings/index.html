@@ -137,6 +137,8 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#stripe_api_host-unset">STRIPE_API_HOST (= unset)</a>
     </li>
+    <li class="toctree-l2"><a class="reference internal" href="#djstripe_subscriber_model_request_callback-optionally-required">DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK (Optionally Required)</a>
+    </li>
     <li class="toctree-l2"><a class="reference internal" href="#source-code">Source Code</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe.settings">settings</a>
@@ -299,6 +301,11 @@ processing.</p>
 example, <code>"http://localhost:12111"</code> if you are running
 <a href="https://github.com/stripe/stripe-mock">stripe-mock</a>.</p>
 <p>If this is set in production (DEBUG=False), a warning will be raised on <code>manage.py check</code>.</p>
+<h2 id="djstripe_subscriber_model_request_callback-optionally-required">DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK (Optionally Required)</h2>
+<p>This is required to be set in case you are linking Stripe Customers (via the <code>subscriber</code> model field) to a model other than the one defined by <code>settings.AUTH_USER_MODEL</code></p>
+<div class="highlight"><pre><span></span><code><span class="c1"># settings.py</span>
+<span class="n">DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK</span><span class="o">=</span><span class="p">(</span><span class="k">lambda</span> <span class="n">request</span><span class="p">:</span> <span class="n">request</span><span class="o">.</span><span class="n">org</span><span class="p">)</span>
+</code></pre></div>
 <h2 id="source-code">Source Code</h2>
 
 
