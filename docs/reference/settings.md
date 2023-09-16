@@ -149,6 +149,18 @@ example, `"http://localhost:12111"` if you are running
 
 If this is set in production (DEBUG=False), a warning will be raised on `manage.py check`.
 
+## DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK (Optionally Required)
+
+This is required to be set in case you are linking Stripe Customers (via the `subscriber` model field) to a model other than the one defined by `settings.AUTH_USER_MODEL`
+
+```py
+# settings.py
+DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK=(lambda request: request.org)
+
+```
+
+
+
 ## Source Code
 
 ::: djstripe.settings
