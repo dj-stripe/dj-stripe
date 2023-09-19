@@ -196,13 +196,15 @@ class StripeModel(StripeBaseModel):
             for which this request is being made.
         :type stripe_account: string
         """
+        api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.retrieve(
             id=self.id,
-            api_key=api_key or self.default_api_key,
+            api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=self.expand_fields,
             stripe_account=stripe_account,
@@ -236,6 +238,7 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
@@ -260,6 +263,7 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
