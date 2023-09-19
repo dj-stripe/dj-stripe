@@ -1922,6 +1922,7 @@ class SubscriptionSchedule(StripeModel):
         """
 
         api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
@@ -1950,6 +1951,7 @@ class SubscriptionSchedule(StripeModel):
         """
 
         api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
@@ -2150,6 +2152,7 @@ class TaxId(StripeModel):
         """
         nested_id = self.id
         id = self.customer.id
+        api_key = api_key or self.default_api_key
 
         # Prefer passed in stripe_account if set.
         if not stripe_account:
@@ -2158,7 +2161,7 @@ class TaxId(StripeModel):
         return stripe.Customer.retrieve_tax_id(
             id=id,
             nested_id=nested_id,
-            api_key=api_key or self.default_api_key,
+            api_key=api_key,
             expand=self.expand_fields,
             stripe_account=stripe_account,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
