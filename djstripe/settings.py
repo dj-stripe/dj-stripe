@@ -175,19 +175,11 @@ class DjstripeSettings:
         )
         return str(idempotency_key.uuid)
 
-    def get_default_api_key(self, livemode) -> str:
+    def get_default_api_key(self, livemode, djstripe_owner_account) -> str:
         """
-        Returns the default API key for a value of `livemode`.
+        Returns the default API key for a value of `livemode` and djstripe_owner_account.
         """
-        if livemode is None:
-            # Livemode is unknown. Use the default secret key.
-            return self.STRIPE_SECRET_KEY
-        elif livemode:
-            # Livemode is true, use the live secret key
-            return self.LIVE_API_KEY or self.STRIPE_SECRET_KEY
-        else:
-            # Livemode is false, use the test secret key
-            return self.TEST_API_KEY or self.STRIPE_SECRET_KEY
+        return self.GET_DEFAULT_STRIPE_SECRET_KEY(livemode, djstripe_owner_account)
 
     def get_subscriber_model_string(self) -> str:
         """Get the configured subscriber model as a module path string."""
