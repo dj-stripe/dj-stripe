@@ -71,7 +71,7 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
             listed_events = (
                 models.Event.stripe_class.retrieve(
                     id=event_id,
-                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                    api_key=djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY(),
                     stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 )
                 for event_id in event_ids

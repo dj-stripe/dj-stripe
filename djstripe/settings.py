@@ -1,11 +1,17 @@
 """
 dj-stripe settings
 """
+import logging
+
 import stripe
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
+
+from djstripe.enums import APIKeyType
+
+logger = logging.getLogger(__name__)
 
 
 class DjstripeSettings:
@@ -106,6 +112,28 @@ class DjstripeSettings:
         """
         version = getattr(settings, "STRIPE_API_VERSION", stripe.api_version)
         return version or self.DEFAULT_STRIPE_API_VERSION
+
+    def GET_DEFAULT_STRIPE_SECRET_KEY(self, livemode=None, djstripe_owner_account=None):
+        """Returns the default Stripe Secret Key"""
+        from .models import APIKey
+
+        data_dict = {
+            "type": APIKeyType.secret,
+            "djstripe_is_account_default": True,
+            "livemode": livemode or self.STRIPE_LIVE_MODE,
+        }
+
+        if djstripe_owner_account:
+            data_dict["djstripe_owner_account"] = djstripe_owner_account
+
+        try:
+            return APIKey.objects.get(**data_dict).secret
+        except APIKey.DoesNotExist:
+            logger.warn(
+                "No Account Default Secret API Key found, falling back to stripe.api_key"
+            )
+            # The user may have set this. By default Stripe sets it to None anyway
+            return stripe.api_key
 
     def get_callback_function(self, setting_name, default=None):
         """
