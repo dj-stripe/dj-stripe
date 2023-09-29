@@ -109,10 +109,12 @@ class Session(StripeModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
         from ..event_handlers import update_customer_helper
+
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations

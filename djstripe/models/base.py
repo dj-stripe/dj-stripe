@@ -35,12 +35,12 @@ class StripeBaseModel(models.Model):
         abstract = True
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         """
         Call the stripe API's list operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
 
         See Stripe documentation for accepted kwargs for each object.
@@ -49,7 +49,7 @@ class StripeBaseModel(models.Model):
         """
 
         return cls.stripe_class.list(
-            api_key=api_key,
+            api_key=api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY(),
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,
         ).auto_paging_iter()
@@ -141,7 +141,7 @@ class StripeModel(StripeBaseModel):
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -190,7 +190,7 @@ class StripeModel(StripeBaseModel):
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -211,15 +211,15 @@ class StripeModel(StripeBaseModel):
         )
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=None, **kwargs):
         """
         Call the stripe API's create operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         """
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         return cls.stripe_class.create(
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -231,7 +231,7 @@ class StripeModel(StripeBaseModel):
         Call the stripe API's delete operation for this model
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -256,7 +256,7 @@ class StripeModel(StripeBaseModel):
         Call the stripe API's modify operation for this model
 
         :param api_key: The api key to use for this request.
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -286,7 +286,7 @@ class StripeModel(StripeBaseModel):
         return data
 
     @classmethod
-    def _find_owner_account(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
+    def _find_owner_account(cls, data, api_key=None):
         """
         Fetches the Stripe Account (djstripe_owner_account model field)
         linked to the class, cls.
@@ -294,6 +294,8 @@ class StripeModel(StripeBaseModel):
         Otherwise uses the api_key.
         """
         from .account import Account
+
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         # try to fetch by stripe_account. Also takes care of Stripe Connected Accounts
         if data:
@@ -324,7 +326,7 @@ class StripeModel(StripeBaseModel):
         current_ids=None,
         pending_relations: list = None,
         stripe_account: str = None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ) -> Dict:
         """
         This takes an object, as it is formatted in Stripe's current API for our object
@@ -344,6 +346,8 @@ class StripeModel(StripeBaseModel):
         :return: All the members from the input, translated, mutated, etc
         """
         from .webhooks import WebhookEndpoint
+
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         manipulated_data = cls._manipulate_stripe_object_hook(data)
         if not cls.is_valid_object(manipulated_data):
@@ -435,7 +439,7 @@ class StripeModel(StripeBaseModel):
         current_ids=None,
         pending_relations=None,
         stripe_account=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ):
         """
         This converts a stripe API field to the dj stripe object it references,
@@ -455,6 +459,8 @@ class StripeModel(StripeBaseModel):
         :return:
         """
         from djstripe.models import DjstripePaymentMethod
+
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         field_data = None
         field_name = field.name
@@ -548,9 +554,7 @@ class StripeModel(StripeBaseModel):
             return False
         return data and data.get("object") == object_name
 
-    def _attach_objects_hook(
-        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
-    ):
+    def _attach_objects_hook(self, cls, data, api_key=None, current_ids=None):
         """
         Gets called by this object's create and sync methods just before save.
         Use this to populate fields before the model is saved.
@@ -568,7 +572,7 @@ class StripeModel(StripeBaseModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
         """
@@ -579,6 +583,7 @@ class StripeModel(StripeBaseModel):
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         unprocessed_pending_relations = []
         if pending_relations is not None:
@@ -616,7 +621,7 @@ class StripeModel(StripeBaseModel):
         pending_relations=None,
         save=True,
         stripe_account=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ):
         """
         Instantiates a model instance using the provided data object received
@@ -635,6 +640,7 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         :returns: The instantiated object.
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         stripe_data = cls._stripe_object_to_record(
             data,
             current_ids=current_ids,
@@ -678,7 +684,7 @@ class StripeModel(StripeBaseModel):
         pending_relations=None,
         save=True,
         stripe_account=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ):
         """
 
@@ -696,6 +702,7 @@ class StripeModel(StripeBaseModel):
         :return:
         :rtype: cls, bool
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         field = data.get(field_name)
         is_nested_data = field_name != "id"
         should_expand = False
@@ -788,7 +795,7 @@ class StripeModel(StripeBaseModel):
         cls,
         target_cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         current_ids=None,
     ):
         """
@@ -801,16 +808,14 @@ class StripeModel(StripeBaseModel):
         :param current_ids: stripe ids of objects that are currently being processed
         :type current_ids: set
         """
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         if "customer" in data and data["customer"]:
             return target_cls._get_or_create_from_stripe_object(
                 data, "customer", current_ids=current_ids, api_key=api_key
             )[0]
 
     @classmethod
-    def _stripe_object_to_default_tax_rates(
-        cls, target_cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
+    def _stripe_object_to_default_tax_rates(cls, target_cls, data, api_key=None):
         """
         Retrieves TaxRates for a Subscription or Invoice
         :param target_cls:
@@ -820,6 +825,7 @@ class StripeModel(StripeBaseModel):
         :return:
         """
         tax_rates = []
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         for tax_rate_data in data.get("default_tax_rates", []):
             tax_rate, _ = target_cls._get_or_create_from_stripe_object(
@@ -830,9 +836,7 @@ class StripeModel(StripeBaseModel):
         return tax_rates
 
     @classmethod
-    def _stripe_object_to_tax_rates(
-        cls, target_cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
+    def _stripe_object_to_tax_rates(cls, target_cls, data, api_key=None):
         """
         Retrieves TaxRates for a SubscriptionItem or InvoiceItem
         :param target_cls:
@@ -840,6 +844,7 @@ class StripeModel(StripeBaseModel):
         :return:
         """
         tax_rates = []
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         for tax_rate_data in data.get("tax_rates", []):
             tax_rate, _ = target_cls._get_or_create_from_stripe_object(
@@ -851,7 +856,7 @@ class StripeModel(StripeBaseModel):
 
     @classmethod
     def _stripe_object_set_total_tax_amounts(
-        cls, target_cls, data, instance, api_key=djstripe_settings.STRIPE_SECRET_KEY
+        cls, target_cls, data, instance, api_key=None
     ):
         """
         Set total tax amounts on Invoice instance
@@ -862,6 +867,8 @@ class StripeModel(StripeBaseModel):
         :return:
         """
         from .billing import TaxRate
+
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         pks = []
 
@@ -890,9 +897,7 @@ class StripeModel(StripeBaseModel):
         instance.total_tax_amounts.exclude(pk__in=pks).delete()
 
     @classmethod
-    def _stripe_object_to_line_items(
-        cls, target_cls, data, invoice, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
+    def _stripe_object_to_line_items(cls, target_cls, data, invoice, api_key=None):
         """
         Retrieves LineItems for an invoice.
 
@@ -908,6 +913,7 @@ class StripeModel(StripeBaseModel):
         :param invoice: The invoice object that should hold the line items.
         :type invoice: ``djstripe.models.Invoice``
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         lines = data.get("lines")
         if not lines:
             return []
@@ -934,7 +940,7 @@ class StripeModel(StripeBaseModel):
 
     @classmethod
     def _stripe_object_to_subscription_items(
-        cls, target_cls, data, subscription, api_key=djstripe_settings.STRIPE_SECRET_KEY
+        cls, target_cls, data, subscription, api_key=None
     ):
         """
         Retrieves SubscriptionItems for a subscription.
@@ -948,7 +954,7 @@ class StripeModel(StripeBaseModel):
         :param subscription: The subscription object that should hold the items.
         :type subscription: djstripe.models.Subscription
         """
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         items = data.get("items")
         if not items:
             subscription.items.delete()
@@ -971,9 +977,7 @@ class StripeModel(StripeBaseModel):
         return subscriptionitems
 
     @classmethod
-    def _stripe_object_to_refunds(
-        cls, target_cls, data, charge, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
+    def _stripe_object_to_refunds(cls, target_cls, data, charge, api_key=None):
         """
         Retrieves Refunds for a charge
         :param target_cls: The target class to instantiate per refund
@@ -984,6 +988,7 @@ class StripeModel(StripeBaseModel):
         :type charge: djstripe.models.Refund
         :return:
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         stripe_refunds = convert_to_stripe_object(data.get("refunds"))
 
         if not stripe_refunds:
@@ -1005,7 +1010,7 @@ class StripeModel(StripeBaseModel):
     def sync_from_stripe_data(
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         stripe_version=djstripe_settings.STRIPE_API_VERSION,
     ):
         """
@@ -1017,6 +1022,7 @@ class StripeModel(StripeBaseModel):
         :type data: dict
         :rtype: cls
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         current_ids = set()
         data_id = data.get("id")
         stripe_account = getattr(data, "stripe_account", None)
