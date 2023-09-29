@@ -22,6 +22,7 @@ from .admin_inline import (
 from .filters import CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter
 from .forms import (
     APIKeyAdminCreateForm,
+    APIKeyAdminEditForm,
     CustomActionForm,
     WebhookEndpointAdminCreateForm,
     WebhookEndpointAdminEditForm,
@@ -154,7 +155,7 @@ class APIKeyAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
             return APIKeyAdminCreateForm
-        return super().get_form(request, obj, **kwargs)
+        return APIKeyAdminEditForm
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("djstripe_owner_account")

@@ -56,6 +56,40 @@ class APIKeyAdminBaseForm(forms.ModelForm):
         return f"You have already configured an account default {self.instance.type} key on {self.instance.djstripe_owner_account}. Consider unchecking the Account Default checkbox or add another key type"
 
 
+class APIKeyAdminEditForm(APIKeyAdminBaseForm):
+    class Meta(APIKeyAdminBaseForm.Meta):
+        fields = list(
+            set(
+                APIKeyAdminBaseForm.Meta.fields + ["djstripe_owner_account", "livemode"]
+            )
+        )
+
+    def clean(self):
+        cd = super().clean()
+        # Add back data for Read only fields
+        cd["djstripe_owner_account"] = self.instance.djstripe_owner_account
+        cd["type"] = self.instance.type
+        cd["secret"] = self.instance.secret
+        cd["livemode"] = self.instance.livemode
+
+        # We check only when the user tries to update djstripe_is_account_default
+        if (
+            cd["djstripe_is_account_default"]
+            != self.instance.djstripe_is_account_default
+        ):
+            qs = models.APIKey.objects.filter(
+                type=self.instance.type,
+                livemode=self.instance.livemode,
+                djstripe_owner_account=self.instance.djstripe_owner_account,
+                djstripe_is_account_default=cd["djstripe_is_account_default"],
+            )
+
+            if cd["djstripe_is_account_default"] and qs.exists():
+                raise forms.ValidationError(self.construct_custom_error_message)
+
+        return cd
+
+
 class APIKeyAdminCreateForm(APIKeyAdminBaseForm):
     class Meta(APIKeyAdminBaseForm.Meta):
         fields = list(set(APIKeyAdminBaseForm.Meta.fields + ["secret"]))
