@@ -6,6 +6,7 @@ from urllib.parse import urljoin
 
 from django import forms
 from django.contrib.admin import helpers
+from django.db import IntegrityError
 from django.urls import reverse
 from stripe.error import AuthenticationError, InvalidRequestError, PermissionError
 
@@ -45,10 +46,19 @@ class CustomActionForm(forms.Form):
             )
 
 
-class APIKeyAdminCreateForm(forms.ModelForm):
+class APIKeyAdminBaseForm(forms.ModelForm):
     class Meta:
         model = models.APIKey
-        fields = ["name", "secret"]
+        fields = ["name", "djstripe_is_account_default"]
+
+    @property
+    def construct_custom_error_message(self):
+        return f"You have already configured an account default {self.instance.type} key on {self.instance.djstripe_owner_account}. Consider unchecking the Account Default checkbox or add another key type"
+
+
+class APIKeyAdminCreateForm(APIKeyAdminBaseForm):
+    class Meta(APIKeyAdminBaseForm.Meta):
+        fields = list(set(APIKeyAdminBaseForm.Meta.fields + ["secret"]))
 
     def _post_clean(self):
         super()._post_clean()
@@ -63,12 +73,14 @@ class APIKeyAdminCreateForm(forms.ModelForm):
                 and self.instance.djstripe_owner_account is None
             ):
                 try:
-                    self.instance.refresh_account()
+                    self.instance.refresh_account(commit=True, raise_exception=True)
                 except AuthenticationError as e:
                     self.add_error("secret", str(e))
                 # Abandon Key Creation if the given key doesn't allow Accounts to be retrieved from Stripe
                 except PermissionError as e:
                     self.add_error("secret", str(e))
+                except IntegrityError:
+                    self.add_error("__all__", self.construct_custom_error_message)
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
