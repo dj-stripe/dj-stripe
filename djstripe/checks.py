@@ -3,37 +3,22 @@ dj-stripe System Checks
 """
 import re
 
+import stripe
 from django.core import checks
 from django.db.utils import DatabaseError
+
+from djstripe.models.api import get_api_key_details_by_prefix
 
 STRIPE_API_VERSION_PATTERN = re.compile(
     r"(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})(; [\w=]*)?$"
 )
 
 
-# 4 possibilities:
-# Keys in admin and in settings
-# Keys in admin and not in settings
-# Keys not in admin but in settings
-# Keys not in admin and not in settings
 @checks.register("djstripe")
 def check_stripe_api_key(app_configs=None, **kwargs):
     """Check the user has configured API live/test keys correctly."""
 
-    def _check_stripe_api_in_settings(messages):
-        if djstripe_settings.STRIPE_LIVE_MODE:
-            if not djstripe_settings.LIVE_API_KEY.startswith(("sk_live_", "rk_live_")):
-                msg = "Bad Stripe live API key."
-                hint = 'STRIPE_LIVE_SECRET_KEY should start with "sk_live_"'
-                messages.append(checks.Info(msg, hint=hint, id="djstripe.I003"))
-        elif not djstripe_settings.TEST_API_KEY.startswith(("sk_test_", "rk_test_")):
-            msg = "Bad Stripe test API key."
-            hint = 'STRIPE_TEST_SECRET_KEY should start with "sk_test_"'
-            messages.append(checks.Info(msg, hint=hint, id="djstripe.I004"))
-
     from djstripe.models import APIKey
-
-    from .settings import djstripe_settings
 
     messages = []
 
@@ -50,38 +35,21 @@ def check_stripe_api_key(app_configs=None, **kwargs):
                 "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly from"
                 " the Django Admin."
             )
-            messages.append(checks.Info(msg, hint=hint, id="djstripe.I001"))
+            messages.append(checks.Warning(msg, hint=hint, id="djstripe.W003"))
 
-            # Keys not in admin but in settings
-            if djstripe_settings.STRIPE_SECRET_KEY:
+        if stripe.api_key:
+            # Warn the user if stripe.api_key is set
+            msg = "You have set stripe.api_key. Please unset it and add Stripe keys from admin to the DB."
+            messages.append(checks.Info(msg, id="djstripe.I001"))
+
+            key_type, livemode = get_api_key_details_by_prefix(stripe.api_key)
+
+            if APIKey.objects.filter(type=key_type, livemode=livemode).exists():
                 msg = (
-                    "Your keys are defined in the settings files. You can now add and"
-                    " manage them directly from the django admin."
+                    "You have configured both stripe.api_key and keys from the admin. Please unset stripe.api_key."
+                    " dj-stripe may not work properly due to ambiguity in fetching keys."
                 )
-                hint = (
-                    "Add STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY directly"
-                    " from the Django Admin."
-                )
-                messages.append(checks.Info(msg, hint=hint, id="djstripe.I002"))
-
-                # Ensure keys defined in settings files are valid
-                _check_stripe_api_in_settings(messages)
-
-        # Keys in admin and in settings
-        elif djstripe_settings.STRIPE_SECRET_KEY:
-            msg = (
-                "Your keys are defined in the settings files and are also in the admin."
-                " You can now add and manage them directly from the django admin."
-            )
-            hint = (
-                "We suggest adding STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY"
-                " directly from the Django Admin. And removing them from the settings"
-                " files."
-            )
-            messages.append(checks.Info(msg, hint=hint, id="djstripe.I002"))
-
-            # Ensure keys defined in settings files are valid
-            _check_stripe_api_in_settings(messages)
+                messages.append(checks.Warning(msg, id="djstripe.W004"))
 
     except DatabaseError:
         # Skip the check - Database most likely not migrated yet
