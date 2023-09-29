@@ -3,7 +3,6 @@ dj-stripe Custom Field Definitions
 """
 import decimal
 
-from django.conf import SettingsReference, settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import JSONField as BaseJSONField
