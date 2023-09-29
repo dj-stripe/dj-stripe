@@ -83,29 +83,10 @@ class DjstripeSettings:
             settings, "DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY", "djstripe_subscriber"
         )
 
-    @property
-    def TEST_API_KEY(self):
-        return getattr(settings, "STRIPE_TEST_SECRET_KEY", "")
-
-    @property
-    def LIVE_API_KEY(self):
-        return getattr(settings, "STRIPE_LIVE_SECRET_KEY", "")
-
     # Determines whether we are in live mode or test mode
     @property
     def STRIPE_LIVE_MODE(self):
         return getattr(settings, "STRIPE_LIVE_MODE", False)
-
-    @property
-    def STRIPE_SECRET_KEY(self):
-        # Default secret key
-        if hasattr(settings, "STRIPE_SECRET_KEY"):
-            STRIPE_SECRET_KEY = settings.STRIPE_SECRET_KEY
-        else:
-            STRIPE_SECRET_KEY = (
-                self.LIVE_API_KEY if self.STRIPE_LIVE_MODE else self.TEST_API_KEY
-            )
-        return STRIPE_SECRET_KEY
 
     @property
     def STRIPE_PUBLIC_KEY(self):
