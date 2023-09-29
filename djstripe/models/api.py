@@ -105,7 +105,7 @@ class APIKey(StripeModel):
             except InvalidStripeAPIKey as e:
                 raise ValidationError(str(e))
 
-    def refresh_account(self, commit=True):
+    def refresh_account(self, commit=True, raise_exception=False):
         from .account import Account
 
         if self.type not in (
@@ -135,7 +135,8 @@ class APIKey(StripeModel):
                 with transaction.atomic():
                     self.save()
             except IntegrityError:
-                pass
+                if raise_exception:
+                    raise
 
     @property
     def secret_redacted(self) -> str:
