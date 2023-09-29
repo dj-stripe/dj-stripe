@@ -134,7 +134,9 @@ class StripeModel(StripeBaseModel):
         if not self._meta.abstract:
             if self.djstripe_owner_account:
                 return self.djstripe_owner_account.get_default_api_key(self.livemode)
-        return djstripe_settings.get_default_api_key(self.livemode)
+        return djstripe_settings.get_default_api_key(
+            livemode=self.livemode, djstripe_owner_account=self.djstripe_owner_account
+        )
 
     def _get_stripe_account_id(self, api_key=None) -> Optional[str]:
         """

@@ -220,7 +220,9 @@ class WebhookEventTrigger(models.Model):
         )
         api_key = (
             stripe_account.default_api_key
-            or djstripe_settings.get_default_api_key(obj.livemode)
+            or djstripe_settings.get_default_api_key(
+                livemode=obj.livemode, djstripe_owner_account=stripe_account
+            )
         )
 
         try:
@@ -345,7 +347,9 @@ class WebhookEventTrigger(models.Model):
             )
 
         livemode = local_data["livemode"]
-        api_key = api_key or djstripe_settings.get_default_api_key(livemode)
+        api_key = api_key or djstripe_settings.get_default_api_key(
+            livemode=livemode, djstripe_owner_account=self.stripe_trigger_account
+        )
 
         # Retrieve the event using the api_version specified in itself
         remote_data = Event.stripe_class.retrieve(

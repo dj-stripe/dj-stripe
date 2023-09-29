@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 User = get_user_model()
-stripe.api_key = djstripe_settings.djstripe_settings.STRIPE_SECRET_KEY
+stripe.api_key = djstripe_settings.djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
 
 class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):

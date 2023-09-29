@@ -56,7 +56,9 @@ class Account(StripeModel):
 
         if api_key:
             return api_key.secret
-        return djstripe_settings.get_default_api_key(livemode)
+        return djstripe_settings.get_default_api_key(
+            livemode=livemode, djstripe_owner_account=self
+        )
 
     @property
     def business_url(self) -> str:
