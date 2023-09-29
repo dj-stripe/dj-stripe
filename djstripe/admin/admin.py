@@ -171,6 +171,11 @@ class APIKeyAdmin(admin.ModelAdmin):
         except IntegrityError:
             pass
 
+    def get_changeform_initial_data(self, request) -> Dict[str, str]:
+        ret = super().get_changeform_initial_data(request)
+        ret.setdefault("djstripe_is_account_default", True)
+        return ret
+
 
 @admin.register(models.BalanceTransaction)
 class BalanceTransactionAdmin(ReadOnlyMixin, StripeModelAdmin):
