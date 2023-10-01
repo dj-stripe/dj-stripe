@@ -177,7 +177,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
 
         _api_key = {}
         account = self.cleaned_data.get("djstripe_owner_account")
-        livemode = self.cleaned_data["livemode"]
+        livemode = self.cleaned_data.get("livemode", None)
         if account:
             self._stripe_api_key = _api_key["api_key"] = account.get_default_api_key(
                 livemode=livemode
@@ -186,11 +186,11 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
         try:
             self._stripe_data = models.WebhookEndpoint._api_create(
                 url=url,
-                api_version=self.cleaned_data["api_version"] or None,
+                api_version=self.cleaned_data.get("api_version", None),
                 description=self.cleaned_data.get("description"),
                 enabled_events=self.cleaned_data.get("enabled_events"),
                 metadata=metadata,
-                connect=self.cleaned_data["connect"],
+                connect=self.cleaned_data.get("connect", False),
                 **_api_key,
             )
         except InvalidRequestError as e:
