@@ -182,7 +182,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
     # This is used by Django for ModelForm logic. It's internal, but exactly
     # what we need to add errors after the data has been validated locally.
     def _post_clean(self):
-        base_url = self.cleaned_data["base_url"]
+        base_url = self.cleaned_data.get("base_url")
         url_path = reverse(
             "djstripe:djstripe_webhook_by_uuid",
             kwargs={"uuid": self.instance.djstripe_uuid},
@@ -193,7 +193,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
         metadata["djstripe_uuid"] = str(self.instance.djstripe_uuid)
 
         _api_key = {}
-        account = self.cleaned_data["djstripe_owner_account"]
+        account = self.cleaned_data.get("djstripe_owner_account")
         livemode = self.cleaned_data["livemode"]
         if account:
             self._stripe_api_key = _api_key["api_key"] = account.get_default_api_key(
@@ -204,7 +204,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             self._stripe_data = models.WebhookEndpoint._api_create(
                 url=url,
                 api_version=self.cleaned_data["api_version"] or None,
-                description=self.cleaned_data["description"],
+                description=self.cleaned_data.get("description"),
                 enabled_events=self.cleaned_data.get("enabled_events"),
                 metadata=metadata,
                 connect=self.cleaned_data["connect"],
