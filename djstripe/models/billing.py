@@ -25,7 +25,7 @@ from ..fields import (
 )
 from ..managers import SubscriptionManager
 from ..settings import djstripe_settings
-from ..utils import QuerySetMock, get_friendly_currency_amount
+from ..utils import QuerySetMock, get_friendly_currency_amount, get_id_from_stripe_data
 from .base import StripeModel
 from .core import Customer
 

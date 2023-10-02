@@ -12,6 +12,7 @@ from ..fields import (
     StripeForeignKey,
     StripeQuantumCurrencyAmountField,
 )
+from ..settings import djstripe_settings
 from .base import StripeModel
 
 
