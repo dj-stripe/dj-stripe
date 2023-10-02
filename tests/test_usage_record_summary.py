@@ -289,4 +289,5 @@ class TestUsageRecordSummary(CreateAccountMixin, AssertStripeFksMixin, TestCase)
             id=fake_usage_data["data"][1]["subscription_item"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            expand=[],
         )
