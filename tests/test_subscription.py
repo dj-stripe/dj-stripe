@@ -1162,6 +1162,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             status=SubscriptionStatus.canceled,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            expand=[],
         )
 
     @patch("stripe.Subscription.list")
@@ -1176,6 +1177,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             status="all",
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            expand=[],
         )
 
 
