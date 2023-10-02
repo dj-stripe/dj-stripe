@@ -393,6 +393,9 @@ class TransferReversal(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
         return stripe.Transfer.list_reversals(
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
