@@ -185,4 +185,5 @@ class TestTransfer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             id=FAKE_CUSTOMER["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            expand=[],
         )
