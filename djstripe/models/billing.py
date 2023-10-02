@@ -1409,6 +1409,9 @@ class LineItem(StripeModel):
 
         :returns: an iterator over all items in the query
         """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
         # get current invoice if any
         invoice_id = kwargs.pop("id")
 
@@ -2015,6 +2018,9 @@ class Subscription(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
         if not kwargs.get("status"):
             # special case: https://stripe.com/docs/api/subscriptions/list#list_subscriptions-status
             # See Issue: https://github.com/dj-stripe/dj-stripe/issues/1763
@@ -2669,6 +2675,9 @@ class TaxId(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
         return stripe.Customer.list_tax_ids(
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -2900,6 +2909,9 @@ class UsageRecordSummary(StripeModel):
 
         :returns: an iterator over all items in the query
         """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
         if not kwargs.get("id"):
             raise KeyError("SubscriptionItem Object ID is missing")
 

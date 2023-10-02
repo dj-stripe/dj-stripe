@@ -94,6 +94,7 @@ class SourceTransactionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         source_transaction_list_mock.assert_called_once_with(
             FAKE_SOURCE["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            expand=[],
         )
 
     @patch.object(SourceTransaction, "api_list", autospec=True)

@@ -218,6 +218,9 @@ class LegacySourceMixin:
         # OVERRIDING the parent version of this function
         # Cards & Bank Accounts must be manipulated through a customer or account.
 
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
         account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
             **kwargs
         )
@@ -821,6 +824,9 @@ class Source(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
         return Customer.stripe_class.list_sources(
             object="source",
             api_key=api_key,
@@ -898,6 +904,9 @@ class SourceTransaction(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
         source = kwargs.pop("id", None)
         if not source:
             raise KeyError("Source Object ID is missing")

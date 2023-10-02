@@ -71,6 +71,8 @@ class StripeBaseModel(models.Model):
 
         :returns: an iterator over all items in the query
         """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
 
         return cls.stripe_class.list(
             api_key=api_key,
