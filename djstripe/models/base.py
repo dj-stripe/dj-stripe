@@ -34,6 +34,31 @@ class StripeBaseModel(models.Model):
         abstract = True
 
     @classmethod
+    def get_expand_params(cls, api_key, **kwargs):
+        """Populate `expand` kwarg in stripe api calls by updating the kwargs passed."""
+        # To avoid Circular Import Error
+        from djstripe.management.commands.djstripe_sync_models import Command
+
+        # As api_list is a class method we will never get the stripe account unless we
+        # default to the owner account of the api_key. But even that is pointless as we only care about expand
+        # So no need to make a call to Stripe and again do an account object sync which would make
+        # no sense if this is for a Stripe Connected Account
+        expand = Command.get_default_list_kwargs(
+            cls, {kwargs.get("stripe_account", "acct_fake")}, api_key
+        )[0].get("expand", [])
+
+        # Add expand to the provided list
+        if kwargs.get("expand"):
+            kwargs["expand"].extend(expand)
+        else:
+            kwargs["expand"] = expand
+
+        # Keep only unique elements
+        kwargs["expand"] = list(set(kwargs["expand"]))
+
+        return kwargs
+
+    @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         """
         Call the stripe API's list operation for this model.
