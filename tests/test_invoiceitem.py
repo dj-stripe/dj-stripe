@@ -259,7 +259,7 @@ class InvoiceItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         invoice_retrieve_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            expand=["discounts"],
+            expand=["discounts", "lines.data.discounts"],
             id=FAKE_INVOICE_II["id"],
             stripe_account=None,
         )
