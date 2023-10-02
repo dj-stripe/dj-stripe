@@ -13,7 +13,6 @@ from django.core.exceptions import FieldError
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.urls import reverse
-from pytest_django.asserts import assertQuerysetEqual
 
 from djstripe import models, utils
 from djstripe.admin import admin as djstripe_admin
@@ -38,6 +37,16 @@ from .conftest import CreateAccountMixin
 from .fields.models import CustomActionModel
 
 pytestmark = pytest.mark.django_db
+
+try:
+    from pytest_django.asserts import assertQuerysetEqual
+
+    assert_queryset_equality_callable = assertQuerysetEqual
+except ImportError:
+    # Django 5.1 +
+    from pytest_django.asserts import assertQuerySetEqual
+
+    assert_queryset_equality_callable = assertQuerySetEqual
 
 
 @pytest.mark.parametrize(
@@ -967,7 +976,7 @@ class TestCustomActionMixin:
 
         if action_name == "_sync_all_instances":
             assert context.get("info") == []
-            assertQuerysetEqual(
+            assert_queryset_equality_callable(
                 context.get("form").initial.get(helpers.ACTION_CHECKBOX_NAME),
                 ["_sync_all_instances"],
             )
@@ -980,7 +989,7 @@ class TestCustomActionMixin:
                 f' href="/admin/fields/customactionmodel/{instance.pk}/change/">&lt;id=test&gt;</a>'
             ]
 
-            assertQuerysetEqual(
+            assert_queryset_equality_callable(
                 context.get("form").initial.get(helpers.ACTION_CHECKBOX_NAME),
                 queryset.values_list("pk", flat=True),
             )
