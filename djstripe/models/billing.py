@@ -272,7 +272,7 @@ class BaseInvoice(StripeModel):
 
     stripe_class = stripe.Invoice
     stripe_dashboard_item_name = "invoices"
-    expand_fields = ["discounts"]
+    expand_fields = ["discounts", "lines.data.discounts"]
 
     account_country = models.CharField(
         max_length=2,
