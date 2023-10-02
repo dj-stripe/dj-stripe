@@ -98,7 +98,9 @@ class TestPayout(AssertStripeFksMixin, TestCase):
         payout = Payout.sync_from_stripe_data(fake_payout_express)
 
         self.assertEqual(payout.balance_transaction.id, FAKE_BALANCE_TRANSACTION["id"])
-        self.assertEqual(payout.destination.id, fake_payout_express["destination"])
+        # Todo uncomment after badab4faac0c089e016a502693776f8a42eb81d1 get merged.
+        # See PR: https://github.com/dj-stripe/dj-stripe/pull/1876
+        # self.assertEqual(payout.destination.id, fake_payout_express["destination"])
         self.assertEqual(payout.djstripe_owner_account.id, FAKE_PLATFORM_ACCOUNT["id"])
         self.assert_fks(
             payout,
