@@ -116,8 +116,10 @@ class APIKeyAdminCreateForm(APIKeyAdminBaseForm):
                 # Abandon Key Creation if the given key doesn't allow Accounts to be retrieved from Stripe
                 except PermissionError as e:
                     self.add_error("secret", str(e))
-                except IntegrityError:
-                    self.add_error("__all__", self.construct_custom_error_message)
+                except IntegrityError as e:
+                    # If APIKey model's Unique constraint is getting violated then let the user know
+                    if self.instance._meta.constraints[0].name in str(e):
+                        self.add_error("__all__", self.construct_custom_error_message)
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
