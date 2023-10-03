@@ -19,11 +19,11 @@ from . import (
     FAKE_PRODUCT,
     FAKE_TRANSFER,
 )
+from .conftest import CreateAccountMixin
 
 
-class SubscriptionManagerTest(TestCase):
+class SubscriptionManagerTest(CreateAccountMixin, TestCase):
     def setUp(self):
-
         # create customers and current subscription records
         period_start = datetime.datetime(2013, 4, 1, tzinfo=get_timezone_utc())
         period_end = datetime.datetime(2013, 4, 30, tzinfo=get_timezone_utc())
@@ -153,7 +153,6 @@ class TransferManagerTest(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=True,
     )
     def test_transfer_summary(
         self, account_retrieve_mock, transfer__attach_object_post_save_hook_mock
@@ -184,7 +183,6 @@ class TransferManagerTest(TestCase):
 
 class ChargeManagerTest(TestCase):
     def setUp(self):
-
         customer = Customer.objects.create(
             id="cus_XXXXXXX", livemode=False, balance=0, delinquent=False
         )

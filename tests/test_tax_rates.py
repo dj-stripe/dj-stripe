@@ -12,8 +12,10 @@ from tests import FAKE_TAX_RATE_EXAMPLE_1_VAT
 
 pytestmark = pytest.mark.django_db
 
+from .conftest import CreateAccountMixin
 
-class TaxRateTest(TestCase):
+
+class TaxRateTest(CreateAccountMixin, TestCase):
     def test_sync_from_stripe_data(self):
         tax_rate = TaxRate.sync_from_stripe_data(deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT))
 
@@ -26,12 +28,15 @@ class TaxRateTest(TestCase):
         tax_rate = TaxRate.sync_from_stripe_data(deepcopy(FAKE_TAX_RATE_EXAMPLE_1_VAT))
 
         self.assertEqual(
-            f"{FAKE_TAX_RATE_EXAMPLE_1_VAT['display_name']} at {FAKE_TAX_RATE_EXAMPLE_1_VAT['percentage']:.4f}%",
+            (
+                f"{FAKE_TAX_RATE_EXAMPLE_1_VAT['display_name']} at"
+                f" {FAKE_TAX_RATE_EXAMPLE_1_VAT['percentage']:.4f}%"
+            ),
             str(tax_rate),
         )
 
 
-class TestTaxRateDecimal:
+class TestTaxRateDecimal(CreateAccountMixin):
     @pytest.mark.parametrize(
         "inputted,expected",
         [

@@ -29,6 +29,7 @@ class StripeBaseModel(models.Model):
 
     djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
     djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
+    stripe_data = JSONField(default=dict)
 
     class Meta:
         abstract = True
@@ -81,9 +82,11 @@ class StripeModel(StripeBaseModel):
         null=True,
         default=None,
         blank=True,
-        help_text="Null here indicates that the livemode status is unknown or was "
-        "previously unrecorded. Otherwise, this field indicates whether this record "
-        "comes from Stripe test mode or live mode operation.",
+        help_text=(
+            "Null here indicates that the livemode status is unknown or was previously"
+            " unrecorded. Otherwise, this field indicates whether this record comes"
+            " from Stripe test mode or live mode operation."
+        ),
     )
     created = StripeDateTimeField(
         null=True,
@@ -93,9 +96,11 @@ class StripeModel(StripeBaseModel):
     metadata = JSONField(
         null=True,
         blank=True,
-        help_text="A set of key/value pairs that you can attach to an object. "
-        "It can be useful for storing additional information about an object in "
-        "a structured format.",
+        help_text=(
+            "A set of key/value pairs that you can attach to an object. "
+            "It can be useful for storing additional information about an object in "
+            "a structured format."
+        ),
     )
     description = models.TextField(
         null=True, blank=True, help_text="A description of this object."
@@ -191,13 +196,15 @@ class StripeModel(StripeBaseModel):
             for which this request is being made.
         :type stripe_account: string
         """
+        api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.retrieve(
             id=self.id,
-            api_key=api_key or self.default_api_key,
+            api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=self.expand_fields,
             stripe_account=stripe_account,
@@ -231,6 +238,7 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
@@ -255,6 +263,7 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
@@ -343,13 +352,19 @@ class StripeModel(StripeBaseModel):
                 % (manipulated_data.get("object", ""), cls.__name__)
             )
 
-        result = {}
+        # By default we put the  raw stripe data in the stripe_data json field
+        result = {"stripe_data": data}
+
         if current_ids is None:
             current_ids = set()
 
         # Iterate over all the fields that we know are related to Stripe,
         # let each field work its own magic
-        ignore_fields = ["date_purged", "subscriber"]  # XXX: Customer hack
+        ignore_fields = [
+            "date_purged",
+            "subscriber",
+            "stripe_data",
+        ]  # XXX: Customer hack
 
         # get all forward and reverse relations for given cls
         for field in cls._meta.get_fields():
@@ -451,10 +466,7 @@ class StripeModel(StripeBaseModel):
         if current_ids is None:
             current_ids = set()
 
-        if issubclass(field.related_model, StripeModel) or issubclass(
-            field.related_model, DjstripePaymentMethod
-        ):
-
+        if issubclass(field.related_model, (StripeModel, DjstripePaymentMethod)):
             if field_name in manipulated_data:
                 raw_field_data = manipulated_data.get(field_name)
 
@@ -697,7 +709,8 @@ class StripeModel(StripeBaseModel):
             # An empty field - We need to return nothing here because there is
             # no way of knowing what needs to be fetched!
             raise RuntimeError(
-                f"dj-stripe encountered an empty field {cls.__name__}.{field_name} = {field}"
+                f"dj-stripe encountered an empty field {cls.__name__}.{field_name} ="
+                f" {field}"
             )
         elif id_ == field:
             # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
@@ -877,44 +890,34 @@ class StripeModel(StripeBaseModel):
         instance.total_tax_amounts.exclude(pk__in=pks).delete()
 
     @classmethod
-    def _stripe_object_to_invoice_items(
+    def _stripe_object_to_line_items(
         cls, target_cls, data, invoice, api_key=djstripe_settings.STRIPE_SECRET_KEY
     ):
         """
-        Retrieves InvoiceItems for an invoice.
+        Retrieves LineItems for an invoice.
 
-        If the invoice item doesn't exist already then it is created.
+        If the line item doesn't exist already then it is created.
 
         If the invoice is an upcoming invoice that doesn't persist to the
-        database (i.e. ephemeral) then the invoice items are also not saved.
+        database (i.e. ephemeral) then the line items are also not saved.
 
-        :param target_cls: The target class to instantiate per invoice item.
-        :type target_cls:  Type[djstripe.models.InvoiceItem]
+        :param target_cls: The target class to instantiate per line item.
+        :type target_cls:  Type[djstripe.models.LineItem]
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
-        :param invoice: The invoice object that should hold the invoice items.
+        :param invoice: The invoice object that should hold the line items.
         :type invoice: ``djstripe.models.Invoice``
         """
-
         lines = data.get("lines")
         if not lines:
             return []
 
-        invoiceitems = []
+        lineitems = []
         for line in lines.auto_paging_iter():
             if invoice.id:
                 save = True
                 line.setdefault("invoice", invoice.id)
 
-                if line.get("type") == "subscription":
-                    # Lines for subscriptions need to be keyed based on invoice and
-                    # subscription, because their id is *just* the subscription
-                    # when received from Stripe. This means that future updates to
-                    # a subscription will change previously saved invoices - Doing
-                    # the composite key avoids this.
-                    line_id = line["id"]
-                    if not line_id.startswith(invoice.id):
-                        line["id"] = f"{invoice.id}-{line_id}"
             else:
                 # Don't save invoice items for ephemeral invoices
                 save = False
@@ -925,9 +928,9 @@ class StripeModel(StripeBaseModel):
             item, _ = target_cls._get_or_create_from_stripe_object(
                 line, refetch=False, save=save, api_key=api_key
             )
-            invoiceitems.append(item)
+            lineitems.append(item)
 
-        return invoiceitems
+        return lineitems
 
     @classmethod
     def _stripe_object_to_subscription_items(

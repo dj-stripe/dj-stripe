@@ -1,7 +1,6 @@
 """
 dj-stripe PaymenthMethod Model Tests.
 """
-import sys
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -22,10 +21,10 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestPaymentMethod:
-
+class TestPaymentMethod(CreateAccountMixin):
     #
     # Helper Methods for monkeypatching
     #
@@ -35,7 +34,6 @@ class TestPaymentMethod:
 
     @pytest.mark.parametrize("customer_exists", [True, False])
     def test___str__(self, monkeypatch, customer_exists):
-
         # monkeypatch stripe.Customer.retrieve call to return
         # the desired json response.
         monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
@@ -46,8 +44,9 @@ class TestPaymentMethod:
             pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
             customer = None
             assert (
-                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} is not associated with any customer"
-            ) == str(pm)
+                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} is"
+                " not associated with any customer" == str(pm)
+            )
 
         else:
             pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
@@ -55,12 +54,12 @@ class TestPaymentMethod:
                 id=fake_payment_method_data["customer"]
             )
             assert (
-                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} for {customer}"
-            ) == str(pm)
+                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} for"
+                f" {customer}" == str(pm)
+            )
 
     @pytest.mark.parametrize("customer_exists", [True, False])
     def test_get_stripe_dashboard_url(self, monkeypatch, customer_exists):
-
         # monkeypatch stripe.Customer.retrieve call to return
         # the desired json response.
         monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
@@ -82,7 +81,6 @@ class TestPaymentMethod:
 
     @pytest.mark.parametrize("customer_exists", [True, False])
     def test_sync_from_stripe_data(self, monkeypatch, customer_exists):
-
         # monkeypatch stripe.Customer.retrieve call to return
         # the desired json response.
         monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
@@ -96,9 +94,8 @@ class TestPaymentMethod:
         assert pm.id == fake_payment_method_data["id"]
 
 
-class PaymentMethodTest(AssertStripeFksMixin, TestCase):
+class PaymentMethodTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         user = get_user_model().objects.create_user(
             username="testuser", email="djstripe@example.com"
         )
@@ -115,7 +112,6 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     def test_attach(self, attach_mock):
-
         payment_method = models.PaymentMethod.attach(
             FAKE_PAYMENT_METHOD_I["id"], customer=FAKE_CUSTOMER["id"]
         )
@@ -216,8 +212,10 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         with patch(
             "tests.PaymentMethodDict.detach",
             side_effect=InvalidRequestError(
-                message="A source must be attached to a customer to be used "
-                "as a `payment_method`",
+                message=(
+                    "A source must be attached to a customer to be used "
+                    "as a `payment_method`"
+                ),
                 param="payment_method",
             ),
             autospec=True,
@@ -289,8 +287,10 @@ class PaymentMethodTest(AssertStripeFksMixin, TestCase):
         with patch(
             "tests.PaymentMethodDict.detach",
             side_effect=InvalidRequestError(
-                message="A source must be attached to a customer to be used "
-                "as a `payment_method`",
+                message=(
+                    "A source must be attached to a customer to be used "
+                    "as a `payment_method`"
+                ),
                 param="payment_method",
             ),
             autospec=True,

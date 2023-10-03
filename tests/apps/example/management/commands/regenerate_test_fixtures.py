@@ -330,7 +330,7 @@ class Command(BaseCommand):
             if fake_id in self.fake_id_map:
                 assert self.fake_id_map[fake_id] == actual_id, (
                     f"Duplicate fake_id {fake_id} - reset your test Stripe data at "
-                    f"https://dashboard.stripe.com/account/data"
+                    "https://dashboard.stripe.com/account/data"
                 )
 
             self.fake_id_map[fake_id] = actual_id

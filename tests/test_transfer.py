@@ -46,7 +46,6 @@ class TestTransferStr:
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -62,7 +61,6 @@ class TestTransferStr:
         transfer__attach_object_post_save_hook_mock,
         fake_transfer_data,
     ):
-
         transfer_retrieve_mock.return_value = fake_transfer_data
         transfer = Transfer.sync_from_stripe_data(fake_transfer_data)
 
@@ -81,7 +79,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -98,7 +95,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         account_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         transfer = Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
 
         balance_transaction_retrieve_mock.assert_not_called()
@@ -117,7 +113,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -134,7 +129,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         account_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         transfer = Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
         assert transfer.fee == FAKE_BALANCE_TRANSACTION_II["fee"]
         assert transfer.fee == transfer.balance_transaction.fee
@@ -143,7 +137,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -160,10 +153,10 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         account_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         transfer = Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
 
-        assert transfer.get_stripe_dashboard_url() == (
-            f"{transfer._get_base_stripe_dashboard_url()}"
+        assert (
+            transfer.get_stripe_dashboard_url()
+            == f"{transfer._get_base_stripe_dashboard_url()}"
             f"connect/{transfer.stripe_dashboard_item_name}/{transfer.id}"
         )

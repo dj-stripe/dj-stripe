@@ -26,7 +26,6 @@ class TestTransferReversalStr(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -45,7 +44,6 @@ class TestTransferReversalStr(TestCase):
         account_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         transfer_reversal = TransferReversal.sync_from_stripe_data(
             deepcopy(FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0])
         )
@@ -57,7 +55,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -76,7 +73,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         account_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         transfer_reversal = TransferReversal.sync_from_stripe_data(
             deepcopy(FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0])
         )
@@ -99,7 +95,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.BalanceTransaction.retrieve",
@@ -118,7 +113,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         account_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         transfer_reversal = TransferReversal.sync_from_stripe_data(
             deepcopy(FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0])
         )
@@ -150,7 +144,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         transfer_get_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-
         TransferReversal._api_create(
             id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"]
         )

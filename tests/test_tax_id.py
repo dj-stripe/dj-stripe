@@ -14,9 +14,10 @@ from djstripe.settings import djstripe_settings
 from . import FAKE_CUSTOMER, FAKE_TAX_ID, AssertStripeFksMixin
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestTaxIdStr(TestCase):
+class TestTaxIdStr(CreateAccountMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER),
@@ -32,15 +33,16 @@ class TestTaxIdStr(TestCase):
         tax_id_retrieve_mock,
         customer_retrieve_mock,
     ):
-
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
         self.assertEqual(
             str(tax_id),
-            f"{enums.TaxIdType.humanize(FAKE_TAX_ID['type'])} {FAKE_TAX_ID['value']} ({FAKE_TAX_ID['verification']['status']})",
+            (
+                f"{enums.TaxIdType.humanize(FAKE_TAX_ID['type'])} {FAKE_TAX_ID['value']} ({FAKE_TAX_ID['verification']['status']})"
+            ),
         )
 
 
-class TestTransfer(AssertStripeFksMixin, TestCase):
+class TestTransfer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve",
         return_value=deepcopy(FAKE_CUSTOMER),
@@ -56,7 +58,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         tax_id_retrieve_mock,
         customer_retrieve_mock,
     ):
-
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
         assert tax_id
         assert tax_id.id == FAKE_TAX_ID["id"]
@@ -86,7 +87,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         tax_id_create_mock,
         customer_get_mock,
     ):
-
         STRIPE_DATA = TaxId._api_create(
             id=FAKE_CUSTOMER["id"], type=FAKE_TAX_ID["type"], value=FAKE_TAX_ID["value"]
         )
@@ -154,7 +154,6 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         tax_id_retrieve_mock,
         customer_retrieve_mock,
     ):
-
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
         assert tax_id
         tax_id.api_retrieve()
@@ -163,7 +162,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         tax_id_retrieve_mock.assert_called_once_with(
             id=FAKE_CUSTOMER["id"],
             nested_id=FAKE_TAX_ID["id"],
-            expand=[],
+            expand=["customer"],
             stripe_account=tax_id.djstripe_owner_account.id,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             api_key=djstripe_settings.STRIPE_SECRET_KEY,

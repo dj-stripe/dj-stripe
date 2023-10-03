@@ -3,10 +3,10 @@ from django.db import models, transaction
 
 from .. import enums
 from ..enums import APIKeyType
-from ..fields import JSONField, StripeCurrencyCodeField, StripeEnumField
+from ..fields import StripeCurrencyCodeField, StripeEnumField
 from ..settings import djstripe_settings
 from .api import APIKey, get_api_key_details_by_prefix
-from .base import StripeModel, logger
+from .base import StripeModel
 
 
 class Account(StripeModel):
@@ -20,74 +20,17 @@ class Account(StripeModel):
     """
 
     stripe_class = stripe.Account
-    business_profile = JSONField(
-        null=True, blank=True, help_text="Optional information related to the business."
-    )
-    business_type = StripeEnumField(
-        enum=enums.BusinessType, default="", blank=True, help_text="The business type."
-    )
-    charges_enabled = models.BooleanField(
-        help_text="Whether the account can create live charges"
-    )
     country = models.CharField(max_length=2, help_text="The country of the account")
-    company = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Information about the company or business. "
-            "This field is null unless business_type is set to company."
-        ),
-    )
     default_currency = StripeCurrencyCodeField(
         help_text="The currency this account has chosen to use as the default"
     )
-    details_submitted = models.BooleanField(
-        help_text=(
-            "Whether account details have been submitted. "
-            "Standard accounts cannot receive payouts before this is true."
-        )
-    )
     email = models.CharField(
-        max_length=255, help_text="The primary user's email address."
-    )
-    # TODO external_accounts = ...
-    individual = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Information about the person represented by the account. "
-            "This field is null unless business_type is set to individual."
-        ),
+        max_length=255, db_index=True, help_text="The primary user's email address."
     )
     payouts_enabled = models.BooleanField(
         null=True, help_text="Whether Stripe can send payouts to this account"
     )
-    product_description = models.CharField(
-        max_length=255,
-        default="",
-        blank=True,
-        help_text="Internal-only description of the product sold or service provided "
-        "by the business. It's used by Stripe for risk and underwriting purposes.",
-    )
-    requirements = JSONField(
-        null=True,
-        blank=True,
-        help_text="Information about the requirements for the account, "
-        "including what information needs to be collected, and by when.",
-    )
-    settings = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Account options for customizing how the account functions within Stripe."
-        ),
-    )
     type = StripeEnumField(enum=enums.AccountType, help_text="The Stripe account type.")
-    tos_acceptance = JSONField(
-        null=True,
-        blank=True,
-        help_text="Details on the acceptance of the Stripe Services Agreement",
-    )
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
@@ -120,8 +63,9 @@ class Account(StripeModel):
         """
         The business's publicly available website.
         """
-        if self.business_profile:
-            return self.business_profile.get("url", "")
+        business_profile = self.stripe_data.get("business_profile")
+        if business_profile:
+            return business_profile.get("url", "")
         return ""
 
     @classmethod
@@ -147,8 +91,8 @@ class Account(StripeModel):
             return apikey_instance.djstripe_owner_account
 
     def __str__(self):
-        settings = self.settings or {}
-        business_profile = self.business_profile or {}
+        settings = self.stripe_data.get("settings") or {}
+        business_profile = self.stripe_data.get("business_profile") or {}
         return (
             settings.get("dashboard", {}).get("display_name")
             or business_profile.get("name")
@@ -167,6 +111,7 @@ class Account(StripeModel):
         :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
@@ -204,24 +149,6 @@ class Account(StripeModel):
             api_key=api_key,
         )
 
-    # "Special" handling of the icon and logo fields
-    # Previously available as properties, they moved to
-    # settings.branding in Stripe 2019-02-19.
-    # Currently, they return a File ID
-    @property
-    def branding_icon(self):
-        from ..models.core import File
-
-        id = self.settings.get("branding", {}).get("icon")
-        return File.objects.filter(id=id).first() if id else None
-
-    @property
-    def branding_logo(self):
-        from ..models.core import File
-
-        id = self.settings.get("branding", {}).get("logo")
-        return File.objects.filter(id=id).first() if id else None
-
     def _attach_objects_post_save_hook(
         self,
         cls,
@@ -229,15 +156,12 @@ class Account(StripeModel):
         pending_relations=None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
-        from ..models.core import File
-
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations, api_key=api_key
         )
 
         # set the livemode if not returned by data
         if "livemode" not in data.keys() and self.djstripe_owner_account is not None:
-
             # Platform Account
             if self == self.djstripe_owner_account:
                 self.livemode = None
@@ -247,36 +171,3 @@ class Account(StripeModel):
 
         # save the updates
         self.save()
-
-        # Retrieve and save the Files in the settings.branding object.
-        for field in "icon", "logo":
-            file_upload_id = self.settings and self.settings.get("branding", {}).get(
-                field
-            )
-            if file_upload_id:
-                try:
-                    File.sync_from_stripe_data(
-                        File(id=file_upload_id).api_retrieve(
-                            stripe_account=self.id, api_key=api_key
-                        ),
-                        api_key=api_key,
-                    )
-                except stripe.error.PermissionError:
-                    # No permission to retrieve the data with the key
-                    logger.warning(
-                        f"Cannot retrieve business branding {field} for acct {self.id} with the key."
-                    )
-                except stripe.error.InvalidRequestError as e:
-                    if "a similar object exists in" in str(e):
-                        # HACK around a Stripe bug.
-                        # See #830 and commit c09d25f52bfdcf883e9eec0bf6c25af1771a644a
-                        pass
-                    else:
-                        raise
-                except stripe.error.AuthenticationError:
-                    # This may happen if saving an account that has a logo, using
-                    # a different API key to the default.
-                    # OK, concretely, there is a chicken-and-egg problem here.
-                    # But, the logo file object is not a particularly important thing.
-                    # Until we have a better solution, just ignore this error.
-                    pass

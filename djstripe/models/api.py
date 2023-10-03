@@ -86,7 +86,10 @@ class APIKey(StripeModel):
     def refresh_account(self, commit=True):
         from .account import Account
 
-        if self.type != APIKeyType.secret:
+        if self.type not in (
+            APIKeyType.secret,
+            APIKeyType.restricted,
+        ):
             return
 
         account_data = Account.stripe_class.retrieve(
@@ -97,7 +100,6 @@ class APIKey(StripeModel):
         # Account needs to exist for things to work. Make a stub if necessary.
         account, created = Account.objects.get_or_create(
             id=account_data["id"],
-            defaults={"charges_enabled": False, "details_submitted": False},
         )
         if created:
             # If it's just been created, now we can sync the account.

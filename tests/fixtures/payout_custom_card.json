@@ -16,6 +16,8 @@
     "failure_code": "",
     "failure_message": "",
     "method": "standard",
+    "original_payout": null,
+    "reversed_by": null,
     "source_type": "card",
     "statement_descriptor": "",
     "status": "paid",

@@ -269,13 +269,6 @@ class BillingScheme(Enum):
     tiered = _("Tiered")
 
 
-class BusinessType(Enum):
-    individual = _("Individual")
-    company = _("Company")
-    non_profit = _("Non Profit")
-    government_entity = _("Government Entity")
-
-
 class CaptureMethod(Enum):
     automatic = _("Automatic")
     manual = _("Manual")
@@ -315,6 +308,12 @@ class ChargeStatus(Enum):
     succeeded = _("Succeeded")
     pending = _("Pending")
     failed = _("Failed")
+
+
+class SessionStatus(Enum):
+    open = _("Open")
+    complete = _("Complete")
+    expired = _("Expired")
 
 
 class ConfirmationMethod(Enum):
@@ -437,6 +436,11 @@ class IntentStatus(Enum):
     )
 
 
+class LineItem(Enum):
+    invoiceitem = _("Invoice Item")
+    subscription = _("Subscription")
+
+
 class MandateStatus(Enum):
     active = _("Active")
     inactive = _("Inactive")
@@ -490,7 +494,7 @@ class SetupIntentStatus(Enum):
 
 
 class PaymentMethodType(Enum):
-    acss_debit = _("Acss Dbit")
+    acss_debit = _("ACSS Dbit")
     affirm = _("Affirm")
     afterpay_clearpay = _("Afterpay Clearpay")
     alipay = _("Alipay")
@@ -501,6 +505,7 @@ class PaymentMethodType(Enum):
     boleto = _("Boleto")
     card = _("Card")
     card_present = _("Card present")
+    cashapp = _("Cash App")
     customer_balance = _("Customer Balance")
     eps = _("EPS")
     fpx = _("FPX")
@@ -514,12 +519,14 @@ class PaymentMethodType(Enum):
     oxxo = _("OXXO")
     p24 = _("Przelewy24")
     paynow = _("PayNow")
+    paypal = _("PayPal")
     pix = _("Pix")
     promptpay = _("PromptPay")
     sepa_debit = _("SEPA Direct Debit")
     sofort = _("SOFORT")
     us_bank_account = _("ACH Direct Debit")
     wechat_pay = _("Wechat Pay")
+    zip = _("Zip")
 
 
 class PayoutFailureCode(Enum):
@@ -544,10 +551,12 @@ class PayoutFailureCode(Enum):
         "Your bank notified us that the bank account holder name on file is incorrect."
     )
     incorrect_account_holder_address = _(
-        "Your bank notified us that the bank account holder address on file is incorrect."
+        "Your bank notified us that the bank account holder address on file is"
+        " incorrect."
     )
     incorrect_account_holder_tax_id = _(
-        "Your bank notified us that the bank account holder tax ID on file is incorrect."
+        "Your bank notified us that the bank account holder tax ID on file is"
+        " incorrect."
     )
     invalid_currency = _("Bank account does not support currency.")
     no_account = _("Bank account could not be located.")
@@ -709,11 +718,6 @@ class RefundStatus(Enum):
     canceled = _("Canceled")
 
 
-class SessionBillingAddressCollection(Enum):
-    auto = _("Auto")
-    required = _("Required")
-
-
 class SessionMode(Enum):
     payment = _("Payment")
     setup = _("Setup")
@@ -744,11 +748,11 @@ class SourceRedirectStatus(Enum):
     failed = _("Failed")
 
 
-class SubmitTypeStatus(Enum):
-    auto = _("Auto")
-    book = _("Book")
-    donate = _("donate")
-    pay = _("pay")
+class SourceTransactionStatus(Enum):
+    pending = _("Pending")
+    succeeded = _("Succeeded")
+    chargeable = _("Chargeable")
+    failed = _("Failed")
 
 
 class SubscriptionScheduleEndBehavior(Enum):
@@ -826,14 +830,37 @@ class TaxIdType(Enum):
     unknown = _("Unknown")
 
 
-class UsageAction(Enum):
-    increment = _("increment")
-    set = _("set")
+class VerificationSessionStatus(Enum):
+    """
+    https://stripe.com/docs/api/identity/verification_sessions/object#identity_verification_session_object-status
+    """
+
+    requires_input = _("Requires input")
+    processing = _("Processing")
+    verified = _("Verified")
+    canceled = _("Canceled")
+
+
+class VerificationType(Enum):
+    """
+    https://stripe.com/docs/api/identity/verification_sessions/object#identity_verification_session_object-type
+    """
+
+    document = _("Document")
+    id_number = _("ID number")
 
 
 class WebhookEndpointStatus(Enum):
     enabled = _("enabled")
     disabled = _("disabled")
+
+
+class WebhookEndpointValidation(Enum):
+    """An enum to specific the choices for WebhookEndpoint Validation."""
+
+    verify_signature = _("Verify Signature")
+    retrieve_event = _("Retrieve Event")
+    none = _("None (NOT RECOMMENDED)")
 
 
 class DjstripePaymentMethodType(Enum):

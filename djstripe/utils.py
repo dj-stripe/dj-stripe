@@ -63,7 +63,7 @@ def get_friendly_currency_amount(amount, currency: str) -> str:
 class QuerySetMock(QuerySet):
     """
     A mocked QuerySet class that does not handle updates.
-    Used by UpcomingInvoice.invoiceitems.
+    Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
     """
 
     @classmethod

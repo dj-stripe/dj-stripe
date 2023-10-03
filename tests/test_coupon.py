@@ -2,16 +2,18 @@ from copy import deepcopy
 from decimal import Decimal
 
 import pytest
+import stripe
 from django.test.testcases import TestCase
 
 from djstripe.models import Coupon
 
 from . import FAKE_COUPON
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
 
 
-class TransferTest(TestCase):
+class TransferTest(CreateAccountMixin, TestCase):
     def test_retrieve_coupon(self):
         coupon_data = deepcopy(FAKE_COUPON)
         coupon = Coupon.sync_from_stripe_data(coupon_data)
@@ -106,7 +108,7 @@ class CouponTest(TestCase):
         self.assertEqual(str(coupon), coupon.human_readable)
 
 
-class TestCouponDecimal:
+class TestCouponDecimal(CreateAccountMixin):
     @pytest.mark.parametrize(
         "inputted,expected",
         [

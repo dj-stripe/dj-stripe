@@ -27,7 +27,7 @@ class ProcessWebhookView(View):
     If an exception happens during processing, returns HTTP 500.
     """
 
-    def post(self, request, uuid=None):
+    def post(self, request, uuid):
         # https://stripe.com/docs/webhooks/signatures
         if "stripe-signature" not in request.headers:
             # Do not even attempt to process/store the event if there is
@@ -35,14 +35,9 @@ class ProcessWebhookView(View):
             logger.error("HTTP_STRIPE_SIGNATURE is missing")
             return HttpResponseBadRequest()
 
-        # uuid is passed for new-style webhook views only.
-        # old-style defaults to no account.
-        if uuid:
-            # If the UUID is invalid (does not exist), this will throw a 404.
-            # Note that this happens after the HTTP_STRIPE_SIGNATURE check on purpose.
-            webhook_endpoint = get_object_or_404(WebhookEndpoint, djstripe_uuid=uuid)
-        else:
-            webhook_endpoint = None
+        # If the UUID is invalid, this will throw a 404.
+        # Note that this happens after the HTTP_STRIPE_SIGNATURE check on purpose.
+        webhook_endpoint = get_object_or_404(WebhookEndpoint, djstripe_uuid=uuid)
 
         trigger = WebhookEventTrigger.from_request(
             request, webhook_endpoint=webhook_endpoint

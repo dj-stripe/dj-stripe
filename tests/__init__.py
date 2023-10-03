@@ -483,6 +483,10 @@ FAKE_SOURCE_II = SourceDict(
 )
 
 
+FAKE_SOURCE_TRANSACTION = load_fixture(
+    "sourcetransaction_srctxn_fakefakefakefakefake0001.json"
+)
+
 FAKE_PAYMENT_INTENT_I = load_fixture("payment_intent_pi_fakefakefakefakefake0001.json")
 
 FAKE_PAYMENT_INTENT_II = deepcopy(FAKE_PAYMENT_INTENT_I)
@@ -607,7 +611,9 @@ FAKE_SETUP_INTENT_I = {
 FAKE_SETUP_INTENT_II = {
     "application": None,
     "cancellation_reason": None,
-    "client_secret": "seti_1J0g0WJSZQVUcJYgWE2XSi1K_secret_Jdxw2mOaIEHBdE6eTsfJ2IfmamgNJaF",
+    "client_secret": (
+        "seti_1J0g0WJSZQVUcJYgWE2XSi1K_secret_Jdxw2mOaIEHBdE6eTsfJ2IfmamgNJaF"
+    ),
     "created": 1623301244,
     "customer": "cus_6lsBvm5rJ0zyHc",
     "description": None,
@@ -638,9 +644,12 @@ FAKE_SETUP_INTENT_DESTINATION_CHARGE = load_fixture(
 FAKE_SESSION_I = {
     "id": "cs_test_OAgNmy75Td25OeREvKUs8XZ7SjMPO9qAplqHO1sBaEjOg9fYbaeMh2nA",
     "object": "checkout.session",
+    "amount_total": 1500,
+    "amount_subtotal": 1500,
     "billing_address_collection": None,
     "cancel_url": "https://example.com/cancel",
     "client_reference_id": None,
+    "currency": "usd",
     "customer": "cus_6lsBvm5rJ0zyHc",
     "customer_email": None,
     "display_items": [
@@ -661,11 +670,20 @@ FAKE_SESSION_I = {
     "mode": None,
     "payment_intent": FAKE_PAYMENT_INTENT_I["id"],
     "payment_method_types": ["card"],
-    "setup_intent": None,
+    "payment_status": "unpaid",
+    "setup_intent": FAKE_SETUP_INTENT_II["id"],
+    "shipping_address_collection": {},
+    "shipping_cost": {},
+    "shipping_details": {},
+    "shipping_options": {},
+    "status": "open",
     "submit_type": None,
     "subscription": None,
     "success_url": "https://example.com/success",
     "metadata": {},
+    "line_tems": {},
+    "url": "",
+    "total_details": {},
 }
 
 
@@ -1374,14 +1392,40 @@ FAKE_CUSTOMER_IV = CustomerDict(
 )
 
 
+FAKE_DISCOUNT = {
+    "id": "di_fakefakefakefakefake0001",
+    "object": "discount",
+    "description": "",
+    "checkout_session": None,
+    "coupon": deepcopy(FAKE_COUPON),
+    "customer": FAKE_CUSTOMER,
+    "end": None,
+    "invoice": None,
+    "invoice_item": None,
+    "promotion_code": "",
+    "start": 1493206114,
+    "subscription": "sub_fakefakefakefakefake0001",
+}
+
 FAKE_DISCOUNT_CUSTOMER = {
+    "id": "di_fakefakefakefakefake0002",
     "object": "discount",
     "coupon": deepcopy(FAKE_COUPON),
-    "customer": FAKE_CUSTOMER["id"],
+    "customer": deepcopy(FAKE_CUSTOMER),
     "start": 1493206114,
     "end": None,
     "subscription": None,
 }
+
+
+FAKE_LINE_ITEM = load_fixture("line_item_il_invoice_item_fakefakefakefakefake0001.json")
+FAKE_LINE_ITEM["discounts"] = [deepcopy(FAKE_DISCOUNT_CUSTOMER)]
+
+FAKE_LINE_ITEM_SUBSCRIPTION = load_fixture(
+    "line_item_il_invoice_item_fakefakefakefakefake0002.json"
+)
+FAKE_LINE_ITEM_SUBSCRIPTION["discounts"] = [deepcopy(FAKE_DISCOUNT_CUSTOMER)]
+FAKE_LINE_ITEM_SUBSCRIPTION["discounts"][0]["subscription"] = "sub_1rn1dp7WgjMtx9"
 
 
 class InvoiceDict(StripeItem):
@@ -1394,7 +1438,17 @@ class InvoiceDict(StripeItem):
         return self
 
 
-FAKE_INVOICE = InvoiceDict(load_fixture("invoice_in_fakefakefakefakefake0001.json"))
+FAKE_INVOICE = load_fixture("invoice_in_fakefakefakefakefake0001.json")
+FAKE_INVOICE["lines"] = {
+    "object": "list",
+    "data": [deepcopy(FAKE_LINE_ITEM)],
+    "has_more": False,
+    "total_count": 1,
+    "url": "/v1/invoices/in_fakefakefakefakefake0001/lines",
+}
+FAKE_INVOICE = InvoiceDict(FAKE_INVOICE)
+
+
 FAKE_INVOICE_IV = InvoiceDict(load_fixture("invoice_in_fakefakefakefakefake0004.json"))
 
 
@@ -1416,27 +1470,11 @@ FAKE_INVOICE_II = InvoiceDict(
         "created": 1439785128,
         "description": None,
         "discount": None,
+        "discounts": [],
         "due_date": None,
         "ending_balance": 0,
         "lines": {
-            "data": [
-                {
-                    "id": FAKE_SUBSCRIPTION_III["id"],
-                    "object": "line_item",
-                    "amount": 2000,
-                    "currency": "usd",
-                    "description": None,
-                    "discountable": True,
-                    "livemode": True,
-                    "metadata": {},
-                    "period": {"start": 1442469907, "end": 1445061907},
-                    "plan": deepcopy(FAKE_PLAN),
-                    "proration": False,
-                    "quantity": 1,
-                    "subscription": None,
-                    "type": "subscription",
-                }
-            ],
+            "data": [deepcopy(FAKE_LINE_ITEM_SUBSCRIPTION)],
             "total_count": 1,
             "object": "list",
             "url": "/v1/invoices/in_16af5A2eZvKYlo2CJjANLL81/lines",
@@ -1479,27 +1517,11 @@ FAKE_INVOICE_III = InvoiceDict(
         "customer": "cus_6lsBvm5rJ0zyHc",
         "description": None,
         "discount": None,
+        "discounts": [],
         "due_date": None,
         "ending_balance": 20,
         "lines": {
-            "data": [
-                {
-                    "id": FAKE_SUBSCRIPTION["id"],
-                    "object": "line_item",
-                    "amount": 2000,
-                    "currency": "usd",
-                    "description": None,
-                    "discountable": True,
-                    "livemode": True,
-                    "metadata": {},
-                    "period": {"start": 1442111228, "end": 1444703228},
-                    "plan": deepcopy(FAKE_PLAN),
-                    "proration": False,
-                    "quantity": 1,
-                    "subscription": None,
-                    "type": "subscription",
-                }
-            ],
+            "data": [deepcopy(FAKE_LINE_ITEM_SUBSCRIPTION)],
             "total_count": 1,
             "object": "list",
             "url": "/v1/invoices/in_16Z9dP2eZvKYlo2CgFHgFx2Z/lines",
@@ -1561,28 +1583,11 @@ FAKE_INVOICE_METERED_SUBSCRIPTION = InvoiceDict(
         "object": "invoice",
         "charge": None,
         "discount": None,
+        "discounts": [],
         "due_date": None,
         "ending_balance": 0,
         "lines": {
-            "data": [
-                {
-                    "amount": 2000,
-                    "id": FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"],
-                    "object": "line_item",
-                    "currency": "usd",
-                    "description": None,
-                    "discountable": True,
-                    "livemode": True,
-                    "metadata": {},
-                    "period": {"start": 1442111228, "end": 1444703228},
-                    "plan": deepcopy(FAKE_PLAN_METERED),
-                    "proration": False,
-                    "quantity": 1,
-                    "subscription": FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"],
-                    "subscription_item": FAKE_SUBSCRIPTION_ITEM["id"],
-                    "type": "subscription",
-                }
-            ],
+            "data": [deepcopy(FAKE_LINE_ITEM_SUBSCRIPTION)],
             "total_count": 1,
             "object": "list",
             "url": "/v1/invoices/in_1JGGM6JSZQVUcJYgpWqfBOIl/lines",
@@ -1637,35 +1642,11 @@ FAKE_UPCOMING_INVOICE = InvoiceDict(
             }
         ],
         "discount": None,
+        "discounts": [],
         "due_date": None,
         "ending_balance": None,
         "lines": {
-            "data": [
-                {
-                    "id": FAKE_SUBSCRIPTION["id"],
-                    "object": "line_item",
-                    "amount": 2000,
-                    "currency": "usd",
-                    "description": None,
-                    "discountable": True,
-                    "livemode": True,
-                    "metadata": {},
-                    "period": {"start": 1441907581, "end": 1444499581},
-                    "plan": deepcopy(FAKE_PLAN),
-                    "proration": False,
-                    "quantity": 1,
-                    "subscription": None,
-                    "tax_amounts": [
-                        {
-                            "amount": 261,
-                            "inclusive": True,
-                            "tax_rate": "txr_fakefakefakefakefake0001",
-                        }
-                    ],
-                    "tax_rates": [],
-                    "type": "subscription",
-                }
-            ],
+            "data": [deepcopy(FAKE_LINE_ITEM_SUBSCRIPTION)],
             "total_count": 1,
             "object": "list",
             "url": "/v1/invoices/in_fakefakefakefakefake0001/lines",
@@ -1740,8 +1721,8 @@ FAKE_EVENT_TAX_ID_DELETED["type"] = "customer.tax_id.deleted"
 
 FAKE_TAX_CODE = load_fixture("tax_code_txcd_fakefakefakefakefake0001.json")
 
-FAKE_INVOICEITEM = {
-    "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
+FAKE_INVOICEITEM_II = {
+    "id": "ii_fakefakefakefakefake0001",
     "object": "invoiceitem",
     "amount": 2000,
     "currency": "usd",
@@ -1765,8 +1746,8 @@ FAKE_INVOICEITEM = {
     "unit_amount_decimal": "2000",
 }
 
-FAKE_INVOICEITEM_II = {
-    "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
+FAKE_INVOICEITEM = {
+    "id": "ii_fakefakefakefakefake0001",  # todo make these ids unique as well
     "object": "invoiceitem",
     "amount": 2000,
     "currency": "usd",
@@ -1793,7 +1774,7 @@ FAKE_INVOICEITEM_II = {
 # Invoice item with tax_rates
 # TODO generate this
 FAKE_INVOICEITEM_III = {
-    "id": "ii_16XVTY2eZvKYlo2Cxz5n3RaS",
+    "id": "ii_fakefakefakefakefake0001",  # todo make these ids unique as well
     "object": "invoiceitem",
     "amount": 2000,
     "currency": "usd",
@@ -2123,14 +2104,14 @@ FAKE_EVENT_CUSTOMER_DELETED.update(
 )
 
 FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED = {
-    "id": "evt_test_customer.discount.created",
+    "id": "AGBWvF5zBm4sMCsLLPZrw9YY",
     "object": "event",
     "api_version": "2018-05-21",
     "created": 1439229084,
     "data": {"object": deepcopy(FAKE_DISCOUNT_CUSTOMER)},
     "livemode": False,
-    "pending_webhooks": 1,
-    "request": {"id": "req_6l38DHch3whaDj", "idempotency_key": None},
+    "pending_webhooks": 0,
+    "request": "req_6l38DHch3whaDj",
     "type": "customer.discount.created",
 }
 
@@ -2141,6 +2122,7 @@ FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED = {
     "api_version": "2017-02-14",
     "created": 1439229084,
     "object": "event",
+    "livemode": False,
     "pending_webhooks": 0,
     "request": "req_6l38DHch3whaDj",
     "data": {"object": deepcopy(FAKE_DISCOUNT_CUSTOMER)},

@@ -8,12 +8,13 @@ from traceback import format_exc
 from uuid import uuid4
 
 import stripe
+from django.conf import settings
 from django.db import models
 from django.utils.datastructures import CaseInsensitiveMapping
 from django.utils.functional import cached_property
 
 from .. import signals
-from ..enums import WebhookEndpointStatus
+from ..enums import WebhookEndpointStatus, WebhookEndpointValidation
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
 from .base import StripeModel, logger
@@ -28,12 +29,15 @@ class WebhookEndpoint(StripeModel):
     api_version = models.CharField(
         max_length=64,
         blank=True,
-        help_text="The API version events are rendered as for this webhook endpoint. Defaults to the configured Stripe API Version.",
+        help_text=(
+            "The API version events are rendered as for this webhook endpoint. Defaults"
+            " to the configured Stripe API Version."
+        ),
     )
     enabled_events = JSONField(
         help_text=(
-            "The list of events to enable for this endpoint. "
-            "['*'] indicates that all events are enabled, except those that require explicit selection."
+            "The list of events to enable for this endpoint. ['*'] indicates that all"
+            " events are enabled, except those that require explicit selection."
         )
     )
     secret = models.CharField(
@@ -54,10 +58,18 @@ class WebhookEndpoint(StripeModel):
     )
 
     djstripe_uuid = models.UUIDField(
-        null=True,
         unique=True,
         default=uuid4,
         help_text="A UUID specific to dj-stripe generated for the endpoint",
+    )
+    djstripe_tolerance = models.PositiveSmallIntegerField(
+        help_text="Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you're doing.",
+        default=stripe.Webhook.DEFAULT_TOLERANCE,
+    )
+    djstripe_validation_method = StripeEnumField(
+        enum=WebhookEndpointValidation,
+        help_text="Controls the webhook validation method.",
+        default=WebhookEndpointValidation.verify_signature,
     )
 
     def __str__(self):
@@ -73,8 +85,16 @@ class WebhookEndpoint(StripeModel):
         super()._attach_objects_hook(
             cls, data, current_ids=current_ids, api_key=api_key
         )
-
         self.djstripe_uuid = data.get("metadata", {}).get("djstripe_uuid")
+
+        djstripe_tolerance = data.get("djstripe_tolerance")
+        # As djstripe_tolerance can be set to 0
+        if djstripe_tolerance is not None:
+            self.djstripe_tolerance = djstripe_tolerance
+
+        djstripe_validation_method = data.get("djstripe_validation_method")
+        if djstripe_validation_method:
+            self.djstripe_validation_method = djstripe_validation_method
 
 
 def _get_version():
@@ -171,7 +191,7 @@ class WebhookEventTrigger(models.Model):
         return f"id={self.id}, valid={self.valid}, processed={self.processed}"
 
     @classmethod
-    def from_request(cls, request, *, webhook_endpoint: WebhookEndpoint = None):
+    def from_request(cls, request, *, webhook_endpoint: WebhookEndpoint):
         """
         Create, validate and process a WebhookEventTrigger given a Django
         request object.
@@ -189,17 +209,8 @@ class WebhookEventTrigger(models.Model):
 
         ip = get_remote_ip(request)
 
-        try:
-            data = json.loads(body)
-        except ValueError:
-            data = {}
-
-        if webhook_endpoint is None:
-            stripe_account = StripeModel._find_owner_account(data=data)
-            secret = djstripe_settings.WEBHOOK_SECRET
-        else:
-            stripe_account = webhook_endpoint.djstripe_owner_account
-            secret = webhook_endpoint.secret
+        stripe_account = webhook_endpoint.djstripe_owner_account
+        secret = webhook_endpoint.secret
 
         obj = cls.objects.create(
             headers=dict(request.headers),
@@ -216,13 +227,22 @@ class WebhookEventTrigger(models.Model):
         try:
             # Validate the webhook first
             signals.webhook_pre_validate.send(sender=cls, instance=obj)
-            obj.valid = obj.validate(secret=secret, api_key=api_key)
+
+            # Default to per Webhook Endpoint Tolerance
+            obj.valid = obj.validate(
+                secret=secret,
+                api_key=api_key,
+            )
+
+            # send post webhook validate signal
             signals.webhook_post_validate.send(
                 sender=cls, instance=obj, valid=obj.valid
             )
 
             if obj.valid:
                 signals.webhook_pre_process.send(sender=cls, instance=obj)
+
+                # todo this should be moved to per webhook endpoint callback
                 if djstripe_settings.WEBHOOK_EVENT_CALLBACK:
                     # If WEBHOOK_EVENT_CALLBACK, pass it for processing
                     djstripe_settings.WEBHOOK_EVENT_CALLBACK(obj, api_key=api_key)
@@ -265,23 +285,15 @@ class WebhookEventTrigger(models.Model):
         event_id = self.json_body.get("id")
         return event_id and event_id.endswith("_00000000000000")
 
-    def verify_signature(
-        self, secret: str, tolerance: int = djstripe_settings.WEBHOOK_TOLERANCE
-    ) -> bool:
+    def verify_signature(self, secret: str, tolerance: int) -> bool:
         if not secret:
             raise ValueError("Cannot verify event signature without a secret")
 
         # HTTP headers are case-insensitive, but we store them as a dict.
         headers = CaseInsensitiveMapping(self.headers)
         signature = headers.get("stripe-signature")
-        local_cli_signing_secret = headers.get("x-djstripe-webhook-secret")
-        try:
-            # check if the x-djstripe-webhook-secret Custom Header exists
-            if local_cli_signing_secret:
-                # Set Endpoint Signing Secret to the output of Stripe CLI
-                # for signature verification
-                secret = local_cli_signing_secret
 
+        try:
             stripe.WebhookSignature.verify_header(
                 self.body, signature, secret, tolerance
             )
@@ -293,10 +305,8 @@ class WebhookEventTrigger(models.Model):
 
     def validate(
         self,
-        api_key: str = None,
-        secret: str = djstripe_settings.WEBHOOK_SECRET,
-        tolerance: int = djstripe_settings.WEBHOOK_TOLERANCE,
-        validation_method=djstripe_settings.WEBHOOK_VALIDATION,
+        api_key: str,
+        secret: str,
     ):
         """
         The original contents of the Event message must be confirmed by
@@ -317,12 +327,23 @@ class WebhookEventTrigger(models.Model):
             logger.info("Test webhook received and discarded: %s", local_data)
             return False
 
-        if validation_method is None:
+        validation_method = self.webhook_endpoint.djstripe_validation_method
+
+        if validation_method == WebhookEndpointValidation.none:
             # validation disabled
             warnings.warn("WEBHOOK VALIDATION is disabled.")
             return True
-        elif validation_method == "verify_signature":
-            return self.verify_signature(secret=secret)
+        elif validation_method == WebhookEndpointValidation.verify_signature:
+            if settings.DEBUG:
+                # In debug mode, allow overriding the webhook secret with
+                # the x-djstripe-webhook-secret header.
+                # (used for stripe cli webhook forwarding)
+                headers = CaseInsensitiveMapping(self.headers)
+                local_secret = headers.get("x-djstripe-webhook-secret")
+                secret = local_secret if local_secret else secret
+            return self.verify_signature(
+                secret=secret, tolerance=self.webhook_endpoint.djstripe_tolerance
+            )
 
         livemode = local_data["livemode"]
         api_key = api_key or djstripe_settings.get_default_api_key(livemode)

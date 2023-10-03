@@ -23,6 +23,7 @@ from . import (
     FAKE_STANDARD_ACCOUNT,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
 
@@ -75,14 +76,14 @@ class TestStrCard:
                 default = True
 
             assert (
-                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} {fake_stripe_data['last4']} {'Default' if default else ''} Expires {fake_stripe_data['exp_month']} {fake_stripe_data['exp_year']}"
+                f"{enums.CardBrand.humanize(fake_stripe_data['brand'])} {fake_stripe_data['last4']} {'Default' if default else ''} Expires"
+                f" {fake_stripe_data['exp_month']} {fake_stripe_data['exp_year']}"
                 == str(card)
             )
 
 
-class CardTest(AssertStripeFksMixin, TestCase):
+class CardTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         # create a Standard Stripe Account
         self.standard_account = FAKE_STANDARD_ACCOUNT.create()
 
@@ -223,8 +224,8 @@ class CardTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_no_customer_and_no_account(self):
         exception_message = (
-            "Card objects must be manipulated through either a Stripe Connected Account or a customer. "
-            "Pass a Customer or an Account object into this call."
+            "Card objects must be manipulated through either a Stripe Connected Account"
+            " or a customer. Pass a Customer or an Account object into this call."
         )
 
         with self.assertRaisesMessage(
@@ -358,7 +359,6 @@ class CardTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     def test_remove_card_by_account(self, account_retrieve_mock, card_delete_mock):
-
         stripe_card = Card._api_create(
             account=self.custom_account, source=FAKE_CARD_IV["id"]
         )
@@ -392,7 +392,6 @@ class CardTest(AssertStripeFksMixin, TestCase):
     def test_remove_already_deleted_card_by_account(
         self, account_retrieve_mock, card_delete_mock
     ):
-
         stripe_card = Card._api_create(
             account=self.custom_account, source=FAKE_CARD_IV["id"]
         )

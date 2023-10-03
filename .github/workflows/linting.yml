@@ -7,17 +7,38 @@ on:
     # The branches below must be a subset of the branches above
     branches: [master]
 
+env:
+  POETRY_VERSION: "1.2.2"
+  POETRY_VIRTUALENVS_IN_PROJECT: "1"
+
+
 jobs:
   linting:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: djstripe
+          POSTGRES_DB: djstripe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/setup-python@v4
+
+      - uses: ./.github/install_poetry_action
         with:
-          python-version: "3.11"
+            POETRY_VERSION: ${{ env.POETRY_VERSION }}
+            python_version: "3.11"
 
       - name: Install pre-commit
-        run: pip install pre-commit
+        run: poetry install --with dev -E postgres
 
       - name: Run pre-commit
-        run: pre-commit run --all-files --show-diff-on-failure
+        run: poetry run pre-commit run --all-files --show-diff-on-failure

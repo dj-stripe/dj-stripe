@@ -71,3 +71,13 @@ class InvoiceItemInline(admin.StackedInline):
     readonly_fields = ("id", "created", "djstripe_owner_account")
     raw_id_fields = get_forward_relation_fields_for_model(model)
     show_change_link = True
+
+
+class LineItemInline(admin.StackedInline):
+    """A TabularInline for LineItem."""
+
+    model = models.LineItem
+    extra = 0
+    readonly_fields = ("id", "created", "djstripe_owner_account")
+    raw_id_fields = get_forward_relation_fields_for_model(model)
+    show_change_link = True

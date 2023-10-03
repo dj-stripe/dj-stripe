@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
 
     services:
       postgres:
@@ -39,7 +39,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       mysql:
-        image: mysql:5.7
+        image: mysql:8.0
         env:
           MYSQL_ROOT_PASSWORD: djstripe
           MYSQL_DATABASE: djstripe
@@ -54,25 +54,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - uses: ./.github/install_poetry_action
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install poetry
-        run: |
-          curl -sL https://install.python-poetry.org | python - --version ${{ env.POETRY_VERSION }}
-
-      - name: Set up cache
-        uses: actions/cache@v3
-        id: cache
-        with:
-          path: .venv
-          key: venv-${{ matrix.python-version }}
-
-      - name: Ensure cache is healthy
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: timeout 10s poetry run pip --version || rm -rf .venv
+            POETRY_VERSION: ${{ env.POETRY_VERSION }}
+            python_version: ${{ matrix.python-version }}
 
       - name: Install dependencies
         run: poetry install --with ci

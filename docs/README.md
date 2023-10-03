@@ -33,14 +33,14 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 ## Requirements
 
 -   Django >=3.2
--   Python >=3.7.12
+-   Python >=3.8
 -   PostgreSQL engine (recommended) >=9.6
 -   MySQL engine: MariaDB >=10.2 or MySQL >=5.7
 -   SQLite: Not recommended in production. Version >=3.26 required.
 
 ## Installation
 
-See [installation](installation.md) instructions.
+See [installation](https://dj-stripe.dev/dj-stripe/2.7/installation/) instructions.
 
 ## Changelog
 
@@ -60,7 +60,7 @@ See [installation](installation.md) instructions.
 
 You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
 
-We've been bringing dj-stripe to the world for over 7 years and are excited to be able to start
+We've been bringing dj-stripe to the world for over 10 years and are excited to be able to start
 dedicating some real resources to the project.
 
 Your sponsorship helps us keep a team of maintainers actively working to improve dj-stripe and

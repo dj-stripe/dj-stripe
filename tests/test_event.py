@@ -4,6 +4,8 @@ dj-stripe Event Model Tests.
 from copy import deepcopy
 from unittest.mock import patch
 
+import pytest
+import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe.error import StripeError
@@ -18,11 +20,11 @@ from . import (
     FAKE_PLATFORM_ACCOUNT,
     FAKE_TRANSFER,
 )
+from .conftest import CreateAccountMixin
 
 
-class EventTest(TestCase):
+class EventTest(CreateAccountMixin, TestCase):
     def setUp(self):
-
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
@@ -36,7 +38,10 @@ class EventTest(TestCase):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
 
         self.assertEqual(
-            f"type={FAKE_EVENT_TRANSFER_CREATED['type']}, id={FAKE_EVENT_TRANSFER_CREATED['id']}",
+            (
+                f"type={FAKE_EVENT_TRANSFER_CREATED['type']},"
+                f" id={FAKE_EVENT_TRANSFER_CREATED['id']}"
+            ),
             str(event),
         )
 
@@ -164,7 +169,6 @@ class EventRaceConditionTest(TestCase):
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-        autospec=True,
     )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True

@@ -15,13 +15,14 @@ from .test_apikey import RK_LIVE, RK_TEST, SK_LIVE, SK_TEST
 
 pytestmark = pytest.mark.django_db
 
+from .conftest import CreateAccountMixin
+
 
 class TestCustomActionForm:
     @pytest.mark.parametrize(
         "action_name", ["_sync_all_instances", "_resync_instances"]
     )
     def test___init__(self, action_name, monkeypatch):
-
         # monkeypatch utils.get_model
         def mock_get_model(*args, **kwargs):
             return model
@@ -55,10 +56,9 @@ class TestCustomActionForm:
             assert _selected_action_field.choices == list(zip(pk_values, pk_values))
 
 
-class TestAPIKeyAdminCreateForm:
+class TestAPIKeyAdminCreateForm(CreateAccountMixin):
     @pytest.mark.parametrize("secret", [SK_TEST, SK_LIVE, RK_TEST, RK_LIVE])
     def test__post_clean(self, secret, monkeypatch):
-
         form = APIKeyAdminCreateForm(data={"name": "Test Secret Key", "secret": secret})
 
         # Manually invoking internals of Form.full_clean() to isolate
@@ -80,9 +80,8 @@ class TestAPIKeyAdminCreateForm:
 
         if secret.startswith("sk_"):
             assert form.instance.type == enums.APIKeyType.secret
-            assert (
-                form.instance.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]
-            )
+
         elif secret.startswith("rk_"):
             assert form.instance.type == enums.APIKeyType.restricted
-            assert form.instance.djstripe_owner_account is None
+
+        assert form.instance.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]

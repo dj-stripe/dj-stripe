@@ -21,10 +21,10 @@ from tests import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
 class TestStrSetupIntent:
-
     #
     # Helpers
     #
@@ -69,18 +69,20 @@ class TestStrSetupIntent:
             assert (
                 f"{pm} ({SetupIntentStatus.humanize(fake_intent_data['status'])}) "
                 f"for {account} "
-                f"by {customer}"
-            ) == str(si)
+                f"by {customer}" == str(si)
+            )
 
         elif has_account and not has_customer:
             assert (
-                f"{pm} for {account}. {SetupIntentStatus.humanize(fake_intent_data['status'])}"
-            ) == str(si)
+                f"{pm} for {account}."
+                f" {SetupIntentStatus.humanize(fake_intent_data['status'])}" == str(si)
+            )
 
         elif has_customer and not has_account:
             assert (
-                f"{pm} by {customer}. {SetupIntentStatus.humanize(fake_intent_data['status'])}"
-            ) == str(si)
+                f"{pm} by {customer}."
+                f" {SetupIntentStatus.humanize(fake_intent_data['status'])}" == str(si)
+            )
 
         elif not has_customer and not has_account:
             f"{pm} ({SetupIntentStatus.humanize(fake_intent_data['status'])})" == str(
@@ -88,7 +90,7 @@ class TestStrSetupIntent:
             )
 
 
-class SetupIntentTest(AssertStripeFksMixin, TestCase):
+class SetupIntentTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )

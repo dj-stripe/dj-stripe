@@ -23,9 +23,10 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestDispute(TestCase):
+class TestDispute(CreateAccountMixin, TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
             username="fake_customer_1", email=FAKE_CUSTOMER["email"]
@@ -69,7 +70,6 @@ class TestDispute(TestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_I)
         self.assertEqual(str(dispute), "$10.00 USD (Needs response) ")
 
@@ -110,7 +110,6 @@ class TestDispute(TestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_I)
         assert dispute.id == FAKE_DISPUTE_I["id"]
 
@@ -153,7 +152,6 @@ class TestDispute(TestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_III)
         assert dispute.id == FAKE_DISPUTE_III["id"]
 
@@ -212,10 +210,11 @@ class TestDispute(TestCase):
         payment_intent_retrieve_mock,
         payment_method_retrieve_mock,
     ):
-
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_I)
         self.assertEqual(
             dispute.get_stripe_dashboard_url(),
-            f"{dispute._get_base_stripe_dashboard_url()}"
-            f"{dispute.stripe_dashboard_item_name}/{dispute.payment_intent.id}",
+            (
+                f"{dispute._get_base_stripe_dashboard_url()}"
+                f"{dispute.stripe_dashboard_item_name}/{dispute.payment_intent.id}"
+            ),
         )

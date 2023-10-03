@@ -15,21 +15,36 @@ from tests import (
     FAKE_CHARGE,
     FAKE_CUSTOMER,
     FAKE_INVOICE,
+    FAKE_INVOICEITEM,
     FAKE_PAYMENT_INTENT_I,
     FAKE_PAYMENT_METHOD_I,
     FAKE_PRODUCT,
     FAKE_SESSION_I,
+    FAKE_SETUP_INTENT_II,
     FAKE_SUBSCRIPTION,
+    FAKE_SUBSCRIPTION_ITEM,
     AssertStripeFksMixin,
 )
+
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
 
 
-class SessionTest(AssertStripeFksMixin, TestCase):
+class SessionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
+    @patch(
+        "stripe.SetupIntent.retrieve",
+        return_value=deepcopy(FAKE_SETUP_INTENT_II),
+        autospec=True,
+    )
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
         autospec=True,
     )
     @patch(
@@ -47,6 +62,11 @@ class SessionTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch(
@@ -62,13 +82,15 @@ class SessionTest(AssertStripeFksMixin, TestCase):
         payment_intent_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
+        setup_intent_retrieve_mock,
     ):
-
         session = Session.sync_from_stripe_data(deepcopy(FAKE_SESSION_I))
 
         self.assert_fks(
@@ -89,6 +111,7 @@ class SessionTest(AssertStripeFksMixin, TestCase):
                 "djstripe.PaymentIntent.payment_method",
                 "djstripe.PaymentIntent.upcominginvoice (related name)",
                 "djstripe.Product.default_price",
+                "djstripe.SetupIntent.on_behalf_of",
                 "djstripe.Subscription.default_payment_method",
                 "djstripe.Subscription.default_source",
                 "djstripe.Subscription.pending_setup_intent",
@@ -98,8 +121,18 @@ class SessionTest(AssertStripeFksMixin, TestCase):
         )
 
     @patch(
+        "stripe.SetupIntent.retrieve",
+        return_value=deepcopy(FAKE_SETUP_INTENT_II),
+        autospec=True,
+    )
+    @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
         autospec=True,
     )
     @patch(
@@ -117,6 +150,11 @@ class SessionTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
     )
     @patch(
@@ -132,20 +170,21 @@ class SessionTest(AssertStripeFksMixin, TestCase):
         payment_intent_retrieve_mock,
         customer_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
+        setup_intent_retrieve_mock,
     ):
-
         session = Session.sync_from_stripe_data(deepcopy(FAKE_SESSION_I))
 
         self.assertEqual(f"<id={FAKE_SESSION_I['id']}>", str(session))
 
 
-class TestSession:
-
+class TestSession(CreateAccountMixin):
     key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
 
     @pytest.mark.parametrize(
@@ -177,30 +216,37 @@ class TestSession:
 
         def mock_checkout_session_get(*args, **kwargs):
             """Monkeypatched stripe.Session.retrieve"""
-            return fake_stripe_session
+            return deepcopy(fake_stripe_session)
 
         def mock_customer_get(*args, **kwargs):
             """Monkeypatched stripe.Customer.retrieve"""
-            fake_customer = deepcopy(FAKE_CUSTOMER)
-            return fake_customer
+            return deepcopy(FAKE_CUSTOMER)
 
         def mock_payment_intent_get(*args, **kwargs):
             """Monkeypatched stripe.PaymentIntent.retrieve"""
-            fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_I)
-            return fake_payment_intent
+            return deepcopy(FAKE_PAYMENT_INTENT_I)
+
+        def mock_setup_intent_get(*args, **kwargs):
+            """Monkeypatched stripe.SetupIntent.retrieve"""
+            return deepcopy(FAKE_SETUP_INTENT_II)
 
         def mock_invoice_get(*args, **kwargs):
             """Monkeypatched stripe.Invoice.retrieve"""
             return deepcopy(FAKE_INVOICE)
 
+        def mock_invoice_item_get(*args, **kwargs):
+            return deepcopy(FAKE_INVOICEITEM)
+
         def mock_payment_method_get(*args, **kwargs):
             """Monkeypatched stripe.PaymentMethod.retrieve"""
-            fake_payment_intent = deepcopy(FAKE_PAYMENT_METHOD_I)
-            return fake_payment_intent
+            return deepcopy(FAKE_PAYMENT_METHOD_I)
 
         def mock_subscription_get(*args, **kwargs):
             """Monkeypatched stripe.Subscription.retrieve"""
             return deepcopy(FAKE_SUBSCRIPTION)
+
+        def mock_subscriptionitem_get(*args, **kwargs):
+            return deepcopy(FAKE_SUBSCRIPTION_ITEM)
 
         def mock_balance_transaction_get(*args, **kwargs):
             """Monkeypatched stripe.BalanceTransaction.retrieve"""
@@ -218,13 +264,19 @@ class TestSession:
         monkeypatch.setattr(
             stripe.checkout.Session, "retrieve", mock_checkout_session_get
         )
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
         monkeypatch.setattr(stripe.Customer, "modify", mock_customer_get)
         monkeypatch.setattr(stripe.PaymentIntent, "retrieve", mock_payment_intent_get)
+        monkeypatch.setattr(stripe.SetupIntent, "retrieve", mock_setup_intent_get)
 
         # because of Reverse o2o field sync due to PaymentIntent.sync_from_stripe_data..
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
+        monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
         monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
         monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
+        monkeypatch.setattr(
+            stripe.SubscriptionItem, "retrieve", mock_subscriptionitem_get
+        )
         monkeypatch.setattr(
             stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
         )

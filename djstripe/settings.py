@@ -63,22 +63,12 @@ class DjstripeSettings:
         )
 
     @property
-    def DJSTRIPE_WEBHOOK_URL(self):
-        return getattr(settings, "DJSTRIPE_WEBHOOK_URL", r"^webhook/$")
+    def decimal_max_digits(self):
+        return 24
 
     @property
-    def WEBHOOK_TOLERANCE(self):
-        return getattr(
-            settings, "DJSTRIPE_WEBHOOK_TOLERANCE", stripe.Webhook.DEFAULT_TOLERANCE
-        )
-
-    @property
-    def WEBHOOK_VALIDATION(self):
-        return getattr(settings, "DJSTRIPE_WEBHOOK_VALIDATION", "verify_signature")
-
-    @property
-    def WEBHOOK_SECRET(self):
-        return getattr(settings, "DJSTRIPE_WEBHOOK_SECRET", "")
+    def decimal_places(self):
+        return 12
 
     # Webhook event callbacks allow an application to take control of what happens
     # when an event from Stripe is received.  One suggestion is to put the event

@@ -1,10 +1,18 @@
+import typing as t
+
 import stripe
 from django.db import models
 
 from djstripe.settings import djstripe_settings
 
 from .. import enums
-from ..fields import JSONField, StripeEnumField, StripeForeignKey
+from ..fields import (
+    StripeCurrencyCodeField,
+    StripeEnumField,
+    StripeForeignKey,
+    StripeQuantumCurrencyAmountField,
+)
+from ..models import Subscription
 from .base import StripeModel
 
 
@@ -16,23 +24,25 @@ class Session(StripeModel):
     Stripe documentation: https://stripe.com/docs/api/checkout/sessions?lang=python
     """
 
+    expand_fields = [
+        "line_items",
+        "total_details.breakdown",
+        "line_items.data.discounts",
+        "customer",
+        "payment_intent",
+        "subscription",
+    ]
     stripe_class = stripe.checkout.Session
 
-    billing_address_collection = StripeEnumField(
-        enum=enums.SessionBillingAddressCollection,
+    amount_total = StripeQuantumCurrencyAmountField(
+        null=True,
         blank=True,
-        help_text=(
-            "The value (auto or required) for whether Checkout"
-            "collected the customer's billing address."
-        ),
+        help_text="Total of all items after discounts and taxes are applied.",
     )
-    cancel_url = models.TextField(
-        max_length=5000,
+    amount_subtotal = StripeQuantumCurrencyAmountField(
+        null=True,
         blank=True,
-        help_text=(
-            "The URL the customer will be directed to if they"
-            "decide to cancel payment and return to your website."
-        ),
+        help_text="Total of all items after discounts and taxes are applied.",
     )
     client_reference_id = models.TextField(
         max_length=5000,
@@ -42,12 +52,14 @@ class Session(StripeModel):
             "This can be a customer ID, a cart ID, or similar, and"
             "can be used to reconcile the session with your internal systems."
         ),
+        db_index=True,
     )
+    currency = StripeCurrencyCodeField(null=True, blank=True)
     customer = StripeForeignKey(
         "Customer",
         null=True,
         on_delete=models.SET_NULL,
-        help_text=("Customer this Checkout is for if one exists."),
+        help_text="Customer this Checkout is for if one exists.",
     )
     customer_email = models.CharField(
         max_length=255,
@@ -55,11 +67,7 @@ class Session(StripeModel):
         help_text=(
             "If provided, this value will be used when the Customer object is created."
         ),
-    )
-    display_items = JSONField(
-        null=True,
-        blank=True,
-        help_text=("The line items, plans, or SKUs purchased by the customer."),
+        db_index=True,
     )
     locale = models.CharField(
         max_length=255,
@@ -72,39 +80,30 @@ class Session(StripeModel):
     mode = StripeEnumField(
         enum=enums.SessionMode,
         blank=True,
-        help_text="The mode of the Checkout Session, "
-        "one of payment, setup, or subscription.",
-    )
-    payment_intent = StripeForeignKey(
-        "PaymentIntent",
-        null=True,
-        on_delete=models.SET_NULL,
-        help_text=("PaymentIntent created if SKUs or line items were provided."),
-    )
-    payment_method_types = JSONField(
-        help_text="The list of payment method types (e.g. card) that this "
-        "Checkout Session is allowed to accept."
-    )
-    submit_type = StripeEnumField(
-        enum=enums.SubmitTypeStatus,
-        blank=True,
-        help_text="Describes the type of transaction being performed by Checkout"
-        "in order to customize relevant text on the page, such as the submit button.",
-    )
-    subscription = StripeForeignKey(
-        "Subscription",
-        null=True,
-        on_delete=models.SET_NULL,
-        help_text=("Subscription created if one or more plans were provided."),
-    )
-    success_url = models.TextField(
-        max_length=5000,
-        blank=True,
         help_text=(
-            "The URL the customer will be directed to after the payment or subscription"
-            "creation is successful."
+            "The mode of the Checkout Session, one of payment, setup, or subscription."
         ),
     )
+    status = StripeEnumField(
+        enum=enums.SessionStatus,
+        null=True,
+        blank=True,
+        help_text=(
+            "The status of the Checkout Session, one of open, complete, or expired."
+        ),
+    )
+
+    @property
+    def url(self) -> str:
+        return self.stripe_data.get("url") or ""
+
+    @property
+    def subscription(self) -> t.Optional["Subscription"]:
+        subscription = self.stripe_data.get("subscription")
+        if subscription and isinstance(subscription, str):
+            return Subscription.objects.filter(id=subscription).first()
+
+        return None
 
     def _attach_objects_post_save_hook(
         self,
@@ -121,7 +120,6 @@ class Session(StripeModel):
 
         # only update if customer and metadata exist
         if self.customer and self.metadata:
-
             key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
             current_value = self.metadata.get(key)
 

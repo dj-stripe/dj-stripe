@@ -27,6 +27,7 @@ from . import (
     FAKE_CUSTOMER_II,
     FAKE_INVOICE,
     FAKE_INVOICE_II,
+    FAKE_INVOICEITEM,
     FAKE_PAYMENT_INTENT_I,
     FAKE_PAYMENT_INTENT_II,
     FAKE_PAYMENT_METHOD_II,
@@ -38,6 +39,7 @@ from . import (
     FAKE_SUBSCRIPTION_CANCELED,
     FAKE_SUBSCRIPTION_II,
     FAKE_SUBSCRIPTION_III,
+    FAKE_SUBSCRIPTION_ITEM,
     FAKE_SUBSCRIPTION_METERED,
     FAKE_SUBSCRIPTION_MULTI_PLAN,
     FAKE_SUBSCRIPTION_NOT_PERIOD_CURRENT,
@@ -45,6 +47,7 @@ from . import (
     AssertStripeFksMixin,
     datetime_to_unix,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
 
@@ -52,7 +55,7 @@ pytestmark = pytest.mark.django_db
 # with Prices is fully supported
 
 
-class SubscriptionStrTest(TestCase):
+class SubscriptionStrTest(CreateAccountMixin, TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
@@ -78,7 +81,6 @@ class SubscriptionStrTest(TestCase):
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
-
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION_III)
         subscription_fake["latest_invoice"] = None
 
@@ -91,10 +93,20 @@ class SubscriptionStrTest(TestCase):
         )
 
 
-class SubscriptionTest(AssertStripeFksMixin, TestCase):
+class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
+    @patch(
+        "stripe.Customer.retrieve",
+        return_value=deepcopy(FAKE_CUSTOMER),
+        autospec=True,
+    )
     @patch(
         "stripe.BalanceTransaction.retrieve",
         return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+        autospec=True,
+    )
+    @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
         autospec=True,
     )
     @patch(
@@ -117,17 +129,25 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", autospec=True, return_value=deepcopy(FAKE_INVOICE)
     )
     def setUp(
         self,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         product_retrieve_mock,
         payment_intent_retrieve_mock,
         paymentmethod_card_retrieve_mock,
         charge_retrieve_mock,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         balance_transaction_retrieve_mock,
+        customer_retrieve_mock,
     ):
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
@@ -235,7 +255,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
-
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION_II)
         subscription_fake["latest_invoice"] = FAKE_INVOICE["id"]
         subscription_retrieve_mock.return_value = subscription_fake
@@ -870,7 +889,6 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         product_retrieve_mock,
         plan_retrieve_mock,
     ):
-
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION_MULTI_PLAN)
         subscription_fake["latest_invoice"] = FAKE_INVOICE["id"]
         subscription_retrieve_mock.return_value = subscription_fake
@@ -1000,6 +1018,11 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.InvoiceItem.retrieve",
+        return_value=deepcopy(FAKE_INVOICEITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE_II), autospec=True
     )
     @patch("stripe.Plan.retrieve", autospec=True)
@@ -1012,16 +1035,23 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         autospec=True,
     )
     @patch(
+        "stripe.SubscriptionItem.retrieve",
+        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+        autospec=True,
+    )
+    @patch(
         "stripe.Subscription.retrieve",
         autospec=True,
     )
     def test_remove_all_multi_plan(
         self,
         subscription_retrieve_mock,
+        subscription_item_retrieve_mock,
         customer_retrieve_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
         invoice_retrieve_mock,
+        invoice_item_retrieve_mock,
         paymentintent_retrieve_mock,
         paymentmethod_retrieve_mock,
         charge_retrieve_mock,
@@ -1149,7 +1179,7 @@ class SubscriptionTest(AssertStripeFksMixin, TestCase):
         )
 
 
-class TestSubscriptionDecimal:
+class TestSubscriptionDecimal(CreateAccountMixin):
     @pytest.mark.parametrize(
         "inputted,expected",
         [
@@ -1167,12 +1197,17 @@ class TestSubscriptionDecimal:
             (23.2345678, Decimal("23.24")),
         ],
     )
-    def test_decimal_application_fee_percent(self, inputted, expected, monkeypatch):
+    def test_decimal_application_fee_percent(  # noqa: C901
+        self, inputted, expected, monkeypatch
+    ):
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
         fake_subscription["application_fee_percent"] = inputted
 
         def mock_invoice_get(*args, **kwargs):
             return FAKE_INVOICE
+
+        def mock_invoice_item_get(*args, **kwargs):
+            return FAKE_INVOICEITEM
 
         def mock_customer_get(*args, **kwargs):
             return FAKE_CUSTOMER
@@ -1189,6 +1224,9 @@ class TestSubscriptionDecimal:
         def mock_subscription_get(*args, **kwargs):
             return fake_subscription
 
+        def mock_subscriptionitem_get(*args, **kwargs):
+            return FAKE_SUBSCRIPTION_ITEM
+
         def mock_balance_transaction_get(*args, **kwargs):
             return FAKE_BALANCE_TRANSACTION
 
@@ -1201,11 +1239,16 @@ class TestSubscriptionDecimal:
         # monkeypatch stripe retrieve calls to return
         # the desired json response.
         monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
+        monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
+
         monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
         monkeypatch.setattr(
             stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
         )
         monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
+        monkeypatch.setattr(
+            stripe.SubscriptionItem, "retrieve", mock_subscriptionitem_get
+        )
         monkeypatch.setattr(stripe.Charge, "retrieve", mock_charge_get)
         monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
         monkeypatch.setattr(stripe.PaymentIntent, "retrieve", mock_payment_intent_get)

@@ -3,7 +3,6 @@ dj-stripe Custom Field Definitions
 """
 import decimal
 
-from django.conf import SettingsReference, settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import JSONField as BaseJSONField
@@ -30,27 +29,7 @@ class FieldDeconstructMixin:
 
 
 class StripeForeignKey(models.ForeignKey):
-    setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
-
-    def __init__(self, *args, **kwargs):
-        # The default value will only come into play if the check for
-        # that setting has been disabled.
-        kwargs["to_field"] = getattr(settings, self.setting_name, "id")
-        super().__init__(*args, **kwargs)
-
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        kwargs["to_field"] = SettingsReference(
-            getattr(settings, self.setting_name, "id"), self.setting_name
-        )
-        return name, path, args, kwargs
-
-    def get_default(self):
-        # Override to bypass a weird bug in Django
-        # https://stackoverflow.com/a/14390402/227443
-        if isinstance(self.remote_field.model, str):
-            return self._get_default()
-        return super().get_default()
+    pass
 
 
 class PaymentMethodForeignKey(FieldDeconstructMixin, models.ForeignKey):
@@ -106,11 +85,8 @@ class StripeDecimalCurrencyAmountField(FieldDeconstructMixin, models.DecimalFiel
     """
 
     def __init__(self, *args, **kwargs):
-        """
-        Assign default args to this field. By contacting stripe support, some accounts
-        will have their limit raised to 11 digits
-        """
-        defaults = {"decimal_places": 2, "max_digits": 11}
+        # see https://github.com/dj-stripe/dj-stripe/pull/1786
+        defaults = {"decimal_places": 2, "max_digits": 14}
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
@@ -131,7 +107,7 @@ class StripeEnumField(FieldDeconstructMixin, models.CharField):
     def __init__(self, enum, *args, **kwargs):
         self.enum = enum
         choices = enum.choices
-        defaults = {"choices": choices, "max_length": max(len(k) for k, v in choices)}
+        defaults = {"choices": choices, "max_length": 255}
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 

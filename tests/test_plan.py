@@ -20,11 +20,12 @@ from . import (
     FAKE_TIER_PLAN,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
 
 
-class PlanCreateTest(AssertStripeFksMixin, TestCase):
+class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         with patch(
             "stripe.Product.retrieve",
@@ -146,7 +147,7 @@ class PlanCreateTest(AssertStripeFksMixin, TestCase):
         )
 
 
-class PlanTest(AssertStripeFksMixin, TestCase):
+class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     plan: Plan
 
     def setUp(self):
@@ -241,8 +242,7 @@ class PlanTest(AssertStripeFksMixin, TestCase):
         )
 
 
-class TestHumanReadablePlan:
-
+class TestHumanReadablePlan(CreateAccountMixin):
     #
     # Helpers
     #

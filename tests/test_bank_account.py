@@ -21,6 +21,7 @@ from . import (
     FAKE_STANDARD_ACCOUNT,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
 
@@ -72,7 +73,8 @@ class TestStrBankAccount:
                 default = True
 
             assert (
-                f"{fake_stripe_data['bank_name']} {fake_stripe_data['routing_number']} ({bankaccount.human_readable_status}) {'Default' if default else ''} {fake_stripe_data['currency']}"
+                f"{fake_stripe_data['bank_name']} {fake_stripe_data['routing_number']} ({bankaccount.human_readable_status})"
+                f" {'Default' if default else ''} {fake_stripe_data['currency']}"
                 == str(bankaccount)
             )
         if not has_account and not has_customer:
@@ -121,9 +123,8 @@ class TestStrBankAccount:
             )
 
 
-class BankAccountTest(AssertStripeFksMixin, TestCase):
+class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         # create a Standard Stripe Account
         self.standard_account = FAKE_STANDARD_ACCOUNT.create()
 
@@ -245,8 +246,9 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_no_customer_and_no_account(self):
         exception_message = (
-            "BankAccount objects must be manipulated through either a Stripe Connected Account or a customer. "
-            "Pass a Customer or an Account object into this call."
+            "BankAccount objects must be manipulated through either a Stripe Connected"
+            " Account or a customer. Pass a Customer or an Account object into this"
+            " call."
         )
 
         with self.assertRaisesMessage(
@@ -277,8 +279,8 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
 
     def test_api_call_bad_account(self):
         exception_message = (
-            "BankAccount objects must be manipulated through a Stripe Connected Account. "
-            "Pass an Account object into this call."
+            "BankAccount objects must be manipulated through a Stripe Connected"
+            " Account. Pass an Account object into this call."
         )
 
         with self.assertRaisesMessage(
@@ -316,7 +318,6 @@ class BankAccountTest(AssertStripeFksMixin, TestCase):
     def test__api_create_with_customer_and_account(
         self, account_retrieve_mock, customer_retrieve_mock
     ):
-
         FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_SOURCE)
         FAKE_BANK_ACCOUNT_DICT["account"] = FAKE_CUSTOM_ACCOUNT["id"]
 

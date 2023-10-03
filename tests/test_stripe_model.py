@@ -198,6 +198,7 @@ def test__find_owner_account(
     Test that the correct classmethod is invoked with the correct arguments
     to get the owner account
     """
+
     # fake_data_class used to invoke _find_owner_account classmethod
     class fake_data_class:
         @property

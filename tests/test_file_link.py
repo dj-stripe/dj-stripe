@@ -13,9 +13,10 @@ from djstripe.settings import djstripe_settings
 from . import FAKE_FILEUPLOAD_ICON
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestFileLink(TestCase):
+class TestFileLink(CreateAccountMixin, TestCase):
     @patch(
         target="stripe.File.retrieve",
         autospec=True,
@@ -29,7 +30,7 @@ class TestFileLink(TestCase):
     def test___str__(self, mock_file_link_retrieve, mock_file_upload_retrieve):
         file_link_data = deepcopy(FAKE_FILEUPLOAD_ICON["links"]["data"][0])
         file_link = FileLink.sync_from_stripe_data(file_link_data)
-        assert (f"{FAKE_FILEUPLOAD_ICON['filename']}, {file_link_data['url']}") == str(
+        assert f"{FAKE_FILEUPLOAD_ICON['filename']}, {file_link_data['url']}" == str(
             file_link
         )
 

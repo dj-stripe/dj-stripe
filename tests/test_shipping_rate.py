@@ -16,9 +16,10 @@ from tests import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class ShippingRateTest(AssertStripeFksMixin, TestCase):
+class ShippingRateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def test_sync_from_stripe_data(self):
         shipping_rate = ShippingRate.sync_from_stripe_data(deepcopy(FAKE_SHIPPING_RATE))
 

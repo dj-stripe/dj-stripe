@@ -3,8 +3,10 @@ from .api import APIKey
 from .base import IdempotencyKey, StripeModel
 from .billing import (
     Coupon,
+    Discount,
     Invoice,
     InvoiceItem,
+    LineItem,
     Plan,
     ShippingRate,
     Subscription,
@@ -42,6 +44,7 @@ from .core import (
     Refund,
     SetupIntent,
 )
+from .identity import VerificationReport, VerificationSession
 from .orders import Order
 from .payment_methods import (
     BankAccount,
@@ -49,6 +52,7 @@ from .payment_methods import (
     DjstripePaymentMethod,
     PaymentMethod,
     Source,
+    SourceTransaction,
 )
 from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEndpoint, WebhookEventTrigger
@@ -65,6 +69,7 @@ __all__ = [
     "CountrySpec",
     "Coupon",
     "Customer",
+    "Discount",
     "Dispute",
     "DjstripePaymentMethod",
     "Event",
@@ -74,6 +79,7 @@ __all__ = [
     "IdempotencyKey",
     "Invoice",
     "InvoiceItem",
+    "LineItem",
     "Mandate",
     "Order",
     "PaymentIntent",
@@ -88,6 +94,7 @@ __all__ = [
     "SetupIntent",
     "Session",
     "Source",
+    "SourceTransaction",
     "StripeModel",
     "Subscription",
     "SubscriptionItem",
@@ -100,6 +107,8 @@ __all__ = [
     "UpcomingInvoice",
     "UsageRecord",
     "UsageRecordSummary",
+    "VerificationReport",
+    "VerificationSession",
     "WebhookEndpoint",
     "WebhookEventTrigger",
 ]

@@ -5,6 +5,7 @@ from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
+import stripe
 from django.test import TestCase
 
 from djstripe.admin.admin import APIKeyAdminCreateForm
@@ -24,6 +25,7 @@ PK_TEST = "pk_test_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXAAAA"
 PK_LIVE = "pk_live_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXBBBB"
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
 def test_get_api_key_details_by_prefix():
@@ -54,8 +56,16 @@ def test_clean_public_apikey():
 @patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_PLATFORM_ACCOUNT))
 @patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
 def test_apikey_detect_livemode_and_type(
-    fileupload_retrieve_mock, account_retrieve_mock
+    fileupload_retrieve_mock, account_retrieve_mock, monkeypatch
 ):
+    def mock_account_retrieve(*args, **kwargs):
+        return FAKE_PLATFORM_ACCOUNT
+
+    monkeypatch.setattr(stripe.Account, "retrieve", mock_account_retrieve)
+
+    # create a Stripe Platform Account
+    FAKE_PLATFORM_ACCOUNT.create()
+
     keys_and_values = (
         (PK_TEST, False, APIKeyType.publishable),
         (RK_TEST, False, APIKeyType.restricted),
@@ -77,9 +87,8 @@ def test_apikey_detect_livemode_and_type(
         assert key.type is type
 
 
-class APIKeyTest(TestCase):
+class APIKeyTest(CreateAccountMixin, TestCase):
     def setUp(self):
-
         # create a Stripe Platform Account
         self.account = FAKE_PLATFORM_ACCOUNT.create()
 
@@ -90,6 +99,15 @@ class APIKeyTest(TestCase):
             livemode=False,
             djstripe_owner_account=self.account,
         )
+
+        self.apikey_restricted_test = APIKey.objects.create(
+            type=APIKeyType.secret,
+            name="Test Restricted Secret Key",
+            secret=RK_TEST,
+            livemode=False,
+            djstripe_owner_account=self.account,
+        )
+
         self.apikey_live = APIKey.objects.create(
             type=APIKeyType.secret,
             name="Live Secret Key",
@@ -141,10 +159,15 @@ class APIKeyTest(TestCase):
         autospec=True,
     )
     def test_refresh_account(self, fileupload_retrieve_mock, account_retrieve_mock):
-        # remove djstripe_owner_account field
-        self.apikey_test.djstripe_owner_account = None
-        self.apikey_test.save()
+        for key in (
+            "apikey_test",
+            "apikey_restricted_test",
+        ):
+            # remove djstripe_owner_account field
+            instance = getattr(self, key)
+            instance.djstripe_owner_account = None
+            instance.save()
 
-        # invoke refresh_Account()
-        self.apikey_test.refresh_account()
-        assert self.apikey_test.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]
+            # invoke refresh_Account()
+            instance.refresh_account()
+            assert instance.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]

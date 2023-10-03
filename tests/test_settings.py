@@ -51,8 +51,10 @@ class TestSubscriberModelRetrievalMethod(TestCase):
     def test_unknown_model(self):
         self.assertRaisesMessage(
             ImproperlyConfigured,
-            "DJSTRIPE_SUBSCRIBER_MODEL refers to model 'testapp.UnknownModel' "
-            "that has not been installed.",
+            (
+                "DJSTRIPE_SUBSCRIBER_MODEL refers to model 'testapp.UnknownModel' "
+                "that has not been installed."
+            ),
             settings.djstripe_settings.get_subscriber_model,
         )
 
@@ -71,8 +73,10 @@ class TestSubscriberModelRetrievalMethod(TestCase):
     def test_no_callback(self):
         self.assertRaisesMessage(
             ImproperlyConfigured,
-            "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
-            "if a DJSTRIPE_SUBSCRIBER_MODEL is defined.",
+            (
+                "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
+                "if a DJSTRIPE_SUBSCRIBER_MODEL is defined."
+            ),
             settings.djstripe_settings.get_subscriber_model,
         )
 
@@ -145,14 +149,3 @@ class TestGetStripeApiVersion(TestCase):
             "2016-03-07",
             settings.djstripe_settings.STRIPE_API_VERSION,
         )
-
-
-class TestObjectPatching(TestCase):
-    @patch.object(
-        settings.djstripe_settings,
-        "DJSTRIPE_WEBHOOK_URL",
-        return_value=r"^webhook/sample/$",
-    )
-    def test_object_patching(self, mock):
-        webhook_url = settings.djstripe_settings.DJSTRIPE_WEBHOOK_URL
-        self.assertTrue(webhook_url, r"^webhook/sample/$")

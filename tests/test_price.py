@@ -23,10 +23,11 @@ from . import (
 
 pytestmark = pytest.mark.django_db
 
+from .conftest import CreateAccountMixin
 
-class PriceCreateTest(AssertStripeFksMixin, TestCase):
+
+class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         with patch(
             "stripe.Product.retrieve",
             return_value=deepcopy(FAKE_PRODUCT),
@@ -149,9 +150,8 @@ class PriceCreateTest(AssertStripeFksMixin, TestCase):
         )
 
 
-class PriceTest(AssertStripeFksMixin, TestCase):
+class PriceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
-
         self.price_data = deepcopy(FAKE_PRICE)
         with patch(
             "stripe.Product.retrieve",
@@ -232,7 +232,7 @@ class PriceTest(AssertStripeFksMixin, TestCase):
         )
 
 
-class TestStrPrice:
+class TestStrPrice(CreateAccountMixin):
     @pytest.mark.parametrize(
         "fake_price_data",
         [
@@ -256,7 +256,7 @@ class TestStrPrice:
 
         if not fake_price_data["recurring"]:
             price = Price.sync_from_stripe_data(fake_price_data)
-            assert (f"{price.human_readable_price} for {FAKE_PRODUCT['name']}") == str(
+            assert f"{price.human_readable_price} for {FAKE_PRODUCT['name']}" == str(
                 price
             )
 
@@ -267,8 +267,7 @@ class TestStrPrice:
             )
 
 
-class TestHumanReadablePrice:
-
+class TestHumanReadablePrice(CreateAccountMixin):
     #
     # Helpers
     #

@@ -21,9 +21,10 @@ from . import (
 )
 
 pytestmark = pytest.mark.django_db
+from .conftest import CreateAccountMixin
 
 
-class TestUsageRecord(AssertStripeFksMixin, TestCase):
+class TestUsageRecord(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_METERED), autospec=True
     )
@@ -114,7 +115,7 @@ class TestUsageRecord(AssertStripeFksMixin, TestCase):
 
         self.assertEqual(
             str(usage_record),
-            f"Usage for {str(usage_record.subscription_item)} ({fake_usage_data['action']}) is {fake_usage_data['quantity']}",
+            ("Usage for" f" {str(usage_record.subscription_item)}"),
         )
 
     @patch(
