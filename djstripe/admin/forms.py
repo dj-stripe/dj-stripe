@@ -120,6 +120,11 @@ class APIKeyAdminCreateForm(APIKeyAdminBaseForm):
                     # If APIKey model's Unique constraint is getting violated then let the user know
                     if self.instance._meta.constraints[0].name in str(e):
                         self.add_error("__all__", self.construct_custom_error_message)
+                    # Key already got created as the Account object did not exist so the recursive sync populated it
+                    elif "djstripe_apikey_secret_key" in str(e):
+                        pass
+                    else:
+                        self.add_error("__all__", str(e))
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
