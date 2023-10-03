@@ -89,7 +89,7 @@ class Account(StripeModel):
         with transaction.atomic():
             apikey_instance, _ = APIKey.objects.get_or_create_by_api_key(api_key)
             if not apikey_instance.djstripe_owner_account:
-                apikey_instance.refresh_account()
+                apikey_instance.refresh_account(commit=True, raise_exception=False)
 
             return apikey_instance.djstripe_owner_account
 
