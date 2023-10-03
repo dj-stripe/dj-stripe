@@ -58,9 +58,12 @@ class APIKeyAdminBaseForm(forms.ModelForm):
 
 class APIKeyAdminEditForm(APIKeyAdminBaseForm):
     class Meta(APIKeyAdminBaseForm.Meta):
-        fields = list(
-            set(
-                APIKeyAdminBaseForm.Meta.fields + ["djstripe_owner_account", "livemode"]
+        fields = sorted(
+            list(
+                set(
+                    APIKeyAdminBaseForm.Meta.fields
+                    + ["djstripe_owner_account", "livemode"]
+                )
             )
         )
 
@@ -92,7 +95,7 @@ class APIKeyAdminEditForm(APIKeyAdminBaseForm):
 
 class APIKeyAdminCreateForm(APIKeyAdminBaseForm):
     class Meta(APIKeyAdminBaseForm.Meta):
-        fields = list(set(APIKeyAdminBaseForm.Meta.fields + ["secret"]))
+        fields = sorted(list(set(APIKeyAdminBaseForm.Meta.fields + ["secret"])))
 
     def _post_clean(self):
         super()._post_clean()
