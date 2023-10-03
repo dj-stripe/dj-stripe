@@ -9,6 +9,7 @@ from django.shortcuts import render
 from stripe.error import InvalidRequestError
 
 from djstripe import models
+from djstripe.settings import djstripe_settings
 
 from .actions import CustomActionMixin
 from .admin_inline import (
@@ -817,6 +818,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
         ret = super().get_changeform_initial_data(request)
         base_url = f"{request.scheme}://{request.get_host()}"
         ret.setdefault("base_url", base_url)
+        ret.setdefault("api_version", djstripe_settings.STRIPE_API_VERSION)
         return ret
 
     def delete_model(self, request, obj: models.WebhookEndpoint):
