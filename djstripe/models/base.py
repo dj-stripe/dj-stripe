@@ -1078,7 +1078,9 @@ class StripeModel(StripeBaseModel):
         # (or if no livemode is specified, the default one altogether)
         kwargs.setdefault(
             "api_key",
-            djstripe_settings.get_default_api_key(livemode=kwargs.get("livemode")),
+            djstripe_settings.get_default_api_key(
+                livemode=kwargs.get("livemode"), djstripe_owner_account=None
+            ),
         )
         data = cls.stripe_class.retrieve(
             id=id, stripe_version=djstripe_settings.STRIPE_API_VERSION, **kwargs
