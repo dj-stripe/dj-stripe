@@ -14,6 +14,10 @@ from djstripe import enums, models, utils
 from djstripe.signals import ENABLED_EVENTS
 
 
+def construct_custom_error_message(type, djstripe_owner_account):
+    return f"You have already configured an account default {type} key on {djstripe_owner_account}. Consider unchecking the Account Default checkbox or add another key type"
+
+
 class CustomActionForm(forms.Form):
     """Form for Custom Django Admin Actions"""
 
@@ -51,10 +55,6 @@ class APIKeyAdminBaseForm(forms.ModelForm):
         model = models.APIKey
         fields = ["name", "djstripe_is_account_default"]
 
-    @property
-    def construct_custom_error_message(self):
-        return f"You have already configured an account default {self.instance.type} key on {self.instance.djstripe_owner_account}. Consider unchecking the Account Default checkbox or add another key type"
-
 
 class APIKeyAdminEditForm(APIKeyAdminBaseForm):
     class Meta(APIKeyAdminBaseForm.Meta):
@@ -88,7 +88,11 @@ class APIKeyAdminEditForm(APIKeyAdminBaseForm):
             )
 
             if cd["djstripe_is_account_default"] and qs.exists():
-                raise forms.ValidationError(self.construct_custom_error_message)
+                raise forms.ValidationError(
+                    construct_custom_error_message(
+                        cd["type"], cd["djstripe_owner_account"]
+                    )
+                )
 
         return cd
 
@@ -119,7 +123,12 @@ class APIKeyAdminCreateForm(APIKeyAdminBaseForm):
                 except IntegrityError as e:
                     # If APIKey model's Unique constraint is getting violated then let the user know
                     if self.instance._meta.constraints[0].name in str(e):
-                        self.add_error("__all__", self.construct_custom_error_message)
+                        self.add_error(
+                            "__all__",
+                            construct_custom_error_message(
+                                self.instance.type, self.instance.djstripe_owner_account
+                            ),
+                        )
                     # Key already got created as the Account object did not exist so the recursive sync populated it
                     elif "djstripe_apikey_secret_key" in str(e):
                         pass
