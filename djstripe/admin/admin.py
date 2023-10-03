@@ -169,7 +169,14 @@ class APIKeyAdmin(admin.ModelAdmin):
             with transaction.atomic():
                 obj.save()
         except IntegrityError:
-            pass
+            # Get the name and djstripe_is_account_default from the form
+            name = form.cleaned_data.get("name", "")
+            # Get APIKey from DB
+            instance = self.model.objects.get(secret=obj.secret)
+
+            # Update name and djstripe_is_account_default of APIKey
+            instance.name = name
+            instance.save()
 
     def get_changeform_initial_data(self, request) -> Dict[str, str]:
         ret = super().get_changeform_initial_data(request)
