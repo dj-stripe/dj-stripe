@@ -27088,7 +27088,7 @@ pay their closed invoices.</p>
             <span class="n">at_period_end</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="k">if</span> <span class="n">at_period_end</span><span class="p">:</span>
-            <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_update</span><span class="p">(</span><span class="n">cancel_at_period_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_update</span><span class="p">(</span><span class="n">cancel_at_period_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_delete</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -27493,7 +27493,7 @@ subscription at all.</p>
         <span class="n">at_period_end</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">at_period_end</span><span class="p">:</span>
-        <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_update</span><span class="p">(</span><span class="n">cancel_at_period_end</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_update</span><span class="p">(</span><span class="n">cancel_at_period_end</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">stripe_subscription</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_api_delete</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
