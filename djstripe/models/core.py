@@ -482,8 +482,9 @@ class Charge(StripeModel):
         cls,
         data,
         pending_relations=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations, api_key=api_key
         )
@@ -1328,10 +1329,12 @@ class Customer(StripeModel):
         cls,
         data,
         pending_relations=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ):
         from .billing import Coupon
         from .payment_methods import DjstripePaymentMethod
+
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations, api_key=api_key
@@ -1366,9 +1369,8 @@ class Customer(StripeModel):
         if save:
             self.save()
 
-    def _attach_objects_hook(
-        self, cls, data, current_ids=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
+    def _attach_objects_hook(self, cls, data, current_ids=None, api_key=None):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         # When we save a customer to Stripe, we add a reference to its Django PK
         # in the `django_account` key. If we find that, we re-attach that PK.
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
@@ -1503,8 +1505,9 @@ class Dispute(StripeModel):
         cls,
         data,
         pending_relations=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations, api_key=api_key
         )
@@ -1589,9 +1592,8 @@ class Event(StripeModel):
     def __str__(self):
         return f"type={self.type}, id={self.id}"
 
-    def _attach_objects_hook(
-        self, cls, data, current_ids=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
+    def _attach_objects_hook(self, cls, data, current_ids=None, api_key=None):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         if self.api_version is None:
             # as of api version 2017-02-14, the account.application.deauthorized
             # event sends None as api_version.
@@ -1609,7 +1611,8 @@ class Event(StripeModel):
             self.request_id = request_obj or ""
 
     @classmethod
-    def process(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
+    def process(cls, data, api_key=None):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         qs = cls.objects.filter(id=data["id"])
         if qs.exists():
             return qs.first()
@@ -1939,7 +1942,7 @@ class PaymentIntent(StripeModel):
         Call the stripe API's modify operation for this model
 
         :param api_key: The api key to use for this request.
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -1951,7 +1954,7 @@ class PaymentIntent(StripeModel):
         Call the stripe API's cancel operation for this model
 
         :param api_key: The api key to use for this request.
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -1966,7 +1969,7 @@ class PaymentIntent(StripeModel):
         will attempt to initiate a payment.
 
         :param api_key: The api key to use for this request.
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         """
         api_key = api_key or self.default_api_key
@@ -2366,7 +2369,10 @@ class Price(StripeModel):
 
         stripe_price = cls._api_create(**api_kwargs)
 
-        api_key = api_kwargs.get("api_key") or djstripe_settings.STRIPE_SECRET_KEY
+        api_key = (
+            api_kwargs.get("api_key")
+            or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
+        )
         price = cls.sync_from_stripe_data(stripe_price, api_key=api_key)
 
         return price

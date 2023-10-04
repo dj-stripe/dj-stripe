@@ -136,9 +136,7 @@ class CountrySpec(StripeBaseModel):
     )
 
     @classmethod
-    def sync_from_stripe_data(
-        cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ) -> "CountrySpec":
+    def sync_from_stripe_data(cls, data, api_key=None) -> "CountrySpec":
         """
         Syncs this object from the stripe data provided.
 
@@ -148,6 +146,7 @@ class CountrySpec(StripeBaseModel):
         :type data: dict
         :rtype: cls
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         data_id = data["id"]
 
         supported_fields = (
@@ -168,7 +167,7 @@ class CountrySpec(StripeBaseModel):
 
     def api_retrieve(self, api_key: str = None, stripe_account=None):
         if api_key is None:
-            api_key = djstripe_settings.get_default_api_key(livemode=None)
+            api_key = djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         return self.stripe_class.retrieve(
             id=self.id,
@@ -275,14 +274,14 @@ class Transfer(StripeModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
         """
         Iterate over reversals on the Transfer object to create and/or sync
         TransferReversal objects
         """
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations
         )
@@ -334,14 +333,14 @@ class TransferReversal(StripeModel):
         return str(self.transfer)
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=None, **kwargs):
         """
         Call the stripe API's create operation for this model.
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         """
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         if not kwargs.get("id"):
             raise KeyError("Transfer Object ID is missing")
 
@@ -360,7 +359,7 @@ class TransferReversal(StripeModel):
         """
         Call the stripe API's retrieve operation for this model.
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -384,15 +383,16 @@ class TransferReversal(StripeModel):
         )
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         """
         Call the stripe API's list operation for this model.
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         return stripe.Transfer.list_reversals(
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,

@@ -1,11 +1,17 @@
 """
 dj-stripe settings
 """
+import logging
+
 import stripe
 from django.apps import apps as django_apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.utils.module_loading import import_string
+
+from djstripe.enums import APIKeyType
+
+logger = logging.getLogger(__name__)
 
 
 class DjstripeSettings:
@@ -83,29 +89,10 @@ class DjstripeSettings:
             settings, "DJSTRIPE_SUBSCRIBER_CUSTOMER_KEY", "djstripe_subscriber"
         )
 
-    @property
-    def TEST_API_KEY(self):
-        return getattr(settings, "STRIPE_TEST_SECRET_KEY", "")
-
-    @property
-    def LIVE_API_KEY(self):
-        return getattr(settings, "STRIPE_LIVE_SECRET_KEY", "")
-
     # Determines whether we are in live mode or test mode
     @property
     def STRIPE_LIVE_MODE(self):
         return getattr(settings, "STRIPE_LIVE_MODE", False)
-
-    @property
-    def STRIPE_SECRET_KEY(self):
-        # Default secret key
-        if hasattr(settings, "STRIPE_SECRET_KEY"):
-            STRIPE_SECRET_KEY = settings.STRIPE_SECRET_KEY
-        else:
-            STRIPE_SECRET_KEY = (
-                self.LIVE_API_KEY if self.STRIPE_LIVE_MODE else self.TEST_API_KEY
-            )
-        return STRIPE_SECRET_KEY
 
     @property
     def STRIPE_PUBLIC_KEY(self):
@@ -125,6 +112,28 @@ class DjstripeSettings:
         """
         version = getattr(settings, "STRIPE_API_VERSION", stripe.api_version)
         return version or self.DEFAULT_STRIPE_API_VERSION
+
+    def GET_DEFAULT_STRIPE_SECRET_KEY(self, livemode=None, djstripe_owner_account=None):
+        """Returns the default Stripe Secret Key"""
+        from .models import APIKey
+
+        data_dict = {
+            "type": APIKeyType.secret,
+            "djstripe_is_account_default": True,
+            "livemode": livemode or self.STRIPE_LIVE_MODE,
+        }
+
+        if djstripe_owner_account:
+            data_dict["djstripe_owner_account"] = djstripe_owner_account
+
+        try:
+            return APIKey.objects.get(**data_dict).secret
+        except APIKey.DoesNotExist:
+            logger.warn(
+                "No Account Default Secret API Key found, falling back to stripe.api_key"
+            )
+            # The user may have set this. By default Stripe sets it to None anyway
+            return stripe.api_key
 
     def get_callback_function(self, setting_name, default=None):
         """
@@ -166,19 +175,11 @@ class DjstripeSettings:
         )
         return str(idempotency_key.uuid)
 
-    def get_default_api_key(self, livemode) -> str:
+    def get_default_api_key(self, livemode, djstripe_owner_account) -> str:
         """
-        Returns the default API key for a value of `livemode`.
+        Returns the default API key for a value of `livemode` and djstripe_owner_account.
         """
-        if livemode is None:
-            # Livemode is unknown. Use the default secret key.
-            return self.STRIPE_SECRET_KEY
-        elif livemode:
-            # Livemode is true, use the live secret key
-            return self.LIVE_API_KEY or self.STRIPE_SECRET_KEY
-        else:
-            # Livemode is false, use the test secret key
-            return self.TEST_API_KEY or self.STRIPE_SECRET_KEY
+        return self.GET_DEFAULT_STRIPE_SECRET_KEY(livemode, djstripe_owner_account)
 
     def get_subscriber_model_string(self) -> str:
         """Get the configured subscriber model as a module path string."""

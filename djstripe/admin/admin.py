@@ -9,6 +9,7 @@ from django.shortcuts import render
 from stripe.error import InvalidRequestError
 
 from djstripe import models
+from djstripe.settings import djstripe_settings
 
 from .actions import CustomActionMixin
 from .admin_inline import (
@@ -22,6 +23,7 @@ from .admin_inline import (
 from .filters import CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter
 from .forms import (
     APIKeyAdminCreateForm,
+    APIKeyAdminEditForm,
     CustomActionForm,
     WebhookEndpointAdminCreateForm,
     WebhookEndpointAdminEditForm,
@@ -124,7 +126,13 @@ class APIKeyAdmin(admin.ModelAdmin):
     add_form_template = "djstripe/admin/add_form.html"
     change_form_template = "djstripe/admin/change_form.html"
 
-    list_display = ("__str__", "type", "djstripe_owner_account", "livemode")
+    list_display = (
+        "__str__",
+        "djstripe_is_account_default",
+        "type",
+        "djstripe_owner_account",
+        "livemode",
+    )
     readonly_fields = ("djstripe_owner_account", "livemode", "type", "secret")
     search_fields = ("name",)
 
@@ -136,12 +144,19 @@ class APIKeyAdmin(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         if obj is None:
             return APIKeyAdminCreateForm.Meta.fields
-        return ["type", "djstripe_owner_account", "livemode", "name", "secret"]
+        return [
+            "type",
+            "djstripe_is_account_default",
+            "djstripe_owner_account",
+            "livemode",
+            "name",
+            "secret",
+        ]
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
             return APIKeyAdminCreateForm
-        return super().get_form(request, obj, **kwargs)
+        return APIKeyAdminEditForm
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("djstripe_owner_account")
@@ -155,7 +170,24 @@ class APIKeyAdmin(admin.ModelAdmin):
             with transaction.atomic():
                 obj.save()
         except IntegrityError:
-            pass
+            # Get the name and djstripe_is_account_default from the form
+            name = form.cleaned_data.get("name", "")
+            djstripe_is_account_default = form.cleaned_data.get(
+                "djstripe_is_account_default"
+            )
+
+            # Get APIKey from DB
+            instance = self.model.objects.get(secret=obj.secret)
+
+            # Update name and djstripe_is_account_default of APIKey
+            instance.name = name
+            instance.djstripe_is_account_default = djstripe_is_account_default
+            instance.save()
+
+    def get_changeform_initial_data(self, request) -> Dict[str, str]:
+        ret = super().get_changeform_initial_data(request)
+        ret.setdefault("djstripe_is_account_default", True)
+        return ret
 
 
 @admin.register(models.BalanceTransaction)
@@ -786,6 +818,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
         ret = super().get_changeform_initial_data(request)
         base_url = f"{request.scheme}://{request.get_host()}"
         ret.setdefault("base_url", base_url)
+        ret.setdefault("api_version", djstripe_settings.STRIPE_API_VERSION)
         return ret
 
     def delete_model(self, request, obj: models.WebhookEndpoint):

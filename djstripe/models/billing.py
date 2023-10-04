@@ -692,7 +692,7 @@ class BaseInvoice(StripeModel):
     @classmethod
     def upcoming(
         cls,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         customer=None,
         subscription=None,
         subscription_plan=None,
@@ -723,6 +723,7 @@ class BaseInvoice(StripeModel):
         subscription to this plan if no subscription is given.
         :type subscription_plan: Plan or string (plan ID)
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         # Convert Customer to id
         if customer is not None and isinstance(customer, StripeModel):
@@ -777,9 +778,10 @@ class BaseInvoice(StripeModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations
         )
@@ -876,9 +878,10 @@ class Invoice(BaseInvoice):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations
         )
@@ -929,9 +932,8 @@ class UpcomingInvoice(BaseInvoice):
     def get_stripe_dashboard_url(self):
         return ""
 
-    def _attach_objects_hook(
-        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
-    ):
+    def _attach_objects_hook(self, cls, data, api_key=None, current_ids=None):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_hook(
             cls, data, api_key=api_key, current_ids=current_ids
         )
@@ -944,9 +946,10 @@ class UpcomingInvoice(BaseInvoice):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations
         )
@@ -1176,9 +1179,10 @@ class InvoiceItem(StripeModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations
         )
@@ -1339,9 +1343,10 @@ class LineItem(StripeModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations
         )
@@ -1351,7 +1356,7 @@ class LineItem(StripeModel):
             Discount.sync_from_stripe_data(discount, api_key=api_key)
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         """
         Call the stripe API's list operation for this model.
         Note that we only iterate and sync the LineItem associated with the
@@ -1361,13 +1366,14 @@ class LineItem(StripeModel):
         line items are also not retrieved and synced
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
 
         See Stripe documentation for accepted kwargs for each object.
 
         :returns: an iterator over all items in the query
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         # get current invoice if any
         invoice_id = kwargs.pop("id")
 
@@ -1416,7 +1422,10 @@ class Plan(StripeModel):
             api_kwargs["product"] = api_kwargs["product"].id
 
         stripe_plan = cls._api_create(**api_kwargs)
-        api_key = api_kwargs.get("api_key") or djstripe_settings.STRIPE_SECRET_KEY
+        api_key = (
+            api_kwargs.get("api_key")
+            or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
+        )
         plan = cls.sync_from_stripe_data(stripe_plan, api_key=api_key)
 
         return plan
@@ -1514,15 +1523,16 @@ class Subscription(StripeModel):
     objects = SubscriptionManager()
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         """
         Call the stripe API's list operation for this model.
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         if not kwargs.get("status"):
             # special case: https://stripe.com/docs/api/subscriptions/list#list_subscriptions-status
             # See Issue: https://github.com/dj-stripe/dj-stripe/issues/1763
@@ -1702,9 +1712,10 @@ class Subscription(StripeModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations
         )
@@ -1805,9 +1816,10 @@ class SubscriptionItem(StripeModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations
         )
@@ -1914,7 +1926,7 @@ class SubscriptionSchedule(StripeModel):
         ID to the released_subscription property
         and returns the Released SubscriptionSchedule.
         :param api_key: The api key to use for this request.
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -1943,7 +1955,7 @@ class SubscriptionSchedule(StripeModel):
         (if the subscription schedule has an active subscription). A subscription schedule can only be canceled if its status is not_started or active
         and returns the Canceled SubscriptionSchedule.
         :param api_key: The api key to use for this request.
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -1971,7 +1983,7 @@ class SubscriptionSchedule(StripeModel):
         Updates an existing subscription schedule
         and returns the updated SubscriptionSchedule.
         :param api_key: The api key to use for this request.
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -2083,7 +2095,8 @@ class TaxCode(StripeModel):
         return f"{self.name}: {self.id}"
 
     @classmethod
-    def _find_owner_account(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
+    def _find_owner_account(cls, data, api_key=None):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         # Tax Codes do not belong to any Stripe Account
         pass
 
@@ -2121,15 +2134,15 @@ class TaxId(StripeModel):
         verbose_name = "Tax ID"
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=None, **kwargs):
         """
         Call the stripe API's create operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         """
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         if not kwargs.get("id"):
             raise KeyError("Customer Object ID is missing")
 
@@ -2144,7 +2157,7 @@ class TaxId(StripeModel):
         """
         Call the stripe API's retrieve operation for this model.
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -2168,15 +2181,16 @@ class TaxId(StripeModel):
         )
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         """
         Call the stripe API's list operation for this model.
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         return stripe.Customer.list_tax_ids(
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
@@ -2287,15 +2301,15 @@ class UsageRecord(StripeModel):
         return f"Usage for {self.subscription_item}"
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=None, **kwargs):
         """
         Call the stripe API's create operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         """
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         if not kwargs.get("id"):
             raise KeyError("SubscriptionItem Object ID is missing")
 
@@ -2356,18 +2370,19 @@ class UsageRecordSummary(StripeModel):
         return f"Usage Summary for {self.subscription_item} ({self.invoice})"
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         """
         Call the stripe API's list operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
 
         See Stripe documentation for accepted kwargs for each object.
 
         :returns: an iterator over all items in the query
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         if not kwargs.get("id"):
             raise KeyError("SubscriptionItem Object ID is missing")
 

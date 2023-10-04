@@ -56,7 +56,9 @@ class Account(StripeModel):
 
         if api_key:
             return api_key.secret
-        return djstripe_settings.get_default_api_key(livemode)
+        return djstripe_settings.get_default_api_key(
+            livemode=livemode, djstripe_owner_account=self
+        )
 
     @property
     def business_url(self) -> str:
@@ -69,10 +71,11 @@ class Account(StripeModel):
         return ""
 
     @classmethod
-    def get_default_account(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY):
+    def get_default_account(cls, api_key=None):
         # As of API version 2020-03-02, there is no permission that can allow
         # restricted keys to call GET /v1/account
-        if djstripe_settings.STRIPE_SECRET_KEY.startswith("rk_"):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
+        if api_key.startswith("rk_"):
             return None
 
         account_data = cls.stripe_class.retrieve(
@@ -86,7 +89,7 @@ class Account(StripeModel):
         with transaction.atomic():
             apikey_instance, _ = APIKey.objects.get_or_create_by_api_key(api_key)
             if not apikey_instance.djstripe_owner_account:
-                apikey_instance.refresh_account()
+                apikey_instance.refresh_account(commit=True, raise_exception=False)
 
             return apikey_instance.djstripe_owner_account
 
@@ -104,7 +107,7 @@ class Account(StripeModel):
         Call the stripe API's reject operation for Account model
 
         :param api_key: The api key to use for this request.
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -132,7 +135,7 @@ class Account(StripeModel):
         pending_relations=None,
         save=True,
         stripe_account=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ):
         """
         Set the stripe_account to the id of the Account instance being created.
@@ -140,6 +143,7 @@ class Account(StripeModel):
         This ensures that the foreign-key relations that may exist in stripe are
         fetched using the appropriate connected account ID.
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         return super()._create_from_stripe_object(
             data=data,
             current_ids=current_ids,
@@ -154,8 +158,9 @@ class Account(StripeModel):
         cls,
         data,
         pending_relations=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations, api_key=api_key
         )

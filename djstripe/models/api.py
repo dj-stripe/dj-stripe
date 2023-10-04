@@ -50,6 +50,13 @@ class APIKey(StripeModel):
 
     id = models.CharField(max_length=255, default=generate_api_key_id, editable=False)
     type = StripeEnumField(enum=APIKeyType)
+
+    djstripe_is_account_default = models.BooleanField(
+        help_text="Use this key as the default for all Stripe API calls",
+        verbose_name="Account Default",
+        default=False,
+    )
+
     name = models.CharField(
         "Key name",
         max_length=100,
@@ -70,6 +77,21 @@ class APIKey(StripeModel):
     metadata = None
     objects = APIKeyManager()
 
+    class Meta:
+        # Enforce unique together constraint iff djstripe_is_account_default is True
+        constraints = [
+            models.constraints.UniqueConstraint(
+                fields=[
+                    "type",
+                    "djstripe_is_account_default",
+                    "livemode",
+                    "djstripe_owner_account",
+                ],
+                condition=models.Q(djstripe_is_account_default=True),
+                name="unique_account_api_key_default_per_key_type",
+            )
+        ]
+
     def get_stripe_dashboard_url(self):
         return self._get_base_stripe_dashboard_url() + "apikeys"
 
@@ -83,7 +105,7 @@ class APIKey(StripeModel):
             except InvalidStripeAPIKey as e:
                 raise ValidationError(str(e))
 
-    def refresh_account(self, commit=True):
+    def refresh_account(self, commit=True, raise_exception=False):
         from .account import Account
 
         if self.type not in (
@@ -113,7 +135,8 @@ class APIKey(StripeModel):
                 with transaction.atomic():
                     self.save()
             except IntegrityError:
-                pass
+                if raise_exception:
+                    raise
 
     @property
     def secret_redacted(self) -> str:

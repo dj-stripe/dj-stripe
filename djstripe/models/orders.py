@@ -164,9 +164,10 @@ class Order(StripeModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
         pending_relations=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_post_save_hook(
             cls, data, api_key=api_key, pending_relations=pending_relations
         )
@@ -180,7 +181,7 @@ class Order(StripeModel):
         Cancels the order as well as the payment intent if one is attached.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -204,7 +205,7 @@ class Order(StripeModel):
         Reopens a submitted order.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -232,7 +233,7 @@ class Order(StripeModel):
         unless the reopen method is called.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.

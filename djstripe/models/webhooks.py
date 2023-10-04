@@ -75,13 +75,12 @@ class WebhookEndpoint(StripeModel):
     def __str__(self):
         return self.url or str(self.djstripe_uuid)
 
-    def _attach_objects_hook(
-        self, cls, data, current_ids=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
+    def _attach_objects_hook(self, cls, data, current_ids=None, api_key=None):
         """
         Gets called by this object's create and sync methods just before save.
         Use this to populate fields before the model is saved.
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         super()._attach_objects_hook(
             cls, data, current_ids=current_ids, api_key=api_key
         )
@@ -221,7 +220,9 @@ class WebhookEventTrigger(models.Model):
         )
         api_key = (
             stripe_account.default_api_key
-            or djstripe_settings.get_default_api_key(obj.livemode)
+            or djstripe_settings.get_default_api_key(
+                livemode=obj.livemode, djstripe_owner_account=stripe_account
+            )
         )
 
         try:
@@ -346,7 +347,9 @@ class WebhookEventTrigger(models.Model):
             )
 
         livemode = local_data["livemode"]
-        api_key = api_key or djstripe_settings.get_default_api_key(livemode)
+        api_key = api_key or djstripe_settings.get_default_api_key(
+            livemode=livemode, djstripe_owner_account=self.stripe_trigger_account
+        )
 
         # Retrieve the event using the api_version specified in itself
         remote_data = Event.stripe_class.retrieve(

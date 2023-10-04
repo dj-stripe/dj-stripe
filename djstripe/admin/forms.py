@@ -6,11 +6,16 @@ from urllib.parse import urljoin
 
 from django import forms
 from django.contrib.admin import helpers
+from django.db import IntegrityError
 from django.urls import reverse
 from stripe.error import AuthenticationError, InvalidRequestError, PermissionError
 
 from djstripe import enums, models, utils
 from djstripe.signals import ENABLED_EVENTS
+
+
+def construct_custom_error_message(type, djstripe_owner_account):
+    return f"You have already configured an account default {type} key on {djstripe_owner_account}. Consider unchecking the Account Default checkbox or add another key type"
 
 
 class CustomActionForm(forms.Form):
@@ -45,10 +50,56 @@ class CustomActionForm(forms.Form):
             )
 
 
-class APIKeyAdminCreateForm(forms.ModelForm):
+class APIKeyAdminBaseForm(forms.ModelForm):
     class Meta:
         model = models.APIKey
-        fields = ["name", "secret"]
+        fields = ["name", "djstripe_is_account_default"]
+
+
+class APIKeyAdminEditForm(APIKeyAdminBaseForm):
+    class Meta(APIKeyAdminBaseForm.Meta):
+        fields = sorted(
+            list(
+                set(
+                    APIKeyAdminBaseForm.Meta.fields
+                    + ["djstripe_owner_account", "livemode"]
+                )
+            )
+        )
+
+    def clean(self):
+        cd = super().clean()
+        # Add back data for Read only fields
+        cd["djstripe_owner_account"] = self.instance.djstripe_owner_account
+        cd["type"] = self.instance.type
+        cd["secret"] = self.instance.secret
+        cd["livemode"] = self.instance.livemode
+
+        # We check only when the user tries to update djstripe_is_account_default
+        if (
+            cd["djstripe_is_account_default"]
+            != self.instance.djstripe_is_account_default
+        ):
+            qs = models.APIKey.objects.filter(
+                type=self.instance.type,
+                livemode=self.instance.livemode,
+                djstripe_owner_account=self.instance.djstripe_owner_account,
+                djstripe_is_account_default=cd["djstripe_is_account_default"],
+            )
+
+            if cd["djstripe_is_account_default"] and qs.exists():
+                raise forms.ValidationError(
+                    construct_custom_error_message(
+                        cd["type"], cd["djstripe_owner_account"]
+                    )
+                )
+
+        return cd
+
+
+class APIKeyAdminCreateForm(APIKeyAdminBaseForm):
+    class Meta(APIKeyAdminBaseForm.Meta):
+        fields = sorted(list(set(APIKeyAdminBaseForm.Meta.fields + ["secret"])))
 
     def _post_clean(self):
         super()._post_clean()
@@ -63,12 +114,26 @@ class APIKeyAdminCreateForm(forms.ModelForm):
                 and self.instance.djstripe_owner_account is None
             ):
                 try:
-                    self.instance.refresh_account()
+                    self.instance.refresh_account(commit=True, raise_exception=True)
                 except AuthenticationError as e:
                     self.add_error("secret", str(e))
                 # Abandon Key Creation if the given key doesn't allow Accounts to be retrieved from Stripe
                 except PermissionError as e:
                     self.add_error("secret", str(e))
+                except IntegrityError as e:
+                    # If APIKey model's Unique constraint is getting violated then let the user know
+                    if self.instance._meta.constraints[0].name in str(e):
+                        self.add_error(
+                            "__all__",
+                            construct_custom_error_message(
+                                self.instance.type, self.instance.djstripe_owner_account
+                            ),
+                        )
+                    # Key already got created as the Account object did not exist so the recursive sync populated it
+                    elif "djstripe_apikey_secret_key" in str(e):
+                        pass
+                    else:
+                        self.add_error("__all__", str(e))
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):

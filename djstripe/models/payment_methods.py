@@ -47,9 +47,8 @@ class DjstripePaymentMethod(models.Model):
         return instance
 
     @classmethod
-    def _get_or_create_source(
-        cls, data, source_type=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
+    def _get_or_create_source(cls, data, source_type=None, api_key=None):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         # prefer passed in source_type
         if not source_type:
             source_type = data["object"]
@@ -94,8 +93,9 @@ class DjstripePaymentMethod(models.Model):
         pending_relations=None,
         save=True,
         stripe_account=None,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=None,
     ):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         raw_field_data = data.get(field_name)
         id_ = get_id_from_stripe_data(raw_field_data)
         if not id_:
@@ -178,10 +178,10 @@ class LegacySourceMixin:
         return account, customer, kwargs
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=None, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards & Bank Accounts must be manipulated through a customer or account.
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
             **kwargs
         )
@@ -214,10 +214,10 @@ class LegacySourceMixin:
             )
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards & Bank Accounts must be manipulated through a customer or account.
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
             **kwargs
         )
@@ -631,7 +631,7 @@ class Card(LegacySourceMixin, StripeModel):
         exp_month: int,
         exp_year: int,
         cvc: str,
-        api_key: str = djstripe_settings.STRIPE_SECRET_KEY,
+        api_key: str = None,
         **kwargs,
     ) -> stripe.Token:
         """
@@ -647,7 +647,7 @@ class Card(LegacySourceMixin, StripeModel):
         :param cvc: Card security code.
         :param api_key: The API key to use
         """
-
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         card = {
             "number": number,
             "exp_month": exp_month,
@@ -770,9 +770,8 @@ class Source(StripeModel):
         data["source_data"] = data[data["type"]]
         return data
 
-    def _attach_objects_hook(
-        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
-    ):
+    def _attach_objects_hook(self, cls, data, api_key=None, current_ids=None):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         customer = None
         # "customer" key could be like "cus_6lsBvm5rJ0zyHc" or {"id": "cus_6lsBvm5rJ0zyHc"}
         customer_id = get_id_from_stripe_data(data.get("customer"))
@@ -812,15 +811,16 @@ class Source(StripeModel):
             return False
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         """
         Call the stripe API's list operation for this model.
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         return Customer.stripe_class.list_sources(
             object="source",
             api_key=api_key,
@@ -889,15 +889,16 @@ class SourceTransaction(StripeModel):
             return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(cls, api_key=None, **kwargs):
         """
         Call the stripe API's list operation for this model.
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         source = kwargs.pop("id", None)
         if not source:
             raise KeyError("Source Object ID is missing")
@@ -911,7 +912,7 @@ class SourceTransaction(StripeModel):
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY().
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
@@ -1134,9 +1135,8 @@ class PaymentMethod(StripeModel):
             return self.customer.get_stripe_dashboard_url()
         return ""
 
-    def _attach_objects_hook(
-        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
-    ):
+    def _attach_objects_hook(self, cls, data, api_key=None, current_ids=None):
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
         customer = None
         # "customer" key could be like "cus_6lsBvm5rJ0zyHc" or {"id": "cus_6lsBvm5rJ0zyHc"}
         customer_id = get_id_from_stripe_data(data.get("customer"))
@@ -1156,11 +1156,12 @@ class PaymentMethod(StripeModel):
         cls,
         payment_method: Union[str, "PaymentMethod"],
         customer: Union[str, Customer],
-        api_key: str = djstripe_settings.STRIPE_SECRET_KEY,
+        api_key: str = None,
     ) -> "PaymentMethod":
         """
         Attach a payment method to a customer
         """
+        api_key = api_key or djstripe_settings.GET_DEFAULT_STRIPE_SECRET_KEY()
 
         if isinstance(payment_method, StripeModel):
             payment_method = payment_method.id
