@@ -2102,7 +2102,7 @@ class Subscription(StripeModel):
             at_period_end = False
 
         if at_period_end:
-            stripe_subscription = self._api_update(cancel_at_period_end=True)
+            stripe_subscription = self._api_update(cancel_at_period_end=True, **kwargs)
         else:
             try:
                 stripe_subscription = self._api_delete(**kwargs)
