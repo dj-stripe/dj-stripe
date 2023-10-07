@@ -1151,7 +1151,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
     @patch("stripe.Subscription.list")
-    def test_api_list(self, subscription_list_mock):
+    def test_api_list_with_status_enum(self, subscription_list_mock):
         p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
         type(subscription_list_mock).auto_paging_iter = p
 
@@ -1165,17 +1165,42 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
     @patch("stripe.Subscription.list")
+    def test_api_list_with_status_None(self, subscription_list_mock):
+        p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
+        type(subscription_list_mock).auto_paging_iter = p
+
+        # invoke Subscription.api_list with status enum populated
+        Subscription.api_list(status=None)
+
+        subscription_list_mock.assert_called_once_with(
+            status=None,
+            api_key=djstripe_settings.STRIPE_SECRET_KEY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+        )
+
+    @patch("stripe.Subscription.list")
     def test_api_list_with_no_status(self, subscription_list_mock):
         p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
         type(subscription_list_mock).auto_paging_iter = p
 
-        # invoke Subscription.api_list without status enum populated
-        Subscription.api_list()
+        with self.assertLogs("djstripe.models.billing", level="WARNING") as cm:
+            # invoke Subscription.api_list without status enum populated
+            Subscription.api_list()
 
         subscription_list_mock.assert_called_once_with(
             status="all",
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+        )
+
+        self.assertEqual(
+            cm.output,
+            [
+                "WARNING:djstripe.models.billing:You did not pass any value for kwarg status. Dj-stripe defaults to status='all' to sync"
+                " subscriptions with all statuses including cancelled and expired subscriptions even on deleted customers."
+                " Pass it as status=None if you'd like to sync subscriptions that have not been cancelled."
+                "For more info: https://stripe.com/docs/api/subscriptions/list#list_subscriptions-status "
+            ],
         )
 
 

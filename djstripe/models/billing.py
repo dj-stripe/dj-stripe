@@ -1523,10 +1523,18 @@ class Subscription(StripeModel):
         See Stripe documentation for accepted kwargs for each object.
         :returns: an iterator over all items in the query
         """
-        if not kwargs.get("status"):
+        try:
+            kwargs["status"]
+        except KeyError:
             # special case: https://stripe.com/docs/api/subscriptions/list#list_subscriptions-status
             # See Issue: https://github.com/dj-stripe/dj-stripe/issues/1763
             kwargs["status"] = "all"
+            logger.warning(
+                "You did not pass any value for kwarg status. Dj-stripe defaults to status='all' to sync"
+                " subscriptions with all statuses including cancelled and expired subscriptions even on deleted customers."
+                " Pass it as status=None if you'd like to sync subscriptions that have not been cancelled."
+                "For more info: https://stripe.com/docs/api/subscriptions/list#list_subscriptions-status "
+            )
         return super().api_list(api_key=api_key, **kwargs)
 
     def update(self, plan: Union[StripeModel, str] = None, **kwargs):
