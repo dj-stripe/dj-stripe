@@ -183,6 +183,12 @@ We retain model fields for useful foreign keys and other frequently-used fields.
 <li>You can now configure validation method on a per webhook endpoint basis.</li>
 </ul>
 <h2 id="other-changes">Other changes</h2>
+<ul>
+<li>Dropped <code>unique_together</code> constraint on the <code>Customer</code> model. This was done because given the same <code>livemode</code> and <code>djstripe_owner_account</code>, a <code>subscriber</code> can be associated with multiple customers and that is Stripe's default behavior.</li>
+<li>Added missing model fields to Checkout Sessions.</li>
+<li><code>LineItem</code> instances can also get synced using the <code>djstripe_sync_models</code> management command.</li>
+<li>Updated <code>check_stripe_api_key</code> django system check to not be a blocker for new dj-stripe users by raising Info warnings on the console. If the Stripe keys were not defined in the settings file, the <code>Critical</code> warning was preventing users to add them directly from the admin as mentioned in the docs. This was creating a chicken-egg situation where one could only add keys in the admin before they were defined in settings.</li>
+</ul>
               
             </div>
           </div><footer>
