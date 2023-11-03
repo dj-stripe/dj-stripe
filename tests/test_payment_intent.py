@@ -25,9 +25,9 @@ from . import (
     FAKE_SUBSCRIPTION_ITEM,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 def _get_fake_payment_intent_destination_charge_no_customer():

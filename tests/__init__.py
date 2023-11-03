@@ -1096,7 +1096,7 @@ class SubscriptionDict(StripeItem):
         self["items"] = StripeList(self["items"])
 
     def __setattr__(self, name, value):
-        if type(value) == datetime.datetime:
+        if type(value) is datetime.datetime:
             value = datetime_to_unix(value)
 
         # Special case for price and plan

@@ -31,9 +31,9 @@ from . import (
     FAKE_SUBSCRIPTION_ITEM,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 class TestOrder(CreateAccountMixin, AssertStripeFksMixin, TestCase):

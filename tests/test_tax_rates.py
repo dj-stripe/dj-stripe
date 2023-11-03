@@ -10,9 +10,9 @@ from django.test import TestCase
 from djstripe.models import TaxRate
 from tests import FAKE_TAX_RATE_EXAMPLE_1_VAT
 
-pytestmark = pytest.mark.django_db
-
 from .conftest import CreateAccountMixin
+
+pytestmark = pytest.mark.django_db
 
 
 class TaxRateTest(CreateAccountMixin, TestCase):

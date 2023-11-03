@@ -35,10 +35,9 @@ from . import (
     FAKE_UPCOMING_INVOICE,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-
-from .conftest import CreateAccountMixin
 
 
 class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
