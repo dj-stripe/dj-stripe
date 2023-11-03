@@ -6,7 +6,6 @@ from decimal import Decimal
 from unittest.mock import call, create_autospec, patch
 
 import pytest
-import stripe
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 

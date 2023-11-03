@@ -19,9 +19,9 @@ from . import (
     FAKE_USAGE_RECORD,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 class TestUsageRecord(CreateAccountMixin, AssertStripeFksMixin, TestCase):

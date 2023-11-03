@@ -2,7 +2,6 @@ import stripe
 from django.db import models
 
 from djstripe.models.billing import Discount
-from djstripe.settings import djstripe_settings
 
 from ..enums import OrderStatus
 from ..fields import (
