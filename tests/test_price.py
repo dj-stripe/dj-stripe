@@ -20,10 +20,9 @@ from . import (
     FAKE_PRODUCT,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-
-from .conftest import CreateAccountMixin
 
 
 class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):

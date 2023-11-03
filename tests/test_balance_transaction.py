@@ -5,7 +5,6 @@ from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
-import stripe
 from django.test.testcases import TestCase
 
 from djstripe import models
@@ -24,9 +23,9 @@ from . import (
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_ITEM,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 class TestBalanceTransactionStr(CreateAccountMixin):

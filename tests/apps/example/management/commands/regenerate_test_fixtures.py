@@ -821,7 +821,7 @@ class Command(BaseCommand):
                 )
             elif (
                 f in sideeffect_fields
-                and type(old_val) == type(new_val)
+                and type(old_val) is type(new_val)
                 and old_val != new_val
             ):
                 # only preserve old values if the type is the same
