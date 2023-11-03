@@ -16,7 +16,9 @@ from djstripe.models import Account, APIKey
 from djstripe.models.api import get_api_key_details_by_prefix
 
 from . import FAKE_FILEUPLOAD_ICON, FAKE_FILEUPLOAD_LOGO, FAKE_PLATFORM_ACCOUNT
+from .conftest import CreateAccountMixin
 
+pytestmark = pytest.mark.django_db
 # avoid literal api keys to prevent git secret scanners false-positives
 SK_TEST = "sk_test_" + "XXXXXXXXXXXXXXXXXXXX1234"
 SK_LIVE = "sk_live_" + "XXXXXXXXXXXXXXXXXXXX5678"
@@ -24,9 +26,6 @@ RK_TEST = "rk_test_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX9876"
 RK_LIVE = "rk_live_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX5432"
 PK_TEST = "pk_test_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXAAAA"
 PK_LIVE = "pk_live_" + "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXBBBB"
-
-pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 def test_get_api_key_details_by_prefix():

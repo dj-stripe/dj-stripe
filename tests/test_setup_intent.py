@@ -21,8 +21,9 @@ from tests import (
     AssertStripeFksMixin,
 )
 
-pytestmark = pytest.mark.django_db
 from .conftest import CreateAccountMixin
+
+pytestmark = pytest.mark.django_db
 
 
 class TestStrSetupIntent:

@@ -13,9 +13,9 @@ from djstripe.models import Account, File
 from djstripe.settings import djstripe_settings
 
 from . import FAKE_ACCOUNT, FAKE_FILEUPLOAD_ICON, FAKE_FILEUPLOAD_LOGO
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 class TestFileLink(CreateAccountMixin, TestCase):

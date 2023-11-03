@@ -2,7 +2,6 @@ from copy import deepcopy
 from decimal import Decimal
 
 import pytest
-import stripe
 from django.test.testcases import TestCase
 
 from djstripe.models import Coupon

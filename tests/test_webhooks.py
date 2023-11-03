@@ -29,9 +29,9 @@ from . import (
     FAKE_TRANSFER,
     FAKE_WEBHOOK_ENDPOINT_1,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 def mock_webhook_handler(webhook_event_trigger):

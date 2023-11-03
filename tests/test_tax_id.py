@@ -13,9 +13,9 @@ from djstripe.models import Customer, TaxId
 from djstripe.settings import djstripe_settings
 
 from . import FAKE_CUSTOMER, FAKE_TAX_ID, AssertStripeFksMixin
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 class TestTaxIdStr(CreateAccountMixin, TestCase):

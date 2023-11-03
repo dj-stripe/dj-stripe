@@ -19,9 +19,9 @@ from . import (
     FAKE_PRICE_TIER,
     FAKE_PRODUCT,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 class TestProduct(CreateAccountMixin):

@@ -24,11 +24,9 @@ from . import (
     FAKE_PLATFORM_ACCOUNT,
     AssertStripeFksMixin,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-
-
-from .conftest import CreateAccountMixin
 
 
 class TestAccount(CreateAccountMixin, AssertStripeFksMixin, TestCase):
@@ -538,7 +536,7 @@ class TestAccountSTRIPE:
             assert account_instance.type == account_json["type"]
             assert account_instance.email == account_json["email"]
 
-        except:
+        except Exception:
             raise
 
         # deleted created Account
@@ -650,7 +648,7 @@ class TestAccountSTRIPE:
                     mock_file.return_value,
                     "api_retrieve",
                     side_effect=stripe.error.PermissionError,
-                ) as mock_retrieve:
+                ):
                     # Invoke _attach_objects_post_save_hook()
                     account_instance._attach_objects_post_save_hook(
                         cls=Account,
@@ -690,7 +688,7 @@ class TestAccountSTRIPE:
                     mock_file.return_value,
                     "api_retrieve",
                     side_effect=stripe.error.InvalidRequestError("error message", {}),
-                ) as mock_retrieve:
+                ):
                     # Invoke _attach_objects_post_save_hook()
                     account_instance._attach_objects_post_save_hook(
                         cls=Account,
@@ -721,7 +719,7 @@ class TestAccountSTRIPE:
                 side_effect=stripe.error.InvalidRequestError(
                     "a similar object exists in", {}
                 ),
-            ) as mock_retrieve:
+            ):
                 # Invoke _attach_objects_post_save_hook()
                 account_instance._attach_objects_post_save_hook(
                     cls=Account, data=account_json, api_key=settings.STRIPE_SECRET_KEY
@@ -746,7 +744,7 @@ class TestAccountSTRIPE:
                     mock_file.return_value,
                     "api_retrieve",
                     side_effect=stripe.error.AuthenticationError,
-                ) as mock_retrieve:
+                ):
                     # Invoke _attach_objects_post_save_hook()
                     account_instance._attach_objects_post_save_hook(
                         cls=Account,

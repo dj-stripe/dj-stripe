@@ -5,8 +5,6 @@ dj-stripe Event Model Tests.
 from copy import deepcopy
 from unittest.mock import patch
 
-import pytest
-import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe import StripeError

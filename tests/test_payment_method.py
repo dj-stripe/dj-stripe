@@ -20,9 +20,9 @@ from . import (
     AssertStripeFksMixin,
     PaymentMethodDict,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 class TestPaymentMethod(CreateAccountMixin):

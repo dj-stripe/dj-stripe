@@ -11,12 +11,11 @@ from djstripe import enums, utils
 from djstripe.admin.forms import APIKeyAdminCreateForm, CustomActionForm
 from tests import FAKE_PLATFORM_ACCOUNT
 
+from .conftest import CreateAccountMixin
 from .fields.models import CustomActionModel
 from .test_apikey import RK_LIVE, RK_TEST, SK_LIVE, SK_TEST
 
 pytestmark = pytest.mark.django_db
-
-from .conftest import CreateAccountMixin
 
 
 class TestCustomActionForm:

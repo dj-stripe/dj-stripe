@@ -12,9 +12,9 @@ from djstripe.models import File, FileLink
 from djstripe.settings import djstripe_settings
 
 from . import FAKE_FILEUPLOAD_ICON
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 class TestFileLink(CreateAccountMixin, TestCase):

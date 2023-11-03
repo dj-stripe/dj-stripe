@@ -22,9 +22,9 @@ from . import (
     FAKE_DISPUTE_PAYMENT_INTENT,
     FAKE_FILEUPLOAD_ICON,
 )
+from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-from .conftest import CreateAccountMixin
 
 
 class TestDispute(CreateAccountMixin, TestCase):
