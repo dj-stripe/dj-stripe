@@ -1,27 +1,27 @@
 """
 Webhook event handlers for the various models
-
 Stripe docs for Events: https://stripe.com/docs/api/events
 Stripe docs for Webhooks: https://stripe.com/docs/webhooks
-
 TODO: Implement webhook event handlers for all the models that need to
       respond to webhook events.
-
 NOTE:
     Event data is not guaranteed to be in the correct API version format.
     See #116. When writing a webhook handler, make sure to first
     re-retrieve the object you wish to process.
-
 """
+
 import logging
 from enum import Enum
 
 from django.core.exceptions import ObjectDoesNotExist
+from django.dispatch import receiver
 
+from djstripe.models import Event
 from djstripe.settings import djstripe_settings
 
-from . import models, webhooks
+from . import models
 from .enums import PayoutType, SourceType
+from .signals import WEBHOOK_SIGNALS
 from .utils import convert_tstamp
 
 logger = logging.getLogger(__name__)
@@ -98,6 +98,9 @@ def djstripe_receiver(signal_names):
 
     return inner
 
+
+@djstripe_receiver(["customer.created", "customer.updated", "customer.deleted"])
+def handle_customer_event(sender, event, **kwargs):
     """Handle updates to customer objects.
 
     First determines the crud_type and then handles the event if a customer
@@ -119,15 +122,16 @@ def djstripe_receiver(signal_names):
         metadata = event.data.get("object", {}).get("metadata", {})
         customer_id = event.data.get("object", {}).get("id", "")
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
-
         # only update customer.subscriber if both the customer and subscriber already exist
         update_customer_helper(metadata, customer_id, subscriber_key)
 
         _handle_crud_like_event(target_cls=models.Customer, event=event)
 
 
-@webhooks.handler("customer.discount")
-def customer_discount_webhook_handler(event):
+@djstripe_receiver("customer.discount.created")
+@djstripe_receiver("customer.discount.deleted")
+@djstripe_receiver("customer.discount.updated")
+def handle_customer_discount_event(sender, event, **kwargs):
     """Handle updates to customer discount objects.
 
     Docs: https://stripe.com/docs/api#discounts
@@ -162,8 +166,11 @@ def customer_discount_webhook_handler(event):
     customer.save()
 
 
-@webhooks.handler("customer.source")
-def customer_source_webhook_handler(event):
+@djstripe_receiver("customer.source.created")
+@djstripe_receiver("customer.source.deleted")
+@djstripe_receiver("customer.source.expiring")
+@djstripe_receiver("customer.source.updated")
+def handle_customer_source_event(sender, event, **kwargs):
     """Handle updates to customer payment-source objects.
 
     Docs: https://stripe.com/docs/api/sources
@@ -188,18 +195,15 @@ def customer_source_webhook_handler(event):
             _handle_crud_like_event(target_cls=models.Card, event=event)
 
 
-@webhooks.handler("identity.verification_session")
-def identity_verification_session_handler(event):
-    """
-    Handle updates to Stripe Identity Verification Session objects.
-
-    Docs: https://stripe.com/docs/api/identity/verification_sessions
-    """
-    _handle_crud_like_event(target_cls=models.VerificationSession, event=event)
-
-
-@webhooks.handler("customer.subscription")
-def customer_subscription_webhook_handler(event):
+@djstripe_receiver("customer.subscription.created")
+@djstripe_receiver("customer.subscription.deleted")
+@djstripe_receiver("customer.subscription.paused")
+@djstripe_receiver("customer.subscription.pending_update_applied")
+@djstripe_receiver("customer.subscription.pending_update_expired")
+@djstripe_receiver("customer.subscription.resumed")
+@djstripe_receiver("customer.subscription.trial_will_end")
+@djstripe_receiver("customer.subscription.updated")
+def handle_customer_subscription_event(sender, event, **kwargs):
     """Handle updates to customer subscription objects.
 
     Docs an example subscription webhook response:
@@ -217,8 +221,10 @@ def customer_subscription_webhook_handler(event):
     )
 
 
-@webhooks.handler("customer.tax_id")
-def customer_tax_id_webhook_handler(event):
+@djstripe_receiver("customer.tax_id.created")
+@djstripe_receiver("customer.tax_id.deleted")
+@djstripe_receiver("customer.tax_id.updated")
+def handle_customer_tax_id_event(sender, event, **kwargs):
     """
     Handle updates to customer tax ID objects.
     """
@@ -227,8 +233,26 @@ def customer_tax_id_webhook_handler(event):
     )
 
 
-@webhooks.handler("payment_method")
-def payment_method_handler(event):
+@djstripe_receiver("identity.verification_session.canceled")
+@djstripe_receiver("identity.verification_session.created")
+@djstripe_receiver("identity.verification_session.processing")
+@djstripe_receiver("identity.verification_session.redacted")
+@djstripe_receiver("identity.verification_session.requires_input")
+@djstripe_receiver("identity.verification_session.verified")
+def handle_identity_verification_session_event(sender, event, **kwargs):
+    """
+    Handle updates to Stripe Identity Verification Session objects.
+
+    Docs: https://stripe.com/docs/api/identity/verification_sessions
+    """
+    _handle_crud_like_event(target_cls=models.VerificationSession, event=event)
+
+
+@djstripe_receiver("payment_method.attached")
+@djstripe_receiver("payment_method.automatically_updated")
+@djstripe_receiver("payment_method.detached")
+@djstripe_receiver("payment_method.updated")
+def handle_payment_method_event(sender, event, **kwargs):
     """
     Handle updates to payment_method objects
     :param event:
@@ -261,8 +285,10 @@ def payment_method_handler(event):
             _handle_crud_like_event(target_cls=models.PaymentMethod, event=event)
 
 
-@webhooks.handler("account.external_account")
-def account_application_webhook_handler(event):
+@djstripe_receiver("account.external_account.created")
+@djstripe_receiver("account.external_account.deleted")
+@djstripe_receiver("account.external_account.updated")
+def handle_account_external_account_event(sender, event, **kwargs):
     """
     Handles updates to Connected Accounts External Accounts
     """
@@ -274,8 +300,8 @@ def account_application_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.BankAccount, event=event)
 
 
-@webhooks.handler("account.updated")
-def account_updated_webhook_handler(event):
+@djstripe_receiver("account.updated")
+def handle_account_updated_event(sender, event, **kwargs):
     """
     Handles updates to Connected Accounts
         - account: https://stripe.com/docs/api/accounts
@@ -287,8 +313,15 @@ def account_updated_webhook_handler(event):
     )
 
 
-@webhooks.handler("charge")
-def charge_webhook_handler(event):
+@djstripe_receiver("charge.captured")
+@djstripe_receiver("charge.expired")
+@djstripe_receiver("charge.failed")
+@djstripe_receiver("charge.pending")
+@djstripe_receiver("charge.refund.updated")
+@djstripe_receiver("charge.refunded")
+@djstripe_receiver("charge.succeeded")
+@djstripe_receiver("charge.updated")
+def handle_charge_event(sender, event, **kwargs):
     """Handle updates to Charge objects
     - charge: https://stripe.com/docs/api/charges
     """
@@ -300,8 +333,12 @@ def charge_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.Charge, event=event)
 
 
-@webhooks.handler("charge.dispute")
-def dispute_webhook_handler(event):
+@djstripe_receiver("charge.dispute.closed")
+@djstripe_receiver("charge.dispute.created")
+@djstripe_receiver("charge.dispute.funds_reinstated")
+@djstripe_receiver("charge.dispute.funds_withdrawn")
+@djstripe_receiver("charge.dispute.updated")
+def handle_charge_dispute_event(sender, event, **kwargs):
     """Handle updates to Dispute objects
     - dispute: https://stripe.com/docs/api/disputes
     """
@@ -313,8 +350,12 @@ def dispute_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.Dispute, event=event)
 
 
-@webhooks.handler("source")
-def source_webhook_handler(event):
+@djstripe_receiver("source.canceled")
+@djstripe_receiver("source.chargeable")
+@djstripe_receiver("source.failed")
+@djstripe_receiver("source.mandate_notification")
+@djstripe_receiver("source.refund_attributes_required")
+def handle_source_event(sender, event, **kwargs):
     """Handle updates to Source objects
     - charge: https://stripe.com/docs/api/charges
     """
@@ -326,8 +367,9 @@ def source_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.Source, event=event)
 
 
-@webhooks.handler("source.transaction")
-def source_transaction_webhook_handler(event):
+@djstripe_receiver("source.transaction.created")
+@djstripe_receiver("source.transaction.updated")
+def handle_source_transaction_event(sender, event, **kwargs):
     """Handle updates to Source objects
     - charge: https://stripe.com/docs/api/charges
     """
@@ -339,24 +381,79 @@ def source_transaction_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.SourceTransaction, event=event)
 
 
-@webhooks.handler(
-    "checkout",
-    "coupon",
-    "file",
-    "invoice",
-    "invoiceitem",
-    "order",
-    "payment_intent",
-    "payout",
-    "plan",
-    "price",
-    "product",
-    "setup_intent",
-    "subscription_schedule",
-    "tax_rate",
-    "transfer",
-)
-def other_object_webhook_handler(event):
+@djstripe_receiver("checkout.session.async_payment_failed")
+@djstripe_receiver("checkout.session.async_payment_succeeded")
+@djstripe_receiver("checkout.session.completed")
+@djstripe_receiver("checkout.session.expired")
+@djstripe_receiver("coupon.created")
+@djstripe_receiver("coupon.deleted")
+@djstripe_receiver("coupon.updated")
+@djstripe_receiver("file.created")
+@djstripe_receiver("invoice.created")
+@djstripe_receiver("invoice.deleted")
+@djstripe_receiver("invoice.finalization_failed")
+@djstripe_receiver("invoice.finalized")
+@djstripe_receiver("invoice.marked_uncollectible")
+@djstripe_receiver("invoice.paid")
+@djstripe_receiver("invoice.payment_action_required")
+@djstripe_receiver("invoice.payment_failed")
+@djstripe_receiver("invoice.payment_succeeded")
+@djstripe_receiver("invoice.sent")
+@djstripe_receiver("invoice.upcoming")
+@djstripe_receiver("invoice.updated")
+@djstripe_receiver("invoice.voided")
+@djstripe_receiver("invoiceitem.created")
+@djstripe_receiver("invoiceitem.deleted")
+@djstripe_receiver("invoiceitem.updated")
+@djstripe_receiver("order.created")
+@djstripe_receiver("order.completed")
+@djstripe_receiver("order.inventory_reservation_expired")
+@djstripe_receiver("order.payment_completed")
+@djstripe_receiver("order.processing")
+@djstripe_receiver("order.reopened")
+@djstripe_receiver("order.submitted")
+@djstripe_receiver("order.canceled")
+@djstripe_receiver("payment_intent.amount_capturable_updated")
+@djstripe_receiver("payment_intent.canceled")
+@djstripe_receiver("payment_intent.created")
+@djstripe_receiver("payment_intent.partially_funded")
+@djstripe_receiver("payment_intent.payment_failed")
+@djstripe_receiver("payment_intent.processing")
+@djstripe_receiver("payment_intent.requires_action")
+@djstripe_receiver("payment_intent.succeeded")
+@djstripe_receiver("payout.canceled")
+@djstripe_receiver("payout.created")
+@djstripe_receiver("payout.failed")
+@djstripe_receiver("payout.paid")
+@djstripe_receiver("payout.reconciliation_completed")
+@djstripe_receiver("payout.updated")
+@djstripe_receiver("plan.created")
+@djstripe_receiver("plan.deleted")
+@djstripe_receiver("plan.updated")
+@djstripe_receiver("price.created")
+@djstripe_receiver("price.deleted")
+@djstripe_receiver("price.updated")
+@djstripe_receiver("product.created")
+@djstripe_receiver("product.deleted")
+@djstripe_receiver("product.updated")
+@djstripe_receiver("setup_intent.canceled")
+@djstripe_receiver("setup_intent.created")
+@djstripe_receiver("setup_intent.requires_action")
+@djstripe_receiver("setup_intent.setup_failed")
+@djstripe_receiver("setup_intent.succeeded")
+@djstripe_receiver("subscription_schedule.aborted")
+@djstripe_receiver("subscription_schedule.canceled")
+@djstripe_receiver("subscription_schedule.completed")
+@djstripe_receiver("subscription_schedule.created")
+@djstripe_receiver("subscription_schedule.expiring")
+@djstripe_receiver("subscription_schedule.released")
+@djstripe_receiver("subscription_schedule.updated")
+@djstripe_receiver("tax_rate.created")
+@djstripe_receiver("tax_rate.updated")
+@djstripe_receiver("transfer.created")
+@djstripe_receiver("transfer.reversed")
+@djstripe_receiver("transfer.updated")
+def handle_other_event(sender, event, **kwargs):
     """
     Handle updates to checkout, coupon, file, invoice, invoiceitem, payment_intent,
     plan, product, setup_intent, subscription_schedule, tax_rate
