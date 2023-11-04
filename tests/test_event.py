@@ -8,9 +8,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe.error import StripeError
 
-from djstripe import webhooks
 from djstripe.models import Event, Transfer
 from djstripe.settings import djstripe_settings
+from djstripe.signals import WEBHOOK_SIGNALS
 
 from . import (
     FAKE_CUSTOMER,
@@ -28,10 +28,6 @@ class EventTest(CreateAccountMixin, TestCase):
         )
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
-        patcher = patch.object(webhooks, "call_handlers")
-        self.addCleanup(patcher.stop)
-        self.call_handlers = patcher.start()
-
     def test___str__(self):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
 
@@ -45,17 +41,13 @@ class EventTest(CreateAccountMixin, TestCase):
 
     def test_invoke_webhook_handlers_event_with_log_stripe_error(self):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        self.call_handlers.side_effect = StripeError("Boom!")
-        with self.assertRaises(StripeError):
-            event.invoke_webhook_handlers()
+        signal = WEBHOOK_SIGNALS.get(FAKE_EVENT_TRANSFER_CREATED["type"])
+        with patch.object(signal, "send", side_effect=StripeError("Boom!")):
+            with self.assertRaises(StripeError):
+                event.invoke_webhook_handlers()
 
-    def test_invoke_webhook_handlers_event_with_raise_stripe_error(self):
-        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        self.call_handlers.side_effect = StripeError("Boom!")
-        with self.assertRaises(StripeError):
-            event.invoke_webhook_handlers()
-
-    def test_invoke_webhook_handlers_event_when_invalid(self):
+    @patch("djstripe.models.Event.invoke_webhook_handlers", autospec=True)
+    def test_invoke_webhook_handlers_event_when_invalid(self, webhook_handler_mock):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
         event.valid = False
         event.invoke_webhook_handlers()

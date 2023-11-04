@@ -10,7 +10,7 @@ from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from stripe.error import InvalidRequestError
 
-from .. import enums, webhooks
+from .. import enums
 from ..exceptions import MultipleSubscriptionException
 from ..fields import (
     JSONField,
@@ -1628,10 +1628,8 @@ class Event(StripeModel):
         See event handlers registered in the ``djstripe.event_handlers`` module
         (or handlers registered in djstripe plugins or contrib packages).
         """
-
-        webhooks.call_handlers(event=self)
-
         signal = WEBHOOK_SIGNALS.get(self.type)
+
         if signal:
             return signal.send(sender=Event, event=self)
 
