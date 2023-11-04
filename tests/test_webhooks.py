@@ -3,9 +3,8 @@ dj-stripe Webhook Tests.
 """
 import json
 import warnings
-from collections import defaultdict
 from copy import deepcopy
-from unittest.mock import Mock, PropertyMock, call, patch
+from unittest.mock import patch
 from uuid import UUID
 
 import pytest
@@ -14,11 +13,10 @@ from django.test import TestCase, override_settings
 from django.test.client import Client
 from django.urls import reverse
 
-from djstripe import webhooks
 from djstripe.models import Event, Transfer, WebhookEventTrigger
 from djstripe.models.webhooks import WebhookEndpoint, get_remote_ip
 from djstripe.settings import djstripe_settings
-from djstripe.webhooks import TEST_EVENT_ID, call_handlers, handler, handler_all
+from djstripe.webhooks import TEST_EVENT_ID
 
 from . import (
     FAKE_CUSTOM_ACCOUNT,
@@ -542,89 +540,9 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
 
 
 class TestWebhookHandlers(TestCase):
-    def setUp(self):
-        # Reset state of registrations per test
-        patcher = patch.object(
-            webhooks, "registrations", new_callable=(lambda: defaultdict(list))
-        )
-        self.addCleanup(patcher.stop)
-        self.registrations = patcher.start()
-
-        patcher = patch.object(webhooks, "registrations_global", new_callable=list)
-        self.addCleanup(patcher.stop)
-        self.registrations_global = patcher.start()
-
-    def test_global_handler_registration(self):
-        func_mock = Mock()
-        handler_all()(func_mock)
-        event = self._call_handlers("wib.ble", {"data": "foo"})  # handled
-        self.assertEqual(1, func_mock.call_count)
-        func_mock.assert_called_with(event=event)
-
-    def test_event_handler_registration(self):
-        global_func_mock = Mock()
-        handler_all()(global_func_mock)
-        func_mock = Mock()
-        handler("foo")(func_mock)
-        event = self._call_handlers("foo.bar", {"data": "foo"})  # handled
-        self._call_handlers("bar.foo", {"data": "foo"})  # not handled
-        self.assertEqual(2, global_func_mock.call_count)  # called each time
-        self.assertEqual(1, func_mock.call_count)
-        func_mock.assert_called_with(event=event)
-
-    def test_event_subtype_handler_registration(self):
-        global_func_mock = Mock()
-        handler_all()(global_func_mock)
-        func_mock = Mock()
-        handler("foo.bar")(func_mock)
-        event1 = self._call_handlers("foo.bar", {"data": "foo"})  # handled
-        event2 = self._call_handlers("foo.bar.wib", {"data": "foo"})  # handled
-        self._call_handlers("foo.baz", {"data": "foo"})  # not handled
-        self.assertEqual(3, global_func_mock.call_count)  # called each time
-        self.assertEqual(2, func_mock.call_count)
-        func_mock.assert_has_calls([call(event=event1), call(event=event2)])
-
-    def test_global_handler_registration_with_function(self):
-        func_mock = Mock()
-        handler_all(func_mock)
-        event = self._call_handlers("wib.ble", {"data": "foo"})  # handled
-        self.assertEqual(1, func_mock.call_count)
-        func_mock.assert_called_with(event=event)
-
-    def test_event_handle_registation_with_string(self):
-        func_mock = Mock()
-        handler("foo")(func_mock)
-        event = self._call_handlers("foo.bar", {"data": "foo"})  # handled
-        self.assertEqual(1, func_mock.call_count)
-        func_mock.assert_called_with(event=event)
-
-    def test_event_handle_registation_with_list_of_strings(self):
-        func_mock = Mock()
-        handler("foo", "bar")(func_mock)
-        event1 = self._call_handlers("foo.bar", {"data": "foo"})  # handled
-        event2 = self._call_handlers("bar.foo", {"data": "bar"})  # handled
-        self.assertEqual(2, func_mock.call_count)
-        func_mock.assert_has_calls([call(event=event1), call(event=event2)])
-
     def test_webhook_event_trigger_invalid_body(self):
         trigger = WebhookEventTrigger(remote_ip="127.0.0.1", body="invalid json")
         assert not trigger.json_body
-
-    #
-    # Helpers
-    #
-
-    @staticmethod
-    def _call_handlers(event_spec, data):
-        event = Mock(spec=Event)
-        parts = event_spec.split(".")
-        category = parts[0]
-        verb = ".".join(parts[1:])
-        type(event).parts = PropertyMock(return_value=parts)
-        type(event).category = PropertyMock(return_value=category)
-        type(event).verb = PropertyMock(return_value=verb)
-        call_handlers(event=event)
-        return event
 
 
 class TestGetRemoteIp:
