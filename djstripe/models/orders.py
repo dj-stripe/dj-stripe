@@ -2,6 +2,7 @@ import stripe
 from django.db import models
 
 from djstripe.models.billing import Discount
+from djstripe.settings import DjstripeSettings
 
 from ..enums import OrderStatus
 from ..fields import (
@@ -163,7 +164,7 @@ class Order(StripeModel):
         self,
         cls,
         data,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        api_key=DjstripeSettings.STRIPE_SECRET_KEY,
         pending_relations=None,
     ):
         super()._attach_objects_post_save_hook(
