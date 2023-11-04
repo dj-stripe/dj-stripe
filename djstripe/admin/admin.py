@@ -304,20 +304,6 @@ class FileLinkAdmin(StripeModelAdmin):
         return super().get_queryset(request).select_related("file")
 
 
-@admin.register(models.Order)
-class OrderAdmin(StripeModelAdmin):
-    list_display = (
-        "amount_total",
-        "customer",
-        "status",
-    )
-    list_filter = (
-        "customer",
-        "status",
-    )
-    list_select_related = ("customer", "payment_intent")
-
-
 @admin.register(models.PaymentIntent)
 class PaymentIntentAdmin(StripeModelAdmin):
     list_display = (

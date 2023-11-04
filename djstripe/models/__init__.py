@@ -45,7 +45,6 @@ from .core import (
     SetupIntent,
 )
 from .identity import VerificationReport, VerificationSession
-from .orders import Order
 from .payment_methods import (
     BankAccount,
     Card,
@@ -81,7 +80,6 @@ __all__ = [
     "InvoiceItem",
     "LineItem",
     "Mandate",
-    "Order",
     "PaymentIntent",
     "PaymentMethod",
     "Payout",
