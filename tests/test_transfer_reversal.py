@@ -168,8 +168,8 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"],
             expand=[
-                "data.transfer",
                 "data.balance_transaction",
+                "data.transfer",
                 "data.transfer.balance_transaction",
             ],
         )

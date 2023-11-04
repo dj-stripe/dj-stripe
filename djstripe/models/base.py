@@ -55,7 +55,8 @@ class StripeBaseModel(models.Model):
             kwargs["expand"] = expand
 
         # Keep only unique elements
-        kwargs["expand"] = list(set(kwargs["expand"]))
+        # Sort it to ensure the items are returned in the same order
+        kwargs["expand"] = sorted(list(set(kwargs["expand"])))
 
         return kwargs
 
