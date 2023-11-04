@@ -101,7 +101,6 @@ from . import (
     FAKE_EVENT_ORDER_CREATED,
     FAKE_EVENT_ORDER_PROCESSING,
     FAKE_EVENT_ORDER_SUBMITTED,
-    FAKE_EVENT_ORDER_UPDATED,
     FAKE_EVENT_PAYMENT_INTENT_SUCCEEDED_DESTINATION_CHARGE,
     FAKE_EVENT_PAYMENT_METHOD_ATTACHED,
     FAKE_EVENT_PAYMENT_METHOD_DETACHED,
@@ -124,7 +123,6 @@ from . import (
     FAKE_EVENT_TAX_ID_DELETED,
     FAKE_EVENT_TAX_ID_UPDATED,
     FAKE_EVENT_TRANSFER_CREATED,
-    FAKE_EVENT_TRANSFER_DELETED,
     FAKE_EXPRESS_ACCOUNT,
     FAKE_FILEUPLOAD_ICON,
     FAKE_FILEUPLOAD_LOGO,
@@ -150,7 +148,6 @@ from . import (
     FAKE_SUBSCRIPTION_SCHEDULE,
     FAKE_TAX_ID,
     FAKE_TAX_ID_UPDATED,
-    FAKE_TRANSFER,
     AssertStripeFksMixin,
 )
 from .conftest import CreateAccountMixin
@@ -3105,31 +3102,32 @@ class TestTransferEvents(EventTestCase):
             fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
         )
 
-    @patch.object(Transfer, "_attach_objects_post_save_hook")
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
-    )
-    @patch("stripe.Transfer.retrieve", return_value=FAKE_TRANSFER, autospec=True)
-    def test_transfer_deleted(
-        self,
-        transfer_retrieve_mock,
-        account_retrieve_mock,
-        transfer__attach_object_post_save_hook_mock,
-    ):
-        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        event.invoke_webhook_handlers()
+    # transfer.deleted event is not enabled
+    # @patch.object(Transfer, "_attach_objects_post_save_hook")
+    # @patch(
+    #     "stripe.Account.retrieve",
+    #     return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
+    # )
+    # @patch("stripe.Transfer.retrieve", return_value=FAKE_TRANSFER, autospec=True)
+    # def test_transfer_deleted(
+    #     self,
+    #     transfer_retrieve_mock,
+    #     account_retrieve_mock,
+    #     transfer__attach_object_post_save_hook_mock,
+    # ):
+    #     event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
+    #     event.invoke_webhook_handlers()
 
-        Transfer.objects.get(id=FAKE_TRANSFER["id"])
+    #     Transfer.objects.get(id=FAKE_TRANSFER["id"])
 
-        event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
-        event.invoke_webhook_handlers()
+    #     event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
+    #     event.invoke_webhook_handlers()
 
-        with self.assertRaises(Transfer.DoesNotExist):
-            Transfer.objects.get(id=FAKE_TRANSFER["id"])
+    #     with self.assertRaises(Transfer.DoesNotExist):
+    #         Transfer.objects.get(id=FAKE_TRANSFER["id"])
 
-        event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
-        event.invoke_webhook_handlers()
+    #     event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
+    #     event.invoke_webhook_handlers()
 
 
 class TestOrderEvents(CreateAccountMixin, EventTestCase):
@@ -3203,76 +3201,77 @@ class TestOrderEvents(CreateAccountMixin, EventTestCase):
         self.assertEqual(order.payment_intent, None)
         self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch("stripe.Order.retrieve", autospec=True)
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_order_updated(
-        self,
-        event_retrieve_mock,
-        order_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        customer_retrieve_mock,
-        product_retrieve_mock,
-        payment_intent_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        charge_retrieve_mock,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        balance_transaction_retrieve_mock,
-    ):
-        fake_stripe_event = deepcopy(FAKE_EVENT_ORDER_UPDATED)
-        event_retrieve_mock.return_value = fake_stripe_event
-        order_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
+    # order.updated event is not enabled
+    # @patch(
+    #     "stripe.BalanceTransaction.retrieve",
+    #     return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
+    #     autospec=True,
+    # )
+    # @patch(
+    #     "stripe.SubscriptionItem.retrieve",
+    #     return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
+    #     autospec=True,
+    # )
+    # @patch(
+    #     "stripe.Subscription.retrieve",
+    #     return_value=deepcopy(FAKE_SUBSCRIPTION),
+    #     autospec=True,
+    # )
+    # @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
+    # @patch(
+    #     "stripe.PaymentMethod.retrieve",
+    #     return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+    #     autospec=True,
+    # )
+    # @patch(
+    #     "stripe.PaymentIntent.retrieve",
+    #     return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
+    #     autospec=True,
+    # )
+    # @patch(
+    #     "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    # )
+    # @patch(
+    #     "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    # )
+    # @patch(
+    #     "stripe.InvoiceItem.retrieve",
+    #     return_value=deepcopy(FAKE_INVOICEITEM),
+    #     autospec=True,
+    # )
+    # @patch(
+    #     "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
+    # )
+    # @patch("stripe.Order.retrieve", autospec=True)
+    # @patch("stripe.Event.retrieve", autospec=True)
+    # def test_order_updated(
+    #     self,
+    #     event_retrieve_mock,
+    #     order_retrieve_mock,
+    #     invoice_retrieve_mock,
+    #     invoice_item_retrieve_mock,
+    #     customer_retrieve_mock,
+    #     product_retrieve_mock,
+    #     payment_intent_retrieve_mock,
+    #     paymentmethod_card_retrieve_mock,
+    #     charge_retrieve_mock,
+    #     subscription_retrieve_mock,
+    #     subscription_item_retrieve_mock,
+    #     balance_transaction_retrieve_mock,
+    # ):
+    #     fake_stripe_event = deepcopy(FAKE_EVENT_ORDER_UPDATED)
+    #     event_retrieve_mock.return_value = fake_stripe_event
+    #     order_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
 
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
+    #     event = Event.sync_from_stripe_data(fake_stripe_event)
+    #     event.invoke_webhook_handlers()
 
-        order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
+    #     order = Order.objects.get(id=fake_stripe_event["data"]["object"]["id"])
 
-        # assert email got updated
-        self.assertEqual(order.billing_details["email"], "testuser@example.com")
-        self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
-        self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
+    #     # assert email got updated
+    #     self.assertEqual(order.billing_details["email"], "testuser@example.com")
+    #     self.assertEqual(order.payment_intent.id, FAKE_PAYMENT_INTENT_I["id"])
+    #     self.assertEqual(order.customer.id, FAKE_CUSTOMER["id"])
 
     @patch(
         "stripe.BalanceTransaction.retrieve",
