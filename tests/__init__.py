@@ -592,7 +592,7 @@ FAKE_EVENT_ORDER_CANCELLED["data"]["object"]["status"] = "canceled"
 
 
 FAKE_EVENT_ORDER_COMPLETED = deepcopy(FAKE_EVENT_ORDER_UPDATED)
-FAKE_EVENT_ORDER_COMPLETED["type"] = "order.complete"
+FAKE_EVENT_ORDER_COMPLETED["type"] = "order.completed"
 FAKE_EVENT_ORDER_COMPLETED["data"]["object"]["status"] = "complete"
 
 # TODO - add to regenerate_test_fixtures and replace this with a JSON fixture

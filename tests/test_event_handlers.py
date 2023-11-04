@@ -3529,7 +3529,7 @@ class TestOrderEvents(CreateAccountMixin, EventTestCase):
     )
     @patch("stripe.Order.retrieve", autospec=True)
     @patch("stripe.Event.retrieve", autospec=True)
-    def test_order_complet(
+    def test_order_completed(
         self,
         event_retrieve_mock,
         order_retrieve_mock,
