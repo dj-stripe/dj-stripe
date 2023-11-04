@@ -483,7 +483,6 @@ def handle_other_event(sender, event, **kwargs):
         "file": models.File,
         "invoice": models.Invoice,
         "invoiceitem": models.InvoiceItem,
-        "order": models.Order,
         "payment_intent": models.PaymentIntent,
         "payout": models.Payout,
         "plan": models.Plan,
