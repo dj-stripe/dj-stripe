@@ -23,11 +23,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     services:
       postgres:
-        image: postgres:12
+        image: postgres:16
         env:
           POSTGRES_PASSWORD: djstripe
           POSTGRES_DB: djstripe
@@ -39,7 +39,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       mysql:
-        image: mysql:8.0
+        image: mysql:8.3
         env:
           MYSQL_ROOT_PASSWORD: djstripe
           MYSQL_DATABASE: djstripe
@@ -52,7 +52,7 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: ./.github/install_poetry_action
         with:
