@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:12
+        image: postgres:16
         env:
           POSTGRES_PASSWORD: djstripe
           POSTGRES_DB: djstripe
@@ -35,7 +35,7 @@ jobs:
       - uses: ./.github/install_poetry_action
         with:
             POETRY_VERSION: ${{ env.POETRY_VERSION }}
-            python_version: "3.11"
+            python_version: "3.12"
 
       - name: Install pre-commit
         run: poetry install --with dev -E postgres

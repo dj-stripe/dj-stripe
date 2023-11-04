@@ -24,7 +24,7 @@ jobs:
       - uses: ./.github/install_poetry_action
         with:
             POETRY_VERSION: ${{ env.POETRY_VERSION }}
-            python_version: "3.11"
+            python_version: "3.12"
 
       - name: Install dependencies
         run: poetry install --with docs
