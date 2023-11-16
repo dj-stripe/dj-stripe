@@ -33,6 +33,7 @@ class WebhookEndpoint(StripeModel):
             "The API version events are rendered as for this webhook endpoint. Defaults"
             " to the configured Stripe API Version."
         ),
+        default=djstripe_settings.STRIPE_API_VERSION,
     )
     enabled_events = JSONField(
         help_text=(
