@@ -10,6 +10,7 @@ from django.urls import reverse
 from stripe.error import AuthenticationError, InvalidRequestError, PermissionError
 
 from djstripe import enums, models, utils
+from djstripe.settings import djstripe_settings
 from djstripe.signals import ENABLED_EVENTS
 
 
@@ -218,6 +219,11 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             self.add_error("__all__", e.user_message)
 
         return super()._post_clean()
+
+    def get_initial_for_field(self, field, field_name):
+        if field_name == "api_version":
+            return djstripe_settings.STRIPE_API_VERSION
+        return super().get_initial_for_field(field, field_name)
 
 
 class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
