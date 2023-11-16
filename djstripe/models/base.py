@@ -1017,12 +1017,13 @@ class StripeModel(StripeBaseModel):
             return []
 
         refund_objs = []
-
+        stripe_account = getattr(stripe_refunds, "stripe_account", None)
         for refund_data in stripe_refunds.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
                 refund_data,
                 refetch=False,
                 api_key=api_key,
+                stripe_account=stripe_account,
             )
             refund_objs.append(item)
 
