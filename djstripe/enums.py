@@ -776,6 +776,7 @@ class SubscriptionStatus(Enum):
     past_due = _("Past due")
     canceled = _("Canceled")
     unpaid = _("Unpaid")
+    paused = _("Paused")
 
 
 class SubscriptionProrationBehavior(Enum):
