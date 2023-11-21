@@ -1745,6 +1745,7 @@ class PaymentIntent(StripeModel):
 
     stripe_class = stripe.PaymentIntent
     stripe_dashboard_item_name = "payments"
+    expand_fields = ["payment_method"]
 
     amount = StripeQuantumCurrencyAmountField(
         help_text="Amount (in cents) intended to be collected by this PaymentIntent."
