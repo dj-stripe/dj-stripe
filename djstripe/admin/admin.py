@@ -9,6 +9,7 @@ from django.shortcuts import render
 from stripe.error import InvalidRequestError
 
 from djstripe import models
+from djstripe.fields import JSONField
 
 from .actions import CustomActionMixin
 from .admin_inline import (
@@ -27,6 +28,7 @@ from .forms import (
     WebhookEndpointAdminEditForm,
 )
 from .utils import ReadOnlyMixin, get_forward_relation_fields_for_model
+from .widgets import CustomTextAreaWidget
 
 
 @admin.register(models.IdempotencyKey)
@@ -75,6 +77,9 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
     add_form_template = "djstripe/admin/add_form.html"
     actions = ("_resync_instances", "_sync_all_instances")
+    formfield_overrides = {
+        JSONField: {"widget": CustomTextAreaWidget},
+    }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
