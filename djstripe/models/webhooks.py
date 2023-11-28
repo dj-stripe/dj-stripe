@@ -210,7 +210,12 @@ class WebhookEventTrigger(models.Model):
 
         ip = get_remote_ip(request)
 
-        stripe_account = webhook_endpoint.djstripe_owner_account
+        try:
+            data = json.loads(body)
+        except json.JSONDecodeError:
+            data = {}
+
+        stripe_account = StripeModel._find_owner_account(data=data)
         secret = webhook_endpoint.secret
 
         obj = cls.objects.create(
