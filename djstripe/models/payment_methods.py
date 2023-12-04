@@ -1130,11 +1130,16 @@ class PaymentMethod(StripeModel):
         help_text="Additional information for payment methods of type `wechat_pay`",
     )
 
+    @property
+    def last4(self):
+        pm_data = getattr(self, self.type, {})
+        return pm_data.get("last4", "Unknown")
+
     def __str__(self):
         if self.customer:
-            return f"{enums.PaymentMethodType.humanize(self.type)} for {self.customer}"
+            return f"{enums.PaymentMethodType.humanize(self.type)} ending in {self.last4} for {self.customer}"
         return (
-            f"{enums.PaymentMethodType.humanize(self.type)} is not associated with any"
+            f"{enums.PaymentMethodType.humanize(self.type)} ending in {self.last4} is not associated with any"
             " customer"
         )
 
