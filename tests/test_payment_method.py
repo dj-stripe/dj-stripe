@@ -44,8 +44,9 @@ class TestPaymentMethod(CreateAccountMixin):
             pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
             customer = None
             assert (
-                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} is"
-                " not associated with any customer" == str(pm)
+                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])}"
+                f"ending in {fake_payment_method_data['card']['last4']} is not associated with any customer"
+                == str(pm)
             )
 
         else:
@@ -54,8 +55,9 @@ class TestPaymentMethod(CreateAccountMixin):
                 id=fake_payment_method_data["customer"]
             )
             assert (
-                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} for"
-                f" {customer}" == str(pm)
+                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])}"
+                f"ending in {fake_payment_method_data['card']['last4']} for {customer}"
+                == str(pm)
             )
 
     @pytest.mark.parametrize("customer_exists", [True, False])
