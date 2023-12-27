@@ -775,6 +775,12 @@ class StripeModel(StripeBaseModel):
                         # but still present during sync. For example, if a refund is
                         # issued on a charge whose payment method has been deleted.
                         return None, False
+                    elif "Invalid subscription_item id" in str(e):
+                        # subscription items can be irretrievably deleted but still
+                        # be present during sync. For example, if a line item of type subscription is
+                        # removed from the subscription, the invoice generated for that billing period
+                        # will still contain the deleted subscription_item.
+                        return None, False
                     else:
                         raise
                 should_expand = False
