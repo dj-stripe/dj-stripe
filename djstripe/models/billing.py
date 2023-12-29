@@ -791,7 +791,8 @@ class BaseInvoice(StripeModel):
         )
         # sync every discount
         for discount in self.discounts:
-            Discount.sync_from_stripe_data(discount, api_key=api_key)
+            if discount:
+                Discount.sync_from_stripe_data(discount, api_key=api_key)
 
         for line in data.get("lines", []):
             invoice_item_data = line.get("invoice_item")
