@@ -832,7 +832,8 @@ class BaseInvoice(StripeModel):
         )
         # sync every discount
         for discount in self.discounts:
-            Discount.sync_from_stripe_data(discount, api_key=api_key)
+            if discount:
+                Discount.sync_from_stripe_data(discount, api_key=api_key)
 
     @property
     def plan(self) -> Optional["Plan"]:
