@@ -44,9 +44,9 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # to initialise Stripe.js on the front end
-        context[
-            "STRIPE_PUBLIC_KEY"
-        ] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        context["STRIPE_PUBLIC_KEY"] = (
+            djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        )
 
         success_url = self.request.build_absolute_uri(
             reverse("djstripe_example:success")
@@ -63,6 +63,34 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
         metadata = {
             f"{djstripe_settings.djstripe_settings.SUBSCRIBER_CUSTOMER_KEY}": id
         }
+        session_dict = {
+            "payment_method_types": ["card"],
+            # payment_method_types=["bacs_debit"],  # for bacs_debit
+            "payment_intent_data": {
+                "setup_future_usage": "off_session",
+                # so that the metadata gets copied to the associated Payment Intent and Charge Objects
+                "metadata": metadata,
+            },
+            "line_items": [
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        # "currency": "gbp",  # for bacs_debit
+                        "unit_amount": 2000,
+                        "product_data": {
+                            "name": "Sample Product Name",
+                            "images": ["https://i.imgur.com/EHyR2nP.png"],
+                            "description": "Sample Description",
+                        },
+                    },
+                    "quantity": 1,
+                },
+            ],
+            "mode": "payment",
+            "success_url": success_url,
+            "cancel_url": cancel_url,
+            "metadata": metadata,
+        }
 
         try:
             # retreive the Stripe Customer.
@@ -73,66 +101,13 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
             # ! Note that Stripe will always create a new Customer Object if customer id not provided
             # ! even if customer_email is provided!
             session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                customer=customer.id,
-                # payment_method_types=["bacs_debit"],  # for bacs_debit
-                payment_intent_data={
-                    "setup_future_usage": "off_session",
-                    # so that the metadata gets copied to the associated Payment Intent and Charge Objects
-                    "metadata": metadata,
-                },
-                line_items=[
-                    {
-                        "price_data": {
-                            "currency": "usd",
-                            # "currency": "gbp",  # for bacs_debit
-                            "unit_amount": 2000,
-                            "product_data": {
-                                "name": "Sample Product Name",
-                                "images": ["https://i.imgur.com/EHyR2nP.png"],
-                                "description": "Sample Description",
-                            },
-                        },
-                        "quantity": 1,
-                    },
-                ],
-                mode="payment",
-                success_url=success_url,
-                cancel_url=cancel_url,
-                metadata=metadata,
+                customer=customer.id, **session_dict
             )
 
         except models.Customer.DoesNotExist:
             print("Customer Object not in DB.")
 
-            session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                # payment_method_types=["bacs_debit"],  # for bacs_debit
-                payment_intent_data={
-                    "setup_future_usage": "off_session",
-                    # so that the metadata gets copied to the associated Payment Intent and Charge Objects
-                    "metadata": metadata,
-                },
-                line_items=[
-                    {
-                        "price_data": {
-                            "currency": "usd",
-                            # "currency": "gbp",  # for bacs_debit
-                            "unit_amount": 2000,
-                            "product_data": {
-                                "name": "Sample Product Name",
-                                "images": ["https://i.imgur.com/EHyR2nP.png"],
-                                "description": "Sample Description",
-                            },
-                        },
-                        "quantity": 1,
-                    },
-                ],
-                mode="payment",
-                success_url=success_url,
-                cancel_url=cancel_url,
-                metadata=metadata,
-            )
+            session = stripe.checkout.Session.create(**session_dict)
 
         context["CHECKOUT_SESSION_ID"] = session.id
 
@@ -173,9 +148,9 @@ class PurchaseSubscriptionView(FormView):
                 "(or use the dj-stripe webhooks)"
             )
 
-        context[
-            "STRIPE_PUBLIC_KEY"
-        ] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        context["STRIPE_PUBLIC_KEY"] = (
+            djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        )
 
         return context
 
