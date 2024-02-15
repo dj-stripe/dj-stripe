@@ -2,7 +2,7 @@ import logging
 import uuid
 from datetime import timedelta
 from typing import Dict, List, Optional, Type
-
+from stripe.stripe_object import StripeObject
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from stripe.api_resources.abstract.api_resource import APIResource
@@ -727,7 +727,8 @@ class StripeModel(StripeBaseModel):
         field = data.get(field_name)
         is_nested_data = field_name != "id"
         should_expand = False
-
+        if not stripe_account and isinstance(data, StripeObject):
+            stripe_account = data.stripe_account
         if pending_relations is None:
             pending_relations = []
 
