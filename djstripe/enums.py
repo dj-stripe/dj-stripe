@@ -165,12 +165,6 @@ class ApiErrorCode(Enum):
     invalid_swipe_data = _("Invalid swipe data")
 
 
-class AccountType(Enum):
-    standard = _("Standard")
-    express = _("Express")
-    custom = _("Custom")
-
-
 class BalanceTransactionReportingCategory(Enum):
     """
     https://stripe.com/docs/reports/reporting-categories
