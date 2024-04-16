@@ -378,90 +378,59 @@ class BankAccount(LegacySourceMixin, StripeModel):
 
     stripe_class = stripe.BankAccount
 
-    account = StripeForeignKey(
-        "Account",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="bank_accounts",
-        help_text=(
-            "The external account the charge was made on behalf of. Null here indicates"
-            " that this value was never set."
-        ),
-    )
-    account_holder_name = models.TextField(
-        max_length=5000,
-        blank=True,
-        help_text="The name of the person or business that owns the bank account.",
-    )
-    account_holder_type = StripeEnumField(
-        enum=enums.BankAccountHolderType,
-        help_text="The type of entity that holds the account.",
-    )
-    bank_name = models.CharField(
-        max_length=255,
-        help_text=(
-            "Name of the bank associated with the routing number (e.g., `WELLS FARGO`)."
-        ),
-    )
-    country = models.CharField(
-        max_length=2,
-        help_text=(
-            "Two-letter ISO code representing the country the bank account "
-            "is located in."
-        ),
-    )
-    currency = StripeCurrencyCodeField()
-    customer = StripeForeignKey(
-        "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
-    )
-    default_for_currency = models.BooleanField(
-        null=True,
-        help_text=(
-            "Whether this external account (BankAccount) is the default account for "
-            "its currency."
-        ),
-    )
-    fingerprint = models.CharField(
-        max_length=16,
-        help_text=(
-            "Uniquely identifies this particular bank account. "
-            "You can use this attribute to check whether two bank accounts are "
-            "the same."
-        ),
-    )
-    last4 = models.CharField(max_length=4)
-    routing_number = models.CharField(
-        max_length=255, help_text="The routing transit number for the bank account."
-    )
-    status = StripeEnumField(enum=enums.BankAccountStatus)
+    @property
+    def account(self) -> Optional["Account"]:
+        id = get_id_from_stripe_data(self.stripe_data.get("source"))
+        return Account.objects.get(id=id)
 
-    def __str__(self):
-        default = False
-        # prefer to show it by customer format if present
-        if self.customer:
-            default_source = self.customer.default_source
-            default_payment_method = self.customer.default_payment_method
+    @property
+    def account_holder_name(self) -> str:
+        return self.stripe_data.get("account_holder_name", "")
 
-            if (default_payment_method and self.id == default_payment_method.id) or (
-                default_source and self.id == default_source.id
-            ):
-                # current card is the default payment method or source
-                default = True
+    @property
+    def account_holder_type(self) -> enums.BankAccountHolderType:
+        type = self.stripe_data.get("account_holder_type", "")
+        return enums.BankAccountHolderType[type]
 
-            customer_template = (
-                f"{self.bank_name} {self.routing_number} ({self.human_readable_status})"
-                f" {'Default' if default else ''} {self.currency}"
-            )
-            return customer_template
+    @property
+    def bank_name(self) -> str:
+        return self.stripe_data.get("bank_name", "")
 
-        default = getattr(self, "default_for_currency", False)
-        account_template = f"{self.bank_name} {self.currency} {'Default' if default else ''} {self.routing_number} {self.last4}"
-        return account_template
+    @property
+    def country(self) -> str:
+        return self.stripe_data.get("country", "")
+
+    @property
+    def currency(self) -> str:
+        return self.stripe_data.get("currency", "")
+
+    @property
+    def customer(self) -> Optional["Customer"]:
+        customer_id = get_id_from_stripe_data(self.stripe_data.get("customer"))
+        if customer_id:
+            return Customer.objects.get(id=customer_id)
+
+    @property
+    def fingerprint(self) -> str:
+        return self.stripe_data.get("fingerprint", "")
+
+    @property
+    def last4(self) -> str:
+        return self.stripe_data.get("last4", "")
+
+    @property
+    def routing_number(self) -> str:
+        return self.stripe_data.get("routing_number", "")
+
+    @property
+    def status(self) -> enums.BankAccountStatus:
+        status = self.stripe_data.get("status", "")
+        return enums.BankAccountStatus[status]
 
     @property
     def human_readable_status(self):
-        if self.status == "new":
+        status = self.status
+        if status == enums.BankAccountStatus.new:
             return "Pending Verification"
         return enums.BankAccountStatus.humanize(self.status)
 
@@ -493,120 +462,59 @@ class Card(LegacySourceMixin, StripeModel):
     """
 
     stripe_class = stripe.Card
-    # Stripe Custom Connected Accounts can have cards as "Payout Sources"
-    account = StripeForeignKey(
-        "Account",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="cards",
-        help_text=(
-            "The external account the charge was made on behalf of. Null here indicates"
-            " that this value was never set."
-        ),
-    )
-    address_city = models.TextField(
-        max_length=5000,
-        blank=True,
-        default="",
-        help_text="City/District/Suburb/Town/Village.",
-    )
-    address_country = models.TextField(
-        max_length=5000, blank=True, default="", help_text="Billing address country."
-    )
-    address_line1 = models.TextField(
-        max_length=5000,
-        blank=True,
-        default="",
-        help_text="Street address/PO Box/Company name.",
-    )
-    address_line1_check = StripeEnumField(
-        enum=enums.CardCheckResult,
-        blank=True,
-        default="",
-        help_text="If `address_line1` was provided, results of the check.",
-    )
-    address_line2 = models.TextField(
-        max_length=5000,
-        blank=True,
-        default="",
-        help_text="Apartment/Suite/Unit/Building.",
-    )
-    address_state = models.TextField(
-        max_length=5000,
-        blank=True,
-        default="",
-        help_text="State/County/Province/Region.",
-    )
-    address_zip = models.TextField(
-        max_length=5000, blank=True, default="", help_text="ZIP or postal code."
-    )
-    address_zip_check = StripeEnumField(
-        enum=enums.CardCheckResult,
-        blank=True,
-        default="",
-        help_text="If `address_zip` was provided, results of the check.",
-    )
-    brand = StripeEnumField(enum=enums.CardBrand, help_text="Card brand.")
-    country = models.CharField(
-        max_length=2,
-        default="",
-        blank=True,
-        help_text="Two-letter ISO code representing the country of the card.",
-    )
-    customer = StripeForeignKey(
-        "Customer", on_delete=models.SET_NULL, null=True, related_name="legacy_cards"
-    )
-    cvc_check = StripeEnumField(
-        enum=enums.CardCheckResult,
-        default="",
-        blank=True,
-        help_text="If a CVC was provided, results of the check.",
-    )
-    default_for_currency = models.BooleanField(
-        null=True,
-        help_text=(
-            "Whether this external account (Card) is the default account for "
-            "its currency."
-        ),
-    )
-    dynamic_last4 = models.CharField(
-        max_length=4,
-        default="",
-        blank=True,
-        help_text=(
-            "(For tokenized numbers only.) The last four digits of the device "
-            "account number."
-        ),
-    )
-    exp_month = models.IntegerField(help_text="Card expiration month.")
-    exp_year = models.IntegerField(help_text="Card expiration year.")
-    fingerprint = models.CharField(
-        default="",
-        blank=True,
-        max_length=16,
-        help_text="Uniquely identifies this particular card number.",
-    )
-    funding = StripeEnumField(
-        enum=enums.CardFundingType, help_text="Card funding type."
-    )
-    last4 = models.CharField(max_length=4, help_text="Last four digits of Card number.")
-    name = models.TextField(
-        max_length=5000, default="", blank=True, help_text="Cardholder name."
-    )
-    tokenization_method = StripeEnumField(
-        enum=enums.CardTokenizationMethod,
-        default="",
-        blank=True,
-        help_text="If the card number is tokenized, this is the method that was used.",
-    )
+
+    @property
+    def account(self) -> Optional["Account"]:
+        id = get_id_from_stripe_data(self.stripe_data.get("source"))
+        return Account.objects.get(id=id)
+
+    @property
+    def brand(self) -> enums.CardBrand:
+        type = self.stripe_data["brand"]
+        return enums.CardBrand(type)
+
+    @property
+    def country(self) -> str:
+        return self.stripe_data.get("country", "")
+
+    @property
+    def customer(self) -> Optional["Customer"]:
+        customer_id = get_id_from_stripe_data(self.stripe_data.get("customer"))
+        if customer_id:
+            return Customer.objects.get(id=customer_id)
+
+    @property
+    def exp_month(self) -> int:
+        return self.stripe_data["exp_month"]
+
+    @property
+    def exp_year(self) -> int:
+        return self.stripe_data["exp_year"]
+
+    @property
+    def fingerprint(self) -> str:
+        return self.stripe_data.get("fingerprint", "")
+
+    @property
+    def funding(self) -> enums.CardFundingType:
+        type = self.stripe_data["funding"]
+        return enums.CardFundingType(type)
+
+    @property
+    def last4(self) -> str:
+        return self.stripe_data.get("last4", "")
+
+    @property
+    def name(self) -> str:
+        return self.stripe_data.get("name", "")
 
     def __str__(self):
         default = False
         # prefer to show it by customer format if present
-        if self.customer:
-            default_source = self.customer.default_source
-            default_payment_method = self.customer.default_payment_method
+        customer = self.customer
+        if customer:
+            default_source = customer.default_source
+            default_payment_method = customer.default_payment_method
 
             if (default_payment_method and self.id == default_payment_method.id) or (
                 default_source and self.id == default_source.id
@@ -672,23 +580,23 @@ class Source(StripeModel):
     Stripe documentation: https://stripe.com/docs/api?lang=python#sources
     """
 
-    amount = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Amount (as decimal) associated with the source. "
-            "This is the amount for which the source will be chargeable once ready. "
-            "Required for `single_use` sources."
-        ),
-    )
-    client_secret = models.CharField(
-        max_length=255,
-        help_text=(
-            "The client secret of the source. "
-            "Used for client-side retrieval using a publishable key."
-        ),
-    )
-    currency = StripeCurrencyCodeField(default="", blank=True)
+    @property
+    def amount(self) -> int:
+        return self.stripe_data.get("amount")
+
+    @property
+    def client_secret(self) -> str:
+        return self.stripe_data.get("client_secret", "")
+
+    @property
+    def currency(self) -> str:
+        return self.stripe_data.get("currency", "")
+
+    @property
+    def flow(self) -> enums.SourceFlow:
+        flow_type = self.stripe_data.get("flow", "")
+        return enums.SourceFlow[flow_type]
+
     flow = StripeEnumField(
         enum=enums.SourceFlow, help_text="The authentication flow of the source."
     )
@@ -843,57 +751,6 @@ class SourceTransaction(StripeModel):
     stripe_class = stripe.SourceTransaction
     stripe_dashboard_item_name = "source_transactions"
 
-    description = None
-    metadata = None
-    type = enums.SourceType.ach_credit_transfer
-
-    ach_credit_transfer = JSONField(
-        help_text="The data corresponding to the ach_credit_transfer type."
-    )
-    amount = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Amount (as decimal) associated with the ACH Credit Transfer. "
-            "This is the amount your customer has sent for which the source will be chargeable once ready. "
-        ),
-    )
-    currency = StripeCurrencyCodeField()
-
-    # did not use CharField because no idea about possible max-length
-    customer_data = JSONField(
-        null=True,
-        blank=True,
-        help_text="Customer defined string used to initiate the ACH Credit Transfer.",
-    )
-    # source cannot be null but we are allowing this because the order of webhooks is not deterministic
-    source = StripeForeignKey(
-        "Source",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
-    status = StripeEnumField(
-        enum=enums.SourceTransactionStatus,
-        help_text="The status of the ACH Credit Transfer. Only `chargeable` sources can be used "
-        "to create a charge.",
-    )
-
-    def __str__(self):
-        return f"Source Transaction status={self.status}, source={self.source.id}"
-
-    def get_stripe_dashboard_url(self) -> str:
-        """Get the stripe dashboard url for this object."""
-        if (
-            not self.stripe_dashboard_item_name
-            or not self.id
-            or not self.source
-            or not self.source.id
-        ):
-            return ""
-        else:
-            return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
-
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         """
@@ -914,6 +771,23 @@ class SourceTransaction(StripeModel):
         return stripe.Source.list_source_transactions(
             source, api_key=api_key, **kwargs
         ).auto_paging_iter()
+
+    @property
+    def amount(self) -> int:
+        return self.stripe_data.get("amount")
+
+    @property
+    def currency(self) -> str:
+        return self.stripe_data.get("currency", "")
+
+    @property
+    def source(self) -> Optional[Source]:
+        source_id = get_id_from_stripe_data(self.stripe_data.get("source"))
+        return Source.objects.get(id=source_id)
+
+    @property
+    def status(self) -> str:
+        return self.stripe_data.get("status", "")
 
     def api_retrieve(self, api_key=None, stripe_account=None):
         """
@@ -936,6 +810,18 @@ class SourceTransaction(StripeModel):
             if source_trx.id == self.id:
                 return source_trx
 
+    def get_stripe_dashboard_url(self) -> str:
+        """Get the stripe dashboard url for this object."""
+        if (
+            not self.stripe_dashboard_item_name
+            or not self.id
+            or not self.source
+            or not self.source.id
+        ):
+            return ""
+        else:
+            return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
+
 
 class PaymentMethod(StripeModel):
     """
@@ -947,223 +833,33 @@ class PaymentMethod(StripeModel):
     """
 
     stripe_class = stripe.PaymentMethod
-    description = None
 
-    billing_details = JSONField(
-        help_text=(
-            "Billing information associated with the PaymentMethod that may be used or "
-            "required by particular types of payment methods."
-        )
-    )
-    customer = StripeForeignKey(
-        "Customer",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="payment_methods",
-        help_text=(
-            "Customer to which this PaymentMethod is saved. "
-            "This will not be set when the PaymentMethod has "
-            "not been saved to a Customer."
-        ),
-    )
-    type = StripeEnumField(
-        enum=enums.PaymentMethodType,
-        help_text="The type of the PaymentMethod.",
-    )
-    acss_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `acss_debit`",
-    )
-    affirm = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `affirm`",
-    )
-    afterpay_clearpay = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Additional information for payment methods of type `afterpay_clearpay`"
-        ),
-    )
-    alipay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `alipay`",
-    )
-    au_becs_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `au_becs_debit`",
-    )
-    bacs_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `bacs_debit`",
-    )
-    bancontact = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `bancontact`",
-    )
-    blik = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `blik`",
-    )
-    boleto = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `boleto`",
-    )
-    card = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `card`",
-    )
-    card_present = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `card_present`",
-    )
-    customer_balance = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Additional information for payment methods of type `customer_balance`"
-        ),
-    )
-    eps = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `eps`",
-    )
-    fpx = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `fpx`",
-    )
-    giropay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `giropay`",
-    )
-    grabpay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `grabpay`",
-    )
-    ideal = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `ideal`",
-    )
-    interac_present = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Additional information for payment methods of type `interac_present`"
-        ),
-    )
-    klarna = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `klarna`",
-    )
-    konbini = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `konbini`",
-    )
-    link = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `link`",
-    )
-    oxxo = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `oxxo`",
-    )
-    p24 = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `p24`",
-    )
-    paynow = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `paynow`",
-    )
-    pix = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `pix`",
-    )
-    promptpay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `promptpay`",
-    )
-    sepa_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `sepa_debit`",
-    )
-    sofort = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `sofort`",
-    )
-    us_bank_account = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Additional information for payment methods of type `us_bank_account`"
-        ),
-    )
-    wechat_pay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `wechat_pay`",
-    )
+    @property
+    def customer(self) -> Optional["Customer"]:
+        customer_id = get_id_from_stripe_data(self.stripe_data.get("customer"))
+        if customer_id:
+            return Customer.objects.get(id=customer_id)
+
+    @property
+    def type(self) -> enums.PaymentMethodType:
+        type = self.stripe_data["type"]
+        return getattr(enums.PaymentMethodType, type)
 
     @property
     def last4(self):
-        pm_data = getattr(self, self.type, {})
-        return pm_data.get("last4", "Unknown")
+        payment_method_data = self.stripe_data.get(self.type, {})
+        return payment_method_data.get("last4", "")
 
     def __str__(self):
-        if self.customer:
-            return f"{enums.PaymentMethodType.humanize(self.type)} ending in {self.last4} for {self.customer}"
-        return (
-            f"{enums.PaymentMethodType.humanize(self.type)} ending in {self.last4} is not associated with any"
-            " customer"
-        )
+        humanized = enums.PaymentMethodType.humanize(self.type)
+        if self.last4:
+            return f"{humanized} ending in {self.last4}"
+        return humanized
 
     def get_stripe_dashboard_url(self) -> str:
         if self.customer:
             return self.customer.get_stripe_dashboard_url()
         return ""
-
-    def _attach_objects_hook(
-        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
-    ):
-        customer = None
-        # "customer" key could be like "cus_6lsBvm5rJ0zyHc" or {"id": "cus_6lsBvm5rJ0zyHc"}
-        customer_id = get_id_from_stripe_data(data.get("customer"))
-
-        if current_ids is None or customer_id not in current_ids:
-            customer = cls._stripe_object_to_customer(
-                target_cls=Customer, data=data, current_ids=current_ids, api_key=api_key
-            )
-
-        if customer:
-            self.customer = customer
-        else:
-            self.customer = None
 
     @classmethod
     def attach(
