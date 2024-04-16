@@ -742,12 +742,6 @@ class SourceRedirectStatus(Enum):
     failed = _("Failed")
 
 
-class SourceTransactionStatus(Enum):
-    pending = _("Pending")
-    succeeded = _("Succeeded")
-    chargeable = _("Chargeable")
-    failed = _("Failed")
-
 
 class SubscriptionScheduleEndBehavior(Enum):
     release = _("Release")
