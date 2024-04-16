@@ -25,6 +25,7 @@ Invoke like so:
     7) To only sync Stripe Accounts and Charges for sk_test_XXX and sk_test_YYY API keys:
         python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY
 """
+
 import typing
 
 from django.apps import apps
@@ -542,9 +543,7 @@ class Command(BaseCommand):
             "stripe_version": djstripe_settings.STRIPE_API_VERSION,
         }
 
-        if type in (enums.AccountType.custom, enums.AccountType.express) and isinstance(
-            instance, models.Account
-        ):
+        if type in ("custom", "express") and isinstance(instance, models.Account):
             # fetch all Card and BankAccount objects associated with the instance
             items = models.Account.stripe_class.list_external_accounts(
                 **kwargs
