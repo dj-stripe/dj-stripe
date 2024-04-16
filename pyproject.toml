@@ -6,7 +6,6 @@ license = "MIT"
 authors = [
     "Alexander Kavanaugh <alex@kavdev.io>",
     "Jerome Leclanche <jerome@leclan.ch>",
-    "Arnav Choudhury <arnav13@gmail.com>",
 ]
 readme = "docs/README.md"
 homepage = "https://dj-stripe.dev"
