@@ -1,13 +1,14 @@
 """
 dj-stripe Sync Method Tests.
 """
+
 import contextlib
 from copy import deepcopy
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 
 from djstripe.models import Customer
 from djstripe.sync import sync_subscriber

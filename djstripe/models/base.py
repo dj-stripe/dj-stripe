@@ -5,9 +5,7 @@ from typing import Dict, List, Optional, Type
 from stripe.stripe_object import StripeObject
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
-from stripe.api_resources.abstract.api_resource import APIResource
-from stripe.error import InvalidRequestError
-from stripe.util import convert_to_stripe_object
+from stripe import APIResource, InvalidRequestError, convert_to_stripe_object
 
 from ..exceptions import ImpossibleAPIRequest
 from ..fields import (

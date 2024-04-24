@@ -1,13 +1,14 @@
 """
 Module for all dj-stripe Admin app forms
 """
+
 from typing import Optional
 from urllib.parse import urljoin
 
 from django import forms
 from django.contrib.admin import helpers
 from django.urls import reverse
-from stripe.error import AuthenticationError, InvalidRequestError, PermissionError
+from stripe import AuthenticationError, InvalidRequestError, PermissionError
 
 from djstripe import enums, models, utils
 from djstripe.settings import djstripe_settings

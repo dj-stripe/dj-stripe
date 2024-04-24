@@ -1,6 +1,7 @@
 """
 dj-stripe Subscription Model Tests.
 """
+
 from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import PropertyMock, patch
@@ -10,7 +11,7 @@ import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Product, Subscription
