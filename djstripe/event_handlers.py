@@ -13,6 +13,7 @@ NOTE:
     re-retrieve the object you wish to process.
 
 """
+
 import logging
 from enum import Enum
 
@@ -338,7 +339,6 @@ def other_object_webhook_handler(event):
         "file": models.File,
         "invoice": models.Invoice,
         "invoiceitem": models.InvoiceItem,
-        "order": models.Order,
         "payment_intent": models.PaymentIntent,
         "payout": models.Payout,
         "plan": models.Plan,

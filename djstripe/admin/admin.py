@@ -1,6 +1,7 @@
 """
 Django Administration interface definitions
 """
+
 from typing import Any, Dict
 
 from django.contrib import admin
@@ -299,20 +300,6 @@ class FileLinkAdmin(StripeModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("file")
-
-
-@admin.register(models.Order)
-class OrderAdmin(StripeModelAdmin):
-    list_display = (
-        "amount_total",
-        "customer",
-        "status",
-    )
-    list_filter = (
-        "customer",
-        "status",
-    )
-    list_select_related = ("customer", "payment_intent")
 
 
 @admin.register(models.PaymentIntent)
