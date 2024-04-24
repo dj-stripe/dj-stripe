@@ -3117,6 +3117,3 @@ class TestTransferEvents(EventTestCase):
 
     #     event = self._create_event(FAKE_EVENT_TRANSFER_DELETED)
     #     event.invoke_webhook_handlers()
-
-    #     with self.assertRaises(Transfer.DoesNotExist):
-    #         Transfer.objects.get(id=FAKE_TRANSFER["id"])
