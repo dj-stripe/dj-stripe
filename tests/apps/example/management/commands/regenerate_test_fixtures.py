@@ -437,10 +437,6 @@ class Command(BaseCommand):
             created, obj = self.get_or_create_stripe_card(
                 old_obj=old_obj, readonly_fields=readonly_fields
             )
-        elif issubclass(model_class, djstripe.models.Source):
-            created, obj = self.get_or_create_stripe_source(
-                old_obj=old_obj, readonly_fields=readonly_fields
-            )
         elif issubclass(model_class, djstripe.models.Invoice):
             created, obj = self.get_or_create_stripe_invoice(
                 old_obj=old_obj, writable_fields=["metadata"]

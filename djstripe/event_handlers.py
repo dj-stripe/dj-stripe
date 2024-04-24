@@ -266,32 +266,6 @@ def dispute_webhook_handler(event):
         _handle_crud_like_event(target_cls=models.Dispute, event=event)
 
 
-@webhooks.handler("source")
-def source_webhook_handler(event):
-    """Handle updates to Source objects
-    - charge: https://stripe.com/docs/api/charges
-    """
-    # will recieve all events of the type source.X.Y so
-    # need to ensure the data object is related to Source Object
-    target_object_type = event.data.get("object", {}).get("object", {})
-
-    if target_object_type == "source":
-        _handle_crud_like_event(target_cls=models.Source, event=event)
-
-
-@webhooks.handler("source.transaction")
-def source_transaction_webhook_handler(event):
-    """Handle updates to Source objects
-    - charge: https://stripe.com/docs/api/charges
-    """
-    # will recieve all events of the type source.transaction.Y so
-    # need to ensure the data object is related to SourceTransaction Object
-    target_object_type = event.data.get("object", {}).get("object", {})
-
-    if target_object_type == "source_transaction":
-        _handle_crud_like_event(target_cls=models.SourceTransaction, event=event)
-
-
 @webhooks.handler(
     "checkout",
     "coupon",
@@ -441,10 +415,8 @@ def _handle_crud_like_event(
         if event.parts[:2] == ["account", "external_account"] and stripe_account:
             kwargs["account"] = models.Account._get_or_retrieve(id=stripe_account)
 
-        # Stripe doesn't allow direct retrieval of Discount and SourceTransaction Objects
-        # indirect retrieval via Source will not work as SourceTransaction will not have a source attached in
-        # source.transaction.created event
-        if target_cls not in (models.Discount, models.SourceTransaction):
+        # Stripe doesn't allow direct retrieval of Discount Objects
+        if target_cls not in (models.Discount,):
             data = target_cls(**kwargs).api_retrieve(
                 stripe_account=stripe_account, api_key=event.default_api_key
             )

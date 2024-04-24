@@ -516,31 +516,6 @@ class RefundAdmin(StripeModelAdmin):
         return super().get_queryset(request).select_related("charge")
 
 
-@admin.register(models.Source)
-class SourceAdmin(StripeModelAdmin):
-    list_display = ("customer", "type", "status", "amount", "currency", "usage", "flow")
-    list_filter = ("type", "status", "usage", "flow")
-
-    def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("customer", "customer__subscriber")
-        )
-
-
-@admin.register(models.SourceTransaction)
-class SourceTransactionAdmin(StripeModelAdmin):
-    list_display = ("status", "amount", "currency")
-    list_filter = (
-        "status",
-        "source__id",
-        "source__customer",
-        "source__customer__subscriber",
-    )
-    list_select_related = ("source", "source__customer", "source__customer__subscriber")
-
-
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
     list_display = ("customer", "type", "billing_details")
