@@ -1,6 +1,7 @@
 """
 Django Administration Inline interface definitions
 """
+
 from django.contrib import admin
 
 from djstripe import models

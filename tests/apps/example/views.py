@@ -44,9 +44,9 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
 
         # to initialise Stripe.js on the front end
-        context[
-            "STRIPE_PUBLIC_KEY"
-        ] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        context["STRIPE_PUBLIC_KEY"] = (
+            djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        )
 
         success_url = self.request.build_absolute_uri(
             reverse("djstripe_example:success")
@@ -173,9 +173,9 @@ class PurchaseSubscriptionView(FormView):
                 "(or use the dj-stripe webhooks)"
             )
 
-        context[
-            "STRIPE_PUBLIC_KEY"
-        ] = djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        context["STRIPE_PUBLIC_KEY"] = (
+            djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+        )
 
         return context
 

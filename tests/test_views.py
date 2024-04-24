@@ -1,6 +1,7 @@
 """
 dj-stripe Views Tests.
 """
+
 from copy import deepcopy
 
 import pytest

@@ -1,6 +1,7 @@
 """
 dj-stripe Account Tests.
 """
+
 from copy import deepcopy
 from unittest.mock import call, patch
 

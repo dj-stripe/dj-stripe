@@ -1,6 +1,7 @@
 """
 dj-stripe TaxRate Model Tests.
 """
+
 from copy import deepcopy
 from decimal import Decimal
 

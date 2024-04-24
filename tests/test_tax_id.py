@@ -1,6 +1,7 @@
 """
 dj-stripe TaxId model tests
 """
+
 from copy import deepcopy
 from unittest.mock import PropertyMock, patch
 

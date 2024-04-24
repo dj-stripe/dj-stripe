@@ -1,6 +1,7 @@
 """
 dj-stripe - Views related to the djstripe app.
 """
+
 import logging
 
 from django.http import HttpResponse, HttpResponseBadRequest

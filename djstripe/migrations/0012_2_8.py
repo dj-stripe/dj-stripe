@@ -305,7 +305,11 @@ class Migration(migrations.Migration):
             name="tolerance",
             field=models.PositiveSmallIntegerField(
                 default=300,
-                help_text="Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you're doing.",
+                help_text=(
+                    "Controls the milliseconds tolerance which wards against replay"
+                    " attacks. Leave this to its default value unless you know what"
+                    " you're doing."
+                ),
             ),
         ),
         migrations.AlterField(

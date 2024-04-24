@@ -1,6 +1,7 @@
 """
 sync_customer command.
 """
+
 from django.core.management.base import BaseCommand
 
 from ...settings import djstripe_settings

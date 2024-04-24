@@ -3,6 +3,7 @@ signals are sent for each event Stripe sends to the app
 
 Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 """
+
 from django.dispatch import Signal
 
 # providing_args=["instance", "api_key"]

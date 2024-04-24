@@ -1,6 +1,7 @@
 """
 dj-stripe Custom Field Definitions
 """
+
 import decimal
 
 from django.conf import SettingsReference, settings

@@ -63,7 +63,10 @@ class WebhookEndpoint(StripeModel):
         help_text="A UUID specific to dj-stripe generated for the endpoint",
     )
     djstripe_tolerance = models.PositiveSmallIntegerField(
-        help_text="Controls the milliseconds tolerance which wards against replay attacks. Leave this to its default value unless you know what you're doing.",
+        help_text=(
+            "Controls the milliseconds tolerance which wards against replay attacks."
+            " Leave this to its default value unless you know what you're doing."
+        ),
         default=stripe.Webhook.DEFAULT_TOLERANCE,
     )
 

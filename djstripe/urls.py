@@ -7,6 +7,7 @@ Wire this into the root URLConf this way::
     # url can be changed
     # Call to 'djstripe.urls' and 'namespace' must stay as is
 """
+
 from django.urls import path, re_path
 
 from . import views

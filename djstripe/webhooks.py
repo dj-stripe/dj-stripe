@@ -15,6 +15,7 @@ There is also a "global registry" which is just a list of processors (as defined
 
 NOTE: global processors are called before other processors.
 """
+
 import functools
 import itertools
 from collections import defaultdict

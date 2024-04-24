@@ -1,6 +1,7 @@
 """
 dj-stripe File model tests
 """
+
 from copy import deepcopy
 from unittest.mock import ANY, call, patch
 

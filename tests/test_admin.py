@@ -1,6 +1,7 @@
 """
 dj-stripe Admin Tests.
 """
+
 from copy import deepcopy
 from typing import Sequence
 

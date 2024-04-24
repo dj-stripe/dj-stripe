@@ -1,6 +1,7 @@
 """
 dj-stripe Dispute model tests
 """
+
 from copy import deepcopy
 from unittest.mock import patch
 
