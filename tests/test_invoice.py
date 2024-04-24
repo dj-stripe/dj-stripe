@@ -1,6 +1,7 @@
 """
 dj-stripe Invoice Model Tests.
 """
+
 from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import call, patch
@@ -9,7 +10,7 @@ import pytest
 import stripe
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 
 from djstripe.enums import InvoiceStatus
 from djstripe.models import Invoice, Plan, Subscription, UpcomingInvoice
@@ -1449,9 +1450,9 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
     ):
         fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
-        fake_upcoming_invoice_data["lines"]["data"][0][
-            "subscription"
-        ] = FAKE_SUBSCRIPTION["id"]
+        fake_upcoming_invoice_data["lines"]["data"][0]["subscription"] = (
+            FAKE_SUBSCRIPTION["id"]
+        )
         invoice_upcoming_mock.return_value = fake_upcoming_invoice_data
 
         fake_subscription_item_data = deepcopy(FAKE_SUBSCRIPTION_ITEM)
@@ -1579,9 +1580,9 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
     ):
         fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
-        fake_upcoming_invoice_data["lines"]["data"][0][
-            "subscription"
-        ] = FAKE_SUBSCRIPTION["id"]
+        fake_upcoming_invoice_data["lines"]["data"][0]["subscription"] = (
+            FAKE_SUBSCRIPTION["id"]
+        )
         invoice_upcoming_mock.return_value = fake_upcoming_invoice_data
 
         fake_subscription_item_data = deepcopy(FAKE_SUBSCRIPTION_ITEM)
@@ -1680,21 +1681,21 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         customer_retrieve_mock,
     ):
         fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
-        fake_upcoming_invoice_data[
-            "subscription"
-        ] = FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
+        fake_upcoming_invoice_data["subscription"] = (
+            FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
+        )
         invoice_upcoming_mock.return_value = fake_upcoming_invoice_data
 
         fake_invoice_data = deepcopy(FAKE_INVOICE)
         fake_invoice_data["subscription"] = FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE[
             "id"
         ]
-        fake_invoice_data["lines"]["data"][0][
-            "subscription"
-        ] = FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
-        fake_invoice_data["lines"]["data"][0]["discounts"][0][
-            "subscription"
-        ] = FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
+        fake_invoice_data["lines"]["data"][0]["subscription"] = (
+            FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
+        )
+        fake_invoice_data["lines"]["data"][0]["discounts"][0]["subscription"] = (
+            FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
+        )
         invoice_retrieve_mock.return_value = fake_invoice_data
 
         fake_subscription_item_data = deepcopy(FAKE_SUBSCRIPTION_ITEM)

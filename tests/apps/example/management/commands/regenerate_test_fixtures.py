@@ -1,10 +1,8 @@
 import json
 from copy import deepcopy
 
-import stripe.api_resources
-import stripe.stripe_object
 from django.core.management import BaseCommand
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError, ListObject, StripeObject
 
 import djstripe.models
 import tests
@@ -796,7 +794,7 @@ class Command(BaseCommand):
             except KeyError:
                 continue
 
-            if isinstance(new_val, stripe.api_resources.ListObject):
+            if isinstance(new_val, ListObject):
                 # recursively process nested lists
                 for n, (old_val_item, new_val_item) in enumerate(
                     zip(old_val.get("data", []), new_val.data)
@@ -807,7 +805,7 @@ class Command(BaseCommand):
                         object_sideeffect_fields=object_sideeffect_fields,
                         common_sideeffect_fields=common_sideeffect_fields,
                     )
-            elif isinstance(new_val, stripe.stripe_object.StripeObject):
+            elif isinstance(new_val, StripeObject):
                 # recursively process nested objects
                 new_obj[f] = self.preserve_old_sideeffect_values(
                     old_obj=old_val,

@@ -1,6 +1,7 @@
 """
 Customer Model Tests.
 """
+
 import decimal
 from copy import deepcopy
 from unittest.mock import ANY, call, patch
@@ -8,7 +9,7 @@ from unittest.mock import ANY, call, patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
 from django.utils import timezone
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 
 from djstripe.exceptions import MultipleSubscriptionException
 from djstripe.models import (
@@ -225,9 +226,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self, card_retrieve_mock, customer_retrieve_mock, card_get_or_create_mock
     ):
         fake_customer = deepcopy(FAKE_CUSTOMER_II)
-        fake_customer["id"] = fake_customer["sources"]["data"][0][
-            "customer"
-        ] = "cus_test_sync_non_local_card"
+        fake_customer["id"] = fake_customer["sources"]["data"][0]["customer"] = (
+            "cus_test_sync_non_local_card"
+        )
         fake_customer["default_source"]["id"] = fake_customer["sources"]["data"][0][
             "id"
         ] = "card_cus_test_sync_non_local_card"
@@ -349,9 +350,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         Customer.objects.all().delete()
         PaymentMethod.objects.all().delete()
         customer_fake = deepcopy(FAKE_CUSTOMER)
-        customer_fake["invoice_settings"][
-            "default_payment_method"
-        ] = FAKE_PAYMENT_METHOD_I["id"]
+        customer_fake["invoice_settings"]["default_payment_method"] = (
+            FAKE_PAYMENT_METHOD_I["id"]
+        )
         customer_retrieve_mock.return_value = customer_fake
 
         customer = Customer.sync_from_stripe_data(customer_fake)
@@ -382,9 +383,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         PaymentMethod.objects.all().delete()
 
         customer_fake = deepcopy(FAKE_CUSTOMER)
-        customer_fake["invoice_settings"][
-            "default_payment_method"
-        ] = FAKE_PAYMENT_METHOD_I["id"]
+        customer_fake["invoice_settings"]["default_payment_method"] = (
+            FAKE_PAYMENT_METHOD_I["id"]
+        )
         customer_retrieve_mock.return_value = customer_fake
 
         customer = Customer.sync_from_stripe_data(customer_fake)
@@ -2020,9 +2021,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
     ):
         fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
-        fake_upcoming_invoice_data["lines"]["data"][0][
-            "subscription"
-        ] = FAKE_SUBSCRIPTION["id"]
+        fake_upcoming_invoice_data["lines"]["data"][0]["subscription"] = (
+            FAKE_SUBSCRIPTION["id"]
+        )
         invoice_upcoming_mock.return_value = fake_upcoming_invoice_data
 
         fake_subscription_item_data = deepcopy(FAKE_SUBSCRIPTION_ITEM)
@@ -2447,9 +2448,9 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         balance_transaction_retrieve_mock,
     ):
         fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
-        fake_upcoming_invoice_data["lines"]["data"][0][
-            "subscription"
-        ] = FAKE_SUBSCRIPTION["id"]
+        fake_upcoming_invoice_data["lines"]["data"][0]["subscription"] = (
+            FAKE_SUBSCRIPTION["id"]
+        )
         invoice_upcoming_mock.return_value = fake_upcoming_invoice_data
 
         fake_subscription_item_data = deepcopy(FAKE_SUBSCRIPTION_ITEM)

@@ -152,7 +152,7 @@ def webhook_event_callback(event, api_key):
 ```py
 # tasks.py
 from djstripe.models import WebhookEventTrigger
-from stripe.error import StripeError
+from stripe import StripeError
 
 @shared_task(bind=True)
 def process_webhook_event(self, pk, api_key):

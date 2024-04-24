@@ -8,7 +8,7 @@ from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 
 from .. import enums, webhooks
 from ..exceptions import MultipleSubscriptionException
