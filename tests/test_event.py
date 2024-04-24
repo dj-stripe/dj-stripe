@@ -1,12 +1,13 @@
 """
 dj-stripe Event Model Tests.
 """
+
 from copy import deepcopy
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from stripe.error import StripeError
+from stripe import StripeError
 
 from djstripe.models import Event, Transfer
 from djstripe.settings import djstripe_settings

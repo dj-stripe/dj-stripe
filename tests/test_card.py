@@ -1,6 +1,7 @@
 """
 dj-stripe Card Model Tests.
 """
+
 from copy import deepcopy
 from unittest.mock import ANY, patch
 
@@ -8,7 +9,7 @@ import pytest
 import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 
 from djstripe import enums
 from djstripe.exceptions import StripeObjectManipulationException

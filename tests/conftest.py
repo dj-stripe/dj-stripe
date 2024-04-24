@@ -1,13 +1,14 @@
 """
 Module for creating re-usable fixtures to be used across the test suite
 """
+
 import os
 
 import pytest
 import stripe
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from stripe.error import InvalidRequestError, PermissionError
+from stripe import InvalidRequestError, PermissionError
 
 from djstripe import models
 
