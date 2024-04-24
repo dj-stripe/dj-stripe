@@ -20,7 +20,7 @@ from djstripe.models import Event
 from djstripe.settings import djstripe_settings
 
 from . import models
-from .enums import PayoutType, SourceType
+from .enums import PayoutType
 from .signals import WEBHOOK_SIGNALS
 from .utils import convert_tstamp
 
@@ -164,35 +164,6 @@ def handle_customer_discount_event(sender, event, **kwargs):
     customer.coupon_start = convert_tstamp(coupon_start)
     customer.coupon_end = convert_tstamp(coupon_end)
     customer.save()
-
-
-@djstripe_receiver("customer.source.created")
-@djstripe_receiver("customer.source.deleted")
-@djstripe_receiver("customer.source.expiring")
-@djstripe_receiver("customer.source.updated")
-def handle_customer_source_event(sender, event, **kwargs):
-    """Handle updates to customer payment-source objects.
-
-    Docs: https://stripe.com/docs/api/sources
-    """
-    customer_data = event.data.get("object", {})
-    source_type = customer_data.get("object", {})
-
-    # TODO: handle other types of sources
-    #  (https://stripe.com/docs/api/sources)
-    if source_type == SourceType.card:
-        if event.verb.endswith("deleted") and customer_data:
-            # On customer.source.deleted, we do not delete the object,
-            # we merely unlink it.
-            # customer = Customer.objects.get(id=customer_data["id"])
-            # NOTE: for now, customer.sources still points to Card
-            # Also, https://github.com/dj-stripe/dj-stripe/issues/576
-            models.Card.objects.filter(id=customer_data.get("id", "")).delete()
-            models.DjstripePaymentMethod.objects.filter(
-                id=customer_data.get("id", "")
-            ).delete()
-        else:
-            _handle_crud_like_event(target_cls=models.Card, event=event)
 
 
 @djstripe_receiver("customer.subscription.created")
@@ -348,37 +319,6 @@ def handle_charge_dispute_event(sender, event, **kwargs):
 
     if target_object_type == "dispute":
         _handle_crud_like_event(target_cls=models.Dispute, event=event)
-
-
-@djstripe_receiver("source.canceled")
-@djstripe_receiver("source.chargeable")
-@djstripe_receiver("source.failed")
-@djstripe_receiver("source.mandate_notification")
-@djstripe_receiver("source.refund_attributes_required")
-def handle_source_event(sender, event, **kwargs):
-    """Handle updates to Source objects
-    - charge: https://stripe.com/docs/api/charges
-    """
-    # will recieve all events of the type source.X.Y so
-    # need to ensure the data object is related to Source Object
-    target_object_type = event.data.get("object", {}).get("object", {})
-
-    if target_object_type == "source":
-        _handle_crud_like_event(target_cls=models.Source, event=event)
-
-
-@djstripe_receiver("source.transaction.created")
-@djstripe_receiver("source.transaction.updated")
-def handle_source_transaction_event(sender, event, **kwargs):
-    """Handle updates to Source objects
-    - charge: https://stripe.com/docs/api/charges
-    """
-    # will recieve all events of the type source.transaction.Y so
-    # need to ensure the data object is related to SourceTransaction Object
-    target_object_type = event.data.get("object", {}).get("object", {})
-
-    if target_object_type == "source_transaction":
-        _handle_crud_like_event(target_cls=models.SourceTransaction, event=event)
 
 
 @djstripe_receiver("checkout.session.async_payment_failed")
@@ -585,10 +525,8 @@ def _handle_crud_like_event(
         if event.parts[:2] == ["account", "external_account"] and stripe_account:
             kwargs["account"] = models.Account._get_or_retrieve(id=stripe_account)
 
-        # Stripe doesn't allow direct retrieval of Discount and SourceTransaction Objects
-        # indirect retrieval via Source will not work as SourceTransaction will not have a source attached in
-        # source.transaction.created event
-        if target_cls not in (models.Discount, models.SourceTransaction):
+        # Stripe doesn't allow direct retrieval of Discount Objects
+        if target_cls not in (models.Discount,):
             data = target_cls(**kwargs).api_retrieve(
                 stripe_account=stripe_account, api_key=event.default_api_key
             )

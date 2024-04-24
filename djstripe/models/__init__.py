@@ -45,14 +45,7 @@ from .core import (
     SetupIntent,
 )
 from .identity import VerificationReport, VerificationSession
-from .payment_methods import (
-    BankAccount,
-    Card,
-    DjstripePaymentMethod,
-    PaymentMethod,
-    Source,
-    SourceTransaction,
-)
+from .payment_methods import BankAccount, Card, DjstripePaymentMethod, PaymentMethod
 from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEndpoint, WebhookEventTrigger
 
@@ -91,8 +84,6 @@ __all__ = [
     "ScheduledQueryRun",
     "SetupIntent",
     "Session",
-    "Source",
-    "SourceTransaction",
     "StripeModel",
     "Subscription",
     "SubscriptionItem",

@@ -116,8 +116,6 @@ class Command(BaseCommand):
             if model in (
                 models.ApplicationFeeRefund,
                 models.LineItem,
-                models.Source,
-                models.SourceTransaction,
                 models.TransferReversal,
                 models.TaxId,
                 models.UsageRecordSummary,
@@ -353,46 +351,6 @@ class Command(BaseCommand):
         return all_list_kwargs
 
     @staticmethod
-    def get_list_kwargs_src(default_list_kwargs):
-        """Returns sequence of kwargs to sync Sources for
-        all Stripe Accounts"""
-
-        all_list_kwargs = []
-        for def_kwarg in default_list_kwargs:
-            stripe_account = def_kwarg.get("stripe_account")
-            api_key = def_kwarg.get("api_key")
-            for stripe_customer in models.Customer.api_list(
-                stripe_account=stripe_account, api_key=api_key
-            ):
-                all_list_kwargs.append({"id": stripe_customer.id, **def_kwarg})
-
-        return all_list_kwargs
-
-    @staticmethod
-    def get_list_kwargs_srctxn(default_list_kwargs):
-        """Returns sequence of kwargs to sync SourceTransactions for
-        all Stripe Accounts"""
-
-        all_list_kwargs = []
-        for def_kwarg in default_list_kwargs:
-            stripe_account = def_kwarg.get("stripe_account")
-            api_key = def_kwarg.get("api_key")
-            for stripe_customer in models.Customer.api_list(
-                stripe_account=stripe_account, api_key=api_key
-            ):
-                all_list_kwargs.append({"id": stripe_customer.id, **def_kwarg})
-
-                # fetch all Sources associated with the current customer instance
-                for source in models.Customer.stripe_class.list_sources(
-                    id=stripe_customer.id,
-                    stripe_account=stripe_account,
-                    object="source",
-                    api_key=api_key,
-                ).auto_paging_iter():
-                    all_list_kwargs.append({"id": source.id, **def_kwarg})
-        return all_list_kwargs
-
-    @staticmethod
     def get_list_kwargs_si(default_list_kwargs):
         """Returns sequence of kwargs to sync Subscription Items for
         all Stripe Accounts"""
@@ -505,8 +463,6 @@ class Command(BaseCommand):
         list_kwarg_handlers_dict = {
             "LineItem": self.get_list_kwargs_il,
             "PaymentMethod": self.get_list_kwargs_pm,
-            "Source": self.get_list_kwargs_src,
-            "SourceTransaction": self.get_list_kwargs_srctxn,
             "SubscriptionItem": self.get_list_kwargs_si,
             "CountrySpec": self.get_list_kwargs_country_spec,
             "TransferReversal": self.get_list_kwargs_trr,

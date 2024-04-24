@@ -24,9 +24,9 @@ from djstripe.models import (
     Plan,
     Price,
     Product,
-    Source,
     Subscription,
 )
+from djstripe.models.payment_methods import Source
 from djstripe.settings import djstripe_settings
 
 from . import (
