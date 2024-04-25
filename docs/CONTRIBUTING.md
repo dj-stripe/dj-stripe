@@ -59,10 +59,6 @@ If you are proposing a feature:
 -   Remember that this is a volunteer-driven project, and that contributions are welcome
     :)
 
-### Contributor Discussion
-
-For questions regarding contributions to dj-stripe, another avenue is our Discord
-channel at <https://discord.gg/UJY8fcc>.
 
 ## Get Started!
 
