@@ -268,7 +268,7 @@ processing.</p>
 </code></pre></div>
 <div class="highlight"><pre><span></span><code><span class="c1"># tasks.py</span>
 <span class="kn">from</span> <span class="nn">djstripe.models</span> <span class="kn">import</span> <span class="n">WebhookEventTrigger</span>
-<span class="kn">from</span> <span class="nn">stripe.error</span> <span class="kn">import</span> <span class="n">StripeError</span>
+<span class="kn">from</span> <span class="nn">stripe</span> <span class="kn">import</span> <span class="n">StripeError</span>
 
 <span class="nd">@shared_task</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">process_webhook_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pk</span><span class="p">,</span> <span class="n">api_key</span><span class="p">):</span>
