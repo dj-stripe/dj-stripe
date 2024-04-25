@@ -520,8 +520,7 @@ class RefundAdmin(StripeModelAdmin):
 
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
-    list_display = ("customer", "type", "billing_details")
-    list_filter = ("type",)
+    list_display = ("customer",)
     search_fields = ("customer__id",)
 
     def get_queryset(self, request):
