@@ -40,9 +40,6 @@ First, you need to find which version has that old migration. For example:
 PostgreSQL is available
 System check identified some issues:
 
-WARNINGS:
-?: (djstripe.W001) The Stripe API version has a non-default value of '2024-04-10'. Non-default versions are not explicitly supported, and may cause compatibility issues.
-	HINT: Use the dj-stripe default for Stripe API version: 2020-08-27
 Operations to perform:
   Apply all migrations: djstripe
 Running migrations:
