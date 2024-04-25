@@ -59,6 +59,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../upgrade_dj_stripe/">Upgrading Smooth and Carefully</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">Release notes</span></p>
               <ul>
@@ -117,7 +119,7 @@
               <ul class="current">
                   <li class="toctree-l1"><a class="reference internal" href="../enums/">Enumerations</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Managers</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Managers</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#djstripe.managers">managers</a>
     </li>
@@ -206,7 +208,6 @@
 
 
 
-
 <h3 id="djstripe.managers.ChargeManager" class="doc doc-heading">
           <code>djstripe.managers.ChargeManager</code>
 
@@ -282,7 +283,6 @@
 
 
 
-
 <h5 id="djstripe.managers.ChargeManager.during" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">ChargeManager</span><span class="o">.</span><span class="n">during</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span></code>
 
@@ -294,7 +294,7 @@
       <p>Return Charges between a certain time range based on <code>created</code>.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">86</span>
 <span class="normal">87</span>
 <span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">during</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">):</span>
@@ -311,7 +311,6 @@
 
 
 
-
 <h5 id="djstripe.managers.ChargeManager.paid_totals_for" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">ChargeManager</span><span class="o">.</span><span class="n">paid_totals_for</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span></code>
 
@@ -324,7 +323,7 @@
 fee and refunded annotated.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 90</span>
 <span class="normal"> 91</span>
 <span class="normal"> 92</span>
@@ -362,10 +361,10 @@ fee and refunded annotated.</p>
 
   </div>
 
+
 </div>
 
 <div class="doc doc-object doc-class">
-
 
 
 
@@ -397,10 +396,10 @@ fee and refunded annotated.</p>
 
   </div>
 
+
 </div>
 
 <div class="doc doc-object doc-class">
-
 
 
 
@@ -543,7 +542,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.SubscriptionManager.active" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">SubscriptionManager</span><span class="o">.</span><span class="n">active</span><span class="p">()</span></code>
 
@@ -555,7 +553,7 @@ fee and refunded annotated.</p>
       <p>Return active Subscriptions.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">active</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -572,7 +570,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.SubscriptionManager.active_plan_summary" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">SubscriptionManager</span><span class="o">.</span><span class="n">active_plan_summary</span><span class="p">()</span></code>
 
@@ -584,7 +581,7 @@ fee and refunded annotated.</p>
       <p>Return active Subscriptions with plan counts annotated.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span>
@@ -605,7 +602,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.SubscriptionManager.canceled" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">SubscriptionManager</span><span class="o">.</span><span class="n">canceled</span><span class="p">()</span></code>
 
@@ -617,7 +613,7 @@ fee and refunded annotated.</p>
       <p>Return canceled Subscriptions.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">canceled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -634,7 +630,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.SubscriptionManager.canceled_during" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">SubscriptionManager</span><span class="o">.</span><span class="n">canceled_during</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span></code>
 
@@ -646,7 +641,7 @@ fee and refunded annotated.</p>
       <p>Return Subscriptions canceled during a certain time range.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">canceled_during</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">):</span>
@@ -663,7 +658,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.SubscriptionManager.canceled_plan_summary_for" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">SubscriptionManager</span><span class="o">.</span><span class="n">canceled_plan_summary_for</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span></code>
 
@@ -675,7 +669,7 @@ fee and refunded annotated.</p>
       <p>Return Subscriptions canceled within a time range with plan counts annotated.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">51</span>
 <span class="normal">52</span>
 <span class="normal">53</span>
@@ -706,7 +700,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.SubscriptionManager.churn" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">SubscriptionManager</span><span class="o">.</span><span class="n">churn</span><span class="p">()</span></code>
 
@@ -718,7 +711,7 @@ fee and refunded annotated.</p>
       <p>Return number of canceled Subscriptions divided by active Subscriptions.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">62</span>
 <span class="normal">63</span>
 <span class="normal">64</span>
@@ -739,7 +732,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.SubscriptionManager.started_during" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">SubscriptionManager</span><span class="o">.</span><span class="n">started_during</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span></code>
 
@@ -751,7 +743,7 @@ fee and refunded annotated.</p>
       <p>Return Subscriptions not in trial status between a certain time range.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
@@ -772,7 +764,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.SubscriptionManager.started_plan_summary_for" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">SubscriptionManager</span><span class="o">.</span><span class="n">started_plan_summary_for</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span></code>
 
@@ -784,7 +775,7 @@ fee and refunded annotated.</p>
       <p>Return started_during Subscriptions with plan counts annotated.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
@@ -812,10 +803,10 @@ fee and refunded annotated.</p>
 
   </div>
 
+
 </div>
 
 <div class="doc doc-object doc-class">
-
 
 
 
@@ -878,7 +869,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.TransferManager.during" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">TransferManager</span><span class="o">.</span><span class="n">during</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span></code>
 
@@ -890,7 +880,7 @@ fee and refunded annotated.</p>
       <p>Return Transfers between a certain time range.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">72</span>
 <span class="normal">73</span>
 <span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">during</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">):</span>
@@ -907,7 +897,6 @@ fee and refunded annotated.</p>
 
 
 
-
 <h5 id="djstripe.managers.TransferManager.paid_totals_for" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">managers</span><span class="o">.</span><span class="n">TransferManager</span><span class="o">.</span><span class="n">paid_totals_for</span><span class="p">(</span><span class="n">year</span><span class="p">,</span> <span class="n">month</span><span class="p">)</span></code>
 
@@ -919,7 +908,7 @@ fee and refunded annotated.</p>
       <p>Return paid Transfers during a certain year, month with total amounts annotated.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/managers.py</code></summary>
+            <summary>Source code in <code>djstripe/managers.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">76</span>
 <span class="normal">77</span>
 <span class="normal">78</span>
@@ -940,6 +929,7 @@ fee and refunded annotated.</p>
   </div>
 
   </div>
+
 
 </div>
 

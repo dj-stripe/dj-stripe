@@ -59,6 +59,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../upgrade_dj_stripe/">Upgrading Smooth and Carefully</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">Release notes</span></p>
               <ul>
@@ -123,7 +125,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../settings/">Settings</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Utilities</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Utilities</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#djstripe.utils">utils</a>
     </li>
@@ -145,21 +147,21 @@
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#djstripe.utils-functions">Functions</a>
         <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.clear_expired_idempotency_keys">clear_expired_idempotency_keys()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.clear_expired_idempotency_keys">clear_expired_idempotency_keys</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.convert_tstamp">convert_tstamp()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.convert_tstamp">convert_tstamp</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_friendly_currency_amount">get_friendly_currency_amount()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_friendly_currency_amount">get_friendly_currency_amount</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_id_from_stripe_data">get_id_from_stripe_data()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_id_from_stripe_data">get_id_from_stripe_data</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_model">get_model()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_model">get_model</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_queryset">get_queryset()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_queryset">get_queryset</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_supported_currency_choices">get_supported_currency_choices()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_supported_currency_choices">get_supported_currency_choices</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_timezone_utc">get_timezone_utc()</a>
+    <li class="toctree-l3"><a class="reference internal" href="#djstripe.utils.get_timezone_utc">get_timezone_utc</a>
     </li>
         </ul>
     </li>
@@ -217,7 +219,6 @@
 
 
 
-
 <h3 id="djstripe.utils.CURRENCY_SIGILS" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">CURRENCY_SIGILS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;CAD&#39;</span><span class="p">:</span> <span class="s1">&#39;$&#39;</span><span class="p">,</span> <span class="s1">&#39;EUR&#39;</span><span class="p">:</span> <span class="s1">&#39;€&#39;</span><span class="p">,</span> <span class="s1">&#39;GBP&#39;</span><span class="p">:</span> <span class="s1">&#39;£&#39;</span><span class="p">,</span> <span class="s1">&#39;USD&#39;</span><span class="p">:</span> <span class="s1">&#39;$&#39;</span><span class="p">}</span></code>
   
@@ -235,7 +236,6 @@
 <h2 id="djstripe.utils-classes">Classes</h2>
 
 <div class="doc doc-object doc-class">
-
 
 
 
@@ -317,7 +317,6 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
 
 
-
 <h5 id="djstripe.utils.QuerySetMock.delete" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">QuerySetMock</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></code>
 
@@ -327,7 +326,7 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
   <div class="doc doc-contents ">
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">82</span>
 <span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="mi">0</span>
@@ -339,7 +338,6 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
 
 <div class="doc doc-object doc-function">
-
 
 
 
@@ -356,7 +354,7 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
   <div class="doc doc-contents ">
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">69</span>
 <span class="normal">70</span>
 <span class="normal">71</span>
@@ -379,7 +377,6 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
 
 
-
 <h5 id="djstripe.utils.QuerySetMock.update" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">QuerySetMock</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></code>
 
@@ -389,7 +386,7 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
   <div class="doc doc-contents ">
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">79</span>
 <span class="normal">80</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">return</span> <span class="mi">0</span>
@@ -405,12 +402,12 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
   </div>
 
+
 </div>
 <h2 id="djstripe.utils-functions">Functions</h2>
 
 
 <div class="doc doc-object doc-function">
-
 
 
 
@@ -423,7 +420,7 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
   <div class="doc doc-contents ">
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">31</span>
 <span class="normal">32</span>
 <span class="normal">33</span>
@@ -444,7 +441,6 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
 
 
-
 <h3 id="djstripe.utils.convert_tstamp" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">convert_tstamp</span><span class="p">(</span><span class="n">response</span><span class="p">)</span></code>
 
@@ -456,7 +452,7 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
       <p>Convert a Stripe API timestamp response (unix epoch) to a native datetime.</p>
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
 <span class="normal">39</span>
 <span class="normal">40</span>
@@ -491,7 +487,6 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
 
 
-
 <h3 id="djstripe.utils.get_friendly_currency_amount" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_friendly_currency_amount</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">currency</span><span class="p">)</span></code>
 
@@ -501,7 +496,7 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
   <div class="doc doc-contents ">
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">56</span>
 <span class="normal">57</span>
 <span class="normal">58</span>
@@ -522,7 +517,6 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
 
 
-
 <h3 id="djstripe.utils.get_id_from_stripe_data" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_id_from_stripe_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></code>
 
@@ -534,7 +528,7 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
       <p>Extract stripe id from stripe field data</p>
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">86</span>
 <span class="normal">87</span>
 <span class="normal">88</span>
@@ -571,7 +565,6 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
 
 
-
 <h3 id="djstripe.utils.get_model" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_model</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span></code>
 
@@ -581,7 +574,7 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
   <div class="doc doc-contents ">
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
@@ -602,7 +595,6 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
 
 
-
 <h3 id="djstripe.utils.get_queryset" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">(</span><span class="n">pks</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span></code>
 
@@ -612,7 +604,7 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
   <div class="doc doc-contents ">
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">get_queryset</span><span class="p">(</span><span class="n">pks</span><span class="p">,</span> <span class="n">model_name</span><span class="p">):</span>
@@ -626,7 +618,6 @@ Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
 
 
 <div class="doc doc-object doc-function">
-
 
 
 
@@ -644,7 +635,7 @@ supported currencies.</p>
 :type api_key: str</p>
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
 <span class="normal">16</span>
 <span class="normal">17</span>
@@ -683,7 +674,6 @@ supported currencies.</p>
 
 
 
-
 <h3 id="djstripe.utils.get_timezone_utc" class="doc doc-heading">
           <code class="highlight language-python"><span class="n">djstripe</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">get_timezone_utc</span><span class="p">()</span></code>
 
@@ -697,7 +687,7 @@ supported currencies.</p>
 datetime.timezone class</p>
 
           <details class="quote">
-            <summary> <code>djstripe/utils.py</code></summary>
+            <summary>Source code in <code>djstripe/utils.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>

@@ -59,6 +59,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../upgrade_dj_stripe/">Upgrading Smooth and Carefully</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">Release notes</span></p>
               <ul>
@@ -81,13 +83,11 @@
               </ul>
               <p class="caption"><span class="caption-text">Usage</span></p>
               <ul class="current">
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Using Stripe Webhooks</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Using Stripe Webhooks</a>
     <ul class="current">
     <li class="toctree-l2"><a class="reference internal" href="#setting-up-a-new-webhook-endpoint-in-dj-stripe">Setting up a new webhook endpoint in dj-stripe</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#extra-configuration">Extra configuration</a>
-    </li>
-    <li class="toctree-l2"><a class="reference internal" href="#advanced-usage">Advanced usage</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#official-documentation">Official documentation</a>
     </li>
@@ -183,55 +183,6 @@ by brute-force.</p>
 <li>[<code>DJSTRIPE_WEBHOOK_VALIDATION</code>][djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION]</li>
 <li><a class="autorefs autorefs-internal" href="../../reference/settings/#djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK"><code>DJSTRIPE_WEBHOOK_EVENT_CALLBACK</code></a></li>
 </ul>
-<h2 id="advanced-usage">Advanced usage</h2>
-<p>dj-stripe comes with native support for webhooks as event listeners.</p>
-<p>Events allow you to do things like sending an email to a customer when
-his payment has
-<a href="https://stripe.com/docs/receipts#failed-payment-alerts">failed</a>
-or trial period is ending.</p>
-<p>This is how you use them:</p>
-<div class="highlight"><pre><span></span><code>    <span class="kn">from</span> <span class="nn">djstripe</span> <span class="kn">import</span> <span class="n">webhooks</span>
-
-    <span class="nd">@webhooks</span><span class="o">.</span><span class="n">handler</span><span class="p">(</span><span class="s2">&quot;customer.subscription.trial_will_end&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">my_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;We should probably notify the user at this point&quot;</span><span class="p">)</span>
-</code></pre></div>
-<p>You can handle all events related to customers like this:</p>
-<div class="highlight"><pre><span></span><code>    <span class="kn">from</span> <span class="nn">djstripe</span> <span class="kn">import</span> <span class="n">webhooks</span>
-
-    <span class="nd">@webhooks</span><span class="o">.</span><span class="n">handler</span><span class="p">(</span><span class="s2">&quot;customer&quot;</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">my_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;We should probably notify the user at this point&quot;</span><span class="p">)</span>
-</code></pre></div>
-<p>You can also handle different events in the same handler:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">djstripe</span> <span class="kn">import</span> <span class="n">webhooks</span>
-
-<span class="nd">@webhooks</span><span class="o">.</span><span class="n">handler</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">my_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Triggered webhook &quot;</span> <span class="o">+</span> <span class="n">event</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
-</code></pre></div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>In order to get registrations picked up, you need to put them in a
-module that is imported like models.py or make sure you import it manually.</p>
-</div>
-<p>Webhook event creation and processing is now wrapped in a
-<code>transaction.atomic()</code> block to better handle webhook errors. This will
-prevent any additional database modifications you may perform in your
-custom handler from being committed should something in the webhook
-processing chain fail. You can also take advantage of Django's
-<code>transaction.on_commit()</code> function to only perform an action if the
-transaction successfully commits (meaning the Event processing worked):</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">transaction</span>
-<span class="kn">from</span> <span class="nn">djstripe</span> <span class="kn">import</span> <span class="n">webhooks</span>
-
-<span class="k">def</span> <span class="nf">do_something</span><span class="p">():</span>
-    <span class="k">pass</span>  <span class="c1"># send a mail, invalidate a cache, fire off a Celery task, etc.</span>
-
-<span class="nd">@webhooks</span><span class="o">.</span><span class="n">handler</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">,</span> <span class="s2">&quot;product&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">my_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="n">transaction</span><span class="o">.</span><span class="n">on_commit</span><span class="p">(</span><span class="n">do_something</span><span class="p">)</span>
-</code></pre></div>
 <h2 id="official-documentation">Official documentation</h2>
 <p>Stripe docs for types of Events:
 <a href="https://stripe.com/docs/api/events/types">https://stripe.com/docs/api/events/types</a></p>

@@ -59,6 +59,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../upgrade_dj_stripe/">Upgrading Smooth and Carefully</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">Release notes</span></p>
               <ul>
@@ -95,7 +97,7 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../using_stripe_checkout/">Using Stripe Checkout</a>
                   </li>
-                  <li class="toctree-l1 current"><a class="reference internal current" href="./">Using with Docker</a>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Using with Docker</a>
     <ul class="current">
     </ul>
                   </li>
@@ -202,7 +204,7 @@
 <span class="w">  </span><span class="nt">stripe</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stripe/stripe-cli:v1.7.4</span>
 <span class="w">    </span><span class="c1"># In case Stripe CLI is used to perform local webhook testing, set x-djstripe-webhook-secret custom header to output of Stripe CLI.</span>
-<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;listen&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-H&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;x-djstripe-webhook-secret:</span><span class="nv"> </span><span class="s">whsec_******&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--forward-to&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;http://web:8000/djstripe/webhook/&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;listen&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;-H&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;x-djstripe-webhook-secret:</span><span class="nv"> </span><span class="s">whsec_******&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;--forward-to&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;http://web:8000/djstripe/webhook/&lt;uuid&gt;/&quot;</span><span class="p p-Indicator">]</span>
 <span class="w">    </span><span class="nt">depends_on</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">web</span>
 <span class="w">    </span><span class="nt">environment</span><span class="p">:</span>

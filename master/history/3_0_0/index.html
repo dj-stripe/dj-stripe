@@ -59,6 +59,8 @@
                   </li>
                   <li class="toctree-l1"><a class="reference internal" href="../../stripe_elements_js/">Integrating Stripe Elements</a>
                   </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../upgrade_dj_stripe/">Upgrading Smooth and Carefully</a>
+                  </li>
               </ul>
               <p class="caption"><span class="caption-text">Release notes</span></p>
               <ul>
@@ -188,6 +190,7 @@ We retain model fields for useful foreign keys and other frequently-used fields.
 <li>Added missing model fields to Checkout Sessions.</li>
 <li><code>LineItem</code> instances can also get synced using the <code>djstripe_sync_models</code> management command.</li>
 <li>Updated <code>check_stripe_api_key</code> django system check to not be a blocker for new dj-stripe users by raising Info warnings on the console. If the Stripe keys were not defined in the settings file, the <code>Critical</code> warning was preventing users to add them directly from the admin as mentioned in the docs. This was creating a chicken-egg situation where one could only add keys in the admin before they were defined in settings.</li>
+<li>Added <code>paused</code> as a valid status to the SubscriptionStatus enum</li>
 </ul>
               
             </div>
