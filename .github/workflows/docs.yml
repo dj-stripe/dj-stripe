@@ -38,7 +38,7 @@ jobs:
         run: git fetch origin gh-pages --depth=1
 
       - name: Deploy (and Update) docs for the branch, ${GITHUB_REF##*/}
-        run: poetry run mike deploy --push --rebase "${GITHUB_REF##*/}"
+        run: poetry run mike deploy --push "${GITHUB_REF##*/}"
 
       - name: Set default docs to ${LATEST_STABLE_BRANCH##*/}
-        run: poetry run mike set-default --push --rebase "${LATEST_STABLE_BRANCH##*/}"
+        run: poetry run mike set-default --push "${LATEST_STABLE_BRANCH##*/}"
