@@ -1,6 +1,7 @@
 """
 dj-stripe Settings Tests.
 """
+
 from unittest.mock import patch
 
 import stripe

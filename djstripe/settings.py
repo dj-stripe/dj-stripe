@@ -1,6 +1,7 @@
 """
 dj-stripe settings
 """
+
 import stripe
 from django.apps import apps as django_apps
 from django.conf import settings

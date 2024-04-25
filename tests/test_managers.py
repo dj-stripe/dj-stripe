@@ -1,6 +1,7 @@
 """
 dj-stripe Model Manager Tests.
 """
+
 import datetime
 import decimal
 from copy import deepcopy

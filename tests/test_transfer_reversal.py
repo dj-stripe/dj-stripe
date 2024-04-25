@@ -1,6 +1,7 @@
 """
 dj-stripe TransferReversal model tests
 """
+
 from copy import deepcopy
 from unittest.mock import PropertyMock, patch
 

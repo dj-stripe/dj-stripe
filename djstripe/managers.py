@@ -1,6 +1,7 @@
 """
 dj-stripe model managers
 """
+
 import decimal
 
 from django.db import models

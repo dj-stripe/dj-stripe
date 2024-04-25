@@ -742,7 +742,6 @@ class SourceRedirectStatus(Enum):
     failed = _("Failed")
 
 
-
 class SubscriptionScheduleEndBehavior(Enum):
     release = _("Release")
     cancel = _("Cancel")

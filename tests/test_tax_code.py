@@ -1,6 +1,7 @@
 """
 dj-stripe TaxCode Model Tests.
 """
+
 from copy import deepcopy
 
 import pytest

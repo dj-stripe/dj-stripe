@@ -1,6 +1,7 @@
 """
 dj-stripe StripeModel Model Tests.
 """
+
 from unittest.mock import MagicMock, patch
 
 import pytest
