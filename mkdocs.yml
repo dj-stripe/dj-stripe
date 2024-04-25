@@ -52,6 +52,7 @@ nav:
       - Managing Stripe API Keys: api_keys.md
       - A note on Stripe API Versions: api_versions.md
       - Integrating Stripe Elements: stripe_elements_js.md
+      - Upgrading Smooth and Carefully: upgrade_dj_stripe.md
   - Release notes:
       - dj-stripe 2.7 release notes: history/2_7_0.md
       - dj-stripe 2.6 release notes: history/2_6_0.md
