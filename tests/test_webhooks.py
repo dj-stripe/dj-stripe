@@ -1,6 +1,7 @@
 """
 dj-stripe Webhook Tests.
 """
+
 import json
 import warnings
 from copy import deepcopy

@@ -1,6 +1,7 @@
 """
 dj-stripe UsageRecordSummary model tests
 """
+
 from copy import deepcopy
 from unittest.mock import PropertyMock, call, patch
 

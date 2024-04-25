@@ -1,6 +1,7 @@
 """
 dj-stripe Charge Model Tests.
 """
+
 from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import call, create_autospec, patch

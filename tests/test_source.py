@@ -1,6 +1,7 @@
 """
 dj-stripe Source Model Tests.
 """
+
 import sys
 from copy import deepcopy
 from unittest.mock import patch

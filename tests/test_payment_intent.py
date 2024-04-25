@@ -1,6 +1,7 @@
 """
 dj-stripe PaymentIntent Model Tests.
 """
+
 from copy import deepcopy
 from unittest.mock import patch
 

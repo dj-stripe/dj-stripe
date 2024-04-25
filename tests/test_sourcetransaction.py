@@ -1,6 +1,7 @@
 """
 dj-stripe SourceTransaction Model Tests.
 """
+
 from copy import deepcopy
 from unittest.mock import PropertyMock, patch
 

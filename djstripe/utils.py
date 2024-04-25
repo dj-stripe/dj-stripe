@@ -1,6 +1,7 @@
 """
 Utility functions related to the djstripe app.
 """
+
 import datetime
 from typing import Optional
 
