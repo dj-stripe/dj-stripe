@@ -120,15 +120,6 @@ def check_stripe_api_version(app_configs=None, **kwargs):
         hint = "STRIPE_API_VERSION should be formatted as: YYYY-MM-DD"
         messages.append(checks.Critical(msg, hint=hint, id="djstripe.C004"))
 
-    if version != default_version:
-        msg = (
-            f"The Stripe API version has a non-default value of '{version!r}'. "
-            "Non-default versions are not explicitly supported, and may "
-            "cause compatibility issues."
-        )
-        hint = f"Use the dj-stripe default for Stripe API version: {default_version}"
-        messages.append(checks.Warning(msg, hint=hint, id="djstripe.W001"))
-
     return messages
 
 
