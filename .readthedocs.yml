@@ -13,7 +13,6 @@ mkdocs:
   configuration: mkdocs.yml
 
 python:
-  version: "3.12"
   install:
     - method: pip
       path: .
