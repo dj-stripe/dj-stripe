@@ -64,12 +64,10 @@
     <li class="toctree-l2"><a class="reference internal" href="#background">Background</a>
     </li>
     <li class="toctree-l2"><a class="reference internal" href="#how-to-do-it">How to do it?</a>
-        <ul>
-    <li class="toctree-l3"><a class="reference internal" href="#conclusion">Conclusion</a>
     </li>
-    <li class="toctree-l3"><a class="reference internal" href="#alternatives">Alternatives</a>
+    <li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a>
     </li>
-        </ul>
+    <li class="toctree-l2"><a class="reference internal" href="#alternatives">Alternatives</a>
     </li>
     </ul>
                   </li>
@@ -168,20 +166,22 @@
                 <h1 id="upgrading-dj-stripe-smooth-and-carefully">Upgrading dj-stripe Smooth and Carefully</h1>
 <h2 id="background">Background</h2>
 <p>In this article, we will share how to upgrade the <code>dj-stripe</code> package flawlessly and carefully.</p>
-<p>!! attention "Important Note"
-    Please keep in mind that <code>dj-stripe</code> always squashes the migration files.
-    Which means its migration files are completely changed, and leading to migration issues.
-    <strong>So, you can't immediately upgrade your package too far, for example, from <code>2.4.0</code> to <code>2.7.0</code> because it will cause breaking changes, especially in your database migrations.</strong></p>
+<div class="admonition attention">
+<p class="admonition-title">Important Note</p>
+<p>Please keep in mind that <code>dj-stripe</code> always squashes the migration files.
+Which means its migration files are completely changed, and leading to migration issues.
+<strong>So, you can't immediately upgrade your package too far, for example, from <code>2.4.0</code> to <code>2.7.0</code> because it will cause breaking changes, especially in your database migrations.</strong></p>
+</div>
 <h2 id="how-to-do-it">How to do it?</h2>
 <p>For example, if your <code>dj-stripe</code> version is <code>2.4.0</code> and your migration files are referring to the old version.</p>
 <p><img alt="old migration file" src="https://github.com/agusmakmun/agusmakmun.github.io/assets/7134451/d433d048-d3cf-4385-a7f6-f1890acfe206" /></p>
 <p>First, you need to find which version has that old migration. For example:</p>
 <ol>
 <li>Search for the latest version that is closest to your package version, for example: <code>2.4.0</code> to <code>2.5.0</code>.</li>
-<li>Visit this link to find it: https://github.com/dj-stripe/dj-stripe/tags</li>
+<li>Visit this link to find it: <a href="https://github.com/dj-stripe/dj-stripe/releases">https://github.com/dj-stripe/dj-stripe/releases</a></li>
 <li>Cross-check the release notes.</li>
 <li>Find which dj-stripe version is still compatible with your migration file, for example: <code>0006_2_3.py</code>.</li>
-<li>Find the last migration file of the latest version at https://github.com/dj-stripe/dj-stripe/tree/2.5.0/djstripe/migrations (for example: <code>0008_2_5.py</code>) (both files must exist; if not, it means the new version is no longer compatible with your version).</li>
+<li>Find the last migration file of the latest version at <a href="https://github.com/dj-stripe/dj-stripe/tree/2.5.0/djstripe/migrations">https://github.com/dj-stripe/dj-stripe/tree/2.5.0/djstripe/migrations</a> (for example: <code>0008_2_5.py</code>) (both files must exist; if not, it means the new version is no longer compatible with your version).</li>
 </ol>
 <table>
 <thead>
@@ -201,21 +201,18 @@
 <li>Update your <code>requirements.txt</code> file from <code>dj-stripe==2.4.0</code> to <code>dj-stripe==2.5.0</code></li>
 <li>Run the <code>manage.py migrate djstripe</code> command <em>(this command must not fail; if it does, cross-check steps 1-6).</em></li>
 </ol>
-<div class="highlight"><pre><span></span><code><span class="gp gp-VirtualEnv">(env-my-project)</span> <span class="go">➜  my-project git:(development) ✗ docker-compose -f local.yml run django python manage.py migrate djstripe</span>
-<span class="go">[+] Creating 3/0</span>
-<span class="go"> ✔ Container my-project-redis-1     Running                                                                                                                                                                                  0.0s</span>
-<span class="go"> ✔ Container my-project-mailhog-1   Running                                                                                                                                                                                  0.0s</span>
-<span class="go"> ✔ Container my-project-postgres-1  Running                                                                                                                                                                                  0.0s</span>
-<span class="go">PostgreSQL is available</span>
-<span class="go">System check identified some issues:</span>
+<div class="highlight"><pre><span></span><code>(env-my-project) ➜  my-project git:(development) ✗ docker-compose -f local.yml run django python manage.py migrate djstripe
+[+] Creating 3/0
+ ✔ Container my-project-redis-1     Running                                                                                                                                                                                  0.0s
+ ✔ Container my-project-mailhog-1   Running                                                                                                                                                                                  0.0s
+ ✔ Container my-project-postgres-1  Running                                                                                                                                                                                  0.0s
+PostgreSQL is available
+System check identified some issues:
 
-<span class="go">WARNINGS:</span>
-<span class="go">?: (djstripe.W001) The Stripe API version has a non-default value of &#39;2024-04-10&#39;. Non-default versions are not explicitly supported, and may cause compatibility issues.</span>
-<span class="go">    HINT: Use the dj-stripe default for Stripe API version: 2020-08-27</span>
-<span class="go">Operations to perform:</span>
-<span class="go">  Apply all migrations: djstripe</span>
-<span class="go">Running migrations:</span>
-<span class="go">  Applying djstripe.0008_2_5... OK</span>
+Operations to perform:
+  Apply all migrations: djstripe
+Running migrations:
+  Applying djstripe.0008_2_5... OK
 </code></pre></div>
 <ol>
 <li>And then, after migrating it, change your migration file to refer to the new version (e.g., from <code>0006_2_3</code> to <code>0008_2_5</code>).</li>
@@ -224,20 +221,20 @@
 <ol>
 <li>Repeat the same process for higher version.</li>
 </ol>
-<p>If you have an issue with the Stripe version, we can also try upgrading it in the <code>requirements.txt</code> file. \
-Check out this issue for more information: https://github.com/dj-stripe/dj-stripe/issues/1842#issuecomment-1319185657.</p>
+<p>If you have an issue with the Stripe version, we can also try upgrading it in the <code>requirements.txt</code> file.
+Check out this issue for more information: <a href="https://github.com/dj-stripe/dj-stripe/issues/1842#issuecomment-1319185657">https://github.com/dj-stripe/dj-stripe/issues/1842#issuecomment-1319185657</a>.</p>
 <div class="highlight"><pre><span></span><code>stripe&gt;=4.0.0,&lt;5.0.0  # https://github.com/dj-stripe/dj-stripe/issues/1842#issuecomment-1319185657
 </code></pre></div>
-<h3 id="conclusion">Conclusion</h3>
+<h2 id="conclusion">Conclusion</h2>
 <ol>
 <li>Find the closest version that compatible with your version <em>(for doing migration)</em>.</li>
 <li>Update the dependency in <code>requirements.txt</code> file and then deploy it.</li>
 <li>Don't forget to run the <code>python manage.py migrate djstripe</code> command.</li>
 <li>Change your migration file to refer to the new version (e.g., from <code>0006_2_3</code> to <code>0008_2_5</code>), and then deploy it.</li>
 </ol>
-<h3 id="alternatives">Alternatives</h3>
+<h2 id="alternatives">Alternatives</h2>
 <ul>
-<li>https://stackoverflow.com/a/31122841</li>
+<li><a href="https://stackoverflow.com/a/31122841">https://stackoverflow.com/a/31122841</a></li>
 </ul>
               
             </div>
