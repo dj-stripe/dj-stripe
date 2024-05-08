@@ -12,7 +12,7 @@ on:
 env:
   POETRY_VERSION: "1.2.2"
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
-  LATEST_STABLE_BRANCH: "stable/2.7"
+  LATEST_STABLE_BRANCH: "stable/2.8"
   DOCS_REPO: "dj-stripe.github.io"
   OWNER: "dj-stripe" # if you forked the repo, change this to your gh username
   SOURCE_REPO: "dj-stripe"
