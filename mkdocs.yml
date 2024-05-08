@@ -1,8 +1,7 @@
 site_name: Dj-Stripe
-site_url: https://dj-stripe.github.io/dj-stripe/
+site_url: https://dj-stripe.dev
 site_description: Django + Stripe Made Easy
 site_author: Dj-Stripe Team
-
 repo_url: https://github.com/dj-stripe/dj-stripe/
 
 theme:
@@ -38,11 +37,9 @@ plugins:
             - sys.path.insert(0, os.path.abspath("."))
             - os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.settings")
             - django.setup()
-      watch:
-        - .
       enable_inventory: true
   - mike:
-      canonical_version: "2.7"
+      canonical_version: "2.8"
 
 nav:
   - Home: README.md
@@ -54,6 +51,8 @@ nav:
       - Integrating Stripe Elements: stripe_elements_js.md
       - Upgrading Smooth and Carefully: upgrade_dj_stripe.md
   - Release notes:
+      - dj-stripe 2.9 release notes: history/2_9_0.md
+      - dj-stripe 2.8 release notes: history/2_8_0.md
       - dj-stripe 2.7 release notes: history/2_7_0.md
       - dj-stripe 2.6 release notes: history/2_6_0.md
       - dj-stripe 2.5 release notes: history/2_5_0.md
