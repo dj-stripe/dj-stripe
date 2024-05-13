@@ -31,7 +31,8 @@ jobs:
         with:
           repository: "${{ env.OWNER }}/${{ env.DOCS_REPO }}"
           path: ./${{ env.DOCS_REPO }}
-          token: ${{ secrets.GH_PAT }}  # Token needed to push site to gh-pages branch
+          # token: ${{ secrets.GH_PAT }}  # Token needed to push site to gh-pages branch
+          ssh-key: ${{ secrets.SSH_KEY }}
 
 
       - uses: ./.github/install_poetry_action
