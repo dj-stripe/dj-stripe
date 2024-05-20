@@ -20,13 +20,7 @@ from .billing import (
     UsageRecordSummary,
 )
 from .checkout import Session
-from .connect import (
-    ApplicationFee,
-    ApplicationFeeRefund,
-    CountrySpec,
-    Transfer,
-    TransferReversal,
-)
+from .connect import ApplicationFee, ApplicationFeeRefund, Transfer, TransferReversal
 from .core import (
     BalanceTransaction,
     Charge,
@@ -58,7 +52,6 @@ __all__ = [
     "BankAccount",
     "Card",
     "Charge",
-    "CountrySpec",
     "Coupon",
     "Customer",
     "Discount",

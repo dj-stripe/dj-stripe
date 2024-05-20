@@ -366,17 +366,6 @@ class Command(BaseCommand):
         return all_list_kwargs
 
     @staticmethod
-    def get_list_kwargs_country_spec(default_list_kwargs):
-        """Returns sequence of kwargs to sync Country Specs for
-        all Stripe Accounts"""
-
-        all_list_kwargs = []
-        for def_kwarg in default_list_kwargs:
-            all_list_kwargs.append({"limit": 50, **def_kwarg})
-
-        return all_list_kwargs
-
-    @staticmethod
     def get_list_kwargs_txcd(default_list_kwargs):
         """Returns sequence of kwargs to sync Tax Codes for
         all Stripe Accounts"""
@@ -464,7 +453,6 @@ class Command(BaseCommand):
             "LineItem": self.get_list_kwargs_il,
             "PaymentMethod": self.get_list_kwargs_pm,
             "SubscriptionItem": self.get_list_kwargs_si,
-            "CountrySpec": self.get_list_kwargs_country_spec,
             "TransferReversal": self.get_list_kwargs_trr,
             "ApplicationFeeRefund": self.get_list_kwargs_fee_refund,
             "TaxCode": self.get_list_kwargs_txcd,
