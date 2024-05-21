@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="27.888" height="36.156" viewBox="0 0 27.888 36.156">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_455" data-name="Rectangle 455" width="27.888" height="36.156" transform="translate(140.052 221.805)" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <rect id="Rectangle_452" data-name="Rectangle 452" width="22" height="32.667" transform="translate(145.94 221.805)" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-4">
+      <rect id="Rectangle_454" data-name="Rectangle 454" width="22" height="32.667" transform="translate(140.052 225.294)" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="Group_972" data-name="Group 972" transform="translate(-140.052 -221.805)">
+    <g id="Group_971" data-name="Group 971" clip-path="url(#clip-path)">
+      <g id="Group_965" data-name="Group 965" opacity="0.87">
+        <g id="Group_964" data-name="Group 964">
+          <g id="Group_963" data-name="Group 963" clip-path="url(#clip-path-2)">
+            <g id="Group_962" data-name="Group 962">
+              <g id="Group_961" data-name="Group 961" clip-path="url(#clip-path-2)">
+                <path id="Path_162" data-name="Path 162" d="M145.94,249.525V226.752a4.948,4.948,0,0,1,4.946-4.947h12.108a4.946,4.946,0,0,1,4.946,4.947h0v22.772a4.946,4.946,0,0,1-4.946,4.946H150.886a4.947,4.947,0,0,1-4.946-4.946" fill="#85e9fe"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+      <g id="Group_970" data-name="Group 970" opacity="0.68">
+        <g id="Group_969" data-name="Group 969">
+          <g id="Group_968" data-name="Group 968" clip-path="url(#clip-path-4)">
+            <g id="Group_967" data-name="Group 967">
+              <g id="Group_966" data-name="Group 966" clip-path="url(#clip-path-4)">
+                <path id="Path_163" data-name="Path 163" d="M140.052,252.512V230.741a5.448,5.448,0,0,1,5.448-5.447h11.1a5.448,5.448,0,0,1,5.452,5.446h0v21.771a5.448,5.448,0,0,1-5.449,5.449H145.5a5.449,5.449,0,0,1-5.448-5.449" fill="#3431bc"/>
+              </g>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
