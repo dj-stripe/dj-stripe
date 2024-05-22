@@ -204,6 +204,17 @@ class Coupon(StripeModel):
             duration = self.duration
         return f"{self.human_readable_amount} {duration}"
 
+class PromotionCode(StripeModel):
+    """
+    This is an object representing a Promotion Code.
+
+    A Promotion Code represents a customer-redeemable code for a coupon.
+    It can be used to create multiple codes for a single coupon.
+
+    Stripe documentation: https://stripe.com/docs/api/promotion_codes?lang=python
+    """
+
+    stripe_class = stripe.PromotionCode
 
 class Discount(StripeModel):
     """
