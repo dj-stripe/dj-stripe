@@ -393,10 +393,12 @@ def handle_charge_dispute_event(sender, event, **kwargs):
 @djstripe_receiver("transfer.created")
 @djstripe_receiver("transfer.reversed")
 @djstripe_receiver("transfer.updated")
+@djstripe_receiver("promotion_code.created")
+@djstripe_receiver("promotion_code.updated")
 def handle_other_event(sender, event, **kwargs):
     """
     Handle updates to checkout, coupon, file, invoice, invoiceitem, payment_intent,
-    plan, product, setup_intent, subscription_schedule, tax_rate
+    plan, product, setup_intent, subscription_schedule, tax_rate, promotion_code
     and transfer objects.
 
     Docs for:
@@ -415,6 +417,7 @@ def handle_other_event(sender, event, **kwargs):
     - subscription_schedule: https://stripe.com/docs/api/subscription_schedules
     - tax_rate: https://stripe.com/docs/api/tax_rates/
     - transfer: https://stripe.com/docs/api/transfers
+    - promotion_code: https://docs.stripe.com/api/promotion_codes
     """
 
     target_cls = {
@@ -432,6 +435,7 @@ def handle_other_event(sender, event, **kwargs):
         "setup_intent": models.SetupIntent,
         "subscription_schedule": models.SubscriptionSchedule,
         "tax_rate": models.TaxRate,
+        "promotion_code": models.PromotionCode,
     }.get(event.category)
 
     _handle_crud_like_event(target_cls=target_cls, event=event)
