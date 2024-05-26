@@ -216,37 +216,31 @@ class PromotionCode(StripeModel):
 
     stripe_class = stripe.PromotionCode
 
+    # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-code
     @property
-    def promotion_code(self):
-        return self.stripe_data.get("code")
+    def code(self) -> str:
+        return self.stripe_data["code"]
 
+    # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-active
     @property
-    def active(self):
-        return self.stripe_data.get("active")
+    def active(self) -> str:
+        return self.stripe_data["active"]
 
+    # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-created
     @property
     def created(self):
-        return self.stripe_data.get("created")
+        return self.stripe_data["created"]
 
+    # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-times_redeemed
     @property
-    def times_redeemed(self):
-        return self.stripe_data.get("times_redeemed")
+    def times_redeemed(self) -> int:
+        return self.stripe_data["times_redeemed"]
 
+    # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-max_redemptions
     @property
-    def max_redemptions(self):
+    def max_redemptions(self) -> Optional[int]:
         return self.stripe_data.get("max_redemptions")
 
-    @property
-    def coupon_percent_off(self):
-        return self.stripe_data.get("coupon", {}).get("percent_off")
-
-    @property
-    def coupon_duration(self):
-        return self.stripe_data.get("coupon", {}).get("duration")
-
-    @property
-    def coupon_duration_in_months(self):
-        return self.stripe_data.get("coupon", {}).get("duration_in_months")
 
 class Discount(StripeModel):
     """
