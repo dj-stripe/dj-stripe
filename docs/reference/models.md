@@ -39,10 +39,6 @@ short reason behind the decision in the docstring for each model.
 
 ::: djstripe.models.fraud
 
-## Orders
-
-::: djstripe.models.orders
-
 ## Sigma
 
 ::: djstripe.models.sigma
