@@ -931,6 +931,16 @@ class Migration(migrations.Migration):
                 enum=djstripe.enums.WebhookEndpointStatus, max_length=255
             ),
         ),
+        migrations.AlterField(
+            model_name="webhookendpoint",
+            name="api_version",
+            field=models.CharField(
+                blank=True,
+                default="2024-04-10",
+                help_text="The API version events are rendered as for this webhook endpoint. Defaults to the configured Stripe API Version.",
+                max_length=64,
+            ),
+        ),
         migrations.DeleteModel(
             name="Order",
         ),
