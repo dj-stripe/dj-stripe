@@ -40,7 +40,7 @@ theme:
 
     # Palette toggle for light mode
     - media: "(prefers-color-scheme: light)"
-      scheme: light 
+      scheme: light
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
@@ -94,7 +94,7 @@ plugins:
         - .
       enable_inventory: true
   - mike:
-      canonical_version: "2.7"
+      canonical_version: "2.8"
 
 nav:
   - Documentation:
@@ -104,20 +104,7 @@ nav:
       - A note on Stripe API Versions: api_versions.md
       - Upgrade dj-stripe: upgrade_dj_stripe.md
       - Integrating Stripe Elements: stripe_elements_js.md
-<<<<<<< HEAD
-  - Release notes:
-      - dj-stripe 2.7 release notes: history/2_7_0.md
-      - dj-stripe 2.6 release notes: history/2_6_0.md
-      - dj-stripe 2.5 release notes: history/2_5_0.md
-      - dj-stripe 2.4.1 release notes: history/2_4_x.md
-      - dj-stripe 2.4 release notes: history/2_4_0.md
-      - dj-stripe 2.0 ~ 2.3 release notes: history/2_x.md
-      - dj-stripe 1.x release notes: history/1_x.md
-      - dj-stripe 0.x release notes: history/0_x.md
-  - Usage:
-=======
     - Usage:
->>>>>>> b2dff48f (update mkdocs to include custom theme)
       - Using Stripe Webhooks: usage/webhooks.md
       - Local Webhook Testing: usage/local_webhook_testing.md
       - Subscribing a customer to a plan: usage/subscribing_customers.md
@@ -144,7 +131,6 @@ nav:
   - Sponsors:
     - Our Sponsors: project/sponsors.md
   - History:
-    - dj-stripe 3.0 release notes: history/3_0_0.md
     - dj-stripe 2.9 release notes: history/2_9_0.md
     - dj-stripe 2.8 release notes: history/2_8_x.md
     - dj-stripe 2.7 release notes: history/2_7_x.md
