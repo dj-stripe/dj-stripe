@@ -204,6 +204,7 @@ class Coupon(StripeModel):
             duration = self.duration
         return f"{self.human_readable_amount} {duration}"
 
+
 class PromotionCode(StripeModel):
     """
     This is an object representing a Promotion Code.

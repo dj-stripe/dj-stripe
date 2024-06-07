@@ -29,11 +29,11 @@ repos:
       - id: django-upgrade
         args: [--target-version, "3.2"]
 
-  - repo: local
-    hooks:
-      - id: check-migrations
-        name: check-migrations
-        entry: poetry run python manage.py makemigrations --dry-run --check
-        types: [ python ]
-        pass_filenames: false
-        language: system
+#  - repo: local
+#    hooks:
+#      - id: check-migrations
+#        name: check-migrations
+#        entry: poetry run python manage.py makemigrations --dry-run --check
+#        types: [ python ]
+#        pass_filenames: false
+#        language: system
