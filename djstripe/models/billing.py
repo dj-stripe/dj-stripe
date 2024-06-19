@@ -205,6 +205,7 @@ class Coupon(StripeModel):
             duration = self.duration
         return f"{self.human_readable_amount} {duration}"
 
+
 class PromotionCode(StripeModel):
     """
     This is an object representing a Promotion Code.
@@ -226,11 +227,6 @@ class PromotionCode(StripeModel):
     @property
     def active(self) -> str:
         return self.stripe_data["active"]
-
-    # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-created
-    @property
-    def created(self):
-        return self.stripe_data["created"]
 
     # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-times_redeemed
     @property
