@@ -227,11 +227,6 @@ class PromotionCode(StripeModel):
     def active(self) -> str:
         return self.stripe_data["active"]
 
-    # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-created
-    @property
-    def created(self):
-        return self.stripe_data["created"]
-
     # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-times_redeemed
     @property
     def times_redeemed(self) -> int:
