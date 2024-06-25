@@ -499,6 +499,13 @@ class ProductAdmin(StripeModelAdmin):
         return super().get_queryset(request).prefetch_related("prices")
 
 
+@admin.register(models.PromotionCode)
+class PromotionCodeAdmin(StripeModelAdmin):
+    list_display = ("code", "active", "created", "times_redeemed", "max_redemptions")
+    search_fields = ("code",)
+    list_filter = ("active", "created")
+
+
 @admin.register(models.Refund)
 class RefundAdmin(StripeModelAdmin):
     list_display = (
