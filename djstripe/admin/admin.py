@@ -96,7 +96,17 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
         return (*self.list_filter, "created", "livemode")
 
     def get_readonly_fields(self, request, obj=None):
-        return (*self.readonly_fields, "id", "djstripe_owner_account", "created")
+        excluded_properties = ["pk"]
+        properties = []
+        for name in dir(self.model):
+            if name in excluded_properties:
+                continue
+            if (
+                isinstance(getattr(self.model, name), property)
+                and name not in properties
+            ):
+                properties.append(name)
+        return list(self.readonly_fields) + properties
 
     def get_search_fields(self, request):
         return (*self.search_fields, "id")
