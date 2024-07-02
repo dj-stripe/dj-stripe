@@ -2,16 +2,17 @@
 
 ## Core contributors
 
--   [Alexander Kavanaugh](https://github.com/kavdev) (Co-maintainer)
--   [Jerome Leclanche](https://github.com/jleclanche) (Co-maintainer)
--   [Arnav Choudhury](https://github.com/arnav13081994)
+- [Alexander Kavanaugh](https://github.com/kavdev) (Co-maintainer)
+- [Jerome Leclanche](https://github.com/jleclanche) (Co-maintainer)
+- Abe Hanoka
 
 ## Former core contributors
 
--   [John Carter](https://github.com/therefromhere)
--   [Pablo Castellano](https://github.com/PabloCastellano)
--   [Daniel Greenfeld](https://github.com/pydanny)
--   [Lee Skillen](https://github.com/lskillen)
+- [Arnav Choudhury](https://github.com/arnav13081994)
+- [John Carter](https://github.com/therefromhere)
+- [Pablo Castellano](https://github.com/PabloCastellano)
+- [Daniel Greenfeld](https://github.com/pydanny)
+- [Lee Skillen](https://github.com/lskillen)
 
 ## Contributors
 
