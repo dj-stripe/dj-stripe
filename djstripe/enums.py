@@ -266,6 +266,7 @@ class BillingScheme(Enum):
 class CaptureMethod(Enum):
     automatic = _("Automatic")
     manual = _("Manual")
+    automatic_async = _("Automatic Async")
 
 
 class CardCheckResult(Enum):
