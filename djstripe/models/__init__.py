@@ -47,6 +47,11 @@ from .core import (
     SetupIntent,
 )
 from .identity import VerificationReport, VerificationSession
+from .issuing import Authorization as IssuingAuthorization
+from .issuing import Card as IssuingCard
+from .issuing import Cardholder as IssuingCardholder
+from .issuing import Dispute as IssuingDispute
+from .issuing import Transaction as IssuingTransaction
 from .payment_methods import BankAccount, Card, DjstripePaymentMethod, PaymentMethod
 from .radar import EarlyFraudWarning
 from .sigma import ScheduledQueryRun
@@ -75,6 +80,11 @@ __all__ = [
     "IdempotencyKey",
     "Invoice",
     "InvoiceItem",
+    "IssuingAuthorization",
+    "IssuingCard",
+    "IssuingCardholder",
+    "IssuingDispute",
+    "IssuingTransaction",
     "LineItem",
     "InvoiceOrLineItem",
     "Mandate",
