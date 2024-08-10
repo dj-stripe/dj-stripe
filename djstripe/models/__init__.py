@@ -46,6 +46,7 @@ from .core import (
     Refund,
     SetupIntent,
 )
+from .entitlements import ActiveEntitlement, Feature
 from .identity import VerificationReport, VerificationSession
 from .issuing import Authorization as IssuingAuthorization
 from .issuing import Card as IssuingCard
@@ -59,6 +60,7 @@ from .webhooks import WebhookEndpoint, WebhookEventTrigger
 
 __all__ = [
     "Account",
+    "ActiveEntitlement",
     "APIKey",
     "ApplicationFee",
     "ApplicationFeeRefund",
@@ -74,6 +76,7 @@ __all__ = [
     "DjstripePaymentMethod",
     "EarlyFraudWarning",
     "Event",
+    "Feature",
     "File",
     "FileLink",
     "FileUpload",
