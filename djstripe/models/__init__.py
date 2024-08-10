@@ -48,6 +48,7 @@ from .core import (
 )
 from .identity import VerificationReport, VerificationSession
 from .payment_methods import BankAccount, Card, DjstripePaymentMethod, PaymentMethod
+from .radar import EarlyFraudWarning
 from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEndpoint, WebhookEventTrigger
 
@@ -66,6 +67,7 @@ __all__ = [
     "Discount",
     "Dispute",
     "DjstripePaymentMethod",
+    "EarlyFraudWarning",
     "Event",
     "File",
     "FileLink",
