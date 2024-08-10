@@ -3,35 +3,35 @@ import stripe
 from .base import StripeModel
 
 
-class Authorization(StripeModel):
+class IssuingAuthorization(StripeModel):
     stripe_class = stripe.issuing.Authorization
 
     class Meta:
         db_table = "djstripe_issuing_authorization"
 
 
-class Card(StripeModel):
+class IssuingCard(StripeModel):
     stripe_class = stripe.issuing.Card
 
     class Meta:
         db_table = "djstripe_issuing_card"
 
 
-class Cardholder(StripeModel):
+class IssuingCardholder(StripeModel):
     stripe_class = stripe.issuing.Cardholder
 
     class Meta:
         db_table = "djstripe_issuing_cardholder"
 
 
-class Dispute(StripeModel):
+class IssuingDispute(StripeModel):
     stripe_class = stripe.issuing.Dispute
 
     class Meta:
         db_table = "djstripe_issuing_dispute"
 
 
-class Transaction(StripeModel):
+class IssuingTransaction(StripeModel):
     stripe_class = stripe.issuing.Transaction
 
     class Meta:
