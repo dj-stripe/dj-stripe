@@ -41,11 +41,13 @@ from .core import (
 )
 from .entitlements import ActiveEntitlement, Feature
 from .identity import VerificationReport, VerificationSession
-from .issuing import Authorization as IssuingAuthorization
-from .issuing import Card as IssuingCard
-from .issuing import Cardholder as IssuingCardholder
-from .issuing import Dispute as IssuingDispute
-from .issuing import Transaction as IssuingTransaction
+from .issuing import (
+    IssuingAuthorization,
+    IssuingCard,
+    IssuingCardholder,
+    IssuingDispute,
+    IssuingTransaction,
+)
 from .payment_methods import BankAccount, Card, DjstripePaymentMethod, PaymentMethod
 from .radar import EarlyFraudWarning
 from .sigma import ScheduledQueryRun
