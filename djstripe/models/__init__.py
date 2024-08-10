@@ -86,6 +86,7 @@ __all__ = [
     "Product",
     "PromotionCode",
     "Refund",
+    "Review",
     "ShippingRate",
     "ScheduledQueryRun",
     "SetupIntent",
