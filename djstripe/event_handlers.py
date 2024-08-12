@@ -328,6 +328,7 @@ def handle_charge_dispute_event(sender, event, **kwargs):
 @djstripe_receiver("coupon.created")
 @djstripe_receiver("coupon.deleted")
 @djstripe_receiver("coupon.updated")
+@djstripe_receiver("entitlements.active_entitlement_summary.updated")
 @djstripe_receiver("file.created")
 @djstripe_receiver("invoice.created")
 @djstripe_receiver("invoice.deleted")
