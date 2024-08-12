@@ -56,7 +56,7 @@ from .issuing import (
     IssuingTransaction,
 )
 from .payment_methods import BankAccount, Card, DjstripePaymentMethod, PaymentMethod
-from .radar import EarlyFraudWarning
+from .radar import EarlyFraudWarning, Review
 from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEndpoint, WebhookEventTrigger
 
