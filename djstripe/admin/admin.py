@@ -787,3 +787,13 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("djstripe_owner_account")
+
+
+@admin.register(models.Feature)
+class FeatureAdmin(StripeModelAdmin):
+    pass
+
+
+@admin.register(models.ActiveEntitlement)
+class ActiveEntitlementAdmin(StripeModelAdmin):
+    pass
