@@ -70,7 +70,7 @@
     },
     "receipt_email": "",
     "receipt_number": "",
-    "receipt_url": "https://pay.stripe.com/receipts/acct_1ItQ7cJSZQVUcJYg/ch_1JHRCWJSZQVUcJYgOCavbxio/rcpt_JvHmTnLVQmraFXrLuQq5RT9oF14tFOL",
+    "receipt_url": "https://pay.stripe.com/receipts/acct_1IKVu0Ij6g3bgR0q/ch_1JHRCWJSZQVUcJYgOCavbxio/rcpt_JvHmTnLVQmraFXrLuQq5RT9oF14tFOL",
     "refunded": false,
     "shipping": "",
     "source_transfer": null,
