@@ -8,7 +8,7 @@ from django.core import checks
 from django.db.utils import DatabaseError
 
 STRIPE_API_VERSION_PATTERN = re.compile(
-    r"(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})(; [\w=]*)?$"
+    r"(?P<year>\d{4})-(?P<month>\d{1,2})-(?P<day>\d{1,2})"
 )
 
 
@@ -117,7 +117,7 @@ def check_stripe_api_version(app_configs=None, **kwargs):
 
     if not validate_stripe_api_version(version):
         msg = f"Invalid Stripe API version: {version!r}"
-        hint = "STRIPE_API_VERSION should be formatted as: YYYY-MM-DD"
+        hint = f"STRIPE_API_VERSION should be formatted as: YYYY-MM-DD. Example: {default_version}"
         messages.append(checks.Critical(msg, hint=hint, id="djstripe.C004"))
 
     return messages
