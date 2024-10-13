@@ -2484,7 +2484,7 @@ class Refund(StripeModel):
         help_text="Reason for the refund.",
     )
     receipt_number = models.CharField(
-        max_length=9,
+        max_length=64,
         default="",
         blank=True,
         help_text=(
