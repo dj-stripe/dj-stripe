@@ -880,6 +880,7 @@ class Customer(StripeModel):
         :param livemode: Whether to get the subscriber in live or test mode.
         :type livemode: bool
         """
+        api_key = api_key or djstripe_settings.get_default_api_key(livemode=livemode)
 
         try:
             return cls.objects.get(subscriber=subscriber, livemode=livemode), False
@@ -894,6 +895,7 @@ class Customer(StripeModel):
                     idempotency_key=idempotency_key,
                     stripe_account=stripe_account,
                     livemode=livemode,
+                    api_key=api_key,
                 ),
                 True,
             )
