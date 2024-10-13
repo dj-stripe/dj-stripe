@@ -11,7 +11,6 @@ import djstripe.fields
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("djstripe", "0012_2_8"),
     ]
@@ -796,6 +795,16 @@ class Migration(migrations.Migration):
             name="reason",
             field=djstripe.fields.StripeEnumField(
                 blank=True, default="", enum=djstripe.enums.RefundReason, max_length=255
+            ),
+        ),
+        migrations.AlterField(
+            model_name="refund",
+            name="receipt_number",
+            field=models.CharField(
+                blank=True,
+                default="",
+                help_text="The transaction number that appears on email receipts sent for this charge.",
+                max_length=64,
             ),
         ),
         migrations.AlterField(
