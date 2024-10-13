@@ -1,17 +1,9 @@
-import typing as t
-
 import stripe
 from django.db import models
 
 from djstripe.settings import djstripe_settings
 
-from .. import enums
-from ..fields import (
-    StripeCurrencyCodeField,
-    StripeEnumField,
-    StripeForeignKey,
-    StripeQuantumCurrencyAmountField,
-)
+from ..fields import StripeForeignKey
 from ..models import Subscription
 from .base import StripeModel
 
@@ -34,16 +26,6 @@ class Session(StripeModel):
     ]
     stripe_class = stripe.checkout.Session
 
-    amount_total = StripeQuantumCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text="Total of all items after discounts and taxes are applied.",
-    )
-    amount_subtotal = StripeQuantumCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text="Total of all items after discounts and taxes are applied.",
-    )
     client_reference_id = models.TextField(
         max_length=5000,
         blank=True,
@@ -54,56 +36,52 @@ class Session(StripeModel):
         ),
         db_index=True,
     )
-    currency = StripeCurrencyCodeField(null=True, blank=True)
     customer = StripeForeignKey(
         "Customer",
         null=True,
         on_delete=models.SET_NULL,
         help_text="Customer this Checkout is for if one exists.",
     )
-    customer_email = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text=(
-            "If provided, this value will be used when the Customer object is created."
-        ),
-        db_index=True,
-    )
-    locale = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text=(
-            "The IETF language tag of the locale Checkout is displayed in."
-            "If blank or auto, the browser's locale is used."
-        ),
-    )
-    mode = StripeEnumField(
-        enum=enums.SessionMode,
-        blank=True,
-        help_text=(
-            "The mode of the Checkout Session, one of payment, setup, or subscription."
-        ),
-    )
-    status = StripeEnumField(
-        enum=enums.SessionStatus,
-        null=True,
-        blank=True,
-        help_text=(
-            "The status of the Checkout Session, one of open, complete, or expired."
-        ),
-    )
 
     @property
-    def url(self) -> str:
-        return self.stripe_data.get("url") or ""
+    def amount_subtotal(self) -> int | None:
+        return self.stripe_data.get("amount_subtotal")
 
     @property
-    def subscription(self) -> t.Optional["Subscription"]:
+    def amount_total(self) -> int | None:
+        return self.stripe_data.get("amount_total")
+
+    @property
+    def currency(self) -> str:
+        return self.stripe_data.get("currency", "")
+
+    @property
+    def customer_email(self) -> str:
+        return self.stripe_data.get("customer_email", "")
+
+    @property
+    def locale(self) -> str:
+        return self.stripe_data.get("locale", "")
+
+    @property
+    def mode(self) -> str:
+        return self.stripe_data.get("mode", "")
+
+    @property
+    def status(self) -> str:
+        return self.stripe_data.get("status", "")
+
+    @property
+    def subscription(self) -> Subscription | None:
         subscription = self.stripe_data.get("subscription")
         if subscription and isinstance(subscription, str):
             return Subscription.objects.filter(id=subscription).first()
 
         return None
+
+    @property
+    def url(self) -> str:
+        return self.stripe_data.get("url") or ""
 
     def _attach_objects_post_save_hook(
         self,
