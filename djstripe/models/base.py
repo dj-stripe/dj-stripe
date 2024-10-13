@@ -250,8 +250,8 @@ class StripeModel(StripeBaseModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
-        livemode = kwargs.pop("livemode", None)
-        api_key = api_key or djstripe_settings.get_default_api_key(livemode)
+        livemode = kwargs.get("livemode", djstripe_settings.STRIPE_LIVE_MODE)
+        api_key = api_key or djstripe_settings.get_default_api_key(livemode=livemode)
 
         return cls.stripe_class.create(
             api_key=api_key,
@@ -319,7 +319,7 @@ class StripeModel(StripeBaseModel):
         return data
 
     @classmethod
-    def _find_owner_account(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
+    def _find_owner_account(cls, data, api_key=None, livemode=None):
         """
         Fetches the Stripe Account (djstripe_owner_account model field)
         linked to the class, cls.
@@ -327,6 +327,10 @@ class StripeModel(StripeBaseModel):
         Otherwise uses the api_key.
         """
         from .account import Account
+
+        if livemode is None:
+            livemode = djstripe_settings.STRIPE_LIVE_MODE
+        api_key = api_key or djstripe_settings.get_default_api_key(livemode)
 
         # try to fetch by stripe_account. Also takes care of Stripe Connected Accounts
         if data:
