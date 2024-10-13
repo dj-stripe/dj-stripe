@@ -242,7 +242,7 @@ class StripeModel(StripeBaseModel):
         )
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=None, **kwargs):
         """
         Call the stripe API's create operation for this model.
 
@@ -250,6 +250,8 @@ class StripeModel(StripeBaseModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        livemode = kwargs.pop("livemode", None)
+        api_key = api_key or djstripe_settings.get_default_api_key(livemode)
 
         return cls.stripe_class.create(
             api_key=api_key,
