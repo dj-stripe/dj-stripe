@@ -227,17 +227,6 @@ class DjstripeSettings:
                 "DJSTRIPE_SUBSCRIBER_MODEL must have an email attribute."
             )
 
-        if model_name != settings.AUTH_USER_MODEL:
-            # Custom user model detected. Make sure the callback is configured.
-            func = self.get_callback_function(
-                "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK"
-            )
-            if not func:
-                raise ImproperlyConfigured(
-                    "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
-                    "if a DJSTRIPE_SUBSCRIBER_MODEL is defined."
-                )
-
         return subscriber_model
 
 
