@@ -166,7 +166,7 @@ class DjstripeSettings:
 
         return func
 
-    def _get_idempotency_key(self, object_type, action, livemode) -> str:
+    def _get_idempotency_key(self, object_type, action, livemode: bool | None) -> str:
         from .models import IdempotencyKey
 
         action = f"{object_type}:{action}"
@@ -175,7 +175,7 @@ class DjstripeSettings:
         )
         return str(idempotency_key.uuid)
 
-    def get_default_api_key(self, livemode) -> str:
+    def get_default_api_key(self, livemode: bool | None) -> str:
         """
         Returns the default API key for a value of `livemode`.
         """

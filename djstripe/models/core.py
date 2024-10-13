@@ -868,6 +868,7 @@ class Customer(StripeModel):
         subscriber,
         livemode=djstripe_settings.STRIPE_LIVE_MODE,
         stripe_account=None,
+        api_key=None,
     ):
         """
         Get or create a dj-stripe customer.
@@ -885,19 +886,28 @@ class Customer(StripeModel):
         except cls.DoesNotExist:
             action = f"create:{subscriber.pk}"
             idempotency_key = djstripe_settings.get_idempotency_key(
-                "customer", action, livemode
+                "customer", action, livemode=livemode
             )
             return (
                 cls.create(
                     subscriber,
                     idempotency_key=idempotency_key,
                     stripe_account=stripe_account,
+                    livemode=livemode,
                 ),
                 True,
             )
 
     @classmethod
-    def create(cls, subscriber, idempotency_key=None, stripe_account=None):
+    def create(
+        cls,
+        subscriber,
+        idempotency_key=None,
+        stripe_account=None,
+        livemode: bool | None = djstripe_settings.STRIPE_LIVE_MODE,
+        api_key=None,
+    ):
+        api_key = api_key or djstripe_settings.get_default_api_key(livemode=livemode)
         metadata = {}
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
         if subscriber_key not in ("", None):
@@ -916,6 +926,7 @@ class Customer(StripeModel):
             idempotency_key=idempotency_key,
             metadata=metadata,
             stripe_account=stripe_account,
+            livemode=livemode,
         )
         customer, created = cls.objects.get_or_create(
             id=stripe_customer["id"],
@@ -1128,9 +1139,9 @@ class Customer(StripeModel):
         payment_method = PaymentMethod.attach(payment_method, stripe_customer)
 
         if set_default:
-            stripe_customer["invoice_settings"][
-                "default_payment_method"
-            ] = payment_method.id
+            stripe_customer["invoice_settings"]["default_payment_method"] = (
+                payment_method.id
+            )
             stripe_customer.save()
 
             # Refresh self from the stripe customer, this should have two effects:
