@@ -927,6 +927,7 @@ class Customer(StripeModel):
             metadata=metadata,
             stripe_account=stripe_account,
             livemode=livemode,
+            api_key=api_key,
         )
         customer, created = cls.objects.get_or_create(
             id=stripe_customer["id"],

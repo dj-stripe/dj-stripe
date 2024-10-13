@@ -244,7 +244,7 @@ class StripeModel(StripeBaseModel):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
-        livemode = kwargs.get("livemode", djstripe_settings.STRIPE_LIVE_MODE)
+        livemode = kwargs.pop("livemode", djstripe_settings.STRIPE_LIVE_MODE)
         api_key = api_key or djstripe_settings.get_default_api_key(livemode=livemode)
 
         return cls.stripe_class.create(
