@@ -2682,8 +2682,6 @@ class TaxId(StripeModel):
             for which this request is being made.
         :type stripe_account: string
         """
-        nested_id = self.id
-        id = self.customer.id
         api_key = api_key or self.default_api_key
 
         # Prefer passed in stripe_account if set.
@@ -2691,8 +2689,8 @@ class TaxId(StripeModel):
             stripe_account = self._get_stripe_account_id(api_key)
 
         return stripe.Customer.retrieve_tax_id(
-            id=id,
-            nested_id=nested_id,
+            customer=self.customer.id,
+            id=self.id,
             api_key=api_key,
             expand=self.expand_fields,
             stripe_account=stripe_account,
