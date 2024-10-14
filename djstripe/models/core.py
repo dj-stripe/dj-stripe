@@ -1142,9 +1142,9 @@ class Customer(StripeModel):
         payment_method = PaymentMethod.attach(payment_method, stripe_customer)
 
         if set_default:
-            stripe_customer["invoice_settings"]["default_payment_method"] = (
-                payment_method.id
-            )
+            stripe_customer["invoice_settings"][
+                "default_payment_method"
+            ] = payment_method.id
             stripe_customer.save()
 
             # Refresh self from the stripe customer, this should have two effects:
