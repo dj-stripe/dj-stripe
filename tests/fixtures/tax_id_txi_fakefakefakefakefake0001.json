@@ -1,0 +1,15 @@
+{
+    "id": "txi_1J5NznJSZQVUcJYgGWkyTcvb",
+    "object": "tax_id",
+    "livemode": false,
+    "created": 1570435136,
+    "country": "US",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "type": "us_ein",
+    "value": "12-0982347",
+    "verification": {
+        "status": "unavailable",
+        "verified_address": null,
+        "verified_name": null
+    }
+}

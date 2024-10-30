@@ -1,6 +1,7 @@
 """
 dj-stripe Model Manager Tests.
 """
+
 import datetime
 import decimal
 from copy import deepcopy
@@ -8,27 +9,27 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.utils import timezone
 
 from djstripe.models import Charge, Customer, Plan, Subscription, Transfer
+from djstripe.utils import get_timezone_utc
 
 from . import (
     FAKE_PLAN,
     FAKE_PLAN_II,
+    FAKE_PLATFORM_ACCOUNT,
     FAKE_PRODUCT,
     FAKE_TRANSFER,
-    FAKE_TRANSFER_II,
-    FAKE_TRANSFER_III,
 )
+from .conftest import CreateAccountMixin
 
 
-class SubscriptionManagerTest(TestCase):
+class SubscriptionManagerTest(CreateAccountMixin, TestCase):
     def setUp(self):
         # create customers and current subscription records
-        period_start = datetime.datetime(2013, 4, 1, tzinfo=timezone.utc)
-        period_end = datetime.datetime(2013, 4, 30, tzinfo=timezone.utc)
+        period_start = datetime.datetime(2013, 4, 1, tzinfo=get_timezone_utc())
+        period_end = datetime.datetime(2013, 4, 30, tzinfo=get_timezone_utc())
         start = datetime.datetime(
-            2013, 1, 1, 0, 0, 1, tzinfo=timezone.utc
+            2013, 1, 1, 0, 0, 1, tzinfo=get_timezone_utc()
         )  # more realistic start
 
         with patch(
@@ -41,19 +42,19 @@ class SubscriptionManagerTest(TestCase):
 
         for i in range(10):
             user = get_user_model().objects.create_user(
-                username="patrick{0}".format(i),
-                email="patrick{0}@example.com".format(i),
+                username=f"patrick{i}",
+                email=f"patrick{i}@example.com",
             )
             customer = Customer.objects.create(
                 subscriber=user,
-                id="cus_xxxxxxxxxxxxxx{0}".format(i),
+                id=f"cus_xxxxxxxxxxxxxx{i}",
                 livemode=False,
                 balance=0,
                 delinquent=False,
             )
 
             Subscription.objects.create(
-                id="sub_xxxxxxxxxxxxxx{0}".format(i),
+                id=f"sub_xxxxxxxxxxxxxx{i}",
                 customer=customer,
                 plan=self.plan,
                 current_period_start=period_start,
@@ -64,17 +65,17 @@ class SubscriptionManagerTest(TestCase):
             )
 
         user = get_user_model().objects.create_user(
-            username="patrick{0}".format(11), email="patrick{0}@example.com".format(11)
+            username="patrick11", email="patrick11@example.com"
         )
         customer = Customer.objects.create(
             subscriber=user,
-            id="cus_xxxxxxxxxxxxxx{0}".format(11),
+            id="cus_xxxxxxxxxxxxxx11",
             livemode=False,
             balance=0,
             delinquent=False,
         )
         Subscription.objects.create(
-            id="sub_xxxxxxxxxxxxxx{0}".format(11),
+            id="sub_xxxxxxxxxxxxxx11",
             customer=customer,
             plan=self.plan,
             current_period_start=period_start,
@@ -86,17 +87,17 @@ class SubscriptionManagerTest(TestCase):
         )
 
         user = get_user_model().objects.create_user(
-            username="patrick{0}".format(12), email="patrick{0}@example.com".format(12)
+            username="patrick12", email="patrick12@example.com"
         )
         customer = Customer.objects.create(
             subscriber=user,
-            id="cus_xxxxxxxxxxxxxx{0}".format(12),
+            id="cus_xxxxxxxxxxxxxx12",
             livemode=False,
             balance=0,
             delinquent=False,
         )
         Subscription.objects.create(
-            id="sub_xxxxxxxxxxxxxx{0}".format(12),
+            id="sub_xxxxxxxxxxxxxx12",
             customer=customer,
             plan=self.plan2,
             current_period_start=period_start,
@@ -149,10 +150,31 @@ class SubscriptionManagerTest(TestCase):
 
 
 class TransferManagerTest(TestCase):
-    def test_transfer_summary(self):
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
+    )
+    def test_transfer_summary(
+        self, account_retrieve_mock, transfer__attach_object_post_save_hook_mock
+    ):
+        def FAKE_TRANSFER_III():
+            data = deepcopy(FAKE_TRANSFER)
+            data["id"] = "tr_17O4U52eZvKYlo2CmyYbDAEy"
+            data["amount"] = 19010
+            data["created"] = 1451560845
+            return data
+
+        def FAKE_TRANSFER_II():
+            data = deepcopy(FAKE_TRANSFER)
+            data["id"] = "tr_16hTzv2eZvKYlo2CWuyMmuvV"
+            data["amount"] = 2000
+            data["created"] = 1440420000
+            return data
+
         Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
-        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_II))
-        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER_III))
+        Transfer.sync_from_stripe_data(FAKE_TRANSFER_II())
+        Transfer.sync_from_stripe_data(FAKE_TRANSFER_III())
 
         self.assertEqual(Transfer.objects.during(2015, 8).count(), 2)
 
@@ -169,7 +191,7 @@ class ChargeManagerTest(TestCase):
         self.march_charge = Charge.objects.create(
             id="ch_XXXXMAR1",
             customer=customer,
-            created=datetime.datetime(2015, 3, 31, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 3, 31, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -179,7 +201,7 @@ class ChargeManagerTest(TestCase):
         self.april_charge_1 = Charge.objects.create(
             id="ch_XXXXAPR1",
             customer=customer,
-            created=datetime.datetime(2015, 4, 1, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 4, 1, tzinfo=get_timezone_utc()),
             amount=decimal.Decimal("20.15"),
             amount_refunded=0,
             currency="usd",
@@ -190,7 +212,7 @@ class ChargeManagerTest(TestCase):
         self.april_charge_2 = Charge.objects.create(
             id="ch_XXXXAPR2",
             customer=customer,
-            created=datetime.datetime(2015, 4, 18, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 4, 18, tzinfo=get_timezone_utc()),
             amount=decimal.Decimal("10.35"),
             amount_refunded=decimal.Decimal("5.35"),
             currency="usd",
@@ -201,7 +223,7 @@ class ChargeManagerTest(TestCase):
         self.april_charge_3 = Charge.objects.create(
             id="ch_XXXXAPR3",
             customer=customer,
-            created=datetime.datetime(2015, 4, 30, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 4, 30, tzinfo=get_timezone_utc()),
             amount=decimal.Decimal("100.00"),
             amount_refunded=decimal.Decimal("80.00"),
             currency="usd",
@@ -212,7 +234,7 @@ class ChargeManagerTest(TestCase):
         self.may_charge = Charge.objects.create(
             id="ch_XXXXMAY1",
             customer=customer,
-            created=datetime.datetime(2015, 5, 1, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 5, 1, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -222,7 +244,7 @@ class ChargeManagerTest(TestCase):
         self.november_charge = Charge.objects.create(
             id="ch_XXXXNOV1",
             customer=customer,
-            created=datetime.datetime(2015, 11, 16, tzinfo=timezone.utc),
+            created=datetime.datetime(2015, 11, 16, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -232,7 +254,7 @@ class ChargeManagerTest(TestCase):
         self.charge_2014 = Charge.objects.create(
             id="ch_XXXX20141",
             customer=customer,
-            created=datetime.datetime(2014, 12, 31, tzinfo=timezone.utc),
+            created=datetime.datetime(2014, 12, 31, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",
@@ -242,7 +264,7 @@ class ChargeManagerTest(TestCase):
         self.charge_2016 = Charge.objects.create(
             id="ch_XXXX20161",
             customer=customer,
-            created=datetime.datetime(2016, 1, 1, tzinfo=timezone.utc),
+            created=datetime.datetime(2016, 1, 1, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
             currency="usd",

@@ -1,18 +1,24 @@
 """
 dj-stripe APIKey model tests
 """
+
 from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
+import stripe
 from django.test import TestCase
 
+from djstripe.admin.admin import APIKeyAdminCreateForm
 from djstripe.enums import APIKeyType
+from djstripe.exceptions import InvalidStripeAPIKey
 from djstripe.models import Account, APIKey
 from djstripe.models.api import get_api_key_details_by_prefix
 
-from . import FAKE_ACCOUNT, FAKE_FILEUPLOAD_ICON, default_account
+from . import FAKE_FILEUPLOAD_ICON, FAKE_FILEUPLOAD_LOGO, FAKE_PLATFORM_ACCOUNT
+from .conftest import CreateAccountMixin
 
+pytestmark = pytest.mark.django_db
 # avoid literal api keys to prevent git secret scanners false-positives
 SK_TEST = "sk_test_" + "XXXXXXXXXXXXXXXXXXXX1234"
 SK_LIVE = "sk_live_" + "XXXXXXXXXXXXXXXXXXXX5678"
@@ -32,11 +38,11 @@ def test_get_api_key_details_by_prefix():
 
 
 def test_get_api_key_details_by_prefix_bad_values():
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidStripeAPIKey):
         get_api_key_details_by_prefix("pk_a")
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidStripeAPIKey):
         get_api_key_details_by_prefix("sk_a")
-    with pytest.raises(ValueError):
+    with pytest.raises(InvalidStripeAPIKey):
         get_api_key_details_by_prefix("rk_nope_1234")
 
 
@@ -47,12 +53,19 @@ def test_clean_public_apikey():
     assert not key.djstripe_owner_account
 
 
-@pytest.mark.django_db
-@patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_ACCOUNT))
-@patch("stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
+@patch("stripe.Account.retrieve", return_value=deepcopy(FAKE_PLATFORM_ACCOUNT))
+@patch("stripe.File.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
 def test_apikey_detect_livemode_and_type(
-    fileupload_retrieve_mock, account_retrieve_mock
+    fileupload_retrieve_mock, account_retrieve_mock, monkeypatch
 ):
+    def mock_account_retrieve(*args, **kwargs):
+        return FAKE_PLATFORM_ACCOUNT
+
+    monkeypatch.setattr(stripe.Account, "retrieve", mock_account_retrieve)
+
+    # create a Stripe Platform Account
+    FAKE_PLATFORM_ACCOUNT.create()
+
     keys_and_values = (
         (PK_TEST, False, APIKeyType.publishable),
         (RK_TEST, False, APIKeyType.restricted),
@@ -62,17 +75,23 @@ def test_apikey_detect_livemode_and_type(
         (SK_LIVE, True, APIKeyType.secret),
     )
     for secret, livemode, type in keys_and_values:
-        key = APIKey.objects.create(secret=secret)
-        assert key.livemode is livemode
-        assert key.type is type
-        key.clean()
+        # need to use ModelAdmin Form to create the APIKey instance
+        form = APIKeyAdminCreateForm(
+            data={"secret": secret},
+        )
+        form.save()
+
+        key = form.instance
+
         assert key.livemode is livemode
         assert key.type is type
 
 
-class APIKeyTest(TestCase):
+class APIKeyTest(CreateAccountMixin, TestCase):
     def setUp(self):
-        self.account = default_account()
+        # create a Stripe Platform Account
+        self.account = FAKE_PLATFORM_ACCOUNT.create()
+
         self.apikey_test = APIKey.objects.create(
             type=APIKeyType.secret,
             name="Test Secret Key",
@@ -80,6 +99,15 @@ class APIKeyTest(TestCase):
             livemode=False,
             djstripe_owner_account=self.account,
         )
+
+        self.apikey_restricted_test = APIKey.objects.create(
+            type=APIKeyType.secret,
+            name="Test Restricted Secret Key",
+            secret=RK_TEST,
+            livemode=False,
+            djstripe_owner_account=self.account,
+        )
+
         self.apikey_live = APIKey.objects.create(
             type=APIKeyType.secret,
             name="Live Secret Key",
@@ -91,12 +119,22 @@ class APIKeyTest(TestCase):
     def test_get_stripe_dashboard_url(self):
         self.assertEqual(
             self.apikey_test.get_stripe_dashboard_url(),
-            "https://dashboard.stripe.com/acct_TESTXXXXX/test/apikeys",
+            "https://dashboard.stripe.com/acct_1Fg9jUA3kq9o1aTc/test/apikeys",
         )
         self.assertEqual(
             self.apikey_live.get_stripe_dashboard_url(),
-            "https://dashboard.stripe.com/acct_TESTXXXXX/apikeys",
+            "https://dashboard.stripe.com/acct_1Fg9jUA3kq9o1aTc/apikeys",
         )
+
+    def test___str__(self):
+        assert str(self.apikey_live) == "Live Secret Key"
+        assert str(self.apikey_test) == "Test Secret Key"
+
+        # update name of apikey_live to ""
+        self.apikey_live.name = ""
+        self.apikey_live.save()
+
+        assert str(self.apikey_live) == "sk_live_...5678"
 
     def test_secret_redacted(self):
         self.assertEqual(self.apikey_test.secret_redacted, "sk_test_...1234")
@@ -112,11 +150,24 @@ class APIKeyTest(TestCase):
 
     @patch(
         "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_ACCOUNT),
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
+        autospec=True,
     )
-    @patch("stripe.FileUpload.retrieve", return_value=deepcopy(FAKE_FILEUPLOAD_ICON))
+    @patch(
+        "stripe.File.retrieve",
+        side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
+        autospec=True,
+    )
     def test_refresh_account(self, fileupload_retrieve_mock, account_retrieve_mock):
-        self.apikey_test.djstripe_owner_account = None
-        self.apikey_test.save()
-        self.apikey_test.clean()
-        assert self.apikey_test.djstripe_owner_account.id == FAKE_ACCOUNT["id"]
+        for key in (
+            "apikey_test",
+            "apikey_restricted_test",
+        ):
+            # remove djstripe_owner_account field
+            instance = getattr(self, key)
+            instance.djstripe_owner_account = None
+            instance.save()
+
+            # invoke refresh_Account()
+            instance.refresh_account()
+            assert instance.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]

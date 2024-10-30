@@ -2,7 +2,8 @@
 
 ## Extending subscriptions
 
-`Subscription.extend(*delta*)`
+For your convenience, dj-stripe provides a [`Subscription.extend(*delta*)`][djstripe.models.billing.Subscription.extend] method
+
 
 Subscriptions can be extended by using the `Subscription.extend` method,
 which takes a positive `timedelta` as its only property. This method is

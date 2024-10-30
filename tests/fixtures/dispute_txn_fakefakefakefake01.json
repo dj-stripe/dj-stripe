@@ -1,0 +1,27 @@
+{
+    "id": "txn_1JHRCWJSZQVUcJYgYwW8XpF4",
+    "object": "balance_transaction",
+    "livemode": null,
+    "created": 1557995177,
+    "metadata": "",
+    "description": "Chargeback withdrawal for ch_1JHRCWJSZQVUcJYgOCavbxio",
+    "amount": -1000,
+    "available_on": 1558569600,
+    "currency": "usd",
+    "exchange_rate": null,
+    "fee": 1500,
+    "fee_details": [
+        {
+            "amount": 1500,
+            "application": null,
+            "currency": "usd",
+            "description": "Dispute fee",
+            "type": "stripe_fee"
+        }
+    ],
+    "net": -2500,
+    "source": "dp_1JHRCWJSZQVUcJYgEHzUiuvb",
+    "reporting_category": "dispute",
+    "status": "pending",
+    "type": "adjustment"
+}

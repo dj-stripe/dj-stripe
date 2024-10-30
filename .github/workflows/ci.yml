@@ -1,6 +1,21 @@
 name: CI tests
 
-on: [push]
+on:
+  push:
+    paths-ignore:
+      - "docs/**"
+      - "pyproject.toml"
+      - "mkdocs.yml"
+      - ".readthedocs.yml"
+      - ".github/workflows/docs.yml"
+
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [master]
+
+env:
+  POETRY_VERSION: "1.2.2"
+  POETRY_VIRTUALENVS_IN_PROJECT: "1"
 
 jobs:
   tests:
@@ -8,17 +23,11 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9]
-        env:
-          - TOXENV: django22-postgres,django22-postgres-nativejson,django22-sqlite,django22-mysql
-          - TOXENV: django30-postgres,django30-postgres-nativejson
-          - TOXENV: django30-sqlite,django30-sqlite-nativejson
-          - TOXENV: django30-mysql,django30-mysql-nativejson
-          - TOXENV: django31-postgres,django31-postgres-nativejson
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     services:
       postgres:
-        image: postgres:12
+        image: postgres:16
         env:
           POSTGRES_PASSWORD: djstripe
           POSTGRES_DB: djstripe
@@ -30,7 +39,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       mysql:
-        image: mysql:5.7
+        image: mysql:8.3
         env:
           MYSQL_ROOT_PASSWORD: djstripe
           MYSQL_DATABASE: djstripe
@@ -43,51 +52,18 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip setuptools wheel
-        python -m pip install tox codecov
-    - name: Test with tox
-      run: tox -e postgres,postgres-nativejson
-    - name: Check test coverage
-      run: codecov
+      - uses: actions/checkout@v4
 
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: ./.github/install_poetry_action
         with:
-          python-version: 3.8
-      - name: Install dependencies
-        run: python -m pip install flake8 isort black . djangorestframework
-      - name: Check for flake8 issues
-        run: flake8 .
-      - name: Check code formatting with Black
-        run: black . --check
-      - name: Check import ordering with isort
-        run: isort . --check --diff
-      - name: Check for missing migrations
-        run: python manage.py makemigrations --check --dry-run
-        env:
-          DJSTRIPE_TEST_DB_VENDOR: sqlite
+            POETRY_VERSION: ${{ env.POETRY_VERSION }}
+            python_version: ${{ matrix.python-version }}
 
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.8
       - name: Install dependencies
-        run: python -m pip install .[docs]
-      - name: Build documentation
-        run: mkdocs build
-        env:
-          DJANGO_SETTINGS_MODULE: docs.django_settings
-          PYTHONPATH: "."
+        run: poetry install --with ci
+
+      - name: Test with tox for ${{ matrix.python-version }}
+        run: poetry run tox
+
+      - name: Convert coverage
+        run: poetry run coverage xml

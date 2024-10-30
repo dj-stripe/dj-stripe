@@ -1,0 +1,21 @@
+{
+    "id": "we_1Jto4CJSZQVUcJYgJKJPEBll",
+    "livemode": false,
+    "metadata": {
+        "djstripe_uuid": "f6f9aa0e-cb6c-4e0f-b5ee-5e2b9e0716d8"
+    },
+    "created": 1570435136,
+    "description": "This is the first webhook of a different website example.com",
+    "api_version": "",
+    "application": "ca_JWVN6vOJJs3RKsff0VUwIUfmUmN0VYqe",
+    "enabled_events": [
+        "*"
+    ],
+    "secret": "",
+    "status": "enabled",
+    "url": "https://dev.example.com/stripe/webhook/f6f9aa0e-cb6c-4e0f-b5ee-5e2b9e0716d8",
+    "djstripe_uuid": "f6f9aa0e-cb6c-4e0f-b5ee-5e2b9e0716d8",
+    "tolerance": 300,
+    "djstripe_validation_type": "verify_signature",
+    "object": "webhook_endpoint"
+}

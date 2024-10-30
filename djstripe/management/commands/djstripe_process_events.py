@@ -1,8 +1,8 @@
 from django.core.management.base import BaseCommand
 
 from ... import models
-from ... import settings as djstripe_settings
 from ...mixins import VerbosityAwareOutputMixin
+from ...settings import djstripe_settings
 
 
 class Command(VerbosityAwareOutputMixin, BaseCommand):
@@ -21,7 +21,7 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
     )
 
     def add_arguments(self, parser):
-        """Add optional arugments to filter Events by."""
+        """Add optional arguments to filter Events by."""
         # Use a mutually exclusive group to prevent multiple arguments being
         # specified together.
         group = parser.add_mutually_exclusive_group()
@@ -59,11 +59,9 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
         if failed:
             self.output("Processing all failed events")
         elif type_filter:
-            self.output(
-                "Processing all events that match {filter}".format(filter=type_filter)
-            )
+            self.output(f"Processing all events that match {type_filter}")
         elif event_ids:
-            self.output("Processing specific events {events}".format(events=event_ids))
+            self.output(f"Processing specific events {event_ids}")
         else:
             self.output("Processing all available events")
 
@@ -72,7 +70,9 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
         if event_ids:
             listed_events = (
                 models.Event.stripe_class.retrieve(
-                    id=event_id, api_key=djstripe_settings.STRIPE_SECRET_KEY
+                    id=event_id,
+                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 )
                 for event_id in event_ids
             )
@@ -98,19 +98,13 @@ class Command(VerbosityAwareOutputMixin, BaseCommand):
                 total += 1
                 event = models.Event.process(data=event_data)
                 count += 1
-                self.verbose_output("  Synced Event {id}".format(id=event.id))
+                self.verbose_output(f"\tSynced Event {event.id}")
             except Exception as exception:
-                self.verbose_output(
-                    "  Failed processing Event {id}".format(id=event_data["id"])
-                )
-                self.output("  {exception}".format(exception=exception))
+                self.verbose_output(f"\tFailed processing Event {event_data['id']}")
+                self.output(f"\t{exception}")
                 self.verbose_traceback()
 
         if total == 0:
-            self.output("  (no results)")
+            self.output("\t(no results)")
         else:
-            self.output(
-                "  Processed {count} out of {total} Events".format(
-                    count=count, total=total
-                )
-            )
+            self.output(f"\tProcessed {count} out of {total} Events")

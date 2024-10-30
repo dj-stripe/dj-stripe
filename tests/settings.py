@@ -15,12 +15,12 @@ USE_TZ = True
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
-ALLOWED_HOSTS = json.loads(os.environ.get("DJSTRIPE_TEST_ALLOWED_HOSTS_JSON", "[]"))
+ALLOWED_HOSTS = json.loads(os.environ.get("DJSTRIPE_TEST_ALLOWED_HOSTS_JSON", '["*"]'))
 
 if test_db_vendor == "postgres":
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": test_db_name,
             "USER": test_db_user,
             "PASSWORD": test_db_pass,
@@ -51,7 +51,7 @@ elif test_db_vendor == "sqlite":
         }
     }
 else:
-    raise NotImplementedError("DJSTRIPE_TEST_DB_VENDOR = {}".format(test_db_vendor))
+    raise NotImplementedError(f"DJSTRIPE_TEST_DB_VENDOR = {test_db_vendor}")
 
 
 TEMPLATES = [
@@ -78,9 +78,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.sites",
     "django.contrib.staticfiles",
-    "jsonfield",
     "djstripe",
     "tests",
+    # to load custom models defined to test fields.py
+    "tests.fields",
     "tests.apps.testapp",
     "tests.apps.example",
 ]
@@ -95,25 +96,22 @@ MIDDLEWARE = (
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 )
 
-STRIPE_LIVE_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_123")
-STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_123")
-STRIPE_TEST_PUBLIC_KEY = os.environ.get("STRIPE_PUBLIC_KEY", "pk_test_123")
-STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "sk_test_123")
-
-DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
-    "(admin)",
-    "test_url_name",
-    "testapp_namespaced:test_url_namespaced",
-    "fn:/test_fnmatch*",
+STRIPE_LIVE_PUBLIC_KEY = os.environ.get(
+    "STRIPE_PUBLIC_KEY", "pk_live_XXXXXXXXXXXXXXXXXXXXXXXXX"
+)
+STRIPE_LIVE_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY", "sk_live_XXXXXXXXXXXXXXXXXXXXXXXXX"
+)
+STRIPE_TEST_PUBLIC_KEY = os.environ.get(
+    "STRIPE_PUBLIC_KEY",
+    "pk_test_XXXXXXXXXXXXXXXXXXXXXXXXX",
+)
+STRIPE_TEST_SECRET_KEY = os.environ.get(
+    "STRIPE_SECRET_KEY",
+    "sk_test_XXXXXXXXXXXXXXXXXXXXXXXXX",
 )
 
-DJSTRIPE_USE_NATIVE_JSONFIELD = os.environ.get("USE_NATIVE_JSONFIELD", "") == "1"
-DJSTRIPE_FOREIGN_KEY_TO_FIELD = (
-    "id" if os.environ.get("USE_NATIVE_STRIPE_ID", "") == "1" else "djstripe_id"
-)
-
-DJSTRIPE_SUBSCRIPTION_REDIRECT = "test_url_subscribe"
-DJSTRIPE_WEBHOOK_VALIDATION = "verify_signature"
-DJSTRIPE_WEBHOOK_SECRET = os.environ.get("DJSTRIPE_TEST_WEBHOOK_SECRET", "whsec_XXXXX")
 
 STATIC_URL = "/static/"
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

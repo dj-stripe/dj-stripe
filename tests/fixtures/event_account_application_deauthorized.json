@@ -1,0 +1,21 @@
+{
+  "id": "evt_1Iu8ZfA3kq9o1aTcf3b7EknK",
+  "object": "event",
+  "account": "acct_1Fg9jUA3kq9o1aTc",
+  "api_version": "2020-08-27",
+  "created": 1621742759,
+  "data": {
+    "object": {
+      "id": "ca_JWVN6vOJJs3RKsff0VUwIUfmUmN0VYqe",
+      "object": "application",
+      "name": null
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 2,
+  "request": {
+    "id": null,
+    "idempotency_key": null
+  },
+  "type": "account.application.deauthorized"
+}

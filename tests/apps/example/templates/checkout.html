@@ -1,0 +1,27 @@
+<html>
+  <head>
+    <title>Checkout</title>
+    <script src="https://js.stripe.com/v3/"></script>
+  </head>
+  <body>
+    <script type="text/javascript">
+      // Create a Stripe client.
+      var stripe = Stripe("{{STRIPE_PUBLIC_KEY}}");
+      stripe.redirectToCheckout({
+        // Get the id field from the Checkout Session creation API response
+            sessionId: '{{CHECKOUT_SESSION_ID}}'
+        })
+        .then(function (result) {
+            // If `redirectToCheckout` fails due to a browser or network
+            // error, display the localized error message to your customer
+            // using `result.error.message`.
+            if (result.error) {
+                alert(result.error.message);
+            }
+        })
+        .catch(function (error) {
+          console.error("Error:", error);
+       });
+    </script>
+  </body>
+</html>

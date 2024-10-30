@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16.29" height="30" viewBox="0 0 16.29 30">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="Rectangle_471" data-name="Rectangle 471" width="16.29" height="30" transform="translate(758.574 230.906)" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <rect id="Rectangle_468" data-name="Rectangle 468" width="15.92" height="24.212" transform="translate(758.943 230.907)" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-3">
+      <rect id="Rectangle_467" data-name="Rectangle 467" width="15.92" height="24.212" transform="translate(758.943 230.906)" fill="none"/>
+    </clipPath>
+    <clipPath id="clip-path-4">
+      <rect id="Rectangle_470" data-name="Rectangle 470" width="15.92" height="24.212" transform="translate(758.574 236.695)" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="Group_1011" data-name="Group 1011" transform="translate(-758.574 -230.906)" clip-path="url(#clip-path)">
+    <g id="Group_1005" data-name="Group 1005" opacity="0.87">
+      <g id="Group_1004" data-name="Group 1004">
+        <g id="Group_1003" data-name="Group 1003" clip-path="url(#clip-path-2)">
+          <g id="Group_1002" data-name="Group 1002">
+            <g id="Group_1001" data-name="Group 1001" clip-path="url(#clip-path-3)">
+              <path id="Path_166" data-name="Path 166" d="M759.274,252.737l-.33-19.37a2.416,2.416,0,0,1,2.376-2.459h11.122a2.419,2.419,0,0,1,2.114,3.593L763.8,253.87a2.419,2.419,0,0,1-4.53-1.133" fill="#85e9fe"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+    <g id="Group_1010" data-name="Group 1010" opacity="0.68">
+      <g id="Group_1009" data-name="Group 1009">
+        <g id="Group_1008" data-name="Group 1008" clip-path="url(#clip-path-4)">
+          <g id="Group_1007" data-name="Group 1007">
+            <g id="Group_1006" data-name="Group 1006" clip-path="url(#clip-path-4)">
+              <path id="Path_167" data-name="Path 167" d="M758.9,239.075l-.328,19.371a2.419,2.419,0,0,0,2.377,2.46h11.123a2.419,2.419,0,0,0,2.115-3.593l-10.755-19.371a2.418,2.418,0,0,0-4.532,1.133" fill="#3431bc"/>
+            </g>
+          </g>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

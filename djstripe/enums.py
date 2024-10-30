@@ -5,11 +5,18 @@ from django.utils.translation import gettext_lazy as _
 
 
 class EnumMetaClass(type):
+    def __init__(cls, name, bases, classdict):
+        def _human_enum_values(enum):
+            return cls.__choices__[enum]
+
+        # add a class attribute
+        cls.humanize = _human_enum_values
+
     @classmethod
-    def __prepare__(self, name, bases):
+    def __prepare__(cls, name, bases):
         return OrderedDict()
 
-    def __new__(self, name, bases, classdict):
+    def __new__(cls, name, bases, classdict):
         members = []
         keys = {}
         choices = OrderedDict()
@@ -41,7 +48,7 @@ class EnumMetaClass(type):
             for k, v in sorted(choices.items(), key=operator.itemgetter(0))
         )
 
-        return type.__new__(self, name, bases, classdict)
+        return type.__new__(cls, name, bases, classdict)
 
 
 class Enum(metaclass=EnumMetaClass):
@@ -158,12 +165,6 @@ class ApiErrorCode(Enum):
     invalid_swipe_data = _("Invalid swipe data")
 
 
-class AccountType(Enum):
-    standard = _("Standard")
-    express = _("Express")
-    custom = _("Custom")
-
-
 class BalanceTransactionReportingCategory(Enum):
     """
     https://stripe.com/docs/reports/reporting-categories
@@ -262,11 +263,6 @@ class BillingScheme(Enum):
     tiered = _("Tiered")
 
 
-class BusinessType(Enum):
-    individual = _("Individual")
-    company = _("Company")
-
-
 class CaptureMethod(Enum):
     automatic = _("Automatic")
     manual = _("Manual")
@@ -306,6 +302,12 @@ class ChargeStatus(Enum):
     succeeded = _("Succeeded")
     pending = _("Pending")
     failed = _("Failed")
+
+
+class SessionStatus(Enum):
+    open = _("Open")
+    complete = _("Complete")
+    expired = _("Expired")
 
 
 class ConfirmationMethod(Enum):
@@ -352,22 +354,26 @@ class DisputeStatus(Enum):
     lost = _("Lost")
 
 
-class FileUploadPurpose(Enum):
+class FilePurpose(Enum):
+    account_requirement = _("Account requirement")
     additional_verification = _("Additional verification")
     business_icon = _("Business icon")
     business_logo = _("Business logo")
     customer_signature = _("Customer signature")
+    credit_note = _("Credit Note")
     dispute_evidence = _("Dispute evidence")
+    document_provider_identity_document = _("Document provider identity document")
     finance_report_run = _("Finance report run")
     identity_document = _("Identity document")
+    identity_document_downloadable = _("Identity document (downloadable)")
     invoice_statement = _("Invoice statement")
     pci_document = _("PCI document")
+    selfie = _("Selfie (Stripe Identity)")
     sigma_scheduled_query = _("Sigma scheduled query")
     tax_document_user_upload = _("Tax document user upload")
-    document_provider_identity_document = _("Document provider identity document")
 
 
-class FileUploadType(Enum):
+class FileType(Enum):
     pdf = _("PDF")
     jpg = _("JPG")
     png = _("PNG")
@@ -385,6 +391,7 @@ class InvoiceBillingReason(Enum):
     manual = _("Manual")
     upcoming = _("Upcoming")
     subscription_threshold = _("Subscription threshold")
+    automatic_pending_invoice_item_invoice = _("Automatic pending invoice item invoice")
 
 
 class InvoiceCollectionMethod(Enum):
@@ -423,6 +430,30 @@ class IntentStatus(Enum):
     )
 
 
+class LineItem(Enum):
+    invoiceitem = _("Invoice Item")
+    subscription = _("Subscription")
+
+
+class MandateStatus(Enum):
+    active = _("Active")
+    inactive = _("Inactive")
+    pending = _("Pending")
+
+
+class MandateType(Enum):
+    multi_use = _("Multi-use")
+    single_use = _("Single-use")
+
+
+class OrderStatus(Enum):
+    open = _("Open")
+    submitted = _("Submitted")
+    processing = _("Processing")
+    complete = _("Complete")
+    canceled = _("Canceled")
+
+
 # TODO - maybe refactor Enum so that inheritance works,
 #  then PaymentIntentStatus/SetupIntentStatus can inherit from IntentStatus
 class PaymentIntentStatus(Enum):
@@ -457,21 +488,39 @@ class SetupIntentStatus(Enum):
 
 
 class PaymentMethodType(Enum):
+    acss_debit = _("ACSS Dbit")
+    affirm = _("Affirm")
+    afterpay_clearpay = _("Afterpay Clearpay")
     alipay = _("Alipay")
     au_becs_debit = _("BECS Debit (Australia)")
     bacs_debit = _("Bacs Direct Debit")
     bancontact = _("Bancontact")
+    blik = _("BLIK")
+    boleto = _("Boleto")
     card = _("Card")
     card_present = _("Card present")
+    cashapp = _("Cash App")
+    customer_balance = _("Customer Balance")
     eps = _("EPS")
     fpx = _("FPX")
     giropay = _("Giropay")
+    grabpay = _("Grabpay")
     ideal = _("iDEAL")
     interac_present = _("Interac (card present)")
+    klarna = _("Klarna")
+    konbini = _("Konbini")
+    link = _("Link")
     oxxo = _("OXXO")
     p24 = _("Przelewy24")
+    paynow = _("PayNow")
+    paypal = _("PayPal")
+    pix = _("Pix")
+    promptpay = _("PromptPay")
     sepa_debit = _("SEPA Direct Debit")
     sofort = _("SOFORT")
+    us_bank_account = _("ACH Direct Debit")
+    wechat_pay = _("Wechat Pay")
+    zip = _("Zip")
 
 
 class PayoutFailureCode(Enum):
@@ -487,8 +536,22 @@ class PayoutFailureCode(Enum):
     bank_ownership_changed = _("Destination bank account has changed ownership.")
     could_not_process = _("Bank could not process payout.")
     debit_not_authorized = _("Debit transactions not approved on the bank account.")
+    declined = _(
+        "The bank has declined this transfer. Please contact the bank before retrying."
+    )
     insufficient_funds = _("Stripe account has insufficient funds.")
     invalid_account_number = _("Invalid account number")
+    incorrect_account_holder_name = _(
+        "Your bank notified us that the bank account holder name on file is incorrect."
+    )
+    incorrect_account_holder_address = _(
+        "Your bank notified us that the bank account holder address on file is"
+        " incorrect."
+    )
+    incorrect_account_holder_tax_id = _(
+        "Your bank notified us that the bank account holder tax ID on file is"
+        " incorrect."
+    )
     invalid_currency = _("Bank account does not support currency.")
     no_account = _("Bank account could not be located.")
     unsupported_card = _("Card no longer supported.")
@@ -649,11 +712,6 @@ class RefundStatus(Enum):
     canceled = _("Canceled")
 
 
-class SessionBillingAddressCollection(Enum):
-    auto = _("Auto")
-    required = _("Required")
-
-
 class SessionMode(Enum):
     payment = _("Payment")
     setup = _("Setup")
@@ -684,13 +742,6 @@ class SourceRedirectStatus(Enum):
     failed = _("Failed")
 
 
-class SubmitTypeStatus(Enum):
-    auto = _("Auto")
-    book = _("Book")
-    donate = _("donate")
-    pay = _("pay")
-
-
 class SubscriptionScheduleEndBehavior(Enum):
     release = _("Release")
     cancel = _("Cancel")
@@ -712,6 +763,23 @@ class SubscriptionStatus(Enum):
     past_due = _("Past due")
     canceled = _("Canceled")
     unpaid = _("Unpaid")
+    paused = _("Paused")
+
+
+class SubscriptionProrationBehavior(Enum):
+    create_prorations = _("Create prorations")
+    always_invoice = _("Always invoice")
+    none = _("None")
+
+
+class ShippingRateType(Enum):
+    fixed_amount = _("Fixed Amount")
+
+
+class ShippingRateTaxBehavior(Enum):
+    inclusive = _("Inclusive")
+    exclusive = _("Exclusive")
+    unspecified = _("Unspecified")
 
 
 class TaxIdType(Enum):
@@ -748,6 +816,39 @@ class TaxIdType(Enum):
     us_ein = _("US EIN")
     za_vat = _("ZA VAT")
     unknown = _("Unknown")
+
+
+class VerificationSessionStatus(Enum):
+    """
+    https://stripe.com/docs/api/identity/verification_sessions/object#identity_verification_session_object-status
+    """
+
+    requires_input = _("Requires input")
+    processing = _("Processing")
+    verified = _("Verified")
+    canceled = _("Canceled")
+
+
+class VerificationType(Enum):
+    """
+    https://stripe.com/docs/api/identity/verification_sessions/object#identity_verification_session_object-type
+    """
+
+    document = _("Document")
+    id_number = _("ID number")
+
+
+class WebhookEndpointStatus(Enum):
+    enabled = _("enabled")
+    disabled = _("disabled")
+
+
+class WebhookEndpointValidation(Enum):
+    """An enum to specific the choices for WebhookEndpoint Validation."""
+
+    verify_signature = _("Verify Signature")
+    retrieve_event = _("Retrieve Event")
+    none = _("None (NOT RECOMMENDED)")
 
 
 class DjstripePaymentMethodType(Enum):

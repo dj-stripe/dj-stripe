@@ -1,0 +1,127 @@
+{
+  "id": "evt_1Itt6eB9wPxT0ovY3LLhi5bw",
+  "object": "event",
+  "account": "acct_1Fg9jUA3kq9o1aTc",
+  "api_version": "2020-08-27",
+  "created": 1621683300,
+  "data": {
+    "object": {
+      "id": "acct_1Fg9jUA3kq9o1aTc",
+      "object": "account",
+      "business_profile": {
+        "mcc": null,
+        "name": null,
+        "support_address": null,
+        "support_email": null,
+        "support_phone": null,
+        "support_url": null,
+        "url": null,
+        "product_description": null
+      },
+      "capabilities": {},
+      "charges_enabled": false,
+      "country": "US",
+      "default_currency": "usd",
+      "details_submitted": false,
+      "email": null,
+      "payouts_enabled": false,
+      "settings": {
+        "bacs_debit_payments": {},
+        "branding": {
+          "icon": null,
+          "logo": null,
+          "primary_color": null,
+          "secondary_color": null
+        },
+        "card_issuing": {
+          "tos_acceptance": {
+            "date": null,
+            "ip": null
+          }
+        },
+        "card_payments": {
+          "statement_descriptor_prefix": null,
+          "decline_on": {
+            "avs_failure": false,
+            "cvc_failure": true
+          }
+        },
+        "dashboard": {
+          "display_name": null,
+          "timezone": "Etc/UTC"
+        },
+        "payments": {
+          "statement_descriptor": null,
+          "statement_descriptor_kana": null,
+          "statement_descriptor_kanji": null
+        },
+        "sepa_debit_payments": {},
+        "payouts": {
+          "debit_negative_balances": true,
+          "schedule": {
+            "delay_days": 2,
+            "interval": "daily"
+          },
+          "statement_descriptor": null
+        }
+      },
+      "type": "standard",
+      "business_type": null,
+      "created": 1621683297,
+      "external_accounts": {
+        "object": "list",
+        "data": [],
+        "has_more": false,
+        "total_count": 0,
+        "url": "/v1/accounts/acct_1Fg9jUA3kq9o1aTc/external_accounts"
+      },
+      "metadata": {
+        "foo": "bar"
+      },
+      "requirements": {
+        "current_deadline": null,
+        "currently_due": [
+          "business_profile.product_description",
+          "business_profile.support_phone",
+          "business_profile.url",
+          "email",
+          "external_account",
+          "tos_acceptance.date",
+          "tos_acceptance.ip"
+        ],
+        "disabled_reason": "requirements.past_due",
+        "errors": [],
+        "eventually_due": [
+          "business_profile.product_description",
+          "business_profile.support_phone",
+          "business_profile.url",
+          "email",
+          "external_account",
+          "tos_acceptance.date",
+          "tos_acceptance.ip"
+        ],
+        "past_due": [
+          "external_account",
+          "tos_acceptance.date",
+          "tos_acceptance.ip"
+        ],
+        "pending_verification": []
+      },
+      "tos_acceptance": {
+        "date": null,
+        "ip": null,
+        "user_agent": null
+      }
+    },
+    "previous_attributes": {
+      "metadata": {}
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 2,
+  "request": {
+    "id": "req_A60l4iFvAHopqU",
+    "idempotency_key": null
+  },
+  "type": "account.updated"
+}

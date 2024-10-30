@@ -2,11 +2,10 @@ from typing import Optional, Union
 
 import stripe
 from django.db import models, transaction
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 
 from .. import enums
-from .. import settings as djstripe_settings
-from ..exceptions import StripeObjectManipulationException
+from ..exceptions import ImpossibleAPIRequest, StripeObjectManipulationException
 from ..fields import (
     JSONField,
     StripeCurrencyCodeField,
@@ -14,6 +13,9 @@ from ..fields import (
     StripeEnumField,
     StripeForeignKey,
 )
+from ..settings import djstripe_settings
+from ..utils import get_id_from_stripe_data
+from .account import Account
 from .base import StripeModel, logger
 from .core import Customer
 
@@ -25,7 +27,7 @@ class DjstripePaymentMethod(models.Model):
 
     Contains two fields: `id` and `type`:
     - `id` is the id of the Stripe object.
-    - `type` can be `card`, `bank_account` or `source`.
+    - `type` can be `card`, `bank_account` `account` or `source`.
     """
 
     id = models.CharField(max_length=255, primary_key=True)
@@ -45,10 +47,16 @@ class DjstripePaymentMethod(models.Model):
         return instance
 
     @classmethod
-    def _get_or_create_source(cls, data, source_type):
+    def _get_or_create_source(
+        cls, data, source_type=None, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
+        # prefer passed in source_type
+        if not source_type:
+            source_type = data["object"]
+
         try:
             model = cls._model_for_type(source_type)
-            model._get_or_create_from_stripe_object(data)
+            model._get_or_create_from_stripe_object(data, api_key=api_key)
         except ValueError as e:
             # This may happen if we have source types we don't know about.
             # Let's not make dj-stripe entirely unusable if that happens.
@@ -64,8 +72,10 @@ class DjstripePaymentMethod(models.Model):
             return Source
         elif type == "bank_account":
             return BankAccount
+        elif type == "account":
+            return Account
 
-        raise ValueError("Unknown source type: {}".format(type))
+        raise ValueError(f"Unknown source type: {type}")
 
     @property
     def object_model(self):
@@ -74,6 +84,57 @@ class DjstripePaymentMethod(models.Model):
     def resolve(self):
         return self.object_model.objects.get(id=self.id)
 
+    @classmethod
+    def _get_or_create_from_stripe_object(
+        cls,
+        data,
+        field_name="id",
+        refetch=True,
+        current_ids=None,
+        pending_relations=None,
+        save=True,
+        stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+    ):
+        raw_field_data = data.get(field_name)
+        id_ = get_id_from_stripe_data(raw_field_data)
+        if not id_:
+            raise ValueError(f"ID not found in Stripe data: {raw_field_data!r}")
+
+        if id_.startswith("card"):
+            source_cls = Card
+            source_type = "card"
+        elif id_.startswith("src"):
+            source_cls = Source
+            source_type = "source"
+        elif id_.startswith("ba"):
+            source_cls = BankAccount
+            source_type = "bank_account"
+        elif id_.startswith("acct"):
+            source_cls = Account
+            source_type = "account"
+        else:
+            # This may happen if we have source types we don't know about.
+            # Let's not make dj-stripe entirely unusable if that happens.
+            logger.warning(f"Unknown Object. Could not sync source with id: {id_}")
+            return cls.objects.get_or_create(
+                id=id_, defaults={"type": f"UNSUPPORTED_{id_}"}
+            )
+
+        # call model's _get_or_create_from_stripe_object to ensure
+        # that object exists before getting or creating its source object
+        source_cls._get_or_create_from_stripe_object(
+            data,
+            field_name,
+            refetch=refetch,
+            current_ids=current_ids,
+            pending_relations=pending_relations,
+            stripe_account=stripe_account,
+            api_key=api_key,
+        )
+
+        return cls.objects.get_or_create(id=id_, defaults={"type": source_type})
+
 
 class LegacySourceMixin:
     """
@@ -81,51 +142,138 @@ class LegacySourceMixin:
     """
 
     customer: Optional[StripeForeignKey]
+    account: Optional[StripeForeignKey]
+    id: str
+    default_api_key: str
 
     @classmethod
-    def _get_customer_from_kwargs(cls, **kwargs):
-        if "customer" not in kwargs or not isinstance(kwargs["customer"], Customer):
+    def _get_customer_or_account_from_kwargs(cls, **kwargs):
+        account = kwargs.get("account")
+        customer = kwargs.get("customer")
+
+        if not account and not customer:
             raise StripeObjectManipulationException(
-                "{}s must be manipulated through a Customer. "
-                "Pass a Customer object into this call.".format(cls.__name__)
+                f"{cls.__name__} objects must be manipulated through either a "
+                "Stripe Connected Account or a customer. "
+                "Pass a Customer or an Account object into this call."
             )
 
-        customer = kwargs["customer"]
-        del kwargs["customer"]
+        if account and not isinstance(account, Account):
+            raise StripeObjectManipulationException(
+                f"{cls.__name__} objects must be manipulated through a Stripe Connected"
+                " Account. Pass an Account object into this call."
+            )
 
-        return customer, kwargs
+        if customer and not isinstance(customer, Customer):
+            raise StripeObjectManipulationException(
+                f"{cls.__name__} objects must be manipulated through a Customer. "
+                "Pass a Customer object into this call."
+            )
+
+        if account:
+            del kwargs["account"]
+        if customer:
+            del kwargs["customer"]
+
+        return account, customer, kwargs
 
     @classmethod
     def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards & Bank Accounts must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to
-        #     check if either a customer or account is supplied to determine
-        #     the correct object to use.
 
-        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
+        account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
+            **kwargs
+        )
 
-        return customer.api_retrieve().sources.create(api_key=api_key, **clean_kwargs)
+        # First we try to retrieve by customer attribute,
+        # then by account attribute
+        if customer and account:
+            try:
+                # retrieve by customer
+                return customer.api_retrieve(api_key=api_key).sources.create(
+                    api_key=api_key, **clean_kwargs
+                )
+            except Exception as customer_exc:
+                try:
+                    # retrieve by account
+                    return account.api_retrieve(
+                        api_key=api_key
+                    ).external_accounts.create(api_key=api_key, **clean_kwargs)
+                except Exception:
+                    raise customer_exc
+
+        if customer:
+            return customer.api_retrieve(api_key=api_key).sources.create(
+                api_key=api_key, **clean_kwargs
+            )
+
+        if account:
+            return account.api_retrieve(api_key=api_key).external_accounts.create(
+                api_key=api_key, **clean_kwargs
+            )
 
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
         # Cards & Bank Accounts must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to
-        #     check if either a customer or account is supplied to determine
-        #     the correct object to use.
 
-        customer, clean_kwargs = cls._get_customer_from_kwargs(**kwargs)
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
 
-        return (
-            customer.api_retrieve(api_key=api_key)
-            .sources.list(object=cls.stripe_class.OBJECT_NAME, **clean_kwargs)
-            .auto_paging_iter()
+        account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
+            **kwargs
+        )
+
+        object_name = cls.stripe_class.OBJECT_NAME
+
+        # First we try to retrieve by customer attribute,
+        # then by account attribute
+        if customer and account:
+            try:
+                # retrieve by customer
+                return (
+                    customer.api_retrieve(api_key=api_key)
+                    .sources.list(object=object_name, **clean_kwargs)
+                    .auto_paging_iter()
+                )
+            except Exception as customer_exc:
+                try:
+                    # retrieve by account
+                    return (
+                        account.api_retrieve(api_key=api_key)
+                        .external_accounts.list(object=object_name, **clean_kwargs)
+                        .auto_paging_iter()
+                    )
+                except Exception:
+                    raise customer_exc
+
+        if customer:
+            return (
+                customer.api_retrieve(api_key=api_key)
+                .sources.list(object=object_name, **clean_kwargs)
+                .auto_paging_iter()
+            )
+
+        if account:
+            return (
+                account.api_retrieve(api_key=api_key)
+                .external_accounts.list(object=object_name, **clean_kwargs)
+                .auto_paging_iter()
+            )
+
+        raise ImpossibleAPIRequest(
+            f"Can't list {object_name} without a customer or account object. This may"
+            " happen if not all accounts or customer objects are in the db. Please run"
+            ' "python manage.py djstripe_sync_models Account Customer" as a potential'
+            " fix."
         )
 
     def get_stripe_dashboard_url(self) -> str:
         if self.customer:
             return self.customer.get_stripe_dashboard_url()
+        elif self.account:
+            return f"https://dashboard.stripe.com/{self.account.id}/settings/payouts"
         else:
             return ""
 
@@ -153,85 +301,148 @@ class LegacySourceMixin:
     def api_retrieve(self, api_key=None, stripe_account=None):
         # OVERRIDING the parent version of this function
         # Cards & Banks Accounts must be manipulated through a customer or account.
-        # TODO: When managed accounts are supported, this method needs to check if
-        # either a customer or account is supplied to determine the
-        # correct object to use.
+
         api_key = api_key or self.default_api_key
-        customer = self.customer.api_retrieve(
-            api_key=api_key, stripe_account=stripe_account
+
+        if self.customer:
+            return stripe.Customer.retrieve_source(
+                self.customer.id,
+                self.id,
+                expand=self.expand_fields,
+                stripe_account=stripe_account,
+                api_key=api_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            )
+
+        # try to retrieve by account attribute if retrieval by customer fails.
+        if self.account:
+            return stripe.Account.retrieve_external_account(
+                self.account.id,
+                self.id,
+                expand=self.expand_fields,
+                stripe_account=stripe_account,
+                api_key=api_key,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            )
+
+        raise ImpossibleAPIRequest(
+            f"Can't retrieve {self.__class__} without a customer or account object."
+            " This may happen if not all accounts or customer objects are in the db."
+            ' Please run "python manage.py djstripe_sync_models Account Customer" as a'
+            " potential fix."
         )
 
-        # If the customer is deleted, the sources attribute will be absent.
-        # eg. {"id": "cus_XXXXXXXX", "deleted": True}
-        if "sources" not in customer:
-            # We fake a native stripe InvalidRequestError so that it's caught
-            # like an invalid ID error.
-            raise InvalidRequestError(f"No such source: {self.id!r}", "id")
+    def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
+        # OVERRIDING the parent version of this function
+        # Cards & Banks Accounts must be manipulated through a customer or account.
 
-        # This will retrieve the source using the account ID where the customer resides,
-        # so we don't have to pass `stripe_account`.
-        return customer.sources.retrieve(self.id, expand=self.expand_fields)
+        api_key = api_key or self.default_api_key
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        if self.customer:
+            return stripe.Customer.delete_source(
+                self.customer.id,
+                self.id,
+                api_key=api_key,
+                stripe_account=stripe_account,
+                **kwargs,
+            )
+
+        if self.account:
+            return stripe.Account.delete_external_account(
+                self.account.id,
+                self.id,
+                api_key=api_key,
+                stripe_account=stripe_account,
+                **kwargs,
+            )
+
+        raise ImpossibleAPIRequest(
+            f"Can't delete {self.__class__} without a customer or account object. This"
+            " may happen if not all accounts or customer objects are in the db. Please"
+            ' run "python manage.py djstripe_sync_models Account Customer" as a'
+            " potential fix."
+        )
 
 
 class BankAccount(LegacySourceMixin, StripeModel):
+    """
+    These bank accounts are payment methods on Customer objects.
+    On the other hand External Accounts are transfer destinations on Account
+    objects for Custom accounts. They can be bank accounts or debit cards as well.
+
+    Stripe documentation:https://stripe.com/docs/api/customer_bank_accounts
+    """
+
     stripe_class = stripe.BankAccount
 
-    account = StripeForeignKey(
-        "Account",
-        on_delete=models.PROTECT,
-        null=True,
-        blank=True,
-        related_name="bank_account",
-        help_text="The account the charge was made on behalf of. Null here indicates "
-        "that this value was never set.",
-    )
-    account_holder_name = models.TextField(
-        max_length=5000,
-        blank=True,
-        help_text="The name of the person or business that owns the bank account.",
-    )
-    account_holder_type = StripeEnumField(
-        enum=enums.BankAccountHolderType,
-        help_text="The type of entity that holds the account.",
-    )
-    bank_name = models.CharField(
-        max_length=255,
-        help_text="Name of the bank associated with the routing number "
-        "(e.g., `WELLS FARGO`).",
-    )
-    country = models.CharField(
-        max_length=2,
-        help_text="Two-letter ISO code representing the country the bank account "
-        "is located in.",
-    )
-    currency = StripeCurrencyCodeField()
-    customer = StripeForeignKey(
-        "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
-    )
-    default_for_currency = models.BooleanField(
-        null=True,
-        help_text="Whether this external account is the default account for "
-        "its currency.",
-    )
-    fingerprint = models.CharField(
-        max_length=16,
-        help_text=(
-            "Uniquely identifies this particular bank account. "
-            "You can use this attribute to check whether two bank accounts are "
-            "the same."
-        ),
-    )
-    last4 = models.CharField(max_length=4)
-    routing_number = models.CharField(
-        max_length=255, help_text="The routing transit number for the bank account."
-    )
-    status = StripeEnumField(enum=enums.BankAccountStatus)
+    @property
+    def account(self) -> Optional["Account"]:
+        id = get_id_from_stripe_data(self.stripe_data.get("source"))
+        return Account.objects.get(id=id)
+
+    @property
+    def account_holder_name(self) -> str:
+        return self.stripe_data.get("account_holder_name", "")
+
+    @property
+    def account_holder_type(self) -> enums.BankAccountHolderType:
+        type = self.stripe_data.get("account_holder_type", "")
+        return enums.BankAccountHolderType[type]
+
+    @property
+    def bank_name(self) -> str:
+        return self.stripe_data.get("bank_name", "")
+
+    @property
+    def country(self) -> str:
+        return self.stripe_data.get("country", "")
+
+    @property
+    def currency(self) -> str:
+        return self.stripe_data.get("currency", "")
+
+    @property
+    def customer(self) -> Optional["Customer"]:
+        customer_id = get_id_from_stripe_data(self.stripe_data.get("customer"))
+        if customer_id:
+            return Customer.objects.get(id=customer_id)
+
+    @property
+    def fingerprint(self) -> str:
+        return self.stripe_data.get("fingerprint", "")
+
+    @property
+    def last4(self) -> str:
+        return self.stripe_data.get("last4", "")
+
+    @property
+    def routing_number(self) -> str:
+        return self.stripe_data.get("routing_number", "")
+
+    @property
+    def status(self) -> enums.BankAccountStatus:
+        status = self.stripe_data.get("status", "")
+        return enums.BankAccountStatus[status]
+
+    @property
+    def human_readable_status(self):
+        status = self.status
+        if status == enums.BankAccountStatus.new:
+            return "Pending Verification"
+        return enums.BankAccountStatus.humanize(self.status)
 
     def api_retrieve(self, **kwargs):
-        if not self.customer:
-            raise NotImplementedError(
-                "Cannot retrieve bank accounts not associated with a customer"
+        if not self.customer and not self.account:
+            raise ImpossibleAPIRequest(
+                "Can't retrieve a bank account without a customer or account object."
+                " This may happen if not all accounts or customer objects are in the"
+                ' db. Please run "python manage.py djstripe_sync_models Account'
+                ' Customer" as a potential fix.'
             )
+
         return super().api_retrieve(**kwargs)
 
 
@@ -247,105 +458,82 @@ class Card(LegacySourceMixin, StripeModel):
     A Source object of type "card" is equivalent to a Card object. However, Card
     objects cannot be converted into Source objects by Stripe at this time.
 
-    Stripe documentation: https://stripe.com/docs/api/python#cards
+    Stripe documentation: https://stripe.com/docs/api?lang=python#cards
     """
 
     stripe_class = stripe.Card
 
-    address_city = models.TextField(
-        max_length=5000,
-        blank=True,
-        default="",
-        help_text="City/District/Suburb/Town/Village.",
-    )
-    address_country = models.TextField(
-        max_length=5000, blank=True, default="", help_text="Billing address country."
-    )
-    address_line1 = models.TextField(
-        max_length=5000,
-        blank=True,
-        default="",
-        help_text="Street address/PO Box/Company name.",
-    )
-    address_line1_check = StripeEnumField(
-        enum=enums.CardCheckResult,
-        blank=True,
-        default="",
-        help_text="If `address_line1` was provided, results of the check.",
-    )
-    address_line2 = models.TextField(
-        max_length=5000,
-        blank=True,
-        default="",
-        help_text="Apartment/Suite/Unit/Building.",
-    )
-    address_state = models.TextField(
-        max_length=5000,
-        blank=True,
-        default="",
-        help_text="State/County/Province/Region.",
-    )
-    address_zip = models.TextField(
-        max_length=5000, blank=True, default="", help_text="ZIP or postal code."
-    )
-    address_zip_check = StripeEnumField(
-        enum=enums.CardCheckResult,
-        blank=True,
-        default="",
-        help_text="If `address_zip` was provided, results of the check.",
-    )
-    brand = StripeEnumField(enum=enums.CardBrand, help_text="Card brand.")
-    country = models.CharField(
-        max_length=2,
-        default="",
-        blank=True,
-        help_text="Two-letter ISO code representing the country of the card.",
-    )
-    customer = StripeForeignKey(
-        "Customer", on_delete=models.SET_NULL, null=True, related_name="legacy_cards"
-    )
-    cvc_check = StripeEnumField(
-        enum=enums.CardCheckResult,
-        default="",
-        blank=True,
-        help_text="If a CVC was provided, results of the check.",
-    )
-    dynamic_last4 = models.CharField(
-        max_length=4,
-        default="",
-        blank=True,
-        help_text="(For tokenized numbers only.) The last four digits of the device "
-        "account number.",
-    )
-    exp_month = models.IntegerField(help_text="Card expiration month.")
-    exp_year = models.IntegerField(help_text="Card expiration year.")
-    fingerprint = models.CharField(
-        default="",
-        blank=True,
-        max_length=16,
-        help_text="Uniquely identifies this particular card number.",
-    )
-    funding = StripeEnumField(
-        enum=enums.CardFundingType, help_text="Card funding type."
-    )
-    last4 = models.CharField(max_length=4, help_text="Last four digits of Card number.")
-    name = models.TextField(
-        max_length=5000, default="", blank=True, help_text="Cardholder name."
-    )
-    tokenization_method = StripeEnumField(
-        enum=enums.CardTokenizationMethod,
-        default="",
-        blank=True,
-        help_text="If the card number is tokenized, this is the method that was used.",
-    )
+    @property
+    def account(self) -> Optional["Account"]:
+        id = get_id_from_stripe_data(self.stripe_data.get("source"))
+        return Account.objects.get(id=id)
 
-    def str_parts(self):
-        return [
-            "brand={brand}".format(brand=self.brand),
-            "last4={last4}".format(last4=self.last4),
-            "exp_month={exp_month}".format(exp_month=self.exp_month),
-            "exp_year={exp_year}".format(exp_year=self.exp_year),
-        ] + super().str_parts()
+    @property
+    def brand(self) -> enums.CardBrand:
+        type = self.stripe_data["brand"]
+        return enums.CardBrand(type)
+
+    @property
+    def country(self) -> str:
+        return self.stripe_data.get("country", "")
+
+    @property
+    def customer(self) -> Optional["Customer"]:
+        customer_id = get_id_from_stripe_data(self.stripe_data.get("customer"))
+        if customer_id:
+            return Customer.objects.get(id=customer_id)
+
+    @property
+    def exp_month(self) -> int:
+        return self.stripe_data["exp_month"]
+
+    @property
+    def exp_year(self) -> int:
+        return self.stripe_data["exp_year"]
+
+    @property
+    def fingerprint(self) -> str:
+        return self.stripe_data.get("fingerprint", "")
+
+    @property
+    def funding(self) -> enums.CardFundingType:
+        type = self.stripe_data["funding"]
+        return enums.CardFundingType(type)
+
+    @property
+    def last4(self) -> str:
+        return self.stripe_data.get("last4", "")
+
+    @property
+    def name(self) -> str:
+        return self.stripe_data.get("name", "")
+
+    def __str__(self):
+        default = False
+        # prefer to show it by customer format if present
+        customer = self.customer
+        if customer:
+            default_source = customer.default_source
+            default_payment_method = customer.default_payment_method
+
+            if (default_payment_method and self.id == default_payment_method.id) or (
+                default_source and self.id == default_source.id
+            ):
+                # current card is the default payment method or source
+                default = True
+
+            customer_template = (
+                f"{enums.CardBrand.humanize(self.brand)} {self.last4} {'Default' if default else ''} Expires"
+                f" {self.exp_month} {self.exp_year}"
+            )
+            return customer_template
+
+        elif self.account:
+            default = getattr(self, "default_for_currency", False)
+            account_template = f"{enums.CardBrand.humanize(self.brand)} {self.account.default_currency} {'Default' if default else ''} {self.last4}"
+            return account_template
+
+        return self.id or ""
 
     @classmethod
     def create_token(
@@ -362,7 +550,7 @@ class Card(LegacySourceMixin, StripeModel):
         This token can be used in place of a credit card dictionary with any API method.
         These tokens can only be used once: by creating a new charge object,
         or attaching them to a customer.
-        (Source: https://stripe.com/docs/api/python#create_card_token)
+        (Source: https://stripe.com/docs/api?lang=python#create_card_token)
 
         :param number: The card number without any separators (no spaces)
         :param exp_month: The card's expiration month. (two digits)
@@ -384,26 +572,31 @@ class Card(LegacySourceMixin, StripeModel):
 
 class Source(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#sources
+    Source objects allow you to accept a variety of payment methods.
+    They represent a customer's payment instrument, and can be used with
+    the Stripe API just like a Card object: once chargeable,
+    they can be charged, or can be attached to customers.
+
+    Stripe documentation: https://stripe.com/docs/api?lang=python#sources
     """
 
-    amount = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Amount (as decimal) associated with the source. "
-            "This is the amount for which the source will be chargeable once ready. "
-            "Required for `single_use` sources."
-        ),
-    )
-    client_secret = models.CharField(
-        max_length=255,
-        help_text=(
-            "The client secret of the source. "
-            "Used for client-side retrieval using a publishable key."
-        ),
-    )
-    currency = StripeCurrencyCodeField(default="", blank=True)
+    @property
+    def amount(self) -> int:
+        return self.stripe_data.get("amount")
+
+    @property
+    def client_secret(self) -> str:
+        return self.stripe_data.get("client_secret", "")
+
+    @property
+    def currency(self) -> str:
+        return self.stripe_data.get("currency", "")
+
+    @property
+    def flow(self) -> enums.SourceFlow:
+        flow_type = self.stripe_data.get("flow", "")
+        return enums.SourceFlow[flow_type]
+
     flow = StripeEnumField(
         enum=enums.SourceFlow, help_text="The authentication flow of the source."
     )
@@ -417,41 +610,53 @@ class Source(StripeModel):
         max_length=255,
         default="",
         blank=True,
-        help_text="Extra information about a source. This will appear on your "
-        "customer's statement every time you charge the source.",
+        help_text=(
+            "Extra information about a source. This will appear on your "
+            "customer's statement every time you charge the source."
+        ),
     )
     status = StripeEnumField(
         enum=enums.SourceStatus,
-        help_text="The status of the source. Only `chargeable` sources can be used "
-        "to create a charge.",
+        help_text=(
+            "The status of the source. Only `chargeable` sources can be used "
+            "to create a charge."
+        ),
     )
     type = StripeEnumField(enum=enums.SourceType, help_text="The type of the source.")
     usage = StripeEnumField(
         enum=enums.SourceUsage,
-        help_text="Whether this source should be reusable or not. "
-        "Some source types may or may not be reusable by construction, "
-        "while other may leave the option at creation.",
+        help_text=(
+            "Whether this source should be reusable or not. "
+            "Some source types may or may not be reusable by construction, "
+            "while other may leave the option at creation."
+        ),
     )
 
     # Flows
     code_verification = JSONField(
         null=True,
         blank=True,
-        help_text="Information related to the code verification flow. "
-        "Present if the source is authenticated by a verification code "
-        "(`flow` is `code_verification`).",
+        help_text=(
+            "Information related to the code verification flow. "
+            "Present if the source is authenticated by a verification code "
+            "(`flow` is `code_verification`)."
+        ),
     )
     receiver = JSONField(
         null=True,
         blank=True,
-        help_text="Information related to the receiver flow. "
-        "Present if the source is a receiver (`flow` is `receiver`).",
+        help_text=(
+            "Information related to the receiver flow. "
+            "Present if the source is a receiver (`flow` is `receiver`)."
+        ),
     )
     redirect = JSONField(
         null=True,
         blank=True,
-        help_text="Information related to the redirect flow. "
-        "Present if the source is authenticated by a redirect (`flow` is `redirect`).",
+        help_text=(
+            "Information related to the redirect flow. Present if the source is"
+            " authenticated by a redirect (`flow` is `redirect`)."
+        ),
     )
 
     source_data = JSONField(help_text="The data corresponding to the source type.")
@@ -467,16 +672,27 @@ class Source(StripeModel):
     stripe_class = stripe.Source
     stripe_dashboard_item_name = "sources"
 
+    def __str__(self):
+        return f"{self.type} {self.id}"
+
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
         # The source_data dict is an alias of all the source types
         data["source_data"] = data[data["type"]]
         return data
 
-    def _attach_objects_hook(self, cls, data, current_ids=None):
-        customer = cls._stripe_object_to_customer(
-            target_cls=Customer, data=data, current_ids=current_ids
-        )
+    def _attach_objects_hook(
+        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
+    ):
+        customer = None
+        # "customer" key could be like "cus_6lsBvm5rJ0zyHc" or {"id": "cus_6lsBvm5rJ0zyHc"}
+        customer_id = get_id_from_stripe_data(data.get("customer"))
+
+        if current_ids is None or customer_id not in current_ids:
+            customer = cls._stripe_object_to_customer(
+                target_cls=Customer, data=data, current_ids=current_ids, api_key=api_key
+            )
+
         if customer:
             self.customer = customer
         else:
@@ -489,140 +705,161 @@ class Source(StripeModel):
 
         # First, wipe default source on all customers that use this.
         Customer.objects.filter(default_source=self.id).update(default_source=None)
-
+        api_key = self.default_api_key
         try:
             # TODO - we could use the return value of sync_from_stripe_data
             #  or call its internals - self._sync/_attach_objects_hook etc here
             #  to update `self` at this point?
-            self.sync_from_stripe_data(self.api_retrieve().detach())
+            self.sync_from_stripe_data(
+                self.api_retrieve(api_key=api_key).detach(), api_key=api_key
+            )
             return True
-        except (InvalidRequestError, NotImplementedError):
+        except InvalidRequestError:
             # The source was already detached. Resyncing.
-            # NotImplementedError is an artifact of stripe-python<2.0
-            # https://github.com/stripe/stripe-python/issues/376
-            self.sync_from_stripe_data(self.api_retrieve())
+            self.sync_from_stripe_data(
+                self.api_retrieve(api_key=self.default_api_key),
+                api_key=self.default_api_key,
+            )
             return False
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        See Stripe documentation for accepted kwargs for each object.
+        :returns: an iterator over all items in the query
+        """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
+        return Customer.stripe_class.list_sources(
+            object="source",
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        ).auto_paging_iter()
+
+
+class SourceTransaction(StripeModel):
+    """
+    Stripe documentation: https://stripe.com/docs/sources/ach-credit-transfer#source-transactions
+    """
+
+    stripe_class = stripe.SourceTransaction
+    stripe_dashboard_item_name = "source_transactions"
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        See Stripe documentation for accepted kwargs for each object.
+        :returns: an iterator over all items in the query
+        """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
+        source = kwargs.pop("id", None)
+        if not source:
+            raise KeyError("Source Object ID is missing")
+
+        return stripe.Source.list_source_transactions(
+            source, api_key=api_key, **kwargs
+        ).auto_paging_iter()
+
+    @property
+    def amount(self) -> int:
+        return self.stripe_data.get("amount")
+
+    @property
+    def currency(self) -> str:
+        return self.stripe_data.get("currency", "")
+
+    @property
+    def source(self) -> Optional[Source]:
+        source_id = get_id_from_stripe_data(self.stripe_data.get("source"))
+        return Source.objects.get(id=source_id)
+
+    @property
+    def status(self) -> str:
+        return self.stripe_data.get("status", "")
+
+    def api_retrieve(self, api_key=None, stripe_account=None):
+        """
+        Call the stripe API's retrieve operation for this model.
+
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+        :param stripe_account: The optional connected account \
+            for which this request is being made.
+        :type stripe_account: string
+        """
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        for source_trx in SourceTransaction.api_list(
+            id=self.source.id, api_key=api_key, stripe_account=stripe_account
+        ):
+            if source_trx.id == self.id:
+                return source_trx
+
+    def get_stripe_dashboard_url(self) -> str:
+        """Get the stripe dashboard url for this object."""
+        if (
+            not self.stripe_dashboard_item_name
+            or not self.id
+            or not self.source
+            or not self.source.id
+        ):
+            return ""
+        else:
+            return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
 
 
 class PaymentMethod(StripeModel):
     """
-    Stripe documentation: https://stripe.com/docs/api#payment_methods
+    PaymentMethod objects represent your customer's payment instruments.
+    You can use them with PaymentIntents to collect payments or save them
+    to Customer objects to store instrument details for future payments.
+
+    Stripe documentation: https://stripe.com/docs/api?lang=python#payment_methods
     """
 
     stripe_class = stripe.PaymentMethod
-    description = None
 
-    billing_details = JSONField(
-        help_text=(
-            "Billing information associated with the PaymentMethod that may be used or "
-            "required by particular types of payment methods."
-        )
-    )
-    customer = StripeForeignKey(
-        "Customer",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="payment_methods",
-        help_text=(
-            "Customer to which this PaymentMethod is saved. "
-            "This will not be set when the PaymentMethod has "
-            "not been saved to a Customer."
-        ),
-    )
-    type = StripeEnumField(
-        enum=enums.PaymentMethodType,
-        help_text="The type of the PaymentMethod.",
-    )
-    alipay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `alipay`",
-    )
-    au_becs_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `au_becs_debit`",
-    )
-    bacs_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `bacs_debit`",
-    )
-    bancontact = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `bancontact`",
-    )
-    card = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `card`",
-    )
-    card_present = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `card_present`",
-    )
-    eps = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `eps`",
-    )
-    fpx = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `fpx`",
-    )
-    giropay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `giropay`",
-    )
-    ideal = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `ideal`",
-    )
-    interac_present = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Additional information for payment methods of type `interac_present`"
-        ),
-    )
-    oxxo = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `oxxo`",
-    )
-    p24 = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `p24`",
-    )
-    sepa_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `sepa_debit`",
-    )
-    sofort = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `sofort`",
-    )
+    @property
+    def customer(self) -> Optional["Customer"]:
+        customer_id = get_id_from_stripe_data(self.stripe_data.get("customer"))
+        if customer_id:
+            return Customer.objects.get(id=customer_id)
 
-    def _attach_objects_hook(self, cls, data, current_ids=None):
-        customer = None
-        if current_ids is None or data.get("customer") not in current_ids:
-            customer = cls._stripe_object_to_customer(
-                target_cls=Customer, data=data, current_ids=current_ids
-            )
+    @property
+    def type(self) -> enums.PaymentMethodType:
+        type = self.stripe_data["type"]
+        return getattr(enums.PaymentMethodType, type)
 
-        if customer:
-            self.customer = customer
-        else:
-            self.customer = None
+    @property
+    def last4(self):
+        payment_method_data = self.stripe_data.get(self.type, {})
+        return payment_method_data.get("last4", "")
+
+    def __str__(self):
+        humanized = enums.PaymentMethodType.humanize(self.type)
+        if self.last4:
+            return f"{humanized} ending in {self.last4}"
+        return humanized
+
+    def get_stripe_dashboard_url(self) -> str:
+        if self.customer:
+            return self.customer.get_stripe_dashboard_url()
+        return ""
 
     @classmethod
     def attach(
@@ -651,7 +888,7 @@ class PaymentMethod(StripeModel):
         stripe_payment_method = stripe.PaymentMethod.attach(
             payment_method, customer=customer, **extra_kwargs
         )
-        return cls.sync_from_stripe_data(stripe_payment_method)
+        return cls.sync_from_stripe_data(stripe_payment_method, api_key=api_key)
 
     def detach(self):
         """

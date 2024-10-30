@@ -5,7 +5,10 @@ Utility functions related to the djstripe app.
 import datetime
 from typing import Optional
 
+import stripe
+from django.apps import apps
 from django.conf import settings
+from django.contrib.humanize.templatetags.humanize import intcomma
 from django.db.models.query import QuerySet
 from django.utils import timezone
 
@@ -18,14 +21,10 @@ def get_supported_currency_choices(api_key):
     :param api_key: The api key associated with the account from which to pull data.
     :type api_key: str
     """
-    import stripe
-
-    stripe.api_key = api_key
-
-    account = stripe.Account.retrieve()
-    supported_payment_currencies = stripe.CountrySpec.retrieve(account["country"])[
-        "supported_payment_currencies"
-    ]
+    account = stripe.Account.retrieve(api_key=api_key)
+    supported_payment_currencies = stripe.CountrySpec.retrieve(
+        account["country"], api_key=api_key
+    )["supported_payment_currencies"]
 
     return [(currency, currency.upper()) for currency in supported_payment_currencies]
 
@@ -46,7 +45,7 @@ def convert_tstamp(response) -> Optional[datetime.datetime]:
         return response
 
     # Overrides the set timezone to UTC - I think...
-    tz = timezone.utc if settings.USE_TZ else None
+    tz = get_timezone_utc() if settings.USE_TZ else None
 
     return datetime.datetime.fromtimestamp(response, tz)
 
@@ -58,15 +57,14 @@ CURRENCY_SIGILS = {"CAD": "$", "EUR": "€", "GBP": "£", "USD": "$"}
 def get_friendly_currency_amount(amount, currency: str) -> str:
     currency = currency.upper()
     sigil = CURRENCY_SIGILS.get(currency, "")
-    return "{sigil}{amount:.2f} {currency}".format(
-        sigil=sigil, amount=amount, currency=currency
-    )
+    amount_two_decimals = f"{amount:.2f}"
+    return f"{sigil}{intcomma(amount_two_decimals)} {currency}"
 
 
 class QuerySetMock(QuerySet):
     """
     A mocked QuerySet class that does not handle updates.
-    Used by UpcomingInvoice.invoiceitems.
+    Used by UpcomingInvoice.invoiceitems (deprecated) and UpcomingInvoice.lineitems.
     """
 
     @classmethod
@@ -84,3 +82,44 @@ class QuerySetMock(QuerySet):
 
     def delete(self):
         return 0
+
+
+def get_id_from_stripe_data(data):
+    """
+    Extract stripe id from stripe field data
+    """
+
+    if isinstance(data, str):
+        # data like "sub_6lsC8pt7IcFpjA"
+        return data
+    elif data:
+        # data like {"id": sub_6lsC8pt7IcFpjA", ...}
+        return data.get("id")
+    else:
+        return None
+
+
+def get_model(model_name):
+    app_label = "djstripe"
+    app_config = apps.get_app_config(app_label)
+    model = app_config.get_model(model_name)
+    return model
+
+
+def get_queryset(pks, model_name):
+    model = get_model(model_name)
+    return model.objects.filter(pk__in=pks)
+
+
+def get_timezone_utc():
+    """
+    Returns UTC attribute in a backwards compatible way.
+
+    UTC attribute has been moved from django.utils.timezone module to
+    datetime.timezone class
+    """
+    try:
+        # Django 4+
+        return datetime.timezone.utc
+    except AttributeError:
+        return timezone.utc

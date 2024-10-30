@@ -3,10 +3,13 @@ from base64 import b64encode
 from uuid import uuid4
 
 from django.core.validators import RegexValidator
-from django.db import models
+from django.db import IntegrityError, models, transaction
+from django.forms import ValidationError
 
 from ..enums import APIKeyType
+from ..exceptions import InvalidStripeAPIKey
 from ..fields import StripeEnumField
+from ..settings import djstripe_settings
 from .base import StripeModel
 
 # A regex to validate API key format
@@ -22,7 +25,7 @@ def generate_api_key_id() -> str:
 def get_api_key_details_by_prefix(api_key: str):
     sre = re.match(API_KEY_REGEX, api_key)
     if not sre:
-        raise ValueError(f"Invalid API key: {api_key!r}")
+        raise InvalidStripeAPIKey(f"Invalid API key: {api_key!r}")
 
     key_type = {
         "pk": APIKeyType.publishable,
@@ -61,10 +64,7 @@ class APIKey(StripeModel):
     )
 
     livemode = models.BooleanField(
-        help_text=(
-            "Whether the key is valid for live or test mode. "
-            "This is automatically detected when saved."
-        ),
+        help_text="Whether the key is valid for live or test mode."
     )
     description = None
     metadata = None
@@ -76,41 +76,44 @@ class APIKey(StripeModel):
     def __str__(self):
         return self.name or self.secret_redacted
 
-    def _clean_livemode_and_type(self):
-        if self.livemode is None or self.type is None:
-            self.type, self.livemode = get_api_key_details_by_prefix(self.secret)
-
     def clean(self):
-        self._clean_livemode_and_type()
-        if not self.djstripe_owner_account:
-            self.refresh_account()
-        return super().clean()
-
-    def save(self, *args, **kwargs):
-        self._clean_livemode_and_type()
-        if not self.djstripe_owner_account:
-            self.refresh_account(commit=False)
-        return super().save(*args, **kwargs)
+        if self.livemode is None or self.type is None:
+            try:
+                self.type, self.livemode = get_api_key_details_by_prefix(self.secret)
+            except InvalidStripeAPIKey as e:
+                raise ValidationError(str(e))
 
     def refresh_account(self, commit=True):
         from .account import Account
 
-        if self.type != APIKeyType.secret:
+        if self.type not in (
+            APIKeyType.secret,
+            APIKeyType.restricted,
+        ):
             return
 
-        account_data = Account.stripe_class.retrieve(api_key=self.secret)
+        account_data = Account.stripe_class.retrieve(
+            api_key=self.secret,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+        )
         # NOTE: Do not immediately use _get_or_create_from_stripe_object() here.
         # Account needs to exist for things to work. Make a stub if necessary.
         account, created = Account.objects.get_or_create(
             id=account_data["id"],
-            defaults={"charges_enabled": False, "details_submitted": False},
         )
         if created:
             # If it's just been created, now we can sync the account.
-            Account.sync_from_stripe_data(account_data)
+            Account.sync_from_stripe_data(account_data, api_key=self.secret)
         self.djstripe_owner_account = account
         if commit:
-            self.save()
+            try:
+                # for non-existent accounts, due to djstripe_owner_account search for the
+                # accounts themselves, trigerred by this method, the APIKey gets created before this method
+                # can "commit". This results in an Integrity Error
+                with transaction.atomic():
+                    self.save()
+            except IntegrityError:
+                pass
 
     @property
     def secret_redacted(self) -> str:

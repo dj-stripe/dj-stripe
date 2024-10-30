@@ -1,0 +1,17 @@
+{
+    "id": "srctxn_fakefakefakefakefake0001",
+    "object": "source_transaction",
+    "amount": "10.00",
+    "ach_credit_transfer": {
+        "routing_number": "110000000",
+        "last4": "2a66",
+        "fingerprint": "vGgb45HU7iWwfB6j"
+    },
+    "created": 1557995173,
+    "currency": "usd",
+    "customer_data": "some customer defined string",
+    "livemode": false,
+    "status": "succeeded",
+    "source": "src_fakefakefakefakefake0001",
+    "djstripe_owner_account": "acct_1Fg9jUA3kq9o1aTc"
+}

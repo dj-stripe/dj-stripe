@@ -55,6 +55,7 @@
             {
                 "id": "card_fakefakefakefakefake0001",
                 "object": "card",
+                "account": null,
                 "address_city": null,
                 "address_country": null,
                 "address_line1": null,
@@ -80,8 +81,9 @@
                 "tokenization_method": null
             },
             {
-                "id": "card_fakefakefakefakefake0005",
+                "id": "card_fakefakefakefakefake0003",
                 "object": "card",
+                "account": null,
                 "address_city": null,
                 "address_country": null,
                 "address_line1": null,
@@ -101,7 +103,7 @@
                 "funding": "credit",
                 "last4": "4242",
                 "metadata": {
-                    "djstripe_test_fake_id": "card_fakefakefakefakefake0005"
+                    "djstripe_test_fake_id": "card_fakefakefakefakefake0003"
                 },
                 "name": null,
                 "tokenization_method": null

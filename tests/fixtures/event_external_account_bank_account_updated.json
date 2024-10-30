@@ -1,0 +1,35 @@
+{
+  "id": "evt_1IuKmFQveW0ONQsdEAB1O64Y",
+  "object": "event",
+  "account": "acct_1IuHosQveW0ONQsd",
+  "api_version": "2020-08-27",
+  "created": 1621789667,
+  "data": {
+      "object": {
+          "id": "ba_1IuVozQveW0ONQsd3dWG85e2",
+          "object": "bank_account",
+          "account": "acct_1IuHosQveW0ONQsd",
+          "account_holder_name": "Jenny Rosen-Updated",
+          "account_holder_type": "individual",
+          "available_payout_methods": [
+              "standard"
+          ],
+          "bank_name": "STRIPE TEST BANK",
+          "country": "US",
+          "currency": "usd",
+          "default_for_currency": false,
+          "fingerprint": "OAI2ZEI2iIJVbF1o",
+          "last4": "1116",
+          "metadata": {},
+          "routing_number": "110000000",
+          "status": "verified"
+      }
+  },
+  "livemode": false,
+  "pending_webhooks": 2,
+  "request": {
+      "id": "req_mIvRpJ6b3Y2pOW",
+      "idempotency_key": null
+  },
+  "type": "account.external_account.updated"
+}

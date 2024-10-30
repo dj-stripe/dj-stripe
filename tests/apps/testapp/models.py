@@ -3,13 +3,13 @@ from django.db.models.fields import CharField, EmailField
 
 
 class Organization(Model):
-    """ Model used to test the new custom model setting."""
+    """Model used to test the new custom model setting."""
 
     email = EmailField()
 
 
 class StaticEmailOrganization(Model):
-    """ Model used to test the new custom model setting."""
+    """Model used to test the new custom model setting."""
 
     name = CharField(max_length=200, unique=True)
 
@@ -19,6 +19,6 @@ class StaticEmailOrganization(Model):
 
 
 class NoEmailOrganization(Model):
-    """ Model used to test the new custom model setting."""
+    """Model used to test the new custom model setting."""
 
     name = CharField(max_length=200, unique=True)

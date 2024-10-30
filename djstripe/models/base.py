@@ -1,27 +1,94 @@
 import logging
 import uuid
 from datetime import timedelta
-from typing import List, Optional
+from typing import Dict, List, Optional, Type
 
-import stripe
-from django.apps import apps
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
-from django.utils.encoding import smart_str
-from stripe.api_resources.abstract.api_resource import APIResource
-from stripe.error import InvalidRequestError
+from stripe import (
+    APIResource,
+    InvalidRequestError,
+    StripeObject,
+    convert_to_stripe_object,
+)
 
-from .. import settings as djstripe_settings
-from ..fields import JSONField, StripeDateTimeField, StripeForeignKey, StripeIdField
+from ..exceptions import ImpossibleAPIRequest
+from ..fields import (
+    JSONField,
+    StripeDateTimeField,
+    StripeForeignKey,
+    StripeIdField,
+    StripePercentField,
+)
 from ..managers import StripeModelManager
+from ..settings import djstripe_settings
+from ..utils import get_id_from_stripe_data
 
 logger = logging.getLogger(__name__)
 
 
-class StripeModel(models.Model):
+class StripeBaseModel(models.Model):
+    stripe_class: Type[APIResource] = APIResource
+
+    djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
+    djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
+    stripe_data = JSONField(default=dict)
+
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def get_expand_params(cls, api_key, **kwargs):
+        """Populate `expand` kwarg in stripe api calls by updating the kwargs passed."""
+        # To avoid Circular Import Error
+        from djstripe.management.commands.djstripe_sync_models import Command
+
+        # As api_list is a class method we will never get the stripe account unless we
+        # default to the owner account of the api_key. But even that is pointless as we only care about expand
+        # So no need to make a call to Stripe and again do an account object sync which would make
+        # no sense if this is for a Stripe Connected Account
+        expand = Command.get_default_list_kwargs(
+            cls, {kwargs.get("stripe_account", "acct_fake")}, api_key
+        )[0].get("expand", [])
+
+        # Add expand to the provided list
+        if kwargs.get("expand"):
+            kwargs["expand"].extend(expand)
+        else:
+            kwargs["expand"] = expand
+
+        # Keep only unique elements
+        # Sort it to ensure the items are returned in the same order
+        kwargs["expand"] = sorted(list(set(kwargs["expand"])))
+
+        return kwargs
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Call the stripe API's list operation for this model.
+
+        :param api_key: The api key to use for this request. \
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
+        :type api_key: string
+
+        See Stripe documentation for accepted kwargs for each object.
+
+        :returns: an iterator over all items in the query
+        """
+        # Update kwargs with `expand` param
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+
+        return cls.stripe_class.list(
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        ).auto_paging_iter()
+
+
+class StripeModel(StripeBaseModel):
     # This must be defined in descendants of this model/mixin
     # e.g. Event, Charge, Customer, etc.
-    stripe_class: Optional[APIResource] = None
     expand_fields: List[str] = []
     stripe_dashboard_item_name = ""
 
@@ -46,9 +113,11 @@ class StripeModel(models.Model):
         null=True,
         default=None,
         blank=True,
-        help_text="Null here indicates that the livemode status is unknown or was "
-        "previously unrecorded. Otherwise, this field indicates whether this record "
-        "comes from Stripe test mode or live mode operation.",
+        help_text=(
+            "Null here indicates that the livemode status is unknown or was previously"
+            " unrecorded. Otherwise, this field indicates whether this record comes"
+            " from Stripe test mode or live mode operation."
+        ),
     )
     created = StripeDateTimeField(
         null=True,
@@ -58,18 +127,17 @@ class StripeModel(models.Model):
     metadata = JSONField(
         null=True,
         blank=True,
-        help_text="A set of key/value pairs that you can attach to an object. "
-        "It can be useful for storing additional information about an object in "
-        "a structured format.",
+        help_text=(
+            "A set of key/value pairs that you can attach to an object. "
+            "It can be useful for storing additional information about an object in "
+            "a structured format."
+        ),
     )
     description = models.TextField(
         null=True, blank=True, help_text="A description of this object."
     )
 
-    djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
-    djstripe_updated = models.DateTimeField(auto_now=True, editable=False)
-
-    class Meta:
+    class Meta(StripeBaseModel.Meta):
         abstract = True
         get_latest_by = "created"
 
@@ -79,27 +147,24 @@ class StripeModel(models.Model):
             if self.djstripe_owner_account
             else ""
         )
-        return "https://dashboard.stripe.com/{}{}".format(
-            owner_path_prefix, "test/" if not self.livemode else ""
-        )
+        suffix = "test/" if not self.livemode else ""
+        return f"https://dashboard.stripe.com/{owner_path_prefix}{suffix}"
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
         if not self.stripe_dashboard_item_name or not self.id:
             return ""
         else:
-            return "{base_url}{item}/{id}".format(
-                base_url=self._get_base_stripe_dashboard_url(),
-                item=self.stripe_dashboard_item_name,
-                id=self.id,
-            )
+            base_url = self._get_base_stripe_dashboard_url()
+            item = self.stripe_dashboard_item_name
+            return f"{base_url}{item}/{self.id}"
 
     @property
     def default_api_key(self) -> str:
         # If the class is abstract (StripeModel), fall back to default key.
         if not self._meta.abstract:
             if self.djstripe_owner_account:
-                return self.djstripe_owner_account.get_default_api_key()
+                return self.djstripe_owner_account.get_default_api_key(self.livemode)
         return djstripe_settings.get_default_api_key(self.livemode)
 
     def _get_stripe_account_id(self, api_key=None) -> Optional[str]:
@@ -107,12 +172,14 @@ class StripeModel(models.Model):
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
         :type stripe_account: string
         """
+        from djstripe.models import Account
+
         api_key = api_key or self.default_api_key
 
         try:
@@ -127,11 +194,9 @@ class StripeModel(models.Model):
         reverse_account_relations = (
             field
             for field in self._meta.get_fields(include_parents=True)
-            if field.is_relation and field.one_to_many
-            # Avoid circular import problems by using the app registry to
-            # get the model class rather than a direct import.
-            and field.related_model
-            is apps.get_model(app_label="djstripe", model_name="account")
+            if field.is_relation
+            and field.one_to_many
+            and field.related_model is Account
         )
 
         # Handle case where we have a reverse relation to Account and should pass
@@ -139,10 +204,15 @@ class StripeModel(models.Model):
         for field in reverse_account_relations:
             # Grab the related object, using the first one we find.
             reverse_lookup_attr = field.get_accessor_name()
-            account = getattr(self, reverse_lookup_attr).first()
-
-            if account is not None:
-                return account.id
+            try:
+                account = getattr(self, reverse_lookup_attr).first()
+            except ValueError:
+                if isinstance(self, Account):
+                    # return the id if self is the Account model itself.
+                    return self.id
+            else:
+                if account is not None:
+                    return account.id
 
         return None
 
@@ -151,41 +221,28 @@ class StripeModel(models.Model):
         Call the stripe API's retrieve operation for this model.
 
         :param api_key: The api key to use for this request. \
-            Defaults to settings.STRIPE_SECRET_KEY.
+            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         :param stripe_account: The optional connected account \
             for which this request is being made.
         :type stripe_account: string
         """
+        api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
         return self.stripe_class.retrieve(
             id=self.id,
-            api_key=api_key or self.default_api_key,
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
             expand=self.expand_fields,
             stripe_account=stripe_account,
         )
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
-        """
-        Call the stripe API's list operation for this model.
-
-        :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
-        :type api_key: string
-
-        See Stripe documentation for accepted kwargs for each object.
-
-        :returns: an iterator over all items in the query
-        """
-
-        return cls.stripe_class.list(api_key=api_key, **kwargs).auto_paging_iter()
-
-    @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(cls, api_key=None, **kwargs):
         """
         Call the stripe API's create operation for this model.
 
@@ -193,8 +250,14 @@ class StripeModel(models.Model):
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
         """
+        livemode = kwargs.pop("livemode", djstripe_settings.STRIPE_LIVE_MODE)
+        api_key = api_key or djstripe_settings.get_default_api_key(livemode=livemode)
 
-        return cls.stripe_class.create(api_key=api_key, **kwargs)
+        return cls.stripe_class.create(
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        )
 
     def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
         """
@@ -208,12 +271,17 @@ class StripeModel(models.Model):
         :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return self.api_retrieve(api_key=api_key, stripe_account=stripe_account).delete(
-            **kwargs
+        return self.stripe_class.delete(
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
         )
 
     def _api_update(self, api_key=None, stripe_account=None, **kwargs):
@@ -228,18 +296,18 @@ class StripeModel(models.Model):
         :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
+
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        instance = self.api_retrieve(api_key=api_key, stripe_account=stripe_account)
-        return instance.request("post", instance.instance_url(), params=kwargs)
-
-    def str_parts(self) -> List[str]:
-        """
-        Extend this to add information to the string representation of the object
-        """
-        return ["id={id}".format(id=self.id)]
+        return self.stripe_class.modify(
+            self.id,
+            api_key=api_key,
+            stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        )
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
@@ -251,12 +319,40 @@ class StripeModel(models.Model):
         return data
 
     @classmethod
-    def _find_owner_account(cls, data):
-        api_key = getattr(data, "api_key", "")
-        if api_key:
-            from .account import Account
+    def _find_owner_account(cls, data, api_key=None, livemode=None):
+        """
+        Fetches the Stripe Account (djstripe_owner_account model field)
+        linked to the class, cls.
+        Tries to retreive using the Stripe_account if given.
+        Otherwise uses the api_key.
+        """
+        from .account import Account
 
-            return Account.get_or_retrieve_for_api_key(api_key)
+        if livemode is None:
+            livemode = djstripe_settings.STRIPE_LIVE_MODE
+        api_key = api_key or djstripe_settings.get_default_api_key(livemode)
+
+        # try to fetch by stripe_account. Also takes care of Stripe Connected Accounts
+        if data:
+            # case of Webhook Event Trigger
+            if data.get("object") == "event":
+                # if account key exists and has a not null value
+                stripe_account_id = get_id_from_stripe_data(data.get("account"))
+                if stripe_account_id:
+                    return Account._get_or_retrieve(
+                        id=stripe_account_id, api_key=api_key
+                    )
+
+            else:
+                stripe_account = getattr(data, "stripe_account", None)
+                stripe_account_id = get_id_from_stripe_data(stripe_account)
+                if stripe_account_id:
+                    return Account._get_or_retrieve(
+                        id=stripe_account_id, api_key=api_key
+                    )
+
+        # try to fetch by the given api_key.
+        return Account.get_or_retrieve_for_api_key(api_key)
 
     @classmethod
     def _stripe_object_to_record(
@@ -265,7 +361,8 @@ class StripeModel(models.Model):
         current_ids=None,
         pending_relations: list = None,
         stripe_account: str = None,
-    ) -> dict:
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+    ) -> Dict:
         """
         This takes an object, as it is formatted in Stripe's current API for our object
         type. In return, it provides a dict. The dict can be used to create a record or
@@ -283,33 +380,60 @@ class StripeModel(models.Model):
             for which this request is being made.
         :return: All the members from the input, translated, mutated, etc
         """
-        manipulated_data = cls._manipulate_stripe_object_hook(data)
+        from .webhooks import WebhookEndpoint
 
-        if not cls.is_valid_object(data):
+        manipulated_data = cls._manipulate_stripe_object_hook(data)
+        if not cls.is_valid_object(manipulated_data):
             raise ValueError(
                 "Trying to fit a %r into %r. Aborting."
-                % (data.get("object", ""), cls.__name__)
+                % (manipulated_data.get("object", ""), cls.__name__)
             )
 
-        result = {}
+        # By default we put the  raw stripe data in the stripe_data json field
+        result = {"stripe_data": data}
+
         if current_ids is None:
             current_ids = set()
 
         # Iterate over all the fields that we know are related to Stripe,
         # let each field work its own magic
-        ignore_fields = ["date_purged", "subscriber"]  # XXX: Customer hack
-        for field in cls._meta.fields:
+        ignore_fields = [
+            "date_purged",
+            "subscriber",
+            "stripe_data",
+        ]  # XXX: Customer hack
+
+        # get all forward and reverse relations for given cls
+        for field in cls._meta.get_fields():
             if field.name.startswith("djstripe_") or field.name in ignore_fields:
                 continue
-            if isinstance(field, models.ForeignKey):
-                field_data, skip = cls._stripe_object_field_to_foreign_key(
+
+            # todo add support reverse ManyToManyField sync
+            if isinstance(
+                field, (models.ManyToManyRel, models.ManyToOneRel)
+            ) and not isinstance(field, models.OneToOneRel):
+                # We don't currently support syncing from
+                # reverse side of Many relationship
+                continue
+
+            # todo for ManyToManyField one would also need to handle the case of an intermediate model being used
+            # todo add support ManyToManyField sync
+            if field.many_to_many:
+                # We don't currently support syncing ManyToManyField
+                continue
+
+            # will work for Forward FK and OneToOneField relations and reverse OneToOneField relations
+            if isinstance(field, (models.ForeignKey, models.OneToOneRel)):
+                field_data, skip, is_nulled = cls._stripe_object_field_to_foreign_key(
                     field=field,
                     manipulated_data=manipulated_data,
                     current_ids=current_ids,
                     pending_relations=pending_relations,
                     stripe_account=stripe_account,
+                    api_key=api_key,
                 )
-                if skip:
+
+                if skip and not is_nulled:
                     continue
             else:
                 if hasattr(field, "stripe_to_db"):
@@ -321,38 +445,24 @@ class StripeModel(models.Model):
                     isinstance(field, (models.CharField, models.TextField))
                     and field_data is None
                 ):
-                    # TODO - this applies to StripeEnumField as well, since it
-                    #  sub-classes CharField, is that intentional?
-                    field_data = ""
+                    # do not add empty secret field for WebhookEndpoint model
+                    # as stripe does not return the secret except for the CREATE call
+                    if cls is WebhookEndpoint and field.name == "secret":
+                        continue
+                    else:
+                        # TODO - this applies to StripeEnumField as well, since it
+                        #  sub-classes CharField, is that intentional?
+                        field_data = ""
 
             result[field.name] = field_data
 
         # For all objects other than the account object itself, get the API key
         # attached to the request, and get the matching Account for that key.
-        owner_account = cls._find_owner_account(data)
+        owner_account = cls._find_owner_account(data, api_key=api_key)
         if owner_account:
             result["djstripe_owner_account"] = owner_account
 
         return result
-
-    @classmethod
-    def _id_from_data(cls, data):
-        """
-        Extract stripe id from stripe field data
-        :param data:
-        :return:
-        """
-
-        if isinstance(data, str):
-            # data like "sub_6lsC8pt7IcFpjA"
-            id_ = data
-        elif data:
-            # data like {"id": sub_6lsC8pt7IcFpjA", ...}
-            id_ = data.get("id")
-        else:
-            id_ = None
-
-        return id_
 
     @classmethod
     def _stripe_object_field_to_foreign_key(
@@ -362,6 +472,7 @@ class StripeModel(models.Model):
         current_ids=None,
         pending_relations=None,
         stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
         """
         This converts a stripe API field to the dj stripe object it references,
@@ -380,18 +491,36 @@ class StripeModel(models.Model):
         :type stripe_account: string
         :return:
         """
+        from djstripe.models import DjstripePaymentMethod
+
         field_data = None
         field_name = field.name
-        raw_field_data = manipulated_data.get(field_name)
         refetch = False
         skip = False
+        # a flag to indicate if the given field is null upstream on Stripe
+        is_nulled = False
 
-        if issubclass(field.related_model, StripeModel):
-            id_ = cls._id_from_data(raw_field_data)
+        if current_ids is None:
+            current_ids = set()
 
-            if not raw_field_data:
+        if issubclass(field.related_model, (StripeModel, DjstripePaymentMethod)):
+            if field_name in manipulated_data:
+                raw_field_data = manipulated_data.get(field_name)
+
+                # field's value is None. Skip syncing but set as None.
+                # Otherwise nulled FKs sync gets skipped.
+                if not raw_field_data:
+                    is_nulled = True
+                    skip = True
+
+            else:
+                # field does not exist in manipulated_data dict. Skip Syncing
                 skip = True
-            elif id_ == raw_field_data:
+                raw_field_data = None
+
+            id_ = get_id_from_stripe_data(raw_field_data)
+
+            if id_ == raw_field_data:
                 # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
                 refetch = True
             else:
@@ -407,29 +536,58 @@ class StripeModel(models.Model):
                     pending_relations.append((object_id, field, id_))
                 skip = True
 
-            if not skip:
-                field_data, _ = field.related_model._get_or_create_from_stripe_object(
-                    manipulated_data,
-                    field_name,
-                    refetch=refetch,
-                    current_ids=current_ids,
-                    pending_relations=pending_relations,
-                    stripe_account=stripe_account,
-                )
+            # sync only if field exists and is not null
+            if not skip and not is_nulled:
+                # add the id of the current object to the list
+                # of ids being processed.
+                # This will avoid infinite recursive syncs in case a relatedmodel
+                # requests the same object
+                current_ids.add(id_)
+
+                try:
+                    (
+                        field_data,
+                        _,
+                    ) = field.related_model._get_or_create_from_stripe_object(
+                        manipulated_data,
+                        field_name,
+                        refetch=refetch,
+                        current_ids=current_ids,
+                        pending_relations=pending_relations,
+                        stripe_account=stripe_account,
+                        api_key=api_key,
+                    )
+                except ImpossibleAPIRequest:
+                    # Found to happen in the following situation:
+                    # Customer has a `default_source` set to a `card_` object,
+                    # and neither the Customer nor the Card are present in db.
+                    # This skip is a hack, but it will prevent a crash.
+                    skip = True
+
+                # Remove the id of the current object from the list
+                # after it has been created or retrieved
+                current_ids.remove(id_)
+
         else:
             # eg PaymentMethod, handled in hooks
             skip = True
 
-        return field_data, skip
+        return field_data, skip, is_nulled
 
     @classmethod
     def is_valid_object(cls, data):
         """
         Returns whether the data is a valid object for the class
         """
-        return "object" in data and data["object"] == cls.stripe_class.OBJECT_NAME
+        # .OBJECT_NAME will not exist on the base type itself
+        object_name: str = getattr(cls.stripe_class, "OBJECT_NAME", "")
+        if not object_name:
+            return False
+        return data and data.get("object") == object_name
 
-    def _attach_objects_hook(self, cls, data, current_ids=None):
+    def _attach_objects_hook(
+        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
+    ):
         """
         Gets called by this object's create and sync methods just before save.
         Use this to populate fields before the model is saved.
@@ -443,7 +601,13 @@ class StripeModel(models.Model):
 
         pass
 
-    def _attach_objects_post_save_hook(self, cls, data, pending_relations=None):
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
         """
         Gets called by this object's create and sync methods just after save.
         Use this to populate fields after the model is saved.
@@ -462,12 +626,18 @@ class StripeModel(models.Model):
                     # the target instance now exists
                     target = field.model.objects.get(id=object_id)
                     setattr(target, field.name, self)
-                    target.save()
+                    if isinstance(field, models.OneToOneRel):
+                        # this is a reverse relationship, so the relation exists on self
+                        self.save()
+                    else:
+                        # this is a forward relation on the target,
+                        # so we need to save it
+                        target.save()
 
-                    # reload so that indirect relations back to this object
-                    # eg self.charge.invoice = self are set
-                    # TODO - reverse the field reference here to avoid hitting the DB?
-                    self.refresh_from_db()
+                        # reload so that indirect relations back to this object
+                        # eg self.charge.invoice = self are set
+                        # TODO - reverse the field reference here to avoid hitting the DB?
+                        self.refresh_from_db()
                 else:
                     unprocessed_pending_relations.append(post_save_relation)
 
@@ -483,6 +653,7 @@ class StripeModel(models.Model):
         pending_relations=None,
         save=True,
         stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
         """
         Instantiates a model instance using the provided data object received
@@ -501,26 +672,39 @@ class StripeModel(models.Model):
         :type stripe_account: string
         :returns: The instantiated object.
         """
-        instance = cls(
-            **cls._stripe_object_to_record(
-                data,
-                current_ids=current_ids,
-                pending_relations=pending_relations,
-                stripe_account=stripe_account,
+        stripe_data = cls._stripe_object_to_record(
+            data,
+            current_ids=current_ids,
+            pending_relations=pending_relations,
+            stripe_account=stripe_account,
+            api_key=api_key,
+        )
+        try:
+            id_ = get_id_from_stripe_data(stripe_data)
+            if id_ is not None:
+                instance = cls.stripe_objects.get(id=id_)
+            else:
+                # Raise error on purpose to resume the _create_from_stripe_object flow
+                raise cls.DoesNotExist
+
+        except cls.DoesNotExist:
+            # try to create iff instance doesn't already exist in the DB
+            # TODO dictionary unpacking will not work if cls has any ManyToManyField
+            instance = cls(**stripe_data)
+
+            instance._attach_objects_hook(
+                cls, data, api_key=api_key, current_ids=current_ids
             )
-        )
-        instance._attach_objects_hook(cls, data, current_ids=current_ids)
 
-        if save:
-            instance.save(force_insert=True)
+            if save:
+                instance.save()
 
-        instance._attach_objects_post_save_hook(
-            cls, data, pending_relations=pending_relations
-        )
+            instance._attach_objects_post_save_hook(
+                cls, data, api_key=api_key, pending_relations=pending_relations
+            )
 
         return instance
 
-    # flake8: noqa (C901)
     @classmethod
     def _get_or_create_from_stripe_object(
         cls,
@@ -531,6 +715,7 @@ class StripeModel(models.Model):
         pending_relations=None,
         save=True,
         stripe_account=None,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
         """
 
@@ -551,23 +736,20 @@ class StripeModel(models.Model):
         field = data.get(field_name)
         is_nested_data = field_name != "id"
         should_expand = False
-
+        if not stripe_account and isinstance(data, StripeObject):
+            stripe_account = data.stripe_account
         if pending_relations is None:
             pending_relations = []
 
-        id_ = cls._id_from_data(field)
+        id_ = get_id_from_stripe_data(field)
 
         if not field:
             # An empty field - We need to return nothing here because there is
             # no way of knowing what needs to be fetched!
-            logger.warning(
-                "empty field %s.%s = %r - this is a bug, "
-                "please report it to dj-stripe!",
-                cls.__name__,
-                field_name,
-                field,
+            raise RuntimeError(
+                f"dj-stripe encountered an empty field {cls.__name__}.{field_name} ="
+                f" {field}"
             )
-            return None, False
         elif id_ == field:
             # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
             # We'll have to expand if the field is not "id" (= is nested)
@@ -586,16 +768,29 @@ class StripeModel(models.Model):
                 # If field_name="default_source", we get_or_create the card instead.
                 cls_instance = cls(id=id_)
                 try:
-                    data = cls_instance.api_retrieve(stripe_account=stripe_account)
+                    data = cls_instance.api_retrieve(
+                        stripe_account=stripe_account, api_key=api_key
+                    )
                 except InvalidRequestError as e:
-                    # HACK around a Stripe bug.
-                    # When a FileUpload is retrieved from the Account object,
-                    # a mismatch between live and test mode is possible depending
-                    # on whether the file (usually the logo) was uploaded in live
-                    # or test. Reported to Stripe in August 2020.
-                    # Context: https://github.com/dj-stripe/dj-stripe/issues/830
                     if "a similar object exists in" in str(e):
+                        # HACK around a Stripe bug.
+                        # When a File is retrieved from the Account object,
+                        # a mismatch between live and test mode is possible depending
+                        # on whether the file (usually the logo) was uploaded in live
+                        # or test. Reported to Stripe in August 2020.
+                        # Context: https://github.com/dj-stripe/dj-stripe/issues/830
                         pass
+                    elif "No such PaymentMethod:" in str(e):
+                        # payment methods (card_… etc) can be irretrievably deleted,
+                        # but still present during sync. For example, if a refund is
+                        # issued on a charge whose payment method has been deleted.
+                        return None, False
+                    elif "Invalid subscription_item id" in str(e):
+                        # subscription items can be irretrievably deleted but still
+                        # be present during sync. For example, if a line item of type subscription is
+                        # removed from the subscription, the invoice generated for that billing period
+                        # will still contain the deleted subscription_item.
+                        return None, False
                     else:
                         raise
                 should_expand = False
@@ -605,9 +800,8 @@ class StripeModel(models.Model):
         # *and* we didn't refetch by id, then `should_expand` is True and we
         # don't have the data to actually create the object.
         # If this happens when syncing Stripe data, it's a djstripe bug. Report it!
-        assert not should_expand, "No data to create {} from {}".format(
-            cls.__name__, field_name
-        )
+        if should_expand:
+            raise ValueError(f"No data to create {cls.__name__} from {field_name}")
 
         try:
             # We wrap the `_create_from_stripe_object` in a transaction to
@@ -621,6 +815,7 @@ class StripeModel(models.Model):
                         pending_relations=pending_relations,
                         save=save,
                         stripe_account=stripe_account,
+                        api_key=api_key,
                     ),
                     True,
                 )
@@ -633,7 +828,13 @@ class StripeModel(models.Model):
             return cls.stripe_objects.get(id=id_), False
 
     @classmethod
-    def _stripe_object_to_customer(cls, target_cls, data, current_ids=None):
+    def _stripe_object_to_customer(
+        cls,
+        target_cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        current_ids=None,
+    ):
         """
         Search the given manager for the Customer matching this object's
         ``customer`` field.
@@ -647,11 +848,13 @@ class StripeModel(models.Model):
 
         if "customer" in data and data["customer"]:
             return target_cls._get_or_create_from_stripe_object(
-                data, "customer", current_ids=current_ids
+                data, "customer", current_ids=current_ids, api_key=api_key
             )[0]
 
     @classmethod
-    def _stripe_object_to_default_tax_rates(cls, target_cls, data):
+    def _stripe_object_to_default_tax_rates(
+        cls, target_cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Retrieves TaxRates for a Subscription or Invoice
         :param target_cls:
@@ -664,14 +867,16 @@ class StripeModel(models.Model):
 
         for tax_rate_data in data.get("default_tax_rates", []):
             tax_rate, _ = target_cls._get_or_create_from_stripe_object(
-                tax_rate_data, refetch=False
+                tax_rate_data, refetch=False, api_key=api_key
             )
             tax_rates.append(tax_rate)
 
         return tax_rates
 
     @classmethod
-    def _stripe_object_to_tax_rates(cls, target_cls, data):
+    def _stripe_object_to_tax_rates(
+        cls, target_cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Retrieves TaxRates for a SubscriptionItem or InvoiceItem
         :param target_cls:
@@ -682,14 +887,16 @@ class StripeModel(models.Model):
 
         for tax_rate_data in data.get("tax_rates", []):
             tax_rate, _ = target_cls._get_or_create_from_stripe_object(
-                tax_rate_data, refetch=False
+                tax_rate_data, refetch=False, api_key=api_key
             )
             tax_rates.append(tax_rate)
 
         return tax_rates
 
     @classmethod
-    def _stripe_object_set_total_tax_amounts(cls, target_cls, data, instance):
+    def _stripe_object_set_total_tax_amounts(
+        cls, target_cls, data, instance, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Set total tax amounts on Invoice instance
         :param target_cls:
@@ -708,7 +915,10 @@ class StripeModel(models.Model):
                 tax_rate_data = {"tax_rate": tax_rate_data}
 
             tax_rate, _ = TaxRate._get_or_create_from_stripe_object(
-                tax_rate_data, field_name="tax_rate", refetch=True
+                tax_rate_data,
+                field_name="tax_rate",
+                refetch=True,
+                api_key=api_key,
             )
             tax_amount, _ = target_cls.objects.update_or_create(
                 invoice=instance,
@@ -724,43 +934,34 @@ class StripeModel(models.Model):
         instance.total_tax_amounts.exclude(pk__in=pks).delete()
 
     @classmethod
-    def _stripe_object_to_invoice_items(cls, target_cls, data, invoice):
+    def _stripe_object_to_line_items(
+        cls, target_cls, data, invoice, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
-        Retrieves InvoiceItems for an invoice.
+        Retrieves LineItems for an invoice.
 
-        If the invoice item doesn't exist already then it is created.
+        If the line item doesn't exist already then it is created.
 
         If the invoice is an upcoming invoice that doesn't persist to the
-        database (i.e. ephemeral) then the invoice items are also not saved.
+        database (i.e. ephemeral) then the line items are also not saved.
 
-        :param target_cls: The target class to instantiate per invoice item.
-        :type target_cls:  Type[djstripe.models.InvoiceItem]
+        :param target_cls: The target class to instantiate per line item.
+        :type target_cls:  Type[djstripe.models.LineItem]
         :param data: The data dictionary received from the Stripe API.
         :type data: dict
-        :param invoice: The invoice object that should hold the invoice items.
+        :param invoice: The invoice object that should hold the line items.
         :type invoice: ``djstripe.models.Invoice``
         """
-
         lines = data.get("lines")
         if not lines:
             return []
 
-        invoiceitems = []
+        lineitems = []
         for line in lines.auto_paging_iter():
             if invoice.id:
                 save = True
                 line.setdefault("invoice", invoice.id)
 
-                if line.get("type") == "subscription":
-                    # Lines for subscriptions need to be keyed based on invoice and
-                    # subscription, because their id is *just* the subscription
-                    # when received from Stripe. This means that future updates to
-                    # a subscription will change previously saved invoices - Doing
-                    # the composite key avoids this.
-                    if not line["id"].startswith(invoice.id):
-                        line["id"] = "{invoice_id}-{subscription_id}".format(
-                            invoice_id=invoice.id, subscription_id=line["id"]
-                        )
             else:
                 # Don't save invoice items for ephemeral invoices
                 save = False
@@ -769,14 +970,16 @@ class StripeModel(models.Model):
             line.setdefault("date", int(dateformat.format(invoice.created, "U")))
 
             item, _ = target_cls._get_or_create_from_stripe_object(
-                line, refetch=False, save=save
+                line, refetch=False, save=save, api_key=api_key
             )
-            invoiceitems.append(item)
+            lineitems.append(item)
 
-        return invoiceitems
+        return lineitems
 
     @classmethod
-    def _stripe_object_to_subscription_items(cls, target_cls, data, subscription):
+    def _stripe_object_to_subscription_items(
+        cls, target_cls, data, subscription, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Retrieves SubscriptionItems for a subscription.
 
@@ -799,8 +1002,12 @@ class StripeModel(models.Model):
         subscriptionitems = []
         for item_data in items.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
-                item_data, refetch=False
+                item_data, refetch=False, api_key=api_key
             )
+
+            # sync the SubscriptionItem
+            target_cls.sync_from_stripe_data(item_data, api_key=api_key)
+
             pks.append(item.pk)
             subscriptionitems.append(item)
         subscription.items.exclude(pk__in=pks).delete()
@@ -808,7 +1015,9 @@ class StripeModel(models.Model):
         return subscriptionitems
 
     @classmethod
-    def _stripe_object_to_refunds(cls, target_cls, data, charge):
+    def _stripe_object_to_refunds(
+        cls, target_cls, data, charge, api_key=djstripe_settings.STRIPE_SECRET_KEY
+    ):
         """
         Retrieves Refunds for a charge
         :param target_cls: The target class to instantiate per refund
@@ -819,22 +1028,31 @@ class StripeModel(models.Model):
         :type charge: djstripe.models.Refund
         :return:
         """
+        stripe_refunds = convert_to_stripe_object(data.get("refunds"))
 
-        refunds = data.get("refunds")
-        if not refunds:
+        if not stripe_refunds:
             return []
 
         refund_objs = []
-        for refund_data in refunds.auto_paging_iter():
+        stripe_account = getattr(stripe_refunds, "stripe_account", None)
+        for refund_data in stripe_refunds.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
-                refund_data, refetch=False
+                refund_data,
+                refetch=False,
+                api_key=api_key,
+                stripe_account=stripe_account,
             )
             refund_objs.append(item)
 
         return refund_objs
 
     @classmethod
-    def sync_from_stripe_data(cls, data):
+    def sync_from_stripe_data(
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        stripe_version=djstripe_settings.STRIPE_API_VERSION,
+    ):
         """
         Syncs this object from the stripe data provided.
 
@@ -846,6 +1064,7 @@ class StripeModel(models.Model):
         """
         current_ids = set()
         data_id = data.get("id")
+        stripe_account = getattr(data, "stripe_account", None)
 
         if data_id:
             # stop nested objects from trying to retrieve this object before
@@ -853,36 +1072,59 @@ class StripeModel(models.Model):
             current_ids.add(data_id)
 
         instance, created = cls._get_or_create_from_stripe_object(
-            data, current_ids=current_ids
+            data,
+            current_ids=current_ids,
+            stripe_account=stripe_account,
+            api_key=api_key,
         )
 
         if not created:
-            record_data = cls._stripe_object_to_record(data)
+            record_data = cls._stripe_object_to_record(
+                data, api_key=api_key, stripe_account=stripe_account
+            )
             for attr, value in record_data.items():
                 setattr(instance, attr, value)
-            instance._attach_objects_hook(cls, data, current_ids=current_ids)
+            instance._attach_objects_hook(
+                cls, data, api_key=api_key, current_ids=current_ids
+            )
             instance.save()
-            instance._attach_objects_post_save_hook(cls, data)
+            instance._attach_objects_post_save_hook(cls, data, api_key=api_key)
+
+        for field in instance._meta.concrete_fields:
+            if isinstance(field, (StripePercentField, models.UUIDField)):
+                # get rid of cached values
+                delattr(instance, field.name)
 
         return instance
 
     @classmethod
-    def _get_or_retrieve(cls, **kwargs):
+    def _get_or_retrieve(cls, id, stripe_account=None, **kwargs):
+        """
+        Retrieve object from the db, if it exists. If it doesn't, query Stripe to fetch
+        the object and sync with the db.
+        """
         try:
-            return cls.objects.get(**kwargs)
+            return cls.objects.get(id=id)
         except cls.DoesNotExist:
             pass
 
-        djstripe_owner_account = kwargs.pop("djstripe_owner_account", None)
-        if djstripe_owner_account:
-            kwargs["stripe_account"] = djstripe_owner_account.id
+        if stripe_account:
+            kwargs["stripe_account"] = str(stripe_account)
 
-        data = cls.stripe_class.retrieve(**kwargs)
-        instance = cls.sync_from_stripe_data(data)
+        # If no API key is specified, use the default one for the specified livemode
+        # (or if no livemode is specified, the default one altogether)
+        kwargs.setdefault(
+            "api_key",
+            djstripe_settings.get_default_api_key(livemode=kwargs.get("livemode")),
+        )
+        data = cls.stripe_class.retrieve(
+            id=id, stripe_version=djstripe_settings.STRIPE_API_VERSION, **kwargs
+        )
+        instance = cls.sync_from_stripe_data(data, api_key=kwargs.get("api_key"))
         return instance
 
     def __str__(self):
-        return smart_str("<{list}>".format(list=", ".join(self.str_parts())))
+        return f"<id={self.id}>"
 
 
 class IdempotencyKey(models.Model):

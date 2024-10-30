@@ -1,54 +1,54 @@
 """
 dj-stripe Event Model Tests.
 """
+
 from copy import deepcopy
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from stripe.error import StripeError
+from stripe import StripeError
 
-from djstripe import webhooks
 from djstripe.models import Event, Transfer
+from djstripe.settings import djstripe_settings
+from djstripe.signals import WEBHOOK_SIGNALS
 
-from . import FAKE_CUSTOMER, FAKE_EVENT_TRANSFER_CREATED, FAKE_TRANSFER
+from . import (
+    FAKE_CUSTOMER,
+    FAKE_EVENT_TRANSFER_CREATED,
+    FAKE_PLATFORM_ACCOUNT,
+    FAKE_TRANSFER,
+)
+from .conftest import CreateAccountMixin
 
 
-class EventTest(TestCase):
+class EventTest(CreateAccountMixin, TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
-        patcher = patch.object(webhooks, "call_handlers")
-        self.addCleanup(patcher.stop)
-        self.call_handlers = patcher.start()
-
-    def test_str(self):
+    def test___str__(self):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
 
         self.assertEqual(
-            "<type={type}, id={id}>".format(
-                type=FAKE_EVENT_TRANSFER_CREATED["type"],
-                id=FAKE_EVENT_TRANSFER_CREATED["id"],
+            (
+                f"type={FAKE_EVENT_TRANSFER_CREATED['type']},"
+                f" id={FAKE_EVENT_TRANSFER_CREATED['id']}"
             ),
             str(event),
         )
 
     def test_invoke_webhook_handlers_event_with_log_stripe_error(self):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        self.call_handlers.side_effect = StripeError("Boom!")
-        with self.assertRaises(StripeError):
-            event.invoke_webhook_handlers()
+        signal = WEBHOOK_SIGNALS.get(FAKE_EVENT_TRANSFER_CREATED["type"])
+        with patch.object(signal, "send", side_effect=StripeError("Boom!")):
+            with self.assertRaises(StripeError):
+                event.invoke_webhook_handlers()
 
-    def test_invoke_webhook_handlers_event_with_raise_stripe_error(self):
-        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        self.call_handlers.side_effect = StripeError("Boom!")
-        with self.assertRaises(StripeError):
-            event.invoke_webhook_handlers()
-
-    def test_invoke_webhook_handlers_event_when_invalid(self):
+    @patch("djstripe.models.Event.invoke_webhook_handlers", autospec=True)
+    def test_invoke_webhook_handlers_event_when_invalid(self, webhook_handler_mock):
         event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
         event.valid = False
         event.invoke_webhook_handlers()
@@ -72,7 +72,9 @@ class EventTest(TestCase):
         mock_objects.filter.assert_called_once_with(id=mock_data["id"])
         mock_objects.filter.return_value.exists.assert_called_once_with()
         mock_atomic.return_value.__enter__.assert_called_once_with()
-        mock__create_from_stripe_object.assert_called_once_with(mock_data)
+        mock__create_from_stripe_object.assert_called_once_with(
+            mock_data, api_key=djstripe_settings.STRIPE_SECRET_KEY
+        )
         (
             mock__create_from_stripe_object.return_value.invoke_webhook_handlers
         ).assert_called_once_with()
@@ -134,7 +136,9 @@ class EventTest(TestCase):
         ) as create_from_stripe_object_mock:
             Event.process(data=event_data)
 
-        create_from_stripe_object_mock.assert_called_once_with(event_data)
+        create_from_stripe_object_mock.assert_called_once_with(
+            event_data, api_key=djstripe_settings.STRIPE_SECRET_KEY
+        )
         self.assertFalse(
             Event.objects.filter(id=FAKE_EVENT_TRANSFER_CREATED["id"]).exists()
         )
@@ -152,10 +156,20 @@ class EventTest(TestCase):
 
 
 class EventRaceConditionTest(TestCase):
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
+    )
     @patch(
         "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
     )
-    def test_process_event_race_condition(self, transfer_retrieve_mock):
+    def test_process_event_race_condition(
+        self,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
         transfer = Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
         transfer_retrieve_mock.reset_mock()
         event_data = deepcopy(FAKE_EVENT_TRANSFER_CREATED)

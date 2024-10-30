@@ -4,6 +4,9 @@ __pycache__
 dj_stripe.egg-info
 *.mo
 
+# Environments
+.venv
+
 # mkdocs
 site/
 
@@ -16,6 +19,7 @@ site/
 
 # Editor files
 .vscode
+.idea
 
 # Do not commit Poetry lockfiles for libraries
 poetry.lock

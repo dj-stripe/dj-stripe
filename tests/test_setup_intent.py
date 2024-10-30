@@ -1,16 +1,98 @@
 """
 dj-stripe SetupIntent Model Tests.
 """
+
 from copy import deepcopy
 from unittest.mock import patch
 
+import pytest
+import stripe
 from django.test import TestCase
 
-from djstripe.models import SetupIntent
-from tests import FAKE_CUSTOMER, FAKE_SETUP_INTENT_I, AssertStripeFksMixin
+from djstripe.enums import SetupIntentStatus
+from djstripe.models import Account, Customer, PaymentMethod, SetupIntent
+from tests import (
+    FAKE_CUSTOMER,
+    FAKE_PAYMENT_METHOD_I,
+    FAKE_SETUP_INTENT_DESTINATION_CHARGE,
+    FAKE_SETUP_INTENT_I,
+    FAKE_SETUP_INTENT_II,
+    FAKE_STANDARD_ACCOUNT,
+    AssertStripeFksMixin,
+)
+
+from .conftest import CreateAccountMixin
+
+pytestmark = pytest.mark.django_db
 
 
-class SetupIntentTest(AssertStripeFksMixin, TestCase):
+class TestStrSetupIntent:
+    #
+    # Helpers
+    #
+    def get_fake_setup_intent_destination_charge_no_customer():
+        FAKE_SETUP_INTENT_DESTINATION_CHARGE_NO_CUSTOMER = deepcopy(
+            FAKE_SETUP_INTENT_DESTINATION_CHARGE
+        )
+        FAKE_SETUP_INTENT_DESTINATION_CHARGE_NO_CUSTOMER["customer"] = None
+        return FAKE_SETUP_INTENT_DESTINATION_CHARGE_NO_CUSTOMER
+
+    @pytest.mark.parametrize(
+        "fake_intent_data, has_account, has_customer",
+        [
+            (FAKE_SETUP_INTENT_I, False, False),
+            (FAKE_SETUP_INTENT_DESTINATION_CHARGE, True, True),
+            (get_fake_setup_intent_destination_charge_no_customer(), True, False),
+            (FAKE_SETUP_INTENT_II, False, True),
+        ],
+    )
+    def test___str__(self, fake_intent_data, has_account, has_customer, monkeypatch):
+        def mock_customer_get(*args, **kwargs):
+            return deepcopy(FAKE_CUSTOMER)
+
+        def mock_account_get(*args, **kwargs):
+            return deepcopy(FAKE_STANDARD_ACCOUNT)
+
+        def mock_payment_method_get(*args, **kwargs):
+            return deepcopy(FAKE_PAYMENT_METHOD_I)
+
+        # monkeypatch stripe.Account.retrieve, stripe.Customer.retrieve, and  stripe.PaymentMethod.retrieve calls to return
+        # the desired json response.
+        monkeypatch.setattr(stripe.Account, "retrieve", mock_account_get)
+        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
+        monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
+
+        si = SetupIntent.sync_from_stripe_data(fake_intent_data)
+        pm = PaymentMethod.objects.filter(id=fake_intent_data["payment_method"]).first()
+        account = Account.objects.filter(id=fake_intent_data["on_behalf_of"]).first()
+        customer = Customer.objects.filter(id=fake_intent_data["customer"]).first()
+
+        if has_account and has_customer:
+            assert (
+                f"{pm} ({SetupIntentStatus.humanize(fake_intent_data['status'])}) "
+                f"for {account} "
+                f"by {customer}" == str(si)
+            )
+
+        elif has_account and not has_customer:
+            assert (
+                f"{pm} for {account}."
+                f" {SetupIntentStatus.humanize(fake_intent_data['status'])}" == str(si)
+            )
+
+        elif has_customer and not has_account:
+            assert (
+                f"{pm} by {customer}."
+                f" {SetupIntentStatus.humanize(fake_intent_data['status'])}" == str(si)
+            )
+
+        elif not has_customer and not has_account:
+            f"{pm} ({SetupIntentStatus.humanize(fake_intent_data['status'])})" == str(
+                si
+            )
+
+
+class SetupIntentTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )

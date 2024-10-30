@@ -2,10 +2,12 @@
 
 Stripe API keys are stored in the database, and editable from the Django admin.
 
-**Important note**: By default, keys are visible by anyone who has access to the
-dj-stripe administration.
+!!! attention "Important Note"
+    By default, keys are visible by anyone who has access to the
+    dj-stripe administration.
 
-### Adding new API keys
+
+## Adding new API keys
 
 You may add new API keys via the Dj-Stripe "API key" administration. The only required
 value is the key's "secret" value itself. Example:
@@ -18,16 +20,16 @@ matching Account object will automatically be fetched as well and the key will b
 associated with it, so that it can be used to communicate with the Stripe API when
 dealing with objects belonging to that Account.
 
-### Updating the API keys
+## Updating the API keys
 
 When expiring or rolling new secret keys, you should create the new API key in Stripe,
 then add it from the Django administration. Whenever you are ready, you may delete the
 old key. (It is safe to keep it around, as long as it hasn't expired. Keeping expired
 keys in the database may result in errors during usage).
 
-### FAQ
+## FAQ
 
-#### Why store them in the database?
+### Why store them in the database?
 
 As we work on supporting multiple Stripe accounts per instance, it is vital for
 dj-stripe to have a mechanism to store more than one Stripe API key. It also became
@@ -36,7 +38,7 @@ Furthermore, API keys are a legitimate upstream Stripe object, and it is not unl
 the API may allow access to listing other API keys in the future, in which case we will
 want to move them to the database anyway.
 
-#### Isn't that insecure?
+### Isn't that insecure?
 
 Please do keep your billing database encrypted. There's a copy of all your customers'
 billing data on it!
@@ -48,8 +50,7 @@ data regardless.
 ### I'm using environment variables. Do I need to change anything?
 
 Not at this time. The settings `STRIPE_LIVE_SECRET_KEY` and `STRIPE_TEST_SECRET_KEY` can
-still be used. Their values will however be automatically saved to the database at the
-earliest opportunity.
+still be used.
 
 ### What about public keys?
 

@@ -1,0 +1,44 @@
+name: Linting
+
+on:
+  push:
+
+  pull_request:
+    # The branches below must be a subset of the branches above
+    branches: [master]
+
+env:
+  POETRY_VERSION: "1.2.2"
+  POETRY_VIRTUALENVS_IN_PROJECT: "1"
+
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: djstripe
+          POSTGRES_DB: djstripe
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/install_poetry_action
+        with:
+            POETRY_VERSION: ${{ env.POETRY_VERSION }}
+            python_version: "3.12"
+
+      - name: Install pre-commit
+        run: poetry install --with dev -E postgres
+
+      - name: Run pre-commit
+        run: poetry run pre-commit run --all-files --show-diff-on-failure

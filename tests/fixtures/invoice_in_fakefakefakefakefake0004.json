@@ -29,6 +29,7 @@
     "default_tax_rates": [],
     "description": null,
     "discount": null,
+    "discounts": [],
     "due_date": null,
     "ending_balance": 0,
     "footer": null,
@@ -36,100 +37,94 @@
     "invoice_pdf": "https://pay.stripe.com/invoice/invst_ttp3K5exxywlAI3cGqCDxEWfsM/pdf",
     "lines": {
         "object": "list",
-        "data": [
-            {
-                "id": "il_1GyU3gCOCguPTL2B69cIweEY",
-                "object": "line_item",
+        "data": [{
+            "id": "il_1GyU3gCOCguPTL2B69cIweEY",
+            "object": "line_item",
+            "amount": 4000,
+            "currency": "usd",
+            "description": "1 \u00d7 Fake Product (at $40.00 / month)",
+            "discountable": true,
+            "livemode": false,
+            "metadata": {
+                "djstripe_test_fake_id": "sub_fakefakefakefakefake0002"
+            },
+            "period": {
+                "end": 1595817984,
+                "start": 1593225984
+            },
+            "plan": {
+                "id": "silver41294",
+                "object": "plan",
+                "active": true,
+                "aggregate_usage": null,
                 "amount": 4000,
+                "amount_decimal": "4000",
+                "billing_scheme": "per_unit",
+                "created": 1570941587,
                 "currency": "usd",
-                "description": "1 \u00d7 Fake Product (at $40.00 / month)",
-                "discountable": true,
+                "interval": "month",
+                "interval_count": 1,
                 "livemode": false,
-                "metadata": {
-                    "djstripe_test_fake_id": "sub_fakefakefakefakefake0002"
-                },
-                "period": {
-                    "end": 1595817984,
-                    "start": 1593225984
-                },
-                "plan": {
-                    "id": "silver41294",
-                    "object": "plan",
-                    "active": true,
+                "metadata": {},
+                "nickname": "New plan name",
+                "product": "prod_fake1",
+                "tiers": null,
+                "tiers_mode": null,
+                "transform_usage": null,
+                "trial_period_days": 12,
+                "usage_type": "licensed"
+            },
+            "price": {
+                "id": "silver41294",
+                "object": "price",
+                "active": true,
+                "billing_scheme": "per_unit",
+                "created": 1593225979,
+                "currency": "usd",
+                "livemode": false,
+                "lookup_key": null,
+                "metadata": {},
+                "nickname": "New plan name",
+                "product": "prod_fake1",
+                "recurring": {
                     "aggregate_usage": null,
-                    "amount": 4000,
-                    "amount_decimal": "4000",
-                    "billing_scheme": "per_unit",
-                    "created": 1570941587,
-                    "currency": "usd",
                     "interval": "month",
                     "interval_count": 1,
-                    "livemode": false,
-                    "metadata": {},
-                    "nickname": "New plan name",
-                    "product": "prod_fake1",
-                    "tiers": null,
-                    "tiers_mode": null,
-                    "transform_usage": null,
                     "trial_period_days": 12,
                     "usage_type": "licensed"
                 },
-                "price": {
-                    "id": "silver41294",
-                    "object": "price",
-                    "active": true,
-                    "billing_scheme": "per_unit",
-                    "created": 1593225979,
-                    "currency": "usd",
-                    "livemode": false,
-                    "lookup_key": null,
-                    "metadata": {},
-                    "nickname": "New plan name",
-                    "product": "prod_fake1",
-                    "recurring": {
-                        "aggregate_usage": null,
-                        "interval": "month",
-                        "interval_count": 1,
-                        "trial_period_days": 12,
-                        "usage_type": "licensed"
-                    },
-                    "tiers_mode": null,
-                    "transform_quantity": null,
-                    "type": "recurring",
-                    "unit_amount": 4000,
-                    "unit_amount_decimal": "4000"
+                "tiers_mode": null,
+                "transform_quantity": null,
+                "type": "recurring",
+                "unit_amount": 4000,
+                "unit_amount_decimal": "4000"
+            },
+            "proration": false,
+            "quantity": 1,
+            "subscription": "sub_fakefakefakefakefake0002",
+            "subscription_item": "si_HXZCuxDh3W7EQm",
+            "tax_amounts": [{
+                "amount": 522,
+                "inclusive": true,
+                "tax_rate": "txr_fakefakefakefakefake0001"
+            }],
+            "tax_rates": [{
+                "id": "txr_fakefakefakefakefake0001",
+                "object": "tax_rate",
+                "active": true,
+                "created": 1593225980,
+                "description": null,
+                "display_name": "VAT",
+                "inclusive": true,
+                "jurisdiction": "Example1",
+                "livemode": false,
+                "metadata": {
+                    "djstripe_test_fake_id": "txr_fakefakefakefakefake0001"
                 },
-                "proration": false,
-                "quantity": 1,
-                "subscription": "sub_fakefakefakefakefake0002",
-                "subscription_item": "si_HXZCuxDh3W7EQm",
-                "tax_amounts": [
-                    {
-                        "amount": 522,
-                        "inclusive": true,
-                        "tax_rate": "txr_fakefakefakefakefake0001"
-                    }
-                ],
-                "tax_rates": [
-                    {
-                        "id": "txr_fakefakefakefakefake0001",
-                        "object": "tax_rate",
-                        "active": true,
-                        "created": 1593225980,
-                        "description": null,
-                        "display_name": "VAT",
-                        "inclusive": true,
-                        "jurisdiction": "Example1",
-                        "livemode": false,
-                        "metadata": {
-                            "djstripe_test_fake_id": "txr_fakefakefakefakefake0001"
-                        },
-                        "percentage": 15.0
-                    }
-                ],
-                "type": "subscription"
-            }
-        ],
+                "percentage": 15.0
+            }],
+            "type": "subscription"
+        }],
         "has_more": false,
         "total_count": 1,
         "url": "/v1/invoices/in_fakefakefakefakefake0004/lines"
@@ -161,13 +156,11 @@
     "tax": 522,
     "tax_percent": null,
     "total": 4000,
-    "total_tax_amounts": [
-        {
-            "amount": 522,
-            "inclusive": true,
-            "tax_rate": "txr_fakefakefakefakefake0001"
-        }
-    ],
+    "total_tax_amounts": [{
+        "amount": 522,
+        "inclusive": true,
+        "tax_rate": "txr_fakefakefakefakefake0001"
+    }],
     "transfer_data": null,
     "webhooks_delivered_at": 1570941591
 }

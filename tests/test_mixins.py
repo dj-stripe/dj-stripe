@@ -1,6 +1,7 @@
 """
 dj-stripe Mixin Tests.
 """
+
 from copy import deepcopy
 from unittest.mock import patch
 
@@ -10,9 +11,10 @@ from django.test.testcases import TestCase
 
 from djstripe.mixins import PaymentsContextMixin, SubscriptionMixin
 from djstripe.models import Plan
-from djstripe.settings import STRIPE_PUBLIC_KEY
+from djstripe.settings import djstripe_settings
 
 from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_PRODUCT
+from .conftest import CreateAccountMixin
 
 
 class TestPaymentsContextMixin(TestCase):
@@ -30,7 +32,7 @@ class TestPaymentsContextMixin(TestCase):
         )
         self.assertEqual(
             context["STRIPE_PUBLIC_KEY"],
-            STRIPE_PUBLIC_KEY,
+            djstripe_settings.STRIPE_PUBLIC_KEY,
             "Incorrect STRIPE_PUBLIC_KEY.",
         )
 
@@ -40,7 +42,7 @@ class TestPaymentsContextMixin(TestCase):
         )
 
 
-class TestSubscriptionMixin(TestCase):
+class TestSubscriptionMixin(CreateAccountMixin, TestCase):
     def setUp(self):
         with patch(
             "stripe.Product.retrieve",

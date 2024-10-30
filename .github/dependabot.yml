@@ -1,0 +1,32 @@
+# Config for Dependabot updates. See Documentation here:
+# https://docs.github.com/code-security/supply-chain-security/keeping-your-dependencies-updated-automatically/configuration-options-for-dependency-updates
+
+
+version: 2
+updates:
+  # Update Github actions in workflows
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    commit-message:
+      # Prefix all commit messages with "[actions] " (no colon, but a trailing whitespace)
+      prefix: "[actions] "
+    # Labels on pull requests for version updates only
+    labels:
+      - "update"
+      - "action dependencies"
+
+
+  # Update python packages
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      # Prefix all commit messages with "[python] " (no colon, but a trailing whitespace)
+      prefix: "[python] "
+    # Labels on pull requests for version updates only
+    labels:
+      - "update"
+      - "pip dependencies"

@@ -1,0 +1,178 @@
+{
+    "id": "acct_1IuHosQveW0ONQsd",
+    "object": "account",
+    "business_profile": {
+        "mcc": null,
+        "name": null,
+        "product_description": null,
+        "support_address": null,
+        "support_email": null,
+        "support_phone": null,
+        "support_url": null,
+        "url": null
+    },
+    "business_type": "individual",
+    "capabilities": {
+        "transfers": "inactive"
+    },
+    "charges_enabled": false,
+    "company": {
+        "address": {
+            "city": null,
+            "country": "US",
+            "line1": null,
+            "line2": null,
+            "postal_code": null,
+            "state": null
+        },
+        "directors_provided": true,
+        "executives_provided": true,
+        "name": null,
+        "owners_provided": true,
+        "tax_id_provided": false,
+        "verification": {
+            "document": {
+                "back": null,
+                "details": null,
+                "details_code": null,
+                "front": null
+            }
+        }
+    },
+    "country": "US",
+    "created": 1621778298,
+    "default_currency": "usd",
+    "details_submitted": false,
+    "email": null,
+    "external_accounts": {
+        "object": "list",
+        "data": [
+            {
+                "id": "ba_1IuVozQveW0ONQsd3dWG85e2",
+                "object": "bank_account",
+                "account": "acct_1IuHosQveW0ONQsd",
+                "account_holder_name": "Jenny Rosen",
+                "account_holder_type": "individual",
+                "available_payout_methods": [
+                    "standard"
+                ],
+                "bank_name": "STRIPE TEST BANK",
+                "country": "US",
+                "currency": "usd",
+                "default_for_currency": false,
+                "fingerprint": "OAI2ZEI2iIJVbF1o",
+                "last4": "1116",
+                "metadata": {},
+                "routing_number": "110000000",
+                "status": "verified"
+            },
+            {
+                "id": "card_1IuVlSQveW0ONQsdkXBUUHyE",
+                "object": "card",
+                "account": "acct_1IuHosQveW0ONQsd",
+                "address_city": null,
+                "address_country": null,
+                "address_line1": null,
+                "address_line1_check": null,
+                "address_line2": null,
+                "address_state": null,
+                "address_zip": null,
+                "address_zip_check": null,
+                "available_payout_methods": [
+                    "standard",
+                    "instant"
+                ],
+                "brand": "MasterCard",
+                "country": "US",
+                "currency": "usd",
+                "cvc_check": null,
+                "default_for_currency": true,
+                "dynamic_last4": null,
+                "exp_month": 5,
+                "exp_year": 2022,
+                "fingerprint": "SgIrwXiq2B8M5ab2",
+                "funding": "debit",
+                "last4": "8210",
+                "metadata": {},
+                "name": null,
+                "tokenization_method": null
+            }
+        ],
+        "has_more": false,
+        "total_count": 2,
+        "url": "/v1/accounts/acct_1IuHosQveW0ONQsd/external_accounts"
+    },
+    "metadata": {},
+    "payouts_enabled": false,
+    "requirements": {
+        "current_deadline": null,
+        "currently_due": [
+            "business_profile.url",
+            "individual.first_name",
+            "individual.last_name"
+        ],
+        "disabled_reason": "requirements.past_due",
+        "errors": [],
+        "eventually_due": [
+            "business_profile.url",
+            "individual.dob.day",
+            "individual.dob.month",
+            "individual.dob.year",
+            "individual.first_name",
+            "individual.last_name",
+            "individual.ssn_last_4"
+        ],
+        "past_due": [
+            "business_profile.url",
+            "individual.first_name",
+            "individual.last_name"
+        ],
+        "pending_verification": []
+    },
+    "settings": {
+        "bacs_debit_payments": {},
+        "branding": {
+            "icon": null,
+            "logo": null,
+            "primary_color": null,
+            "secondary_color": null
+        },
+        "card_issuing": {
+            "tos_acceptance": {
+                "date": null,
+                "ip": null
+            }
+        },
+        "card_payments": {
+            "decline_on": {
+                "avs_failure": false,
+                "cvc_failure": false
+            },
+            "statement_descriptor_prefix": null
+        },
+        "dashboard": {
+            "display_name": "djstripe-custom",
+            "timezone": "Etc/UTC"
+        },
+        "payments": {
+            "statement_descriptor": null,
+            "statement_descriptor_kana": null,
+            "statement_descriptor_kanji": null
+        },
+        "payouts": {
+            "debit_negative_balances": false,
+            "schedule": {
+                "delay_days": 2,
+                "interval": "daily"
+            },
+            "statement_descriptor": null
+        },
+        "sepa_debit_payments": {}
+    },
+    "tos_acceptance": {
+        "date": 1621778297,
+        "ip": "127.0.0.1",
+        "user_agent": null
+    },
+    "type": "custom"
+}

@@ -1,0 +1,39 @@
+exclude: ".git|.tox|.pytest_cache"
+default_stages: [commit]
+fail_fast: false
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v4.4.0"
+    hooks:
+      - id: check-builtin-literals
+      - id: check-case-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+
+  - repo: https://github.com/psf/black
+    rev: "24.4.1"
+    hooks:
+      - id: black
+
+  - repo: https://github.com/timothycrosley/isort
+    rev: "5.13.2"
+    hooks:
+      - id: isort
+
+  - repo: https://github.com/adamchainz/django-upgrade
+    rev: "1.13.0"
+    hooks:
+      - id: django-upgrade
+        args: [--target-version, "3.2"]
+
+#  - repo: local
+#    hooks:
+#      - id: check-migrations
+#        name: check-migrations
+#        entry: poetry run python manage.py makemigrations --dry-run --check
+#        types: [ python ]
+#        pass_filenames: false
+#        language: system

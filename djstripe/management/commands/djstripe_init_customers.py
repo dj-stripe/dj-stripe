@@ -1,10 +1,11 @@
 """
 init_customers command.
 """
+
 from django.core.management.base import BaseCommand
 
 from ...models import Customer
-from ...settings import get_subscriber_model
+from ...settings import djstripe_settings
 
 
 class Command(BaseCommand):
@@ -16,9 +17,13 @@ class Command(BaseCommand):
         """
         Create Customer objects for Subscribers without Customer objects associated.
         """
-        for subscriber in get_subscriber_model().objects.filter(
+        subscriber_qs = djstripe_settings.get_subscriber_model().objects.filter(
             djstripe_customers=None
-        ):
-            # use get_or_create in case of race conditions on large subscriber bases
-            Customer.get_or_create(subscriber=subscriber)
-            print("Created subscriber for {0}".format(subscriber.email))
+        )
+        if subscriber_qs:
+            for subscriber in subscriber_qs:
+                # use get_or_create in case of race conditions on large subscriber bases
+                Customer.get_or_create(subscriber=subscriber)
+                self.stdout.write(f"Created subscriber for {subscriber.email}")
+        else:
+            self.stdout.write("All Customers already have subscribers")

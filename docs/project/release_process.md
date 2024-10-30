@@ -105,14 +105,6 @@ Push these changes to the appropriate `stable/MAJOR.MINOR` version
 branch (eg `stable/2.0`) if they're not already - note that this will
 trigger the readthedocs build
 
-## Configure readthedocs
-
-If this is this is a new stable branch then do the following on
-<https://readthedocs.org/dashboard/dj-stripe/versions/>
-
--   Find the new `stable/MAJOR.MINOR` branch name and mark it as active
-    (and then save).
-
 ## Release on pypi
 
 See

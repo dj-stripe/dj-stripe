@@ -1,0 +1,81 @@
+{
+    "id": "order_fakefakefakefakefake0001",
+    "object": "order",
+    "livemode": false,
+    "created": 1562801159,
+    "metadata": {},
+    "description": "",
+    "amount_subtotal": 500,
+    "amount_total": 500,
+    "application": "",
+    "automatic_tax": {
+        "status": null,
+        "enabled": false
+    },
+    "billing_details": {
+        "name": "Jane Doe",
+        "email": null,
+        "phone": null,
+        "address": null
+    },
+    "client_secret": "order_fakefakefakefakefake0001_secret_CQ2wCUrrDiDjp5YyocdjHonYz00s2YdRrKT",
+    "currency": "usd",
+    "customer": "cus_6lsBvm5rJ0zyHc",
+    "discounts": [],
+    "ip_address": null,
+    "line_items": {
+        "url": "/v1/orders/order_fakefakefakefakefake0001/line_items",
+        "data": [{
+            "id": "li_1L3Hf7JSZQVUcJYghrqBjGnv",
+            "price": {
+                "id": "price_1J5O0hJSZQVUcJYgYpVPGEb9",
+                "type": "one_time",
+                "active": true,
+                "object": "price",
+                "created": 1624423702,
+                "product": "prod_JipgBUhNfhFYlt",
+                "currency": "usd",
+                "livemode": false,
+                "metadata": {},
+                "nickname": "One Time Updated",
+                "recurring": null,
+                "lookup_key": null,
+                "tiers_mode": null,
+                "unit_amount": 500,
+                "tax_behavior": "unspecified",
+                "billing_scheme": "per_unit",
+                "transform_quantity": null,
+                "unit_amount_decimal": "500"
+            },
+            "object": "item",
+            "product": "prod_JipgBUhNfhFYlt",
+            "currency": "usd",
+            "quantity": 1,
+            "amount_tax": 0,
+            "description": "Test Product 1",
+            "amount_total": 500,
+            "amount_discount": 0,
+            "amount_subtotal": 500
+        }],
+        "object": "list",
+        "has_more": false
+    },
+    "payment": {
+        "status": "complete",
+        "settings": null,
+        "payment_intent": "pi_fakefakefakefakefake0001"
+    },
+    "payment_intent": "pi_fakefakefakefakefake0001",
+    "shipping_cost": null,
+    "shipping_details": null,
+    "status": "complete",
+    "tax_details": {
+        "tax_ids": [],
+        "tax_exempt": "none"
+    },
+    "total_details": {
+        "amount_tax": 0,
+        "amount_discount": 0,
+        "amount_shipping": 0
+    }
+}

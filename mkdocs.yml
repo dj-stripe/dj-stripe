@@ -1,52 +1,142 @@
 site_name: Dj-Stripe
-site_url: https://dj-stripe.readthedocs.io/
-site_description: Django + Stripe Made Easy
+site_url: https://dj-stripe.dev
+site_description: Stripe Made Easy for Django Developers
+site_footer: The link between your Django project and stripe.
 site_author: Dj-Stripe Team
 
+copyright: Copyright © 2024. All Rights Reserved.
+
+repo_name: dj-stripe
 repo_url: https://github.com/dj-stripe/dj-stripe/
 
+
 theme:
-  name: readthedocs
-  highlightjs: true
-  hljs_languages:
-    - yaml
-    - django
+  logo: assets/logo.svg
+  favicon: assets/favicon.png
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Helvetica
+  name: material
+  custom_dir: overrides
+  static_templates:
+    - 404.html
+  features:
+    - content.code.annotate
+    - navigation.indexes
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - navigation.footer
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: light
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: dark
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
 
 markdown_extensions:
   - admonition
-  - mkautodoc
+  - codehilite
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - pymdownx.extra
+  - meta
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/dj-stripe/dj-stripe
+  version:
+    provider: mike
+
+plugins:
+  - autorefs
+  - search
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            # show_root_heading: true
+            show_object_full_path: true
+            show_category_heading: true
+            show_if_no_docstring: true
+          setup_commands:
+            - import os
+            - import sys
+            - import django
+            - sys.path.insert(0, os.path.abspath("."))
+            - os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.settings")
+            - django.setup()
+      enable_inventory: true
+  - mike:
+      canonical_version: "2.8"
 
 nav:
-  - Home: index.md
-  - Sponsors: project/sponsors.md
-  - Getting Started:
-    - Installation: installation.md
-    - Managing Stripe API Keys: api_keys.md
-    - A note on Stripe API Versions: api_versions.md
-    - Integrating Stripe Elements: stripe_elements_js.md
-  - Release notes:
-    - dj-stripe 2.5 release notes: history/2_5_0.md
+  - Documentation:
+    - Getting Started:
+      - Installation: installation.md
+      - Managing Stripe API Keys: api_keys.md
+      - A note on Stripe API Versions: api_versions.md
+      - Upgrade dj-stripe: upgrade_dj_stripe.md
+      - Integrating Stripe Elements: stripe_elements_js.md
+    - Usage:
+      - Using Stripe Webhooks: usage/webhooks.md
+      - Local Webhook Testing: usage/local_webhook_testing.md
+      - Subscribing a customer to a plan: usage/subscribing_customers.md
+      - Add a payment method to customer: usage/add_payment_method_to_customer.md
+      - Managing subscriptions and payment sources: usage/managing_subscriptions.md
+      - Manually syncing data with Stripe: usage/manually_syncing_with_stripe.md
+      - Creating individual charges: usage/creating_individual_charges.md
+      - Creating Usage Records: usage/creating_usage_record.md
+      - Using Stripe Checkout: usage/using_stripe_checkout.md
+      - Using with Docker: usage/using_with_docker.md
+    - Project:
+      - Contributing: project/contributing.md
+      - Test Fixtures: project/test_fixtures.md
+      - Credits: project/authors.md
+      - Support: project/support.md
+      - Release Process: project/release_process.md
+    - Reference:
+      - Enumerations: reference/enums.md
+      - Managers: reference/managers.md
+      - Models: reference/models.md
+      - Settings: reference/settings.md
+      - Utilities: reference/utils.md
+      - Tests: reference/project.md
+  - Sponsors:
+    - Our Sponsors: project/sponsors.md
+  - History:
+    - dj-stripe 3.0 release notes: history/3_0_0.md
+    - dj-stripe 2.9 release notes: history/2_9_0.md
+    - dj-stripe 2.8 release notes: history/2_8_x.md
+    - dj-stripe 2.7 release notes: history/2_7_x.md
+    - dj-stripe 2.6 release notes: history/2_6_x.md
+    - dj-stripe 2.5 release notes: history/2_5_x.md
     - dj-stripe 2.4.1 release notes: history/2_4_x.md
     - dj-stripe 2.4 release notes: history/2_4_0.md
     - dj-stripe 2.0 ~ 2.3 release notes: history/2_x.md
     - dj-stripe 1.x release notes: history/1_x.md
     - dj-stripe 0.x release notes: history/0_x.md
-  - Usage:
-    - Using Stripe Webhooks: usage/webhooks.md
-    - Subscribing a customer to a plan: usage/subscribing_customers.md
-    - Managing subscriptions and payment sources: usage/managing_subscriptions.md
-    - Manually syncing data with Stripe: usage/manually_syncing_with_stripe.md
-    - Creating individual charges: usage/creating_individual_charges.md
-  - Project:
-    - Contributing: project/contributing.md
-    - Test Fixtures: project/test_fixtures.md
-    - Credits: project/authors.md
-    - Support: project/support.md
-    - Release Process: project/release_process.md
-  - Reference:
-    - Context Managers: reference/context_managers.md
-    - Enumerations: reference/enums.md
-    - Managers: reference/managers.md
-    - Models: reference/models.md
-    - Settings: reference/settings.md
-    - Utilities: reference/utils.md

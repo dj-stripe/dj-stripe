@@ -1,18 +1,20 @@
 """
 dj-stripe Sync Method Tests.
 """
+
 import contextlib
 from copy import deepcopy
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
-from stripe.error import InvalidRequestError
+from stripe import InvalidRequestError
 
 from djstripe.models import Customer
 from djstripe.sync import sync_subscriber
 
 from . import FAKE_CUSTOMER
+from .conftest import CreateAccountMixin
 
 
 @contextlib.contextmanager
@@ -29,7 +31,7 @@ def capture_stdout():
         sys.stdout = old_stdout
 
 
-class TestSyncSubscriber(TestCase):
+class TestSyncSubscriber(CreateAccountMixin, TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
             username="testuser", email="test@example.com", password="123"
@@ -52,7 +54,6 @@ class TestSyncSubscriber(TestCase):
         _sync_invoices_mock,
         _sync_charges_mock,
     ):
-
         sync_subscriber(self.user)
         self.assertEqual(1, Customer.objects.count())
         self.assertEqual(

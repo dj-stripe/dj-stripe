@@ -1,57 +1,45 @@
 """
 dj-stripe Custom Field Definitions
 """
+
 import decimal
 
-from django.conf import SettingsReference, settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import JSONField as BaseJSONField
 
-from .settings import USE_NATIVE_JSONFIELD
 from .utils import convert_tstamp
 
-if USE_NATIVE_JSONFIELD:
-    try:
-        # Django 3.1
-        from django.db.models import JSONField as BaseJSONField
-    except ImportError:
-        from django.contrib.postgres.fields import JSONField as BaseJSONField
-else:
-    from jsonfield import JSONField as BaseJSONField
+
+class FieldDeconstructMixin:
+    IGNORED_ATTRS = [
+        "verbose_name",
+        "help_text",
+        "choices",
+        "get_latest_by",
+        "ordering",
+    ]
+
+    def deconstruct(self):
+        """Remove field attributes that have nothing to
+        do with the database. Otherwise unencessary migrations are generated."""
+        name, path, args, kwargs = super().deconstruct()
+        for attr in self.IGNORED_ATTRS:
+            kwargs.pop(attr, None)
+        return name, path, args, kwargs
 
 
 class StripeForeignKey(models.ForeignKey):
-    setting_name = "DJSTRIPE_FOREIGN_KEY_TO_FIELD"
-
-    def __init__(self, *args, **kwargs):
-        # The default value will only come into play if the check for
-        # that setting has been disabled.
-        kwargs["to_field"] = getattr(settings, self.setting_name, "id")
-        super().__init__(*args, **kwargs)
-
-    def deconstruct(self):
-        name, path, args, kwargs = super().deconstruct()
-        kwargs["to_field"] = SettingsReference(
-            getattr(settings, self.setting_name, "id"), self.setting_name
-        )
-        return name, path, args, kwargs
-
-    def get_default(self):
-        # Override to bypass a weird bug in Django
-        # https://stackoverflow.com/a/14390402/227443
-        if isinstance(self.remote_field.model, str):
-            return self._get_default()
-        else:
-            return super().get_default()
+    pass
 
 
-class PaymentMethodForeignKey(models.ForeignKey):
+class PaymentMethodForeignKey(FieldDeconstructMixin, models.ForeignKey):
     def __init__(self, **kwargs):
         kwargs.setdefault("to", "DjstripePaymentMethod")
         super().__init__(**kwargs)
 
 
-class StripePercentField(models.DecimalField):
+class StripePercentField(FieldDeconstructMixin, models.DecimalField):
     """A field used to define a percent according to djstripe logic."""
 
     def __init__(self, *args, **kwargs):
@@ -65,7 +53,7 @@ class StripePercentField(models.DecimalField):
         super().__init__(*args, **defaults)
 
 
-class StripeCurrencyCodeField(models.CharField):
+class StripeCurrencyCodeField(FieldDeconstructMixin, models.CharField):
     """
     A field used to store a three-letter currency code (eg. usd, eur, ...)
     """
@@ -76,7 +64,7 @@ class StripeCurrencyCodeField(models.CharField):
         super().__init__(*args, **defaults)
 
 
-class StripeQuantumCurrencyAmountField(models.BigIntegerField):
+class StripeQuantumCurrencyAmountField(FieldDeconstructMixin, models.BigIntegerField):
     """
     A field used to store currency amounts in cents (etc) as per stripe.
     By contacting stripe support, some accounts will have their limit raised to 11
@@ -86,7 +74,7 @@ class StripeQuantumCurrencyAmountField(models.BigIntegerField):
     pass
 
 
-class StripeDecimalCurrencyAmountField(models.DecimalField):
+class StripeDecimalCurrencyAmountField(FieldDeconstructMixin, models.DecimalField):
     """
     A legacy field to store currency amounts in dollars (etc).
 
@@ -98,11 +86,8 @@ class StripeDecimalCurrencyAmountField(models.DecimalField):
     """
 
     def __init__(self, *args, **kwargs):
-        """
-        Assign default args to this field. By contacting stripe support, some accounts
-        will have their limit raised to 11 digits
-        """
-        defaults = {"decimal_places": 2, "max_digits": 11}
+        # see https://github.com/dj-stripe/dj-stripe/pull/1786
+        defaults = {"decimal_places": 2, "max_digits": 14}
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
@@ -119,23 +104,21 @@ class StripeDecimalCurrencyAmountField(models.DecimalField):
             return val / decimal.Decimal("100")
 
 
-class StripeEnumField(models.CharField):
+class StripeEnumField(FieldDeconstructMixin, models.CharField):
     def __init__(self, enum, *args, **kwargs):
         self.enum = enum
         choices = enum.choices
-        defaults = {"choices": choices, "max_length": max(len(k) for k, v in choices)}
+        defaults = {"choices": choices, "max_length": 255}
         defaults.update(kwargs)
         super().__init__(*args, **defaults)
 
     def deconstruct(self):
         name, path, args, kwargs = super().deconstruct()
         kwargs["enum"] = self.enum
-        if "choices" in kwargs:
-            del kwargs["choices"]
         return name, path, args, kwargs
 
 
-class StripeIdField(models.CharField):
+class StripeIdField(FieldDeconstructMixin, models.CharField):
     """A field with enough space to hold any stripe ID."""
 
     def __init__(self, *args, **kwargs):
@@ -152,7 +135,7 @@ class StripeIdField(models.CharField):
         super().__init__(*args, **defaults)
 
 
-class StripeDateTimeField(models.DateTimeField):
+class StripeDateTimeField(FieldDeconstructMixin, models.DateTimeField):
     """A field used to define a DateTimeField value according to djstripe logic."""
 
     def stripe_to_db(self, data):
@@ -164,7 +147,7 @@ class StripeDateTimeField(models.DateTimeField):
             return convert_tstamp(val)
 
 
-class JSONField(BaseJSONField):
+class JSONField(FieldDeconstructMixin, BaseJSONField):
     """A field used to define a JSONField value according to djstripe logic."""
 
     pass

@@ -1,11 +1,12 @@
 """
 dj-stripe mixins
 """
+
 import sys
 import traceback
 
-from . import settings as djstripe_settings
 from .models import Customer, Plan
+from .settings import djstripe_settings
 
 
 class PaymentsContextMixin:

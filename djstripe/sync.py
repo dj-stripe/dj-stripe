@@ -1,7 +1,8 @@
 """
 Utility functions used for syncing data.
 """
-from stripe.error import InvalidRequestError
+
+from stripe import InvalidRequestError
 
 from .models import Customer
 
