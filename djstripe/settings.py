@@ -209,7 +209,7 @@ def get_subscriber_model():
 
 def get_stripe_api_version():
     """Get the desired API version to use for Stripe requests."""
-    version = getattr(settings, "STRIPE_API_VERSION", stripe.api_version)
+    version = "2024-06-20"
     return version or DEFAULT_STRIPE_API_VERSION
 
 
