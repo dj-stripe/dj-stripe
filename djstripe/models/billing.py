@@ -2201,8 +2201,7 @@ class TaxId(StripeModel):
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
 
-        return stripe.Customer.retrieve_tax_id(
-            customer=self.customer.id,
+        return stripe.TaxId.retrieve(
             id=self.id,
             api_key=api_key,
             expand=self.expand_fields,
