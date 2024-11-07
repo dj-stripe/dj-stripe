@@ -33,7 +33,6 @@ class VerificationReport(StripeModel):
     """
 
     stripe_class = stripe.identity.VerificationReport
-    expand_fields = ["document.dob", "document.expiration_date", "document.number"]
 
     document = JSONField(null=True, blank=True)
     id_number = JSONField(null=True, blank=True)
