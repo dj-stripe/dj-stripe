@@ -2157,10 +2157,9 @@ class TaxId(StripeModel):
         enum=enums.TaxIdType, help_text="The status of this subscription."
     )
     value = models.CharField(max_length=50, help_text="Value of the tax ID.")
-    verification = JSONField(help_text="Tax ID verification information.")
 
     def __str__(self):
-        return f"{enums.TaxIdType.humanize(self.type)} {self.value} ({self.verification.get('status')})"
+        return f"{enums.TaxIdType.humanize(self.type)} {self.value}"
 
     class Meta(StripeModel.Meta):
         verbose_name = "Tax ID"
@@ -2227,6 +2226,10 @@ class TaxId(StripeModel):
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,
         ).auto_paging_iter()
+
+    @property
+    def verification(self) -> dict | None:
+        return self.stripe_data.get("verification", None)
 
 
 class TaxRate(StripeModel):
