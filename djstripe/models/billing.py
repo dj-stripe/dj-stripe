@@ -2151,7 +2151,11 @@ class TaxId(StripeModel):
         help_text="Two-letter ISO code representing the country of the tax ID.",
     )
     customer = StripeForeignKey(
-        "djstripe.customer", on_delete=models.CASCADE, related_name="tax_ids"
+        "djstripe.customer",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="tax_ids",
     )
     type = StripeEnumField(
         enum=enums.TaxIdType, help_text="The status of this subscription."
