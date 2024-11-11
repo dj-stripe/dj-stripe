@@ -1687,6 +1687,8 @@ class Subscription(StripeModel):
         .. warning:: Reactivating a fully canceled Subscription will fail silently. \
         Be sure to check the returned Subscription's status.
         """
+        if not self.plan:
+            return None
         stripe_subscription = self.api_retrieve()
         stripe_subscription.plan = self.plan.id
         stripe_subscription.cancel_at_period_end = False
