@@ -595,9 +595,6 @@ class Source(StripeModel):
         flow_type = self.stripe_data.get("flow", "")
         return enums.SourceFlow[flow_type]
 
-    flow = StripeEnumField(
-        enum=enums.SourceFlow, help_text="The authentication flow of the source."
-    )
     owner = JSONField(
         help_text=(
             "Information about the owner of the payment instrument that may be "
