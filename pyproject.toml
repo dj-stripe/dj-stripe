@@ -42,60 +42,11 @@ mysqlclient = { version = ">=1.4.0", optional = true }
 [tool.poetry.group.dev]
 optional = true
 [tool.poetry.group.dev.dependencies]
-black = ">=24.4.1"
-isort = ">=5.13.2"
+mypy = ">=1.10.0"
+pre-commit = "^3.7.0"
 pytest = ">=7.3.1"
 pytest-django = ">=4.5.2"
-mypy = ">=1.10.0"
-
-# flake8 = ">=5.0.4"
-# Why is flake8 commented out?
-# The short version: flake8 is pinned to an old version of importlib-metadata
-# which clashes with other dependencies (such as mkdocs in our case).
-#
-# For the longer version, you have to look at these links:
-# https://github.com/PyCQA/flake8/pull/1438
-# https://github.com/PyCQA/flake8/issues/1474
-# https://github.com/PyCQA/flake8/issues/1503
-# https://github.com/PyCQA/flake8/issues/1522
-# https://github.com/PyCQA/flake8/issues/1526
-#
-# So the flake8 team ran into a deprecation path they didn't like, and got so
-# upset about it that… it seems they just decided to never unpin it, even though
-# the maintainers of importlib-metadata have since fixed the issue flake8 was
-# complaining about.
-#
-# Now, they're getting issue, after issue, after issue opened on Github because:
-# - importlib-metadata 4.4+ is required by many popular libs (markdown, sphinx…)
-# - The pin looks unnecessary at first glance
-# - They don't document the reasoning for their choice
-# - There probably ISN'T any valid reasoning for their choice
-# - They are closing & locking any reference to this as off-topic
-# - They refuse to address the issue, and complain about anyone who brings it up.
-#
-# The reasonable approach would of course be to remove the useless pin, but by
-# doing so they fear they would "increase the maintenance burden" because they're
-# a small team (in other words, they're worried about more bug tracker activity).
-# Obviously this makes zero sense since the issue is gone, and they are instead
-# generating lots of bug tracker activity, which they're promptly ignoring.
-#
-# So they're wasting my time, and everybody else's, including yours who's reading
-# this little rant right now. But I'd like this to serve as a lesson on how not
-# to maintain a popular open source project.
-# Many OSS devs are finding out that, with increased popularity comes increased
-# responsibility. If you don't want the responsibility, you are not forced to
-# continue maintaining the library; but as long as you do, your reach puts you in
-# a position of power.
-# Wasting your users' time is abusing that position of power.
-# Think of the underpaid bureaucrat who, by the stroke of a pen, makes or breaks
-# the lives of others. Who was a little too grumpy at work and decided to take it
-# out on someone and waste hours of their life by making illogical demands, just
-# out of spite.
-#
-# I'm grateful flake8 exists. But it's not a useful enough tool to allow it to
-# waste our time like this, and it's largely been displaced by the other tools:
-# mypy, isort, and black. So let's stick to those instead.
-pre-commit = "^3.7.0"
+ruff = "^0.7.3"
 
 [tool.poetry.group.docs]
 optional = true

@@ -846,16 +846,16 @@ FAKE_DISPUTE_IV["status"] = "won"
 
 # case when dispute funds get reinstated (partial)
 FAKE_DISPUTE_V_PARTIAL = load_fixture("dispute_dp_funds_reinstated_full.json")
-FAKE_DISPUTE_V_PARTIAL["balance_transactions"][
-    1
-] = FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL
+FAKE_DISPUTE_V_PARTIAL["balance_transactions"][1] = (
+    FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_PARTIAL
+)
 
 
 # case when dispute funds get reinstated (full)
 FAKE_DISPUTE_V_FULL = load_fixture("dispute_dp_funds_reinstated_full.json")
-FAKE_DISPUTE_V_FULL["balance_transactions"][
-    1
-] = FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL
+FAKE_DISPUTE_V_FULL["balance_transactions"][1] = (
+    FAKE_DISPUTE_BALANCE_TRANSACTION_REFUND_FULL
+)
 
 
 FAKE_PRODUCT = load_fixture("product_prod_fake1.json")
@@ -2421,9 +2421,9 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED = deepcopy(
 )
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["id"] = "evt_1Hm80YFz0jfFqjGs7kKvT7RE"
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["type"] = "subscription_schedule.completed"
-FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["data"]["object"][
-    "completed_at"
-] = 1605057622
+FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["data"]["object"]["completed_at"] = (
+    1605057622
+)
 FAKE_EVENT_SUBSCRIPTION_SCHEDULE_COMPLETED["data"]["object"]["status"] = "completed"
 
 

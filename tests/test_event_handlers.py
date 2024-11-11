@@ -1276,9 +1276,9 @@ class TestCustomerEvents(CreateAccountMixin, EventTestCase):
     ):
         fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
         fake_stripe_event["data"]["object"]["object"] = "unknown"
-        fake_stripe_event["data"]["object"][
-            "id"
-        ] = "card_xxx_test_customer_unk_source_created"
+        fake_stripe_event["data"]["object"]["id"] = (
+            "card_xxx_test_customer_unk_source_created"
+        )
         event_retrieve_mock.return_value = fake_stripe_event
 
         FAKE_CUSTOMER.create_for_user(self.user)
