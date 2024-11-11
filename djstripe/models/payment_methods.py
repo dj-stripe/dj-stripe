@@ -8,6 +8,8 @@ from .. import enums
 from ..exceptions import ImpossibleAPIRequest, StripeObjectManipulationException
 from ..fields import (
     JSONField,
+    StripeCurrencyCodeField,
+    StripeDecimalCurrencyAmountField,
     StripeEnumField,
     StripeForeignKey,
 )

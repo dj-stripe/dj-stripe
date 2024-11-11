@@ -5,6 +5,7 @@ from djstripe.utils import get_friendly_currency_amount
 
 from .. import enums
 from ..fields import (
+    JSONField,
     StripeCurrencyCodeField,
     StripeDecimalCurrencyAmountField,
     StripeEnumField,
@@ -13,6 +14,7 @@ from ..fields import (
     StripeQuantumCurrencyAmountField,
 )
 from ..managers import TransferManager
+from ..models.base import StripeBaseModel
 from ..settings import djstripe_settings
 from .base import StripeModel
 

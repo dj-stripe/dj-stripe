@@ -31,6 +31,7 @@ from tests import (
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_ITEM,
+    FAKE_SUBSCRIPTION_SCHEDULE,
 )
 
 from .conftest import CreateAccountMixin
