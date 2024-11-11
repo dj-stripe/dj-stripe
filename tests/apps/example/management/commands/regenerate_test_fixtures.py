@@ -1,6 +1,7 @@
 import json
 from copy import deepcopy
 
+import stripe
 from django.core.management import BaseCommand
 from stripe import InvalidRequestError, ListObject, StripeObject
 
