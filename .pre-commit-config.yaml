@@ -14,15 +14,10 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "0.7.3"
+    rev: "v0.7.3"
     hooks:
       - id: ruff
       - id: ruff-format
-
-  - repo: https://github.com/timothycrosley/isort
-    rev: "5.13.2"
-    hooks:
-      - id: isort
 
   - repo: https://github.com/adamchainz/django-upgrade
     rev: "1.13.0"
