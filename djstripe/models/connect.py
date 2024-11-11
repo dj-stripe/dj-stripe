@@ -5,7 +5,6 @@ from djstripe.utils import get_friendly_currency_amount
 
 from .. import enums
 from ..fields import (
-    JSONField,
     StripeCurrencyCodeField,
     StripeDecimalCurrencyAmountField,
     StripeEnumField,
@@ -15,7 +14,7 @@ from ..fields import (
 )
 from ..managers import TransferManager
 from ..settings import djstripe_settings
-from .base import StripeBaseModel, StripeModel
+from .base import StripeModel
 
 
 # TODO Implement Full Webhook event support for ApplicationFee and ApplicationFee Refund Objects

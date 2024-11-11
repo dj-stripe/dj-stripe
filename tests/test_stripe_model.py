@@ -66,7 +66,7 @@ def test__api_delete(
         api_key=expected_api_key,
         stripe_account=stripe_account,
         stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        **extra_kwargs
+        **extra_kwargs,
     )
 
 
