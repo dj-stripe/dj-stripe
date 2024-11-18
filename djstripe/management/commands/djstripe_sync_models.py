@@ -135,9 +135,8 @@ class Command(BaseCommand):
     def sync_model(self, model, api_key: str):
         model_name = model.__name__
 
-        should_sync, reason = self._should_sync_model(model)
+        should_sync, _ = self._should_sync_model(model)
         if not should_sync:
-            self.stderr.write(f"Skipping {model}: {reason}")
             return
 
         self.stdout.write(f"Syncing {model_name} for key {api_key}:")
