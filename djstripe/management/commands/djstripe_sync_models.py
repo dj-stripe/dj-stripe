@@ -183,8 +183,7 @@ class Command(BaseCommand):
                                 stripe_obj, api_key=api_key.secret
                             )
                             self.stdout.write(
-                                f"  id={djstripe_obj.id},"
-                                f" pk={djstripe_obj.pk} ({djstripe_obj} on"
+                                f"  id={djstripe_obj.id} ({djstripe_obj} on"
                                 f" {stripe_account} for {api_key})"
                             )
                             # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
