@@ -718,7 +718,13 @@ class Source(StripeModel):
             return False
 
     @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def api_list(
+        cls,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        *,
+        customer: Customer,
+        **kwargs,
+    ):
         """
         Call the stripe API's list operation for this model.
         :param api_key: The api key to use for this request. \
@@ -734,6 +740,7 @@ class Source(StripeModel):
             object="source",
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            customer=customer.id,
             **kwargs,
         ).auto_paging_iter()
 
