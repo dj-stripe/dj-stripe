@@ -20,7 +20,6 @@ from .admin_inline import (
     SubscriptionScheduleInline,
     TaxIdInline,
 )
-from .filters import CustomerHasSourceListFilter, CustomerSubscriptionStatusListFilter
 from .forms import (
     APIKeyAdminCreateForm,
     CustomActionForm,
@@ -243,11 +242,7 @@ class CustomerAdmin(StripeModelAdmin):
         "balance",
     )
 
-    list_filter = (
-        CustomerHasSourceListFilter,
-        CustomerSubscriptionStatusListFilter,
-        "deleted",
-    )
+    list_filter = ("deleted",)
     search_fields = ("email", "description", "deleted")
     inlines = (SubscriptionInline, SubscriptionScheduleInline, TaxIdInline)
 
