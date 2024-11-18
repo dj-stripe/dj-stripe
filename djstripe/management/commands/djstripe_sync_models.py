@@ -132,7 +132,7 @@ class Command(BaseCommand):
 
         return True, ""
 
-    def sync_model(self, model, api_key: str):
+    def sync_model(self, model, api_key: models.APIKey):
         model_name = model.__name__
 
         should_sync, _ = self._should_sync_model(model)
