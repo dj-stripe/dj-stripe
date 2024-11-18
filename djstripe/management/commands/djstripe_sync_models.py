@@ -514,7 +514,7 @@ class Command(BaseCommand):
 
                 # fetch all Card and BankAccount objects associated with the instance
                 items = models.Customer.stripe_class.list_sources(
-                    **kwargs
+                    customer=instance.id, **kwargs
                 ).auto_paging_iter()
 
                 self.start_sync(items, instance, api_key=api_key)
