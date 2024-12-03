@@ -13,7 +13,7 @@
                 "support_email": null,
                 "support_phone": null,
                 "support_url": null,
-                "url": "https://djstripe.com/"
+                "url": "https://example.com/"
             },
             "capabilities": {
                 "transfers": "active"
@@ -30,9 +30,7 @@
                         "account": "acct_1IuHosQveW0ONQsd",
                         "account_holder_name": null,
                         "account_holder_type": null,
-                        "available_payout_methods": [
-                            "standard"
-                        ],
+                        "available_payout_methods": ["standard"],
                         "bank_name": "STRIPE TEST BANK",
                         "country": "US",
                         "currency": "usd",
@@ -57,10 +55,7 @@
                         "address_state": null,
                         "address_zip": null,
                         "address_zip_check": null,
-                        "available_payout_methods": [
-                            "standard",
-                            "instant"
-                        ],
+                        "available_payout_methods": ["standard", "instant"],
                         "brand": "MasterCard",
                         "country": "US",
                         "currency": "usd",
@@ -100,9 +95,7 @@
                 "currently_due": [],
                 "disabled_reason": null,
                 "errors": [],
-                "eventually_due": [
-                    "individual.verification.document"
-                ],
+                "eventually_due": ["individual.verification.document"],
                 "past_due": [],
                 "pending_verification": []
             },

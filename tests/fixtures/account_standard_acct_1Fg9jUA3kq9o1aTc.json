@@ -6,8 +6,8 @@
         "name": "dj-stripe",
         "support_email": "djstripe@example.com",
         "support_phone": null,
-        "support_url": "https://djstripe.com/support/",
-        "url": "https://djstripe.com"
+        "support_url": "https://example.com/support/",
+        "url": "https://example.com"
     },
     "capabilities": {},
     "charges_enabled": true,
@@ -18,8 +18,8 @@
     "settings": {
         "bacs_debit_payments": {},
         "branding": {
-            "icon":null,
-            "logo":null,
+            "icon": null,
+            "logo": null,
             "primary_color": null,
             "secondary_color": null
         },

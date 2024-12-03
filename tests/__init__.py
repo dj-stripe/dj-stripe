@@ -1835,8 +1835,8 @@ FAKE_ACCOUNT = {
         "name": "dj-stripe",
         "support_email": "djstripe@example.com",
         "support_phone": None,
-        "support_url": "https://djstripe.com/support/",
-        "url": "https://djstripe.com",
+        "support_url": "https://example.com/support/",
+        "url": "https://example.com",
     },
     "settings": {
         "branding": {
