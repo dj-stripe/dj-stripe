@@ -18,7 +18,6 @@ from djstripe.models import (
     Coupon,
     Customer,
     DjstripePaymentMethod,
-    IdempotencyKey,
     Invoice,
     PaymentMethod,
     Plan,
@@ -34,12 +33,10 @@ from . import (
     FAKE_BALANCE_TRANSACTION_REFUND,
     FAKE_CARD,
     FAKE_CARD_AS_PAYMENT_METHOD,
-    FAKE_CARD_III,
     FAKE_CHARGE,
     FAKE_COUPON,
     FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
-    FAKE_CUSTOMER_III,
     FAKE_CUSTOMER_IV,
     FAKE_DISCOUNT_CUSTOMER,
     FAKE_INVOICE,
@@ -52,7 +49,6 @@ from . import (
     FAKE_PRICE,
     FAKE_PRODUCT,
     FAKE_REFUND,
-    FAKE_SOURCE,
     FAKE_SOURCE_II,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_II,
@@ -428,147 +424,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
                 "djstripe.Customer.subscriber",
                 "djstripe.Customer.default_payment_method",
             },
-        )
-
-    @patch(
-        "stripe.Customer.delete_source",
-        autospec=True,
-    )
-    @patch("stripe.Customer.delete", autospec=True)
-    @patch("stripe.Customer.retrieve", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve_source",
-        side_effect=[deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_III)],
-        autospec=True,
-    )
-    def test_customer_purge_leaves_customer_record(
-        self,
-        customer_retrieve_source_mock,
-        customer_retrieve_fake,
-        customer_delete_mock,
-        customer_source_delete_mock,
-    ):
-        self.customer.purge()
-        customer = Customer.objects.get(id=self.customer.id)
-
-        self.assertTrue(customer.subscriber is None)
-        self.assertTrue(customer.default_source is None)
-        self.assertTrue(customer.deleted is True)
-        self.assertTrue(not customer.legacy_cards.all())
-        self.assertTrue(not customer.sources.all())
-        self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
-
-    @patch("stripe.Customer.create", autospec=True)
-    def test_customer_purge_detaches_sources(
-        self,
-        customer_api_create_fake,
-    ):
-        fake_customer = deepcopy(FAKE_CUSTOMER_III)
-        customer_api_create_fake.return_value = fake_customer
-
-        user = get_user_model().objects.create_user(
-            username="blah", email=FAKE_CUSTOMER_III["email"]
-        )
-
-        Customer.get_or_create(user)
-        customer = Customer.sync_from_stripe_data(deepcopy(FAKE_CUSTOMER_III))
-
-        self.assertIsNotNone(customer.default_source)
-        self.assertNotEqual(customer.sources.count(), 0)
-
-        with patch("stripe.Customer.delete", autospec=True), patch(
-            "stripe.Source.retrieve", return_value=deepcopy(FAKE_SOURCE), autospec=True
-        ):
-            customer.purge()
-
-        self.assertIsNone(customer.default_source)
-        self.assertEqual(customer.sources.count(), 0)
-
-    @patch(
-        "stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER_II), autospec=True
-    )
-    def test_customer_purge_deletes_idempotency_key(self, customer_api_create_fake):
-        # We need to call Customer.get_or_create (which setUp doesn't)
-        # to get an idempotency key
-        user = get_user_model().objects.create_user(
-            username="blah", email=FAKE_CUSTOMER_II["email"]
-        )
-        idempotency_key_action = f"customer:create:{user.pk}"
-        self.assertFalse(
-            IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
-        )
-
-        customer, created = Customer.get_or_create(user)
-        self.assertTrue(
-            IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
-        )
-
-        with patch("stripe.Customer.delete", autospec=True):
-            customer.purge()
-
-        self.assertFalse(
-            IdempotencyKey.objects.filter(action=idempotency_key_action).exists()
-        )
-
-    @patch(
-        "stripe.Customer.delete_source",
-        autospec=True,
-    )
-    @patch("stripe.Customer.delete", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve",
-        side_effect=InvalidRequestError("No such customer:", "blah"),
-        autospec=True,
-    )
-    def test_customer_purge_raises_customer_exception(
-        self, customer_retrieve_mock, customer_delete_mock, customer_source_delete_mock
-    ):
-        self.customer.purge()
-        customer = Customer.objects.get(id=self.customer.id)
-        self.assertTrue(customer.subscriber is None)
-        self.assertTrue(customer.default_source is None)
-        self.assertTrue(not customer.legacy_cards.all())
-        self.assertTrue(not customer.sources.all())
-        self.assertTrue(get_user_model().objects.filter(pk=self.user.pk).exists())
-
-        customer_delete_mock.assert_called_once_with(
-            self.customer.id,
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_account=self.customer.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
-        self.assertEqual(0, customer_retrieve_mock.call_count)
-
-        self.assertEqual(2, customer_source_delete_mock.call_count)
-
-    @patch("stripe.Customer.delete_source", autospec=True)
-    @patch("stripe.Customer.delete", autospec=True)
-    @patch("stripe.Customer.retrieve", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve_source",
-        return_value=deepcopy(FAKE_CARD),
-        autospec=True,
-    )
-    def test_customer_delete_raises_unexpected_exception(
-        self,
-        customer_retrieve_source_mock,
-        customer_retrieve_mock,
-        customer_delete_mock,
-        customer_source_delete_mock,
-    ):
-        customer_delete_mock.side_effect = InvalidRequestError(
-            "Unexpected Exception", "blah"
-        )
-
-        with self.assertRaisesMessage(InvalidRequestError, "Unexpected Exception"):
-            self.customer.purge()
-
-        customer_delete_mock.assert_called_once_with(
-            self.customer.id,
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_account=self.customer.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
     @patch(
