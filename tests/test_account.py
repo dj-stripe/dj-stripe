@@ -59,7 +59,7 @@ class TestAccount(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(account, expected_blank_fks={})
 
-        self.assertEqual(account.business_url, "https://djstripe.com")
+        self.assertEqual(account.business_url, "https://example.com")
         account.business_profile = None
         self.assertEqual(account.business_url, "")
 
@@ -92,7 +92,7 @@ class TestAccount(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(account, expected_blank_fks={})
 
-        self.assertEqual(account.business_url, "https://djstripe.com")
+        self.assertEqual(account.business_url, "https://example.com")
 
     @patch(
         "stripe.Account.retrieve",
