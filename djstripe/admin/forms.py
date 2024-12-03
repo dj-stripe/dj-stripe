@@ -205,7 +205,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
         try:
             self._stripe_data = models.WebhookEndpoint._api_create(
                 url=url,
-                api_version=self.cleaned_data.get("api_version", None),
+                api_version=self.cleaned_data.get("api_version", ""),
                 description=self.cleaned_data.get("description"),
                 enabled_events=self.cleaned_data.get("enabled_events"),
                 metadata=metadata,
