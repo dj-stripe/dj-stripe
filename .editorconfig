@@ -13,3 +13,9 @@ max_line_length = 88
 
 [*.json]
 insert_final_newline = false
+
+[*.yaml]
+indent_size = 2
+
+[*.yml]
+indent_size = 2
