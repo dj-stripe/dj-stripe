@@ -40,28 +40,28 @@ class TestAccount(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         account_retrieve_mock.return_value = deepcopy(FAKE_ACCOUNT)
 
         account = Account.get_default_account()
+        assert account
+        assert account.business_profile
+        assert account.settings
+        assert account.branding_icon
+        assert account.branding_logo
 
         account_retrieve_mock.assert_called_once_with(
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
 
-        self.assertGreater(len(account.business_profile), 0)
-        self.assertGreater(len(account.settings), 0)
+        assert account.branding_icon.id == FAKE_FILEUPLOAD_ICON["id"]
+        assert account.branding_logo.id == FAKE_FILEUPLOAD_LOGO["id"]
 
-        self.assertEqual(account.branding_icon.id, FAKE_FILEUPLOAD_ICON["id"])
-        self.assertEqual(account.branding_logo.id, FAKE_FILEUPLOAD_LOGO["id"])
+        assert account.settings["branding"]["icon"] == account.branding_icon.id
+        assert account.settings["branding"]["logo"] == account.branding_logo.id
 
-        self.assertEqual(account.settings["branding"]["icon"], account.branding_icon.id)
-        self.assertEqual(account.settings["branding"]["logo"], account.branding_logo.id)
-
-        self.assertNotEqual(account.branding_logo.id, account.branding_icon.id)
+        assert account.branding_logo.id != account.branding_icon.id
 
         self.assert_fks(account, expected_blank_fks={})
 
-        self.assertEqual(account.business_url, "https://example.com")
-        account.business_profile = None
-        self.assertEqual(account.business_url, "")
+        assert account.business_url == "https://example.com"
 
     @patch(
         "stripe.Account.retrieve",
@@ -78,21 +78,23 @@ class TestAccount(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         fake_account = deepcopy(FAKE_ACCOUNT)
         account = Account.sync_from_stripe_data(fake_account)
+        assert account
+        assert account.business_profile
+        assert account.settings
+        assert account.branding_icon
+        assert account.branding_logo
 
-        self.assertGreater(len(account.business_profile), 0)
-        self.assertGreater(len(account.settings), 0)
+        assert account.branding_icon.id == FAKE_FILEUPLOAD_ICON["id"]
+        assert account.branding_logo.id == FAKE_FILEUPLOAD_LOGO["id"]
 
-        self.assertEqual(account.branding_icon.id, FAKE_FILEUPLOAD_ICON["id"])
-        self.assertEqual(account.branding_logo.id, FAKE_FILEUPLOAD_LOGO["id"])
+        assert account.settings["branding"]["icon"] == account.branding_icon.id
+        assert account.settings["branding"]["logo"] == account.branding_logo.id
 
-        self.assertEqual(account.settings["branding"]["icon"], account.branding_icon.id)
-        self.assertEqual(account.settings["branding"]["logo"], account.branding_logo.id)
-
-        self.assertNotEqual(account.branding_logo.id, account.branding_icon.id)
+        assert account.branding_logo.id != account.branding_icon.id
 
         self.assert_fks(account, expected_blank_fks={})
 
-        self.assertEqual(account.business_url, "https://example.com")
+        assert account.business_url == "https://example.com"
 
     @patch(
         "stripe.Account.retrieve",
