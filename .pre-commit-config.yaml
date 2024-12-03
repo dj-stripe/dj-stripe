@@ -24,7 +24,6 @@ repos:
     hooks:
       - id: django-upgrade
         args: [--target-version, "3.2"]
-
 #  - repo: local
 #    hooks:
 #      - id: check-migrations
