@@ -33,7 +33,7 @@ exclude = ["manage.py"]
 
 
 [tool.poetry.dependencies]
-python = "^3.9.0"
+python = "^3.10.0"
 django = ">=4.2"
 stripe = ">=8.0.0"
 psycopg = { version = "^3.2.3", optional = true }
