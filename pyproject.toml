@@ -56,7 +56,6 @@ mkdocstrings = { extras = ["python"], version = "^0.27.0" }
 mike = "^2.1.3"
 jinja2 = "^3.1.4"
 
-
 [tool.poetry.group.ci]
 optional = true
 [tool.poetry.group.ci.dependencies]
@@ -68,9 +67,51 @@ tox-gh-actions = "^3.2.0"
 postgres = ["psycopg"]
 mysql = ["mysqlclient"]
 
-[tool.isort]
-profile = "black"
-
 [build-system]
 requires = ["poetry_core>=1.1.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.tox]
+isolated_build = true
+envlist = [
+    "django{50,51}-py{310,311,312,313}-{postgres,sqlite}",
+    "djangomain-py313-postgres",
+]
+skip_missing_interpreters = true
+
+[tool.tox.gh-actions]
+python = { "3.10" = "py310", "3.11" = "py311", "3.12" = "py312", "3.13" = "py313" }
+
+[tool.tox.testenv]
+passenv = ["DJSTRIPE_*"]
+
+commands = ["pytest {posargs}"]
+deps = [
+    "pytest-django",
+    "pytest-cov",
+    "django50: Django>=5.0,<5.1",
+    "django51: Django>=5.1,<5.2",
+    "djangomain: https://github.com/django/django/archive/main.tar.gz",
+    "postgres: psycopg>=3.2.3",
+]
+
+[tool.tox.testenv.setenv]
+postgres = "DJSTRIPE_TEST_DB_VENDOR=postgres"
+sqlite = "DJSTRIPE_TEST_DB_VENDOR=sqlite"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "tests.settings"
+markers = ["stripe_api: mark a test as using Stripe API."]
+
+[tool.coverage.run]
+branch = true
+source = ["djstripe"]
+omit = [
+    "djstripe/migrations/*",
+    "djstripe/management/*",
+    "djstripe/admin.py",
+    "djstripe/checks.py",
+]
+
+[tool.coverage.html]
+directory = "cover"
