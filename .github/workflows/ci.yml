@@ -4,7 +4,6 @@ on:
   push:
     paths-ignore:
       - "docs/**"
-      - "pyproject.toml"
       - "mkdocs.yml"
       - ".readthedocs.yml"
       - ".github/workflows/docs.yml"

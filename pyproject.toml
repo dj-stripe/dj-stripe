@@ -63,7 +63,7 @@ optional = true
 [tool.poetry.group.ci.dependencies]
 coverage = { version = "^7.6.8", extras = ["toml"] }
 tox = "^4.23.2"
-tox-gh-actions = "^3.2.0"
+tox-gh = "^1.4.4"
 
 [tool.poetry.extras]
 postgres = ["psycopg"]
@@ -84,8 +84,11 @@ envlist = [
 ]
 skip_missing_interpreters = true
 
-[tool.tox.gh-actions]
-python = { "3.10" = "py310", "3.11" = "py311", "3.12" = "py312", "3.13" = "py313" }
+[tool.tox.gh.python]
+"3.13" = ["py313"]
+"3.12" = ["py312"]
+"3.11" = ["py311"]
+"3.10" = ["py310"]
 
 [tool.tox.testenv]
 passenv = ["DJSTRIPE_*"]
