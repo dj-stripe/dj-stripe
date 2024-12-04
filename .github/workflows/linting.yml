@@ -5,12 +5,12 @@ on:
 
   pull_request:
     # The branches below must be a subset of the branches above
-    branches: [master]
+    branches:
+      - main
 
 env:
-  POETRY_VERSION: "1.2.2"
+  POETRY_VERSION: "1.8.4"
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
-
 
 jobs:
   linting:
@@ -34,8 +34,8 @@ jobs:
 
       - uses: ./.github/install_poetry_action
         with:
-            POETRY_VERSION: ${{ env.POETRY_VERSION }}
-            python_version: "3.12"
+          POETRY_VERSION: ${{ env.POETRY_VERSION }}
+          python_version: "3.12"
 
       - name: Install pre-commit
         run: poetry install --with dev -E postgres

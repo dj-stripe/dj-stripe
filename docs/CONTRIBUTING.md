@@ -59,7 +59,6 @@ If you are proposing a feature:
 -   Remember that this is a volunteer-driven project, and that contributions are welcome
     :)
 
-
 ## Get Started!
 
 Ready to contribute? Here's how to set up local development.
@@ -142,7 +141,7 @@ almost all fields in our models).
     recommendation](https://docs.djangoproject.com/en/dev/ref/models/fields/#null) and
     avoid using null on string fields (which means we store `""` for string fields that
     are `null` in stripe). Note that is enforced in the sync logic in
-    [StripeModel.\_stripe_object_to_record](https://github.com/dj-stripe/dj-stripe/blob/master/djstripe/models/base.py).
+    [StripeModel.\_stripe_object_to_record](https://github.com/dj-stripe/dj-stripe/blob/main/djstripe/models/base.py).
 -   For long string fields (eg above 255 characters) we prefer `TextField` over
     `Charfield`.
 

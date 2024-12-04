@@ -3,20 +3,19 @@ name: Build and deploy docs
 on:
   push:
     branches:
-      - "master"
+      - "main"
       # Push events to branches matching "stable/*"
       - "stable/*"
 
   workflow_dispatch: # to trigger manually
 
 env:
-  POETRY_VERSION: "1.2.2"
+  POETRY_VERSION: "1.8.4"
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
-  LATEST_STABLE_BRANCH: "stable/2.8"
+  LATEST_STABLE_BRANCH: "stable/2.9"
   DOCS_REPO: "dj-stripe.github.io"
   OWNER: "dj-stripe" # if you forked the repo, change this to your gh username
   SOURCE_REPO: "dj-stripe"
-
 
 jobs:
   deploy:
@@ -34,11 +33,10 @@ jobs:
           # token: ${{ secrets.GH_PAT }}  # Token needed to push site to gh-pages branch
           ssh-key: ${{ secrets.SSH_KEY }}
 
-
       - uses: ./.github/install_poetry_action
         with:
-            POETRY_VERSION: ${{ env.POETRY_VERSION }}
-            python_version: "3.12"
+          POETRY_VERSION: ${{ env.POETRY_VERSION }}
+          python_version: "3.12"
 
       - name: Copy docs and configuration from source to documentation repo
         run: |
@@ -50,8 +48,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-            cd ${{ env.DOCS_REPO }}
-            poetry install --with docs
+          cd ${{ env.DOCS_REPO }}
+          poetry install --with docs
 
       - name: Configure git user to make commit
         run: |
@@ -60,15 +58,15 @@ jobs:
 
       - name: Fetch gh-pages remote changes (if any)
         run: |
-            cd ${{ env.DOCS_REPO }}
-            git fetch origin gh-pages --depth=1
+          cd ${{ env.DOCS_REPO }}
+          git fetch origin gh-pages --depth=1
 
       - name: Deploy (and Update) docs for the branch, ${GITHUB_REF##*/}
         run: |
-            cd ${{ env.DOCS_REPO }}
-            poetry run mike deploy --push "${GITHUB_REF##*/}"
+          cd ${{ env.DOCS_REPO }}
+          poetry run mike deploy --push "${GITHUB_REF##*/}"
 
       - name: Set default docs to ${LATEST_STABLE_BRANCH##*/}
         run: |
-            cd ${{ env.DOCS_REPO }}
-            poetry run mike set-default --push "${LATEST_STABLE_BRANCH##*/}"
+          cd ${{ env.DOCS_REPO }}
+          poetry run mike set-default --push "${LATEST_STABLE_BRANCH##*/}"
