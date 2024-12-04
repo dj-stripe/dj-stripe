@@ -35,10 +35,6 @@ short reason behind the decision in the docstring for each model.
 ::: djstripe.models.connect
 
 
-## Fraud
-
-::: djstripe.models.fraud
-
 ## Sigma
 
 ::: djstripe.models.sigma

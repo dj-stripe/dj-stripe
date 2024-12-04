@@ -1,7 +1,6 @@
 site_name: Dj-Stripe
 site_url: https://dj-stripe.dev
 site_description: Stripe Made Easy for Django Developers
-site_footer: The link between your Django project and stripe.
 site_author: Dj-Stripe Team
 
 copyright: Copyright © 2024. All Rights Reserved.
@@ -17,7 +16,6 @@ theme:
   font:
     text: Helvetica
   name: material
-  custom_dir: overrides
   static_templates:
     - 404.html
   features:
