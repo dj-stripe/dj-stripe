@@ -132,7 +132,7 @@ class StripeItem(dict):
         """Superficial mock that emulates instance_url."""
         id = self.get("id")
         base = self.class_url()
-        return "%s/%s" % (base, id)
+        return "{}/{}".format(base, id)
 
     def request(self, method, url, params) -> Dict:
         """Superficial mock that emulates request method."""
