@@ -19,7 +19,7 @@ from .conftest import CreateAccountMixin
 
 class TestPaymentsContextMixin(TestCase):
     def test_get_context_data(self):
-        class TestSuperView(object):
+        class TestSuperView:
             def get_context_data(self):
                 return {}
 
@@ -56,7 +56,7 @@ class TestSubscriptionMixin(CreateAccountMixin, TestCase):
         "stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
     def test_get_context_data(self, stripe_create_customer_mock):
-        class TestSuperView(object):
+        class TestSuperView:
             def get_context_data(self):
                 return {}
 
