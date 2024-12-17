@@ -129,11 +129,14 @@ class EventTest(CreateAccountMixin, TestCase):
             Event.objects.filter(id=FAKE_EVENT_TRANSFER_CREATED["id"]).exists()
         )
 
-        with self.assertRaises(HandlerException), patch(
-            "djstripe.models.Event._create_from_stripe_object",
-            side_effect=side_effect,
-            autospec=True,
-        ) as create_from_stripe_object_mock:
+        with (
+            self.assertRaises(HandlerException),
+            patch(
+                "djstripe.models.Event._create_from_stripe_object",
+                side_effect=side_effect,
+                autospec=True,
+            ) as create_from_stripe_object_mock,
+        ):
             Event.process(data=event_data)
 
         create_from_stripe_object_mock.assert_called_once_with(

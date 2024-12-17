@@ -192,12 +192,17 @@ class PaymentMethodTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         payment_method = self.customer.payment_methods.first()
 
-        with patch(
-            "tests.PaymentMethodDict.detach", side_effect=mocked_detach, autospec=True
-        ) as mock_detach, patch(
-            "stripe.PaymentMethod.retrieve",
-            return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
-            autospec=True,
+        with (
+            patch(
+                "tests.PaymentMethodDict.detach",
+                side_effect=mocked_detach,
+                autospec=True,
+            ) as mock_detach,
+            patch(
+                "stripe.PaymentMethod.retrieve",
+                return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+                autospec=True,
+            ),
         ):
             self.assertTrue(payment_method.detach())
 
@@ -212,21 +217,24 @@ class PaymentMethodTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
         )
 
-        with patch(
-            "tests.PaymentMethodDict.detach",
-            side_effect=InvalidRequestError(
-                message=(
-                    "A source must be attached to a customer to be used "
-                    "as a `payment_method`"
+        with (
+            patch(
+                "tests.PaymentMethodDict.detach",
+                side_effect=InvalidRequestError(
+                    message=(
+                        "A source must be attached to a customer to be used "
+                        "as a `payment_method`"
+                    ),
+                    param="payment_method",
                 ),
-                param="payment_method",
-            ),
-            autospec=True,
-        ) as mock_detach, patch(
-            "stripe.PaymentMethod.retrieve",
-            return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
-            autospec=True,
-        ) as payment_method_retrieve_mock:
+                autospec=True,
+            ) as mock_detach,
+            patch(
+                "stripe.PaymentMethod.retrieve",
+                return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
+                autospec=True,
+            ) as payment_method_retrieve_mock,
+        ):
             payment_method_retrieve_mock.return_value["customer"] = None
             # Need to re-sync as the PaymentMethod object has been deleted
             models.PaymentMethod.sync_from_stripe_data(
@@ -267,12 +275,17 @@ class PaymentMethodTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             payment_method.id.startswith("card_"), "We expect this to be a 'card_'"
         )
 
-        with patch(
-            "tests.PaymentMethodDict.detach", side_effect=mocked_detach, autospec=True
-        ) as mock_detach, patch(
-            "stripe.PaymentMethod.retrieve",
-            return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-            autospec=True,
+        with (
+            patch(
+                "tests.PaymentMethodDict.detach",
+                side_effect=mocked_detach,
+                autospec=True,
+            ) as mock_detach,
+            patch(
+                "stripe.PaymentMethod.retrieve",
+                return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
+                autospec=True,
+            ),
         ):
             self.assertTrue(payment_method.detach())
 
@@ -287,21 +300,24 @@ class PaymentMethodTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         mock_detach.assert_called()
 
-        with patch(
-            "tests.PaymentMethodDict.detach",
-            side_effect=InvalidRequestError(
-                message=(
-                    "A source must be attached to a customer to be used "
-                    "as a `payment_method`"
+        with (
+            patch(
+                "tests.PaymentMethodDict.detach",
+                side_effect=InvalidRequestError(
+                    message=(
+                        "A source must be attached to a customer to be used "
+                        "as a `payment_method`"
+                    ),
+                    param="payment_method",
                 ),
-                param="payment_method",
-            ),
-            autospec=True,
-        ) as mock_detach, patch(
-            "stripe.PaymentMethod.retrieve",
-            side_effect=deleted_card_exception,
-            autospec=True,
-        ) as payment_method_retrieve_mock:
+                autospec=True,
+            ) as mock_detach,
+            patch(
+                "stripe.PaymentMethod.retrieve",
+                side_effect=deleted_card_exception,
+                autospec=True,
+            ) as payment_method_retrieve_mock,
+        ):
             payment_method_retrieve_mock.return_value["customer"] = None
             # Need to re-sync as the PaymentMethod object has been deleted
             models.PaymentMethod.sync_from_stripe_data(
