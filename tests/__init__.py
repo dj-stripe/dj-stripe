@@ -212,7 +212,7 @@ class StripeList(dict):
         return len(self.data)
 
 
-class ExternalAccounts(object):
+class ExternalAccounts:
     def __init__(self, external_account_fakes):
         self.external_account_fakes = external_account_fakes
 
@@ -1236,7 +1236,7 @@ FAKE_SHIPPING_RATE_WITH_TAX_CODE = load_fixture(
 )
 
 
-class Sources(object):
+class Sources:
     def __init__(self, card_fakes):
         self.card_fakes = card_fakes
 

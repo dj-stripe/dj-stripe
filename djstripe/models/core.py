@@ -2350,7 +2350,7 @@ class Price(StripeModel):
         ),
     )
 
-    class Meta(object):
+    class Meta:
         ordering = ["unit_amount"]
 
     @classmethod
