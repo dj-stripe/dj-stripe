@@ -956,11 +956,9 @@ class Customer(StripeModel):
         An iterable of all of the customer's payment methods
         (sources, then legacy cards)
         """
-        for source in self.sources.iterator():
-            yield source
+        yield from self.sources.iterator()
 
-        for card in self.legacy_cards.iterator():
-            yield card
+        yield from self.legacy_cards.iterator()
 
     @property
     def pending_charges(self):
