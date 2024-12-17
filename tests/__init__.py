@@ -5,8 +5,6 @@ Originally collected using API VERSION 2015-07-28.
 Updated to API VERSION 2016-03-07 with bogus fields.
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
-
 import datetime
 import json
 import logging
