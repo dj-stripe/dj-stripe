@@ -96,8 +96,7 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
             return None
         if stripe_field == "url":
             return "base_url"
-        else:
-            return stripe_field.partition("[")[0]
+        return stripe_field.partition("[")[0]
 
     def save(self, commit: bool = False):
         # If we do the following in _post_clean(), the data doesn't save properly.

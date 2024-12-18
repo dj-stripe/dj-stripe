@@ -384,9 +384,9 @@ class StripeModel(StripeBaseModel):
 
         manipulated_data = cls._manipulate_stripe_object_hook(data)
         if not cls.is_valid_object(manipulated_data):
+            object_type = manipulated_data.get("object", "")
             raise ValueError(
-                "Trying to fit a %r into %r. Aborting."
-                % (manipulated_data.get("object", ""), cls.__name__)
+                f"Trying to fit {object_type!r} into {cls.__name__!r}. Aborting."
             )
 
         # By default we put the  raw stripe data in the stripe_data json field

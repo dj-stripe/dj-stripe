@@ -229,7 +229,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         charge = Charge.sync_from_stripe_data(fake_charge_copy)
 
-        self.assertEqual(Decimal("20"), charge.amount)
+        self.assertEqual(Decimal(20), charge.amount)
         self.assertEqual(True, charge.paid)
         self.assertEqual(False, charge.refunded)
         self.assertEqual(True, charge.captured)
@@ -329,7 +329,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         ):
             charge = Charge.sync_from_stripe_data(fake_charge_copy)
 
-        self.assertEqual(Decimal("20"), charge.amount)
+        self.assertEqual(Decimal(20), charge.amount)
         self.assertEqual(True, charge.paid)
         self.assertEqual(False, charge.refunded)
         self.assertEqual(True, charge.captured)
@@ -347,7 +347,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertEqual(charge.id, charge_refunded.id)
 
-        self.assertEqual(Decimal("20"), charge_refunded.amount)
+        self.assertEqual(Decimal(20), charge_refunded.amount)
         self.assertEqual(True, charge_refunded.paid)
         self.assertEqual(True, charge_refunded.refunded)
         self.assertEqual(True, charge_refunded.captured)
@@ -457,7 +457,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         charge = Charge.sync_from_stripe_data(fake_charge_copy)
 
-        self.assertEqual(Decimal("20"), charge.amount)
+        self.assertEqual(Decimal(20), charge.amount)
         self.assertEqual(True, charge.paid)
         self.assertEqual(True, charge.refunded)
         self.assertEqual(True, charge.captured)

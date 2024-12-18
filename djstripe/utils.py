@@ -95,15 +95,10 @@ def get_id_from_stripe_data(data):
     elif data:
         # data like {"id": sub_6lsC8pt7IcFpjA", ...}
         return data.get("id")
-    else:
-        return None
 
 
 def get_model(model_name):
-    app_label = "djstripe"
-    app_config = apps.get_app_config(app_label)
-    model = app_config.get_model(model_name)
-    return model
+    return apps.get_app_config("djstripe").get_model(model_name)
 
 
 def get_queryset(pks, model_name):

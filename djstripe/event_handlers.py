@@ -463,9 +463,6 @@ class CrudType(Enum):
             if verb.endswith(enum.value):
                 return enum
 
-        # in case nothing matches
-        return
-
 
 def _handle_crud_like_event(
     target_cls, event: "models.Event", data=None, id: str = None, crud_type=None
@@ -523,7 +520,7 @@ def _handle_crud_like_event(
             kwargs["account"] = models.Account._get_or_retrieve(id=stripe_account)
 
         # Stripe doesn't allow direct retrieval of Discount Objects
-        if target_cls not in (models.Discount,):
+        if target_cls != models.Discount:
             data = target_cls(**kwargs).api_retrieve(
                 stripe_account=stripe_account, api_key=event.default_api_key
             )

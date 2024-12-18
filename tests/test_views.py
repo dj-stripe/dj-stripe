@@ -241,10 +241,9 @@ class TestConfirmCustomActionView(CreateAccountMixin):
     @pytest.mark.parametrize("fake_selected_pks", [None, [1, 2]])
     def test__sync_all_instances(self, fake_selected_pks, monkeypatch):
         app_label = "djstripe"
-        app_config = apps.get_app_config(app_label)
-        all_models_lst = app_config.get_models()
+        all_models = apps.get_app_config(app_label).get_models()
 
-        for model in all_models_lst:
+        for model in all_models:
             if model in site._registry.keys() and (
                 model.__name__ == "WebhookEndpoint"
                 or model.__name__ not in self.ignore_models
@@ -370,7 +369,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
             }
         else:
             # assert in case djstripe_owner_account does not exist that kwargs are empty
-            assert self.kwargs_called_with == {}
+            assert not self.kwargs_called_with
 
     def test__resync_instances_stripe_permission_error(self, monkeypatch):
         model = CustomActionModel

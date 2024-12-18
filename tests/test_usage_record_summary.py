@@ -229,7 +229,7 @@ class TestUsageRecordSummary(CreateAccountMixin, AssertStripeFksMixin, TestCase)
             str(usage_record_summary),
             (
                 "Usage Summary for"
-                f" {str(usage_record_summary.subscription_item)} ({str(usage_record_summary.invoice)})"
+                f" {usage_record_summary.subscription_item} ({usage_record_summary.invoice})"
             ),
         )
 

@@ -272,8 +272,7 @@ class LegacySourceMixin:
             return self.customer.get_stripe_dashboard_url()
         elif self.account:
             return f"https://dashboard.stripe.com/{self.account.id}/settings/payouts"
-        else:
-            return ""
+        return ""
 
     def remove(self):
         """
@@ -821,8 +820,7 @@ class SourceTransaction(StripeModel):
             or not self.source.id
         ):
             return ""
-        else:
-            return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
+        return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
 
 
 class PaymentMethod(StripeModel):
@@ -849,8 +847,7 @@ class PaymentMethod(StripeModel):
 
     @property
     def last4(self):
-        payment_method_data = self.stripe_data.get(self.type, {})
-        return payment_method_data.get("last4", "")
+        return self.stripe_data.get(self.type, {}).get("last4", "")
 
     def __str__(self):
         humanized = enums.PaymentMethodType.humanize(self.type)

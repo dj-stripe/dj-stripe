@@ -17,8 +17,9 @@ API_KEY_REGEX = r"^(pk|sk|rk)_(test|live)_([a-zA-Z0-9]{24,99})"
 
 
 def generate_api_key_id() -> str:
-    b64_id = b64encode(uuid4().bytes).decode()
-    generated_id = b64_id.rstrip("=").replace("+", "").replace("/", "")
+    generated_id = (
+        b64encode(uuid4().bytes).decode().rstrip("=").replace("+", "").replace("/", "")
+    )
     return f"djstripe_mk_{generated_id}"
 
 

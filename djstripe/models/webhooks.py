@@ -295,8 +295,7 @@ class WebhookEventTrigger(models.Model):
             raise ValueError("Cannot verify event signature without a secret")
 
         # HTTP headers are case-insensitive, but we store them as a dict.
-        headers = CaseInsensitiveMapping(self.headers)
-        signature = headers.get("stripe-signature")
+        signature = CaseInsensitiveMapping(self.headers).get("stripe-signature")
 
         try:
             stripe.WebhookSignature.verify_header(
@@ -345,7 +344,7 @@ class WebhookEventTrigger(models.Model):
                 # (used for stripe cli webhook forwarding)
                 headers = CaseInsensitiveMapping(self.headers)
                 local_secret = headers.get("x-djstripe-webhook-secret")
-                secret = local_secret if local_secret else secret
+                secret = local_secret or secret
             return self.verify_signature(
                 secret=secret, tolerance=self.webhook_endpoint.djstripe_tolerance
             )

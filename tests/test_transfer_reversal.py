@@ -48,7 +48,7 @@ class TestTransferReversalStr(TestCase):
         transfer_reversal = TransferReversal.sync_from_stripe_data(
             deepcopy(FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0])
         )
-        self.assertEqual(str(f"{transfer_reversal.transfer}"), str(transfer_reversal))
+        self.assertEqual(str(transfer_reversal.transfer), str(transfer_reversal))
 
 
 class TestTransfer(AssertStripeFksMixin, TestCase):

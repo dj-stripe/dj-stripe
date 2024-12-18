@@ -671,8 +671,7 @@ class Product(StripeModel):
             return f"{self.name} ({price_count} prices)"
         elif price_count == 1:
             return f"{self.name} ({price_qs[0].human_readable_price})"
-        else:
-            return self.name
+        return self.name
 
 
 class Customer(StripeModel):
@@ -2365,7 +2364,7 @@ class Price(StripeModel):
     @classmethod
     def create(cls, **kwargs):
         # A few minor things are changed in the api-version of the create call
-        api_kwargs = dict(kwargs)
+        api_kwargs = kwargs.copy()
         if api_kwargs["unit_amount"]:
             api_kwargs["unit_amount"] = int(api_kwargs["unit_amount"] * 100)
 

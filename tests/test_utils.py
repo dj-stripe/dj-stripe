@@ -69,9 +69,7 @@ class TestUtils(TestCase):
         self.assertEqual(
             get_friendly_currency_amount(Decimal("1.001"), "usd"), "$1.00 USD"
         )
-        self.assertEqual(
-            get_friendly_currency_amount(Decimal("10"), "usd"), "$10.00 USD"
-        )
+        self.assertEqual(get_friendly_currency_amount(Decimal(10), "usd"), "$10.00 USD")
         self.assertEqual(
             get_friendly_currency_amount(Decimal("10.50"), "usd"), "$10.50 USD"
         )

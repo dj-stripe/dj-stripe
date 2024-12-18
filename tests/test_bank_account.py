@@ -168,15 +168,17 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         # deepcopy the BankAccount object
         FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_IV)
 
-        bankaccount = BankAccount.sync_from_stripe_data(FAKE_BANK_ACCOUNT_DICT)
-        bankaccount_by_customer = bankaccount.api_retrieve()
+        bankaccount_by_customer = BankAccount.sync_from_stripe_data(
+            FAKE_BANK_ACCOUNT_DICT
+        ).api_retrieve()
 
         # Add account
         FAKE_BANK_ACCOUNT_DICT["account"] = FAKE_CUSTOM_ACCOUNT["id"]
         FAKE_BANK_ACCOUNT_DICT["customer"] = None
 
-        bankaccount = BankAccount.sync_from_stripe_data(FAKE_BANK_ACCOUNT_DICT)
-        bankaccount_by_account = bankaccount.api_retrieve()
+        bankaccount_by_account = BankAccount.sync_from_stripe_data(
+            FAKE_BANK_ACCOUNT_DICT
+        ).api_retrieve()
 
         # assert the same bankaccount object gets retrieved
         self.assertCountEqual(bankaccount_by_customer, bankaccount_by_account)
