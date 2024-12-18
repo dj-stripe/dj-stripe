@@ -132,7 +132,7 @@ class StripeItem(dict):
         """Superficial mock that emulates instance_url."""
         id = self.get("id")
         base = self.class_url()
-        return "{}/{}".format(base, id)
+        return f"{base}/{id}"
 
     def request(self, method, url, params) -> Dict:
         """Superficial mock that emulates request method."""
@@ -1021,16 +1021,16 @@ class SubscriptionDict(StripeItem):
 
         # Special case for price and plan
         if name == "price":
-            for price in [
+            for price in (
                 FAKE_PRICE,
                 FAKE_PRICE_II,
                 FAKE_PRICE_TIER,
                 FAKE_PRICE_METERED,
-            ]:
+            ):
                 if value == price["id"]:
                     value = price
         elif name == "plan":
-            for plan in [FAKE_PLAN, FAKE_PLAN_II, FAKE_TIER_PLAN, FAKE_PLAN_METERED]:
+            for plan in (FAKE_PLAN, FAKE_PLAN_II, FAKE_TIER_PLAN, FAKE_PLAN_METERED):
                 if value == plan["id"]:
                     value = plan
 

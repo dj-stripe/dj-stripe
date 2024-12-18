@@ -61,7 +61,7 @@ class CreateCheckoutSessionView(LoginRequiredMixin, TemplateView):
         # example of how to insert the SUBSCRIBER_CUSTOMER_KEY: id in the metadata
         # to add customer.subscriber to the newly created/updated customer.
         metadata = {
-            f"{djstripe_settings.djstripe_settings.SUBSCRIBER_CUSTOMER_KEY}": id
+            str(djstripe_settings.djstripe_settings.SUBSCRIBER_CUSTOMER_KEY): id
         }
 
         try:

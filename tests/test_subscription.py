@@ -1186,9 +1186,9 @@ class TestSubscriptionDecimal(CreateAccountMixin):
     @pytest.mark.parametrize(
         "inputted,expected",
         [
-            (Decimal("1"), Decimal("1.00")),
+            (Decimal(1), Decimal("1.00")),
             (Decimal("1.5234567"), Decimal("1.52")),
-            (Decimal("0"), Decimal("0.00")),
+            (Decimal(0), Decimal("0.00")),
             (Decimal("23.2345678"), Decimal("23.23")),
             ("1", Decimal("1.00")),
             ("1.5234567", Decimal("1.52")),

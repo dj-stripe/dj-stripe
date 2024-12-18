@@ -185,9 +185,8 @@ class DjstripeSettings:
         elif livemode:
             # Livemode is true, use the live secret key
             return self.LIVE_API_KEY or self.STRIPE_SECRET_KEY
-        else:
-            # Livemode is false, use the test secret key
-            return self.TEST_API_KEY or self.STRIPE_SECRET_KEY
+        # Livemode is false, use the test secret key
+        return self.TEST_API_KEY or self.STRIPE_SECRET_KEY
 
     def get_subscriber_model_string(self) -> str:
         """Get the configured subscriber model as a module path string."""

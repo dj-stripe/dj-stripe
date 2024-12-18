@@ -772,7 +772,7 @@ class TestChargeEvents(CreateAccountMixin, EventTestCase):
         charge = Charge.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             charge.amount,
-            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
+            fake_stripe_event["data"]["object"]["amount"] / Decimal(100),
         )
         self.assertEqual(charge.status, fake_stripe_event["data"]["object"]["status"])
 
@@ -1945,7 +1945,7 @@ class TestInvoiceEvents(CreateAccountMixin, EventTestCase):
         invoice = Invoice.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             invoice.amount_due,
-            fake_stripe_event["data"]["object"]["amount_due"] / Decimal("100"),
+            fake_stripe_event["data"]["object"]["amount_due"] / Decimal(100),
         )
         self.assertEqual(invoice.paid, fake_stripe_event["data"]["object"]["paid"])
 
@@ -2120,7 +2120,7 @@ class TestInvoiceItemEvents(CreateAccountMixin, EventTestCase):
         )
         self.assertEqual(
             invoiceitem.amount,
-            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
+            fake_stripe_event["data"]["object"]["amount"] / Decimal(100),
         )
 
     @patch(
@@ -3094,7 +3094,7 @@ class TestTransferEvents(EventTestCase):
         transfer = Transfer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             transfer.amount,
-            fake_stripe_event["data"]["object"]["amount"] / Decimal("100"),
+            fake_stripe_event["data"]["object"]["amount"] / Decimal(100),
         )
 
     # transfer.deleted event is not enabled

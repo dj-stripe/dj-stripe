@@ -145,7 +145,7 @@ class SubscriptionManagerTest(CreateAccountMixin, TestCase):
 
     def test_churn(self):
         self.assertEqual(
-            Subscription.objects.churn(), decimal.Decimal("1") / decimal.Decimal("11")
+            Subscription.objects.churn(), decimal.Decimal(1) / decimal.Decimal(11)
         )
 
 

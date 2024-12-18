@@ -335,8 +335,7 @@ class Command(BaseCommand):
             self.fake_id_map[fake_id] = actual_id
 
             return fake_id
-        else:
-            return actual_id
+        return actual_id
 
     def get_fake_id(self, obj):
         """

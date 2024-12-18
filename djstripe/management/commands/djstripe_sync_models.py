@@ -219,9 +219,9 @@ class Command(BaseCommand):
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
         accs_set.add(stripe_platform_obj.id)
-
-        for stripe_connected_obj in models.Account.api_list(api_key=api_key, **kwargs):
-            accs_set.add(stripe_connected_obj.id)
+        accs_set.update(
+            obj.id for obj in models.Account.api_list(api_key=api_key, **kwargs)
+        )
 
         return accs_set
 

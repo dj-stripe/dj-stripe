@@ -133,15 +133,15 @@ class CardTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         # deepcopy the CardDict object
         FAKE_CARD_DICT = deepcopy(FAKE_CARD)
 
-        card = Card.sync_from_stripe_data(deepcopy(FAKE_CARD_DICT))
-        card_by_customer = card.api_retrieve()
+        card_by_customer = Card.sync_from_stripe_data(
+            deepcopy(FAKE_CARD_DICT)
+        ).api_retrieve()
 
         # Add account
         FAKE_CARD_DICT["account"] = FAKE_CUSTOM_ACCOUNT["id"]
         FAKE_CARD_DICT["customer"] = None
 
-        card = Card.sync_from_stripe_data(FAKE_CARD_DICT)
-        card_by_account = card.api_retrieve()
+        card_by_account = Card.sync_from_stripe_data(FAKE_CARD_DICT).api_retrieve()
 
         # assert the same card object gets retrieved
         self.assertCountEqual(card_by_customer, card_by_account)

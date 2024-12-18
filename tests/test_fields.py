@@ -25,9 +25,9 @@ class TestStripeDecimalCurrencyAmountField:
     @pytest.mark.parametrize(
         "expected,inputted",
         [
-            (Decimal("1"), Decimal("100")),
-            (Decimal("1.5"), Decimal("150")),
-            (Decimal("0"), Decimal("0")),
+            (Decimal(1), Decimal(100)),
+            (Decimal("1.5"), Decimal(150)),
+            (Decimal(0), Decimal(0)),
         ],
     )
     def test_stripe_to_db_decimal_val(self, expected, inputted):
@@ -52,9 +52,9 @@ class TestStripePercentField:
     @pytest.mark.parametrize(
         "inputted,expected",
         [
-            (Decimal("1"), Decimal("1.00")),
+            (Decimal(1), Decimal("1.00")),
             (Decimal("1.5234567"), Decimal("1.52")),
-            (Decimal("0"), Decimal("0.00")),
+            (Decimal(0), Decimal("0.00")),
             (Decimal("23.2345678"), Decimal("23.23")),
             ("1", Decimal("1.00")),
             ("1.5234567", Decimal("1.52")),

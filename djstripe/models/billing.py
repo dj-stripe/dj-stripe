@@ -1063,10 +1063,9 @@ class UpcomingInvoice(BaseInvoice):
         will act like a normal queryset, but mutation will silently fail.
         """
         # filter lineitems with type="invoice_item" and fetch all the actual InvoiceItem objects
-        items = []
-        for item in self._lineitems:
-            if item.type == "invoice_item":
-                items.append(item.invoice_item)
+        items = [
+            item.invoice_item for item in self._lineitems if item.type == "invoice_item"
+        ]
 
         return QuerySetMock.from_iterable(InvoiceItem, items)
 
@@ -1672,7 +1671,7 @@ class Plan(StripeModel):
     @classmethod
     def create(cls, **kwargs):
         # A few minor things are changed in the api-version of the create call
-        api_kwargs = dict(kwargs)
+        api_kwargs = kwargs.copy()
         api_kwargs["amount"] = int(api_kwargs["amount"] * 100)
 
         if isinstance(api_kwargs.get("product"), StripeModel):
@@ -2196,7 +2195,7 @@ class Subscription(StripeModel):
         false otherwise.
         """
 
-        return self.status in ["trialing", "active"]
+        return self.status in ("trialing", "active")
 
     def is_status_temporarily_current(self):
         """
@@ -2590,8 +2589,7 @@ class ShippingRate(StripeModel):
         )
         if self.active:
             return f"{self.display_name} - {amount} (Active)"
-        else:
-            return f"{self.display_name} - {amount} (Archived)"
+        return f"{self.display_name} - {amount} (Archived)"
 
 
 class TaxCode(StripeModel):

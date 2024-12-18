@@ -103,7 +103,7 @@ def validate_stripe_api_version(version):
     :type version: ``str``
     :returns bool: Whether the version is formatted correctly.
     """
-    return re.match(STRIPE_API_VERSION_PATTERN, version)
+    return STRIPE_API_VERSION_PATTERN.match(version)
 
 
 @checks.register("djstripe")

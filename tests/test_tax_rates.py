@@ -41,9 +41,9 @@ class TestTaxRateDecimal(CreateAccountMixin):
     @pytest.mark.parametrize(
         "inputted,expected",
         [
-            (Decimal("1"), Decimal("1.0000")),
+            (Decimal(1), Decimal("1.0000")),
             (Decimal("1.5234567"), Decimal("1.5235")),
-            (Decimal("0"), Decimal("0.0000")),
+            (Decimal(0), Decimal("0.0000")),
             (Decimal("23.2345678"), Decimal("23.2346")),
             ("1", Decimal("1.0000")),
             ("1.5234567", Decimal("1.5235")),

@@ -274,8 +274,7 @@ class LegacySourceMixin:
             return self.customer.get_stripe_dashboard_url()
         elif self.account:
             return f"https://dashboard.stripe.com/{self.account.id}/settings/payouts"
-        else:
-            return ""
+        return ""
 
     def remove(self):
         """
@@ -945,6 +944,17 @@ class SourceTransaction(StripeModel):
         ):
             if source_trx.id == self.id:
                 return source_trx
+
+    def get_stripe_dashboard_url(self) -> str:
+        """Get the stripe dashboard url for this object."""
+        if (
+            not self.stripe_dashboard_item_name
+            or not self.id
+            or not self.source
+            or not self.source.id
+        ):
+            return ""
+        return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
 
 
 class PaymentMethod(StripeModel):

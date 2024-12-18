@@ -270,7 +270,7 @@ class Transfer(StripeModel):
             # Partial Reversal
             return f"{amount} Partially Reversed"
         # No Reversal
-        return f"{amount}"
+        return str(amount)
 
     def _attach_objects_post_save_hook(
         self,

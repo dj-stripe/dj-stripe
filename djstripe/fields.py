@@ -128,7 +128,7 @@ class StripeDecimalCurrencyAmountField(FieldDeconstructMixin, models.DecimalFiel
 
         # Note: 0 is a possible return value, which is 'falseish'
         if val is not None:
-            return val / decimal.Decimal("100")
+            return val / decimal.Decimal(100)
 
 
 class StripeEnumField(FieldDeconstructMixin, models.CharField):
