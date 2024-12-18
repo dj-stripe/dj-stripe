@@ -71,6 +71,10 @@ mysql = ["mysqlclient"]
 requires = ["poetry_core>=1.1.0"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.ruff.lint]
+select = ["F", "FURB", "UP"]
+
+
 [tool.tox]
 isolated_build = true
 envlist = [
