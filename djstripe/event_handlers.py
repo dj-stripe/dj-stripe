@@ -360,9 +360,6 @@ def handle_charge_dispute_event(sender, event, **kwargs):
 @djstripe_receiver("payout.paid")
 @djstripe_receiver("payout.reconciliation_completed")
 @djstripe_receiver("payout.updated")
-@djstripe_receiver("plan.created")
-@djstripe_receiver("plan.deleted")
-@djstripe_receiver("plan.updated")
 @djstripe_receiver("price.created")
 @djstripe_receiver("price.deleted")
 @djstripe_receiver("price.updated")
@@ -403,7 +400,6 @@ def handle_other_event(sender, event, **kwargs):
     - order: https://stripe.com/docs/api/orders_v2
     - payment_intent: https://stripe.com/docs/api/payment_intents
     - payout: https://stripe.com/docs/api/payouts
-    - plan: https://stripe.com/docs/api/plans
     - price: https://stripe.com/docs/api/prices
     - product: https://stripe.com/docs/api/products
     - setup_intent: https://stripe.com/docs/api/setup_intents
@@ -421,7 +417,6 @@ def handle_other_event(sender, event, **kwargs):
         "invoiceitem": models.InvoiceItem,
         "payment_intent": models.PaymentIntent,
         "payout": models.Payout,
-        "plan": models.Plan,
         "price": models.Price,
         "product": models.Product,
         "transfer": models.Transfer,
