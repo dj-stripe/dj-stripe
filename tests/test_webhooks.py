@@ -17,7 +17,6 @@ from django.urls import reverse
 from djstripe.models import Event, Transfer, WebhookEventTrigger
 from djstripe.models.webhooks import WebhookEndpoint, get_remote_ip
 from djstripe.settings import djstripe_settings
-from djstripe.webhooks import TEST_EVENT_ID
 
 from . import (
     FAKE_CUSTOM_ACCOUNT,
@@ -62,10 +61,8 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
         resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
         self.assertEqual(resp.status_code, 200)
-        self.assertFalse(Event.objects.filter(id=TEST_EVENT_ID).exists())
         self.assertEqual(WebhookEventTrigger.objects.count(), 1)
         event_trigger = WebhookEventTrigger.objects.first()
-        self.assertTrue(event_trigger.is_test_event)
 
     def test___str__(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
@@ -452,7 +449,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         self.assertEqual(WebhookEventTrigger.objects.count(), 1)
 
         event_trigger = WebhookEventTrigger.objects.first()
-        self.assertEqual(event_trigger.is_test_event, False)
         self.assertEqual(
             event_trigger.stripe_trigger_account.id, FAKE_STANDARD_ACCOUNT["id"]
         )
@@ -488,7 +484,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         self.assertEqual(WebhookEventTrigger.objects.count(), 1)
 
         event_trigger = WebhookEventTrigger.objects.first()
-        self.assertEqual(event_trigger.is_test_event, False)
         self.assertEqual(
             event_trigger.stripe_trigger_account.id, FAKE_CUSTOM_ACCOUNT["id"]
         )
@@ -522,7 +517,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         self.assertEqual(WebhookEventTrigger.objects.count(), 1)
 
         event_trigger = WebhookEventTrigger.objects.first()
-        self.assertEqual(event_trigger.is_test_event, False)
+        assert event_trigger
         self.assertEqual(event_trigger.exception, "'Test error'")
 
 

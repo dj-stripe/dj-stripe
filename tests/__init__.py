@@ -18,7 +18,6 @@ from django.db import models
 from django.utils import dateformat
 
 from djstripe.utils import get_timezone_utc
-from djstripe.webhooks import TEST_EVENT_ID
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tests.settings")
 logger = logging.getLogger(__name__)
@@ -2000,7 +1999,7 @@ FAKE_EVENT_CHARGE_SUCCEEDED = {
 }
 
 FAKE_EVENT_TEST_CHARGE_SUCCEEDED = deepcopy(FAKE_EVENT_CHARGE_SUCCEEDED)
-FAKE_EVENT_TEST_CHARGE_SUCCEEDED["id"] = TEST_EVENT_ID
+FAKE_EVENT_TEST_CHARGE_SUCCEEDED["id"] = "evt_XXXXXXXXX"
 
 FAKE_EVENT_CUSTOMER_CREATED = {
     "id": "evt_38DHch3whaDvKYlo2CT2oe5ff3",
