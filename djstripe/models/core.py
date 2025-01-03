@@ -30,26 +30,6 @@ from ..utils import get_friendly_currency_amount, get_id_from_stripe_data
 from .base import IdempotencyKey, StripeModel, logger
 
 
-def _sanitise_price(price=None, plan=None, **kwargs):
-    """
-    Helper for Customer.subscribe()
-    """
-
-    if price and plan:
-        raise TypeError("price and plan arguments cannot both be defined.")
-
-    price = price or plan
-
-    if not price:
-        raise TypeError("you need to set either price or plan")
-
-    # Convert Price to id
-    if isinstance(price, StripeModel):
-        price = price.id
-
-    return price, kwargs
-
-
 class BalanceTransaction(StripeModel):
     """
     A single transaction that updates the Stripe balance.
@@ -966,7 +946,7 @@ class Customer(StripeModel):
         """
         return max(self.balance, 0)
 
-    def subscribe(self, *, items=None, price=None, plan=None, **kwargs):
+    def subscribe(self, *, items=None, price=None, **kwargs):
         """
         Subscribes this customer to all the prices or plans in the items dict (Recommended).
 
@@ -983,8 +963,8 @@ class Customer(StripeModel):
         """
         from .billing import Subscription
 
-        if (items and price) or (items and plan) or (price and plan):
-            raise TypeError("Please define only one of items, price or plan arguments.")
+        if items and price:
+            raise TypeError("Please define only one of items and price arguments.")
 
         if items is None:
             _items = [{"price": price}]
@@ -992,12 +972,8 @@ class Customer(StripeModel):
             _items = []
             for item in items:
                 price = item.get("price", "")
-                plan = item.get("plan", "")
-                price, kwargs = _sanitise_price(price, plan, **kwargs)
                 if "price" in item:
                     _items.append({"price": price})
-                if "plan" in item:
-                    _items.append({"plan": price})
 
         stripe_subscription = Subscription._api_create(
             items=_items, customer=self.id, **kwargs
