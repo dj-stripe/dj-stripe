@@ -410,16 +410,8 @@ class InvoiceAdmin(StripeModelAdmin):
         "customer",
         "due_date",
     )
-    list_filter = (
-        "status",
-        "paid",
-        "attempted",
-        "created",
-        "due_date",
-        "period_start",
-        "period_end",
-    )
-    search_fields = ("customer__id", "number", "receipt_number")
+    list_filter = ("status", "created", "due_date")
+    search_fields = ("number", "receipt_number")
     inlines = (InvoiceItemInline,)
 
     @admin.display(description="Default Tax Rates")
