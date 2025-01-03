@@ -652,34 +652,6 @@ class BaseInvoice(StripeModel):
             if discount:
                 Discount.sync_from_stripe_data(discount, api_key=api_key)
 
-    @property
-    def plan(self) -> Optional["Plan"]:
-        """Gets the associated plan for this invoice.
-
-        In order to provide a consistent view of invoices, the plan object
-        should be taken from the first invoice item that has one, rather than
-        using the plan associated with the subscription.
-
-        Subscriptions (and their associated plan) are updated by the customer
-        and represent what is current, but invoice items are immutable within
-        the invoice and stay static/unchanged.
-
-        In other words, a plan retrieved from an invoice item will represent
-        the plan as it was at the time an invoice was issued.  The plan
-        retrieved from the subscription will be the currently active plan.
-
-        :returns: The associated plan for the invoice.
-        """
-
-        for invoiceitem in self.invoiceitems.all():
-            if invoiceitem.plan:
-                return invoiceitem.plan
-
-        if self.subscription:
-            return self.subscription.plan
-
-        return None
-
 
 class Invoice(BaseInvoice):
     """
