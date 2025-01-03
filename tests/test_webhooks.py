@@ -594,6 +594,7 @@ class TestWebhookEndpoint(CreateAccountMixin):
     def test_sync_from_stripe_data_existent_webhook_endpoint(self):
         fake_webhook_1 = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
         webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook_1)
+        assert webhook_endpoint
         assert webhook_endpoint.id == fake_webhook_1["id"]
         djstripe_uuid = webhook_endpoint.djstripe_uuid
 
@@ -622,6 +623,7 @@ class TestWebhookEndpoint(CreateAccountMixin):
     def test___str__(self):
         fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
         webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+        assert webhook_endpoint
         assert str(webhook_endpoint) == webhook_endpoint.url
         assert (
             str(webhook_endpoint)

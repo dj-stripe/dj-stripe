@@ -22,7 +22,6 @@ from djstripe.models import (
     Invoice,
     InvoiceItem,
     PaymentMethod,
-    Plan,
     Price,
     Subscription,
     SubscriptionSchedule,
@@ -99,9 +98,6 @@ from . import (
     FAKE_EVENT_PAYMENT_INTENT_SUCCEEDED_DESTINATION_CHARGE,
     FAKE_EVENT_PAYMENT_METHOD_ATTACHED,
     FAKE_EVENT_PAYMENT_METHOD_DETACHED,
-    FAKE_EVENT_PLAN_CREATED,
-    FAKE_EVENT_PLAN_DELETED,
-    FAKE_EVENT_PLAN_REQUEST_IS_OBJECT,
     FAKE_EVENT_PRICE_CREATED,
     FAKE_EVENT_PRICE_DELETED,
     FAKE_EVENT_PRICE_UPDATED,
@@ -2212,69 +2208,6 @@ class TestInvoiceItemEvents(CreateAccountMixin, EventTestCase):
 
         with self.assertRaises(InvoiceItem.DoesNotExist):
             InvoiceItem.objects.get(id=FAKE_INVOICEITEM["id"])
-
-
-class TestPlanEvents(CreateAccountMixin, EventTestCase):
-    @patch("stripe.Plan.retrieve", autospec=True)
-    @patch("stripe.Event.retrieve", autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_plan_created(
-        self, product_retrieve_mock, event_retrieve_mock, plan_retrieve_mock
-    ):
-        fake_stripe_event = deepcopy(FAKE_EVENT_PLAN_CREATED)
-        event_retrieve_mock.return_value = fake_stripe_event
-        plan_retrieve_mock.return_value = fake_stripe_event["data"]["object"]
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        plan = Plan.objects.get(id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEqual(plan.nickname, fake_stripe_event["data"]["object"]["nickname"])
-
-    @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN, autospec=True)
-    @patch(
-        "stripe.Event.retrieve",
-        return_value=FAKE_EVENT_PLAN_REQUEST_IS_OBJECT,
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_plan_updated_request_object(
-        self, product_retrieve_mock, event_retrieve_mock, plan_retrieve_mock
-    ):
-        plan_retrieve_mock.return_value = FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"][
-            "object"
-        ]
-
-        event = Event.sync_from_stripe_data(FAKE_EVENT_PLAN_REQUEST_IS_OBJECT)
-        event.invoke_webhook_handlers()
-
-        plan = Plan.objects.get(
-            id=FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["id"]
-        )
-        self.assertEqual(
-            plan.nickname,
-            FAKE_EVENT_PLAN_REQUEST_IS_OBJECT["data"]["object"]["nickname"],
-        )
-
-    @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN, autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_plan_deleted(self, product_retrieve_mock, plan_retrieve_mock):
-        event = self._create_event(FAKE_EVENT_PLAN_CREATED)
-        event.invoke_webhook_handlers()
-
-        Plan.objects.get(id=FAKE_PLAN["id"])
-
-        event = self._create_event(FAKE_EVENT_PLAN_DELETED)
-        event.invoke_webhook_handlers()
-
-        with self.assertRaises(Plan.DoesNotExist):
-            Plan.objects.get(id=FAKE_PLAN["id"])
 
 
 class TestPriceEvents(CreateAccountMixin, EventTestCase):
