@@ -60,6 +60,7 @@ class PaymentMethodForeignKey(FieldDeconstructMixin, models.ForeignKey):
         super().__init__(**kwargs)
 
 
+# DEPRECATED
 class InvoiceOrLineItemForeignKey(models.ForeignKey):
     def __init__(self, **kwargs):
         kwargs.setdefault("to", "InvoiceOrLineItem")

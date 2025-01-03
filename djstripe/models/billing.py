@@ -11,7 +11,6 @@ from stripe import InvalidRequestError
 
 from .. import enums
 from ..fields import (
-    InvoiceOrLineItemForeignKey,
     JSONField,
     PaymentMethodForeignKey,
     StripeCurrencyCodeField,
@@ -235,16 +234,6 @@ class Discount(StripeModel):
         ),
         related_name="invoice_discounts",
     )
-    invoice_item = InvoiceOrLineItemForeignKey(
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        help_text=(
-            "The invoice item id (or invoice line item id for invoice line items of"
-            " type=‘subscription’) that the discount’s coupon was applied to, if it was"
-            " applied directly to a particular invoice item or invoice line item."
-        ),
-    )
     promotion_code = models.CharField(
         max_length=255,
         blank=True,
@@ -266,6 +255,10 @@ class Discount(StripeModel):
         ),
         related_name="subscription_discounts",
     )
+
+    @property
+    def invoice_item(self):
+        return self.stripe_data.get("invoice_item")
 
     @classmethod
     def is_valid_object(cls, data):
