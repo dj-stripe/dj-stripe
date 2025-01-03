@@ -715,32 +715,8 @@ class Customer(StripeModel):
             "Whether the Customer instance has been deleted upstream in Stripe or not."
         ),
     )
-    # <discount>
     coupon = models.ForeignKey(
         "Coupon", null=True, blank=True, on_delete=models.SET_NULL
-    )
-    coupon_start = StripeDateTimeField(
-        null=True,
-        blank=True,
-        editable=False,
-        help_text="If a coupon is present, the date at which it was applied.",
-    )
-    coupon_end = StripeDateTimeField(
-        null=True,
-        blank=True,
-        editable=False,
-        help_text=(
-            "If a coupon is present and has a limited duration, "
-            "the date that the discount will end."
-        ),
-    )
-    # </discount>
-    discount = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Describes the current discount active on the customer, if there is one."
-        ),
     )
 
     email = models.TextField(max_length=5000, default="", blank=True)
@@ -828,11 +804,6 @@ class Customer(StripeModel):
         else:
             # set "deleted" key to False (default)
             data["deleted"] = False
-
-        discount = data.get("discount")
-        if discount:
-            data["coupon_start"] = discount["start"]
-            data["coupon_end"] = discount["end"]
 
         # Populate the object id for our default_payment_method field (or set it None)
         data["default_payment_method"] = data.get("invoice_settings", {}).get(
@@ -938,6 +909,10 @@ class Customer(StripeModel):
         yield from self.sources.iterator()
 
         yield from self.legacy_cards.iterator()
+
+    @property
+    def discount(self):
+        return self.stripe_data.get("discount")
 
     @property
     def pending_charges(self):
@@ -1343,9 +1318,6 @@ class Customer(StripeModel):
             if coupon and coupon != self.coupon:
                 self.coupon = coupon
                 save = True
-        elif self.coupon:
-            self.coupon = None
-            save = True
 
         if save:
             self.save()
