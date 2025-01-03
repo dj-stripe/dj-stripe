@@ -908,8 +908,6 @@ class Customer(StripeModel):
         """
         yield from self.sources.iterator()
 
-        yield from self.legacy_cards.iterator()
-
     @property
     def discount(self):
         return self.stripe_data.get("discount")
@@ -1133,9 +1131,6 @@ class Customer(StripeModel):
 
         # Remove sources
         self.default_source = None
-        for source in self.legacy_cards.all():
-            source.remove()
-
         for source in self.sources.all():
             source.detach()
 

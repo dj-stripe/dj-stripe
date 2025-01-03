@@ -251,7 +251,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         customer = fake_customer.create_for_user(user)
 
         self.assertEqual(customer.sources.count(), 1)
-        self.assertEqual(customer.legacy_cards.count(), 0)
         self.assertEqual(
             customer.default_source.id, fake_customer["default_source"]["id"]
         )
@@ -270,7 +269,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertEqual(customer.deleted, False)
         self.assertEqual(customer.sources.count(), 0)
-        self.assertEqual(customer.legacy_cards.count(), 0)
         self.assertEqual(customer.bank_account.count(), 1)
         self.assertEqual(
             customer.default_source.id, fake_customer["default_source"]["id"]
@@ -302,7 +300,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
         self.assertEqual(customer.sources.count(), 0)
-        self.assertEqual(customer.legacy_cards.count(), 0)
         self.assertEqual(customer.default_source, None)
 
         self.assert_fks(
@@ -324,7 +321,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(
             customer.default_source.id, customer_fake["default_source"]["id"]
         )
-        self.assertEqual(customer.legacy_cards.count(), 2)
         self.assertEqual(len(list(customer.customer_payment_methods)), 2)
 
         self.assert_fks(
