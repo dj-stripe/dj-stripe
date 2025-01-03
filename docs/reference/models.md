@@ -21,11 +21,10 @@ short reason behind the decision in the docstring for each model.
 
 ## Billing
 
-<!-- DO NOT INCLUDE DjstripeInvoiceTotalTaxAmount, DjstripeUpcomingInvoiceTotalTaxAmount AND DJBaseInvoiceSTRIPEPAYMENTMETHOD -->
+<!-- DO NOT INCLUDE BaseInvoice -->
 ::: djstripe.models.billing
     selection:
-        filters: ["!DjstripeInvoiceTotalTaxAmount$", "!DjstripeUpcomingInvoiceTotalTaxAmount$",
-        "!BaseInvoice$"]
+        filters: ["!BaseInvoice$"]
 
 
 ## Connect

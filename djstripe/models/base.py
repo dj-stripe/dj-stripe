@@ -883,46 +883,6 @@ class StripeModel(StripeBaseModel):
         return tax_rates
 
     @classmethod
-    def _stripe_object_set_total_tax_amounts(
-        cls, target_cls, data, instance, api_key=djstripe_settings.STRIPE_SECRET_KEY
-    ):
-        """
-        Set total tax amounts on Invoice instance
-        :param target_cls:
-        :param data:
-        :param instance:
-        :type instance: djstripe.models.Invoice
-        :return:
-        """
-        from .billing import TaxRate
-
-        pks = []
-
-        for tax_amount_data in data.get("total_tax_amounts", []):
-            tax_rate_data = tax_amount_data["tax_rate"]
-            if isinstance(tax_rate_data, str):
-                tax_rate_data = {"tax_rate": tax_rate_data}
-
-            tax_rate, _ = TaxRate._get_or_create_from_stripe_object(
-                tax_rate_data,
-                field_name="tax_rate",
-                refetch=True,
-                api_key=api_key,
-            )
-            tax_amount, _ = target_cls.objects.update_or_create(
-                invoice=instance,
-                tax_rate=tax_rate,
-                defaults={
-                    "amount": tax_amount_data["amount"],
-                    "inclusive": tax_amount_data["inclusive"],
-                },
-            )
-
-            pks.append(tax_amount.pk)
-
-        instance.total_tax_amounts.exclude(pk__in=pks).delete()
-
-    @classmethod
     def _stripe_object_to_line_items(
         cls, target_cls, data, invoice, api_key=djstripe_settings.STRIPE_SECRET_KEY
     ):

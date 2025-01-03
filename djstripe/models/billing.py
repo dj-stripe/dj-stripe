@@ -31,65 +31,6 @@ from .base import StripeModel
 logger = logging.getLogger(__name__)
 
 
-# TODO Mimic stripe-python decorator pattern to easily add and expose CRUD operations like create, update, delete etc on models
-# TODO Add Tests
-class DjstripeInvoiceTotalTaxAmount(models.Model):
-    """
-    An internal model that holds the value of elements of Invoice.total_tax_amounts
-
-    Note that this is named with the prefix Djstripe to avoid potential
-    collision with a Stripe API object name.
-    """
-
-    invoice = StripeForeignKey(
-        "Invoice", on_delete=models.CASCADE, related_name="total_tax_amounts"
-    )
-
-    amount = StripeQuantumCurrencyAmountField(
-        help_text="The amount, in cents, of the tax."
-    )
-    inclusive = models.BooleanField(
-        help_text="Whether this tax amount is inclusive or exclusive."
-    )
-    tax_rate = StripeForeignKey(
-        "TaxRate",
-        on_delete=models.CASCADE,
-        help_text="The tax rate that was applied to get this tax amount.",
-    )
-
-    class Meta:
-        unique_together = ["invoice", "tax_rate"]
-
-
-# TODO Add Tests
-class DjstripeUpcomingInvoiceTotalTaxAmount(models.Model):
-    """
-    As per DjstripeInvoiceTotalTaxAmount, except for UpcomingInvoice
-    """
-
-    invoice = models.ForeignKey(
-        # Don't define related_name since property is defined in UpcomingInvoice
-        "UpcomingInvoice",
-        on_delete=models.CASCADE,
-        related_name="+",
-    )
-
-    amount = StripeQuantumCurrencyAmountField(
-        help_text="The amount, in cents, of the tax."
-    )
-    inclusive = models.BooleanField(
-        help_text="Whether this tax amount is inclusive or exclusive."
-    )
-    tax_rate = StripeForeignKey(
-        "TaxRate",
-        on_delete=models.CASCADE,
-        help_text="The tax rate that was applied to get this tax amount.",
-    )
-
-    class Meta:
-        unique_together = ["invoice", "tax_rate"]
-
-
 class Coupon(StripeModel):
     """
     A coupon contains information about a percent-off or amount-off discount you might want to apply to a customer.
@@ -790,6 +731,10 @@ class Invoice(BaseInvoice):
         help_text="The tax rates applied to this invoice, if any.",
     )
 
+    @property
+    def total_tax_amounts(self):
+        return self.stripe_data.get("total_tax_amounts")
+
     def _attach_objects_post_save_hook(
         self,
         cls,
@@ -805,13 +750,6 @@ class Invoice(BaseInvoice):
             cls._stripe_object_to_default_tax_rates(
                 target_cls=TaxRate, data=data, api_key=api_key
             )
-        )
-
-        cls._stripe_object_set_total_tax_amounts(
-            target_cls=DjstripeInvoiceTotalTaxAmount,
-            data=data,
-            instance=self,
-            api_key=api_key,
         )
 
 
@@ -842,7 +780,6 @@ class UpcomingInvoice(BaseInvoice):
 
         self._lineitems = []
         self._default_tax_rates = []
-        self._total_tax_amounts = []
 
     def get_stripe_dashboard_url(self):
         return ""
@@ -872,26 +809,6 @@ class UpcomingInvoice(BaseInvoice):
         self._default_tax_rates = cls._stripe_object_to_default_tax_rates(
             target_cls=TaxRate, data=data, api_key=api_key
         )
-
-        total_tax_amounts = []
-
-        for tax_amount_data in data.get("total_tax_amounts", []):
-            tax_rate_id = tax_amount_data["tax_rate"]
-            if not isinstance(tax_rate_id, str):
-                tax_rate_id = tax_rate_id["tax_rate"]
-
-            tax_rate = TaxRate._get_or_retrieve(id=tax_rate_id, api_key=api_key)
-
-            tax_amount = DjstripeUpcomingInvoiceTotalTaxAmount(
-                invoice=self,
-                amount=tax_amount_data["amount"],
-                inclusive=tax_amount_data["inclusive"],
-                tax_rate=tax_rate,
-            )
-
-            total_tax_amounts.append(tax_amount)
-
-        self._total_tax_amounts = total_tax_amounts
 
     @property
     def invoiceitems(self):
@@ -935,16 +852,6 @@ class UpcomingInvoice(BaseInvoice):
         :return:
         """
         return QuerySetMock.from_iterable(TaxRate, self._default_tax_rates)
-
-    @property
-    def total_tax_amounts(self):
-        """
-        Gets the total tax amounts associated with this upcoming invoice.
-        :return:
-        """
-        return QuerySetMock.from_iterable(
-            DjstripeUpcomingInvoiceTotalTaxAmount, self._total_tax_amounts
-        )
 
     @property
     def id(self):
