@@ -373,6 +373,7 @@ def handle_other_event(sender, event, **kwargs):
     target_cls = {
         "checkout": models.Session,
         "coupon": models.Coupon,
+        "entitlements": models.ActiveEntitlement,
         "file": models.File,
         "invoice": models.Invoice,
         "invoiceitem": models.InvoiceItem,
