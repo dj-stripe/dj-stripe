@@ -1353,14 +1353,6 @@ class Dispute(StripeModel):
     stripe_class = stripe.Dispute
     stripe_dashboard_item_name = "payments"
 
-    amount = StripeQuantumCurrencyAmountField(
-        help_text=(
-            "Disputed amount (in cents). Usually the amount of the charge, "
-            "but can differ "
-            "(usually because of currency fluctuation or because only part of "
-            "the order is disputed)."
-        )
-    )
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         null=True,
@@ -1368,13 +1360,6 @@ class Dispute(StripeModel):
         related_name="disputes",
         help_text=(
             "Balance transaction that describes the impact on your account balance."
-        ),
-    )
-    balance_transactions = JSONField(
-        default=list,
-        help_text=(
-            "List of 0, 1 or 2 Balance Transactions that show funds withdrawn and"
-            " reinstated to your Stripe account as a result of this dispute."
         ),
     )
     # charge is nullable to avoid infinite sync as Charge model has a dispute field as well
@@ -1385,16 +1370,6 @@ class Dispute(StripeModel):
         related_name="disputes",
         help_text="The charge that was disputed",
     )
-    currency = StripeCurrencyCodeField()
-    evidence = JSONField(help_text="Evidence provided to respond to a dispute.")
-    evidence_details = JSONField(help_text="Information about the evidence submission.")
-    is_charge_refundable = models.BooleanField(
-        help_text=(
-            "If true, it is still possible to refund the disputed payment. "
-            "Once the payment has been fully refunded, no further funds will "
-            "be withdrawn from your Stripe account as a result of this dispute."
-        )
-    )
     payment_intent = StripeForeignKey(
         "PaymentIntent",
         null=True,
@@ -1402,13 +1377,43 @@ class Dispute(StripeModel):
         related_name="disputes",
         help_text="The PaymentIntent that was disputed",
     )
-    reason = StripeEnumField(enum=enums.DisputeReason)
-    status = StripeEnumField(enum=enums.DisputeStatus)
 
     def __str__(self):
         amount = get_friendly_currency_amount(self.amount / 100, self.currency)
         status = enums.DisputeStatus.humanize(self.status)
         return f"{amount} ({status}) "
+
+    @property
+    def amount(self) -> int:
+        return self.stripe_data["amount"]
+
+    @property
+    def balance_transactions(self):
+        return self.stripe_data.get("balance_transactions")
+
+    @property
+    def currency(self):
+        return self.stripe_data.get("currency")
+
+    @property
+    def evidence(self):
+        return self.stripe_data.get("evidence")
+
+    @property
+    def evidence_details(self):
+        return self.stripe_data.get("evidence_details")
+
+    @property
+    def is_charge_refundable(self):
+        return self.stripe_data.get("is_charge_refundable")
+
+    @property
+    def reason(self):
+        return self.stripe_data.get("reason")
+
+    @property
+    def status(self):
+        return self.stripe_data.get("status")
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""

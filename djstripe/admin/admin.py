@@ -278,8 +278,7 @@ class DiscountAdmin(ReadOnlyMixin, StripeModelAdmin):
 
 @admin.register(models.Dispute)
 class DisputeAdmin(ReadOnlyMixin, StripeModelAdmin):
-    list_display = ("reason", "status", "amount", "currency", "is_charge_refundable")
-    list_filter = ("is_charge_refundable", "reason", "status")
+    list_display = ("reason", "status", "amount", "currency")
 
 
 @admin.register(models.Event)
