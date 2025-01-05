@@ -72,7 +72,6 @@ class Command(BaseCommand):
                 "account_balance",
                 "currency",
                 "default_source",
-                "delinquent",
                 "invoice_prefix",
                 "subscriptions",
                 "sources",

@@ -666,22 +666,6 @@ class Customer(StripeModel):
     expand_fields = ["default_source", "sources"]
     stripe_dashboard_item_name = "customers"
 
-    address = JSONField(null=True, blank=True, help_text="The customer's address.")
-    balance = StripeQuantumCurrencyAmountField(
-        null=True,
-        blank=True,
-        default=0,
-        help_text=(
-            "Current balance (in cents), if any, being stored on the customer's "
-            "account. "
-            "If negative, the customer has credit to apply to the next invoice. "
-            "If positive, the customer has an amount owed that will be added to the "
-            "next invoice. The balance does not refer to any unpaid invoices; it "
-            "solely takes into account amounts that have yet to be successfully "
-            "applied to any invoice. This balance is only taken into account for "
-            "recurring billing purposes (i.e., subscriptions, invoices, invoice items)."
-        ),
-    )
     currency = StripeCurrencyCodeField(
         blank=True,
         default="",
@@ -691,15 +675,6 @@ class Customer(StripeModel):
     )
     default_source = PaymentMethodForeignKey(
         on_delete=models.SET_NULL, null=True, blank=True, related_name="customers"
-    )
-    delinquent = models.BooleanField(
-        null=True,
-        blank=True,
-        default=False,
-        help_text=(
-            "Whether or not the latest charge for the customer's "
-            "latest invoice has failed."
-        ),
     )
     # Stripe API returns deleted customers like so:
     # {
@@ -720,17 +695,6 @@ class Customer(StripeModel):
     )
 
     email = models.TextField(max_length=5000, default="", blank=True)
-    invoice_prefix = models.CharField(
-        default="",
-        blank=True,
-        max_length=255,
-        help_text=(
-            "The prefix for the customer used to generate unique invoice numbers."
-        ),
-    )
-    invoice_settings = JSONField(
-        null=True, blank=True, help_text="The customer's default invoice settings."
-    )
     # default_payment_method is actually nested inside invoice_settings
     # this field is a convenience to provide the foreign key
     default_payment_method = StripeForeignKey(
@@ -749,32 +713,6 @@ class Customer(StripeModel):
         default="",
         blank=True,
         help_text="The customer's full name or business name.",
-    )
-    phone = models.TextField(
-        max_length=5000,
-        default="",
-        blank=True,
-        help_text="The customer's phone number.",
-    )
-    preferred_locales = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The customer's preferred locales (languages), ordered by preference."
-        ),
-    )
-    shipping = JSONField(
-        null=True,
-        blank=True,
-        help_text="Shipping information associated with the customer.",
-    )
-    tax_exempt = StripeEnumField(
-        enum=enums.CustomerTaxExempt,
-        default="",
-        help_text=(
-            "Describes the customer's tax exemption status. When set to reverse, "
-            'invoice and receipt PDFs include the text "Reverse charge".'
-        ),
     )
 
     # dj-stripe fields
@@ -886,12 +824,18 @@ class Customer(StripeModel):
             defaults={
                 "subscriber": subscriber,
                 "livemode": stripe_customer["livemode"],
-                "balance": stripe_customer.get("balance", 0),
-                "delinquent": stripe_customer.get("delinquent", False),
             },
         )
 
         return customer
+
+    @property
+    def address(self):
+        return self.stripe_data.get("address")
+
+    @property
+    def balance(self) -> int:
+        return self.stripe_data.get("balance", 0)
 
     @property
     def credits(self):
@@ -899,6 +843,10 @@ class Customer(StripeModel):
         The customer is considered to have credits if their balance is below 0.
         """
         return abs(min(self.balance, 0))
+
+    @property
+    def delinquent(self) -> bool:
+        return self.stripe_data.get("delinquent", False) or False
 
     @property
     def customer_payment_methods(self):
@@ -913,11 +861,31 @@ class Customer(StripeModel):
         return self.stripe_data.get("discount")
 
     @property
+    def invoice_prefix(self) -> str | None:
+        return self.stripe_data.get("invoice_prefix")
+
+    @property
     def pending_charges(self):
         """
         The customer is considered to have pending charges if their balance is above 0.
         """
         return max(self.balance, 0)
+
+    @property
+    def phone(self):
+        return self.stripe_data.get("phone")
+
+    @property
+    def shipping(self):
+        return self.stripe_data.get("shipping")
+
+    @property
+    def preferred_locales(self):
+        return self.stripe_data.get("preferred_locales")
+
+    @property
+    def tax_exempt(self):
+        return self.stripe_data.get("tax_exempt")
 
     def subscribe(self, *, items=None, price=None, **kwargs):
         """

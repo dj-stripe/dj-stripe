@@ -238,7 +238,6 @@ class CustomerAdmin(StripeModelAdmin):
         "currency",
         "default_source",
         "default_payment_method",
-        "balance",
     )
 
     list_filter = ("deleted",)

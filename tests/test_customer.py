@@ -84,20 +84,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.customer.subscriber = None
         self.assertEqual(str(self.customer), self.customer.description)
 
-    def test_balance(self):
-        self.assertEqual(self.customer.balance, 0)
-        self.assertEqual(self.customer.credits, 0)
-
-        self.customer.balance = 1000
-        self.assertEqual(self.customer.balance, 1000)
-        self.assertEqual(self.customer.credits, 0)
-        self.assertEqual(self.customer.pending_charges, 1000)
-
-        self.customer.balance = -1000
-        self.assertEqual(self.customer.balance, -1000)
-        self.assertEqual(self.customer.credits, 1000)
-        self.assertEqual(self.customer.pending_charges, 0)
-
     def test_customer_dashboard_url(self):
         expected_url = f"https://dashboard.stripe.com/{self.customer.djstripe_owner_account.id}/test/customers/{self.customer.id}"
         self.assertEqual(self.customer.get_stripe_dashboard_url(), expected_url)
