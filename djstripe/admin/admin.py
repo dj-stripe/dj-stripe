@@ -307,27 +307,10 @@ class FileLinkAdmin(StripeModelAdmin):
 
 @admin.register(models.PaymentIntent)
 class PaymentIntentAdmin(StripeModelAdmin):
-    list_display = (
-        "on_behalf_of",
-        "customer",
-        "amount",
-        "payment_method",
-        "currency",
-        "description",
-        "amount_capturable",
-        "amount_received",
-        "receipt_email",
-    )
-    search_fields = ("customer__id", "invoice__id")
+    list_display = ("customer", "on_behalf_of")
 
     def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related(
-                "customer", "payment_method", "payment_method__customer", "on_behalf_of"
-            )
-        )
+        return super().get_queryset(request).select_related("customer", "on_behalf_of")
 
 
 @admin.register(models.Payout)
@@ -359,30 +342,7 @@ class PayoutAdmin(StripeModelAdmin):
 
 @admin.register(models.SetupIntent)
 class SetupIntentAdmin(StripeModelAdmin):
-    list_display = (
-        "created",
-        "customer",
-        "description",
-        "on_behalf_of",
-        "payment_method",
-        "payment_method_types",
-        "status",
-    )
-    list_filter = ("status",)
-    search_fields = ("customer__id", "status")
-
-    def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related(
-                "on_behalf_of",
-                "customer",
-                "customer__subscriber",
-                "payment_method",
-                "payment_method__customer",
-            )
-        )
+    list_display = ("customer", "on_behalf_of")
 
 
 @admin.register(models.Session)
