@@ -1023,7 +1023,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_NULL,
                         related_name="djstripe_customers",
-                        to=settings.AUTH_USER_MODEL,
+                        to=DJSTRIPE_SUBSCRIBER_MODEL,
                     ),
                 ),
                 (
