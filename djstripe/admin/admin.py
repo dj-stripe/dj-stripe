@@ -297,7 +297,6 @@ class FileAdmin(StripeModelAdmin):
 @admin.register(models.FileLink)
 class FileLinkAdmin(StripeModelAdmin):
     list_display = ("url",)
-    list_filter = ("expires_at",)
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("file")

@@ -1643,14 +1643,18 @@ class FileLink(StripeModel):
 
     stripe_class = stripe.FileLink
 
-    expires_at = StripeDateTimeField(
-        null=True, blank=True, help_text="Time at which the link expires."
-    )
     file = StripeForeignKey("File", on_delete=models.CASCADE)
-    url = models.URLField(help_text="The publicly accessible URL to download the file.")
 
     def __str__(self):
-        return f"{self.file.filename}, {self.url}"
+        return self.url
+
+    @property
+    def expires_at(self):
+        return self.stripe_data.get("expires_at")
+
+    @property
+    def url(self):
+        return self.stripe_data.get("url")
 
 
 class PaymentIntent(StripeModel):
