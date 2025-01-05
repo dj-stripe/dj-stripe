@@ -292,8 +292,6 @@ class EventAdmin(ReadOnlyMixin, StripeModelAdmin):
 @admin.register(models.File)
 class FileAdmin(StripeModelAdmin):
     list_display = ("purpose", "size", "type")
-    list_filter = ("purpose", "type")
-    search_fields = ("filename",)
 
 
 @admin.register(models.FileLink)

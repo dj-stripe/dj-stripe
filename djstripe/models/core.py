@@ -1598,28 +1598,32 @@ class File(StripeModel):
 
     stripe_class = stripe.File
 
-    filename = models.CharField(
-        max_length=255,
-        help_text="A filename for the file, suitable for saving to a filesystem.",
-    )
-    purpose = StripeEnumField(
-        enum=enums.FilePurpose, help_text="The purpose of the uploaded file."
-    )
-    size = models.IntegerField(help_text="The size in bytes of the file upload object.")
-    type = StripeEnumField(
-        enum=enums.FileType, help_text="The type of the file returned."
-    )
-    url = models.CharField(
-        max_length=200,
-        help_text="A read-only URL where the uploaded file can be accessed.",
-    )
-
     @classmethod
     def is_valid_object(cls, data):
         return data and data.get("object") in ("file", "file_upload")
 
     def __str__(self):
-        return f"{self.filename}, {enums.FilePurpose.humanize(self.purpose)}"
+        return self.filename
+
+    @property
+    def filename(self):
+        return self.stripe_data.get("filename")
+
+    @property
+    def purpose(self):
+        return self.stripe_data.get("purpose")
+
+    @property
+    def size(self):
+        return self.stripe_data.get("size")
+
+    @property
+    def type(self):
+        return self.stripe_data.get("type")
+
+    @property
+    def url(self):
+        return self.stripe_data.get("url")
 
 
 # Alias for compatibility
