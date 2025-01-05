@@ -2048,36 +2048,22 @@ class Refund(StripeModel):
             "balance transaction."
         ),
     )
-    failure_reason = StripeEnumField(
-        enum=enums.RefundFailureReason,
-        default="",
-        blank=True,
-        help_text="If the refund failed, the reason for refund failure if known.",
-    )
-    reason = StripeEnumField(
-        enum=enums.RefundReason,
-        blank=True,
-        default="",
-        help_text="Reason for the refund.",
-    )
-    receipt_number = models.CharField(
-        max_length=64,
-        default="",
-        blank=True,
-        help_text=(
-            "The transaction number that appears on email receipts sent "
-            "for this charge."
-        ),
-    )
-    status = StripeEnumField(
-        blank=True, enum=enums.RefundStatus, help_text="Status of the refund."
-    )
-    # todo implement source_transfer_reversal and transfer_reversal
 
     def get_stripe_dashboard_url(self):
         return self.charge.get_stripe_dashboard_url()
 
-    def __str__(self):
-        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
-        status = enums.RefundStatus.humanize(self.status)
-        return f"{amount} ({status})"
+    @property
+    def failure_reason(self):
+        return self.stripe_data.get("failure_reason")
+
+    @property
+    def reason(self):
+        return self.stripe_data.get("reason")
+
+    @property
+    def receipt_number(self):
+        return self.stripe_data.get("receipt_number")
+
+    @property
+    def status(self):
+        return self.stripe_data.get("status")
