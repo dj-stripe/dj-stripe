@@ -1433,35 +1433,6 @@ class Dispute(StripeModel):
             cls, data, pending_relations=pending_relations, api_key=api_key
         )
 
-        # Retrieve and save files from the dispute.evidence object.
-        # todo find a better way of retrieving and syncing File Type fields from Dispute object
-        for field in (
-            "cancellation_policy",
-            "customer_communication",
-            "customer_signature",
-            "duplicate_charge_documentation",
-            "receipt",
-            "refund_policy",
-            "service_documentation",
-            "shipping_documentation",
-            "uncategorized_file",
-        ):
-            file_upload_id = self.evidence.get(field, None)
-            if file_upload_id:
-                try:
-                    File.sync_from_stripe_data(
-                        File(id=file_upload_id).api_retrieve(api_key=api_key),
-                        api_key=api_key,
-                    )
-                except stripe.error.PermissionError:
-                    # No permission to retrieve the data with the key
-                    # Log a warning message
-                    logger.warning(
-                        "No permission to retrieve the File Evidence Object."
-                    )
-                except stripe.error.InvalidRequestError:
-                    raise
-
         # iterate and sync every balance transaction
         for stripe_balance_transaction in self.balance_transactions:
             BalanceTransaction.sync_from_stripe_data(
