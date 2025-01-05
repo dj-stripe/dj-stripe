@@ -320,8 +320,6 @@ class PayoutAdmin(StripeModelAdmin):
         "status",
         "type",
     )
-    list_filter = ("destination__id", "original_payout")
-    search_fields = ("destination__id", "balance_transaction__id")
 
     def get_queryset(self, request):
         return (

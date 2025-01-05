@@ -1789,23 +1789,6 @@ class Payout(StripeModel):
     stripe_class = stripe.Payout
     stripe_dashboard_item_name = "payouts"
 
-    amount = StripeDecimalCurrencyAmountField(
-        help_text=(
-            "Amount (as decimal) to be transferred to your bank account or debit card."
-        )
-    )
-    arrival_date = StripeDateTimeField(
-        help_text=(
-            "Date the payout is expected to arrive in the bank. "
-            "This factors in delays like weekends or bank holidays."
-        )
-    )
-    automatic = models.BooleanField(
-        help_text=(
-            "`true` if the payout was created by an automated payout schedule, "
-            "and `false` if it was requested manually."
-        )
-    )
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
@@ -1833,30 +1816,6 @@ class Payout(StripeModel):
             "puts the funds from the failed payout back in your balance."
         ),
     )
-    failure_code = StripeEnumField(
-        enum=enums.PayoutFailureCode,
-        default="",
-        blank=True,
-        help_text=(
-            "Error code explaining reason for transfer failure if available. "
-            "See https://stripe.com/docs/api?lang=python#transfer_failures."
-        ),
-    )
-    failure_message = models.TextField(
-        default="",
-        blank=True,
-        help_text=(
-            "Message to user further explaining reason for payout failure if available."
-        ),
-    )
-    method = StripeEnumField(
-        max_length=8,
-        enum=enums.PayoutMethod,
-        help_text=(
-            "The method used to send this payout. "
-            "`instant` is only supported for payouts to debit cards."
-        ),
-    )
     original_payout = models.OneToOneField(
         "Payout",
         on_delete=models.SET_NULL,
@@ -1877,34 +1836,46 @@ class Payout(StripeModel):
         ),
         related_name="reversed_payout",
     )
-    source_type = StripeEnumField(
-        enum=enums.PayoutSourceType,
-        help_text="The source balance this payout came from.",
-    )
-    statement_descriptor = models.CharField(
-        max_length=255,
-        default="",
-        blank=True,
-        help_text=(
-            "Extra information about a payout to be displayed "
-            "on the user's bank statement."
-        ),
-    )
-    status = StripeEnumField(
-        enum=enums.PayoutStatus,
-        help_text=(
-            "Current status of the payout. "
-            "A payout will be `pending` until it is submitted to the bank, "
-            "at which point it becomes `in_transit`. "
-            "It will then change to paid if the transaction goes through. "
-            "If it does not go through successfully, "
-            "its status will change to `failed` or `canceled`."
-        ),
-    )
-    type = StripeEnumField(enum=enums.PayoutType)
 
-    def __str__(self):
-        return f"{self.amount} ({enums.PayoutStatus.humanize(self.status)})"
+    @property
+    def amount(self):
+        return self.stripe_data.get("amount")
+
+    @property
+    def arrival_date(self):
+        return self.stripe_data.get("arrival_date")
+
+    @property
+    def automatic(self):
+        return self.stripe_data.get("automatic")
+
+    @property
+    def failure_code(self):
+        return self.stripe_data.get("failure_code")
+
+    @property
+    def failure_message(self):
+        return self.stripe_data.get("failure_message")
+
+    @property
+    def method(self):
+        return self.stripe_data.get("method")
+
+    @property
+    def source_type(self):
+        return self.stripe_data.get("source_type")
+
+    @property
+    def statement_descriptor(self):
+        return self.stripe_data.get("statement_descriptor")
+
+    @property
+    def status(self):
+        return self.stripe_data.get("status")
+
+    @property
+    def type(self):
+        return self.stripe_data.get("type")
 
 
 class Price(StripeModel):
