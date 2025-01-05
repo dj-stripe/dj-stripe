@@ -1890,94 +1890,44 @@ class Price(StripeModel):
         related_name="prices",
         help_text="The product this price is associated with.",
     )
-    recurring = JSONField(
-        default=None,
-        blank=True,
-        null=True,
-        help_text=(
-            "The recurring components of a price such as `interval` and `usage_type`."
-        ),
-    )
-    type = StripeEnumField(
-        enum=enums.PriceType,
-        help_text=(
-            "Whether the price is for a one-time purchase or a recurring "
-            "(subscription) purchase."
-        ),
-    )
-    unit_amount = StripeQuantumCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The unit amount in cents to be charged, represented as a whole "
-            "integer if possible. Null if a sub-cent precision is required."
-        ),
-    )
-    unit_amount_decimal = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        max_digits=djstripe_settings.decimal_max_digits,
-        decimal_places=djstripe_settings.decimal_places,
-        help_text=(
-            "The unit amount in cents to be charged, represented as a decimal "
-            "string with at most 12 decimal places."
-        ),
-    )
-
-    # More attributes…
-    billing_scheme = StripeEnumField(
-        enum=enums.BillingScheme,
-        blank=True,
-        help_text=(
-            "Describes how to compute the price per period. "
-            "Either `per_unit` or `tiered`. "
-            "`per_unit` indicates that the fixed amount (specified in `unit_amount` "
-            "or `unit_amount_decimal`) will be charged per unit in `quantity` "
-            "(for prices with `usage_type=licensed`), or per unit of total "
-            "usage (for prices with `usage_type=metered`). "
-            "`tiered` indicates that the unit pricing will be computed using "
-            "a tiering strategy as defined using the `tiers` and `tiers_mode` "
-            "attributes."
-        ),
-    )
     lookup_key = models.CharField(
         max_length=250,
         null=True,
         blank=True,
-        help_text=(
-            "A lookup key used to retrieve prices dynamically from a static string."
-        ),
-    )
-    tiers = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Each element represents a pricing tier. "
-            "This parameter requires `billing_scheme` to be set to `tiered`."
-        ),
-    )
-    tiers_mode = StripeEnumField(
-        enum=enums.PriceTiersMode,
-        null=True,
-        blank=True,
-        help_text=(
-            "Defines if the tiering price should be `graduated` or `volume` based. "
-            "In `volume`-based tiering, the maximum quantity within a period "
-            "determines the per unit price, in `graduated` tiering pricing can "
-            "successively change as the quantity grows."
-        ),
-    )
-    transform_quantity = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Apply a transformation to the reported usage or set quantity "
-            "before computing the amount billed. Cannot be combined with `tiers`."
-        ),
+        help_text="A lookup key used to retrieve prices dynamically from a static string.",
     )
 
-    class Meta:
-        ordering = ["unit_amount"]
+    @property
+    def billing_scheme(self):
+        return self.stripe_data.get("billing_scheme")
+
+    @property
+    def recurring(self):
+        return self.stripe_data.get("recurring")
+
+    @property
+    def tiers(self):
+        return self.stripe_data.get("tiers")
+
+    @property
+    def tiers_mode(self):
+        return self.stripe_data.get("tiers_mode")
+
+    @property
+    def transform_quantity(self):
+        return self.stripe_data.get("transform_quantity")
+
+    @property
+    def type(self):
+        return self.stripe_data.get("type")
+
+    @property
+    def unit_amount(self):
+        return self.stripe_data.get("unit_amount")
+
+    @property
+    def unit_amount_decimal(self):
+        return self.stripe_data.get("unit_amount_decimal")
 
     @classmethod
     def get_or_create(cls, **kwargs):
