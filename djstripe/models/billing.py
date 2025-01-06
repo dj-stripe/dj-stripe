@@ -2229,7 +2229,6 @@ class ShippingRate(StripeModel):
 
     stripe_class = stripe.ShippingRate
     stripe_dashboard_item_name = "shipping-rates"
-    description = None
 
     active = models.BooleanField(
         default=True,
@@ -2332,7 +2331,6 @@ class TaxId(StripeModel):
     """
 
     stripe_class = stripe.TaxId
-    description = None
     metadata = None
 
     country = models.CharField(
@@ -2437,10 +2435,9 @@ class UsageRecord(StripeModel):
     Stripe documentation: https://stripe.com/docs/api?lang=python#usage_records
     """
 
-    description = None
-    metadata = None
-
     stripe_class = stripe.UsageRecord
+
+    metadata = None
 
     quantity = models.PositiveIntegerField(
         help_text="The quantity of the plan to which the customer should be subscribed."
@@ -2525,7 +2522,6 @@ class UsageRecordSummary(StripeModel):
 
     stripe_class = stripe.UsageRecordSummary
 
-    description = None
     metadata = None
 
     invoice = StripeForeignKey(

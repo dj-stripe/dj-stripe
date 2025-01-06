@@ -127,9 +127,6 @@ class StripeModel(StripeBaseModel):
             "a structured format."
         ),
     )
-    description = models.TextField(
-        null=True, blank=True, help_text="A description of this object."
-    )
 
     class Meta(StripeBaseModel.Meta):
         abstract = True
@@ -160,6 +157,10 @@ class StripeModel(StripeBaseModel):
             if self.djstripe_owner_account:
                 return self.djstripe_owner_account.get_default_api_key(self.livemode)
         return djstripe_settings.get_default_api_key(self.livemode)
+
+    @property
+    def description(self) -> str:
+        return self.stripe_data.get("description", "") or ""
 
     def _get_stripe_account_id(self, api_key=None) -> Optional[str]:
         """

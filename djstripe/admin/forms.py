@@ -74,11 +74,6 @@ class APIKeyAdminCreateForm(forms.ModelForm):
 
 
 class WebhookEndpointAdminBaseForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["description"].help_text = ""
-        self.fields["description"].widget.attrs["rows"] = 3
-
     def add_endpoint_tolerance(self):
         """Add djstripe_tolerance from submitted form"""
         self._stripe_data["djstripe_tolerance"] = self.cleaned_data.get(
@@ -170,7 +165,6 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             "enabled_events",
             "livemode",
             "djstripe_owner_account",
-            "description",
             "base_url",
             "connect",
             "api_version",
@@ -205,7 +199,6 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             self._stripe_data = models.WebhookEndpoint._api_create(
                 url=url,
                 api_version=self.cleaned_data.get("api_version", ""),
-                description=self.cleaned_data.get("description"),
                 enabled_events=self.cleaned_data.get("enabled_events"),
                 metadata=metadata,
                 connect=self.cleaned_data.get("connect", False),
@@ -252,7 +245,6 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
     class Meta:
         model = models.WebhookEndpoint
         fields = (
-            "description",
             "base_url",
             "enabled_events",
             "metadata",
@@ -286,7 +278,6 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
         try:
             self._stripe_data = self.instance._api_update(
                 url=url,
-                description=self.cleaned_data.get("description"),
                 enabled_events=self.cleaned_data.get("enabled_events"),
                 metadata=self.cleaned_data.get("metadata"),
                 disabled=(not self.cleaned_data.get("enabled")),

@@ -849,7 +849,6 @@ class SourceTransaction(StripeModel):
     stripe_class = stripe.SourceTransaction
     stripe_dashboard_item_name = "source_transactions"
 
-    description = None
     metadata = None
     type = enums.SourceType.ach_credit_transfer
 
@@ -967,7 +966,6 @@ class PaymentMethod(StripeModel):
     """
 
     stripe_class = stripe.PaymentMethod
-    description = None
 
     billing_details = JSONField(
         help_text=(

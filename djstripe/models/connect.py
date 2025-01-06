@@ -81,7 +81,6 @@ class ApplicationFeeRefund(StripeModel):
     Stripe documentation: https://stripe.com/docs/api?lang=python#fee_refunds
     """
 
-    description = None
     stripe_class = stripe.ApplicationFeeRefund
 
     amount = StripeQuantumCurrencyAmountField(help_text="Amount refunded, in cents.")
