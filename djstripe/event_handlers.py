@@ -306,7 +306,6 @@ def handle_charge_dispute_event(sender, event, **kwargs):
 @djstripe_receiver("invoice.voided")
 @djstripe_receiver("invoiceitem.created")
 @djstripe_receiver("invoiceitem.deleted")
-@djstripe_receiver("invoiceitem.updated")
 @djstripe_receiver("payment_intent.amount_capturable_updated")
 @djstripe_receiver("payment_intent.canceled")
 @djstripe_receiver("payment_intent.created")
