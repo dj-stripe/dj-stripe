@@ -432,16 +432,9 @@ class PriceAdmin(StripeModelAdmin):
 
 @admin.register(models.Product)
 class ProductAdmin(StripeModelAdmin):
-    list_display = (
-        "name",
-        "default_price",
-        "type",
-        "active",
-        "url",
-        "statement_descriptor",
-    )
-    list_filter = ("type", "active", "shippable")
-    search_fields = ("name", "statement_descriptor")
+    list_display = ("name", "default_price", "type", "active", "url")
+    list_filter = ("active",)
+    search_fields = ("name",)
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("prices")

@@ -543,78 +543,12 @@ class Product(StripeModel):
             "Applicable to both `service` and `good` types."
         ),
     )
-    default_price = StripeForeignKey(
-        "Price",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="products",
-        help_text="The default price this product is associated with.",
-    )
-    type = StripeEnumField(
-        enum=enums.ProductType,
-        help_text=(
-            "The type of the product. The product is either of type `good`, which is "
-            "eligible for use with Orders and SKUs, or `service`, which is eligible "
-            "for use with Subscriptions and Plans."
-        ),
-    )
 
     # Fields applicable to `good` only
     active = models.BooleanField(
         null=True,
         help_text=(
             "Whether the product is currently available for purchase. "
-            "Only applicable to products of `type=good`."
-        ),
-    )
-    attributes = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "A list of up to 5 attributes that each SKU can provide values for "
-            '(e.g., `["color", "size"]`). Only applicable to products of `type=good`.'
-        ),
-    )
-    caption = models.TextField(
-        default="",
-        blank=True,
-        max_length=5000,
-        help_text=(
-            "A short one-line description of the product, meant to be displayable"
-            "to the customer. Only applicable to products of `type=good`."
-        ),
-    )
-    deactivate_on = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "An array of connect application identifiers that cannot purchase "
-            "this product. Only applicable to products of `type=good`."
-        ),
-    )
-    images = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "A list of up to 8 URLs of images for this product, meant to be "
-            "displayable to the customer. Only applicable to products of `type=good`."
-        ),
-    )
-    package_dimensions = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The dimensions of this product for shipping purposes. "
-            "A SKU associated with this product can override this value by having its "
-            "own `package_dimensions`. Only applicable to products of `type=good`."
-        ),
-    )
-    shippable = models.BooleanField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Whether this product is a shipped good. "
             "Only applicable to products of `type=good`."
         ),
     )
@@ -627,31 +561,23 @@ class Product(StripeModel):
             "Only applicable to products of `type=good`."
         ),
     )
-
-    # Fields available to `service` only
-    statement_descriptor = models.CharField(
-        max_length=22,
-        default="",
-        blank=True,
-        help_text=(
-            "Extra information about a product which will appear on your customer's "
-            "credit card statement. In the case that multiple products are billed at "
-            "once, the first statement descriptor will be used. "
-            "Only available on products of type=`service`."
-        ),
-    )
     unit_label = models.CharField(max_length=12, default="", blank=True)
 
     def __str__(self):
-        # 1 product can have 1 or more than 1 related price
-        price_qs = self.prices.all()
-        price_count = price_qs.count()
-
-        if price_count > 1:
-            return f"{self.name} ({price_count} prices)"
-        elif price_count == 1:
-            return f"{self.name} ({price_qs[0].human_readable_price})"
         return self.name
+
+    @property
+    def default_price(self) -> Union["Price", None]:
+        default_price_id = self.stripe_data.get("default_price", None)
+        if not default_price_id:
+            return None
+        if isinstance(default_price_id, dict):
+            default_price_id = default_price_id["id"]
+        return Price.objects.get(id=default_price_id)
+
+    @property
+    def type(self):
+        return self.stripe_data.get("type")
 
 
 class Customer(StripeModel):
