@@ -353,8 +353,8 @@ class StripeModel(StripeBaseModel):
         cls,
         data: dict,
         current_ids=None,
-        pending_relations: list = None,
-        stripe_account: str = None,
+        pending_relations: list | None = None,
+        stripe_account: str | None = None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ) -> Dict:
         """
