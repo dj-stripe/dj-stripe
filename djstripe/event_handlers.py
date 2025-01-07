@@ -289,7 +289,6 @@ def handle_charge_dispute_event(sender, event, **kwargs):
 @djstripe_receiver("coupon.created")
 @djstripe_receiver("coupon.deleted")
 @djstripe_receiver("coupon.updated")
-@djstripe_receiver("entitlements.active_entitlement_summary.updated")
 @djstripe_receiver("file.created")
 @djstripe_receiver("invoice.created")
 @djstripe_receiver("invoice.deleted")
@@ -372,7 +371,6 @@ def handle_other_event(sender, event, **kwargs):
     target_cls = {
         "checkout": models.Session,
         "coupon": models.Coupon,
-        "entitlements": models.ActiveEntitlement,
         "file": models.File,
         "invoice": models.Invoice,
         "invoiceitem": models.InvoiceItem,
@@ -487,3 +485,25 @@ def _handle_crud_like_event(
         obj = target_cls.sync_from_stripe_data(data, api_key=event.default_api_key)
 
     return obj
+
+
+@djstripe_receiver("entitlements.active_entitlement_summary.updated")
+def handle_customer_entitlements_event(sender, event, **kwargs):
+    # The `entitlements` object is a list of entitlements.
+    # The event does not carry a normal id. It carries a customer id.
+    # So we track this in `Customer.entitlements`.
+    object = event.data["object"]
+    customer_id = object.get("customer")
+    if not customer_id or not isinstance(customer_id, str):
+        logger.debug(f"Ignoring malformed event id {event.id!r}")
+        return
+    customer = models.Customer.objects.filter(id=customer_id).first()
+    if not customer:
+        logger.warning(
+            f"Discarding event {event.id!r} because customer {customer_id!r} does not exist"
+        )
+        return
+
+    entitlements_list = object["entitlements"].get("data", [])
+    customer.entitlements = entitlements_list
+    customer.save()
