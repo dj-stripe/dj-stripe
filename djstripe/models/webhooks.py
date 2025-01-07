@@ -224,7 +224,7 @@ class WebhookEventTrigger(models.Model):
         )
         api_key = (
             stripe_account.default_api_key if stripe_account else None
-        ) or djstripe_settings.get_default_api_key(obj.livemode)
+        ) or djstripe_settings.get_default_api_key(webhook_endpoint.livemode)
 
         try:
             # Validate the webhook first
