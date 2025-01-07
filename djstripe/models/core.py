@@ -406,10 +406,10 @@ class Charge(StripeModel):
 
     def refund(
         self,
-        amount: Decimal = None,
-        reason: str = None,
-        api_key: str = None,
-        stripe_account: str = None,
+        amount: Decimal | None = None,
+        reason: str | None = None,
+        api_key: str | None = None,
+        stripe_account: str | None = None,
     ) -> "Refund":
         """
         Initiate a refund. Returns the refund object.

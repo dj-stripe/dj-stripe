@@ -422,7 +422,7 @@ class CrudType(Enum):
 
 
 def _handle_crud_like_event(
-    target_cls, event: "models.Event", data=None, id: str = None, crud_type=None
+    target_cls, event: "models.Event", data=None, id: str | None = None, crud_type=None
 ):
     """
     Helper to process crud_type-like events for objects.
