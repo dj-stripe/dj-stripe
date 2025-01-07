@@ -2,6 +2,8 @@
 
 from django.db import migrations
 
+import djstripe.fields
+
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -281,4 +283,9 @@ class Migration(migrations.Migration):
         migrations.RemoveField(model_name="webhookendpoint", name="description"),
         migrations.DeleteModel(name="DjstripeInvoiceTotalTaxAmount"),
         migrations.DeleteModel(name="DjstripeUpcomingInvoiceTotalTaxAmount"),
+        migrations.AddField(
+            model_name="customer",
+            name="entitlements",
+            field=djstripe.fields.JSONField(blank=True, default=list, null=True),
+        ),
     ]

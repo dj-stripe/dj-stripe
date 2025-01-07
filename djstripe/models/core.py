@@ -641,6 +641,9 @@ class Customer(StripeModel):
         help_text="The customer's full name or business name.",
     )
 
+    # via entitlements API
+    entitlements = JSONField(null=True, blank=True, default=list)
+
     # dj-stripe fields
     subscriber = models.ForeignKey(
         djstripe_settings.get_subscriber_model_string(),
