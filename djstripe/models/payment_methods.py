@@ -955,12 +955,6 @@ class PaymentMethod(StripeModel):
 
     stripe_class = stripe.PaymentMethod
 
-    billing_details = JSONField(
-        help_text=(
-            "Billing information associated with the PaymentMethod that may be used or "
-            "required by particular types of payment methods."
-        )
-    )
     customer = StripeForeignKey(
         "Customer",
         on_delete=models.SET_NULL,
@@ -974,175 +968,8 @@ class PaymentMethod(StripeModel):
         ),
     )
     type = StripeEnumField(
-        enum=enums.PaymentMethodType,
-        help_text="The type of the PaymentMethod.",
+        enum=enums.PaymentMethodType, help_text="The type of the PaymentMethod."
     )
-    acss_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `acss_debit`",
-    )
-    affirm = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `affirm`",
-    )
-    afterpay_clearpay = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Additional information for payment methods of type `afterpay_clearpay`"
-        ),
-    )
-    alipay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `alipay`",
-    )
-    au_becs_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `au_becs_debit`",
-    )
-    bacs_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `bacs_debit`",
-    )
-    bancontact = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `bancontact`",
-    )
-    blik = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `blik`",
-    )
-    boleto = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `boleto`",
-    )
-    card = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `card`",
-    )
-    card_present = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `card_present`",
-    )
-    customer_balance = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Additional information for payment methods of type `customer_balance`"
-        ),
-    )
-    eps = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `eps`",
-    )
-    fpx = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `fpx`",
-    )
-    giropay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `giropay`",
-    )
-    grabpay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `grabpay`",
-    )
-    ideal = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `ideal`",
-    )
-    interac_present = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Additional information for payment methods of type `interac_present`"
-        ),
-    )
-    klarna = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `klarna`",
-    )
-    konbini = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `konbini`",
-    )
-    link = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `link`",
-    )
-    oxxo = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `oxxo`",
-    )
-    p24 = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `p24`",
-    )
-    paynow = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `paynow`",
-    )
-    pix = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `pix`",
-    )
-    promptpay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `promptpay`",
-    )
-    sepa_debit = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `sepa_debit`",
-    )
-    sofort = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `sofort`",
-    )
-    us_bank_account = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Additional information for payment methods of type `us_bank_account`"
-        ),
-    )
-    wechat_pay = JSONField(
-        null=True,
-        blank=True,
-        help_text="Additional information for payment methods of type `wechat_pay`",
-    )
-
-    def __str__(self):
-        if self.customer:
-            return f"{enums.PaymentMethodType.humanize(self.type)} for {self.customer}"
-        return (
-            f"{enums.PaymentMethodType.humanize(self.type)} is not associated with any"
-            " customer"
-        )
 
     def get_stripe_dashboard_url(self) -> str:
         if self.customer:
@@ -1194,6 +1021,10 @@ class PaymentMethod(StripeModel):
             payment_method, customer=customer, **extra_kwargs
         )
         return cls.sync_from_stripe_data(stripe_payment_method, api_key=api_key)
+
+    @property
+    def billing_details(self):
+        return self.stripe_data.get("billing_details")
 
     def detach(self):
         """
