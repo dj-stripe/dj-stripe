@@ -1697,7 +1697,7 @@ class Plan(StripeModel):
         if self.billing_scheme == "per_unit":
             unit_amount = self.amount
             amount = get_friendly_currency_amount(unit_amount, self.currency)
-        else:
+        elif self.tiers:
             # tiered billing scheme
             tier_1 = self.tiers[0]
             flat_amount_tier_1 = tier_1["flat_amount"]
@@ -1712,6 +1712,8 @@ class Plan(StripeModel):
                     flat_amount_tier_1 / 100, self.currency
                 )
                 amount = f"{amount} + {formatted_flat_amount_tier_1}"
+        else:
+            amount = "0"
 
         format_args = {"amount": amount}
 
@@ -1734,7 +1736,7 @@ class Plan(StripeModel):
             }[self.interval]
             template = _("{amount} / every {interval_count} {interval}")
             format_args["interval"] = interval
-            format_args["interval_count"] = interval_count
+            format_args["interval_count"] = str(interval_count) or ""
 
         return str(format_lazy(template, **format_args))
 
