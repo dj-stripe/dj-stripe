@@ -1892,7 +1892,7 @@ class Price(StripeModel):
         if self.billing_scheme == "per_unit":
             unit_amount = (self.unit_amount or 0) / 100
             amount = get_friendly_currency_amount(unit_amount, self.currency)
-        else:
+        elif self.tiers:
             # tiered billing scheme
             tier_1 = self.tiers[0]
             formatted_unit_amount_tier_1 = get_friendly_currency_amount(
@@ -1907,6 +1907,8 @@ class Price(StripeModel):
                     flat_amount_tier_1 / 100, self.currency
                 )
                 amount = f"{amount} + {formatted_flat_amount_tier_1}"
+        else:
+            amount = "0"
 
         format_args = {"amount": amount}
 
