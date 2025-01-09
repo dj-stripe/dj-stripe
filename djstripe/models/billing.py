@@ -5,7 +5,6 @@ from typing import Optional, Union
 import stripe
 from django.db import models
 from django.utils import timezone
-from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 from stripe import InvalidRequestError
 
@@ -1385,63 +1384,6 @@ class Plan(StripeModel):
         plan = cls.sync_from_stripe_data(stripe_plan, api_key=api_key)
 
         return plan
-
-    def __str__(self):
-        if self.product and self.product.name:
-            return f"{self.human_readable_price} for {self.product.name}"
-        return self.human_readable_price
-
-    @property
-    def amount_in_cents(self):
-        return int(self.amount * 100)
-
-    @property
-    def human_readable_price(self) -> str:
-        if self.billing_scheme == "per_unit":
-            unit_amount = self.amount
-            amount = get_friendly_currency_amount(unit_amount, self.currency)
-        elif self.tiers:
-            # tiered billing scheme
-            tier_1 = self.tiers[0]
-            flat_amount_tier_1 = tier_1["flat_amount"]
-            formatted_unit_amount_tier_1 = get_friendly_currency_amount(
-                (tier_1["unit_amount"] or 0) / 100, self.currency
-            )
-            amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
-
-            # stripe shows flat fee even if it is set to 0.00
-            if flat_amount_tier_1 is not None:
-                formatted_flat_amount_tier_1 = get_friendly_currency_amount(
-                    flat_amount_tier_1 / 100, self.currency
-                )
-                amount = f"{amount} + {formatted_flat_amount_tier_1}"
-        else:
-            amount = "0"
-
-        format_args = {"amount": amount}
-
-        interval_count = self.interval_count
-        if interval_count == 1:
-            interval = {
-                "day": _("day"),
-                "week": _("week"),
-                "month": _("month"),
-                "year": _("year"),
-            }[self.interval]
-            template = _("{amount}/{interval}")
-            format_args["interval"] = interval
-        else:
-            interval = {
-                "day": _("days"),
-                "week": _("weeks"),
-                "month": _("months"),
-                "year": _("years"),
-            }[self.interval]
-            template = _("{amount} / every {interval_count} {interval}")
-            format_args["interval"] = interval
-            format_args["interval_count"] = str(interval_count) or ""
-
-        return str(format_lazy(template, **format_args))
 
 
 class Subscription(StripeModel):
