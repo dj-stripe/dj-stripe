@@ -16,6 +16,7 @@ theme:
   font:
     text: Helvetica
   name: material
+  custom_dir: overrides
   static_templates:
     - 404.html
   features:
