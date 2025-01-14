@@ -15,7 +15,6 @@ Dj-stripe is an extensible wrapper around the Stripe API that continuously syncs
 For example, if you need to interact with a customer subscription, you can use **dj-stripe’s Subscription Model**, in your code, to get the subscription data for that customer as well as the related models’ data too (if need be and **potentially in 1 database query!**) instead of making multiple slower and unreliable consecutive network calls only to parse through 1 or more of Stripe’s JSON like objects!
 </div>
 
-
 <div markdown="1" class="mdx-features">
 <div markdown="1" class="mdx-wrapper">
 
@@ -79,7 +78,6 @@ The dj-stripe community has come up with some great tutorials:
 * [Using Django and Stripe for Monthly Subscriptions - May 4, 2021 Uses Stripe Elements](https://ordinarycoders.com/blog/article/django-stripe-monthly-subscription)
 * [Django Stripe Integration with using dj-stripe - Jun 12, 2020](https://kartaca.com/en/django-stripe-integration-using-dj-stripe/)
 
-
 **Have a blog, video or online publication? Write about your dj-stripe tips and tricks, then send us a pull request with the link.**
 </div>
 
@@ -91,6 +89,8 @@ The dj-stripe community has come up with some great tutorials:
 <div markdown="1" class="mdx-companies">
 
 [![Das Aktienregister Logo](assets/leaf.png)](https://www.das-aktienregister.ch/)
+
+[![MergeCal Logo](assets/MergeCal.svg)](https://mergecal.org/)
 
 [![BrainHi Logo](assets/brainhi.png)](https://brainhi.com/)
 
