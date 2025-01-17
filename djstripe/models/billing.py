@@ -2418,7 +2418,13 @@ class UsageRecord(StripeModel):
         return f"Usage for {self.subscription_item} ({self.action}) is {self.quantity}"
 
     @classmethod
-    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+    def _api_create(
+        cls,
+        subscription_item_id: str,
+        *,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        **kwargs,
+    ):
         """
         Call the stripe API's create operation for this model.
 
@@ -2427,16 +2433,13 @@ class UsageRecord(StripeModel):
         :type api_key: string
         """
 
-        if not kwargs.get("id"):
-            raise KeyError("SubscriptionItem Object ID is missing")
-
         try:
-            SubscriptionItem.objects.get(id=kwargs["id"])
+            SubscriptionItem.objects.get(id=subscription_item_id)
         except SubscriptionItem.DoesNotExist:
             raise
 
         usage_stripe_data = stripe.SubscriptionItem.create_usage_record(
-            api_key=api_key, **kwargs
+            api_key=api_key, subscription_item=subscription_item_id, **kwargs
         )
 
         # ! Hack: there is no way to retrieve a UsageRecord object from Stripe,
