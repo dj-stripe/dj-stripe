@@ -2433,11 +2433,6 @@ class UsageRecord(StripeModel):
         :type api_key: string
         """
 
-        try:
-            SubscriptionItem.objects.get(id=subscription_item_id)
-        except SubscriptionItem.DoesNotExist:
-            raise
-
         usage_stripe_data = stripe.SubscriptionItem.create_usage_record(
             api_key=api_key, subscription_item=subscription_item_id, **kwargs
         )
