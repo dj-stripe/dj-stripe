@@ -512,7 +512,7 @@ class ProductAdmin(StripeModelAdmin):
 @admin.register(models.PromotionCode)
 class PromotionCodeAdmin(StripeModelAdmin):
     list_display = ("code", "created", "times_redeemed", "max_redemptions")
-    search_fields = ("code",)
+    search_fields = ("id",)
     list_filter = ("created",)
 
 
