@@ -486,7 +486,7 @@ class StripeModel(StripeBaseModel):
         :type stripe_account: string
         :return:
         """
-        from djstripe.models import DjstripePaymentMethod, InvoiceOrLineItem
+        from djstripe.models import DjstripePaymentMethod
 
         field_data = None
         field_name = field.name
@@ -498,9 +498,7 @@ class StripeModel(StripeBaseModel):
         if current_ids is None:
             current_ids = set()
 
-        if issubclass(
-            field.related_model, (StripeModel, DjstripePaymentMethod, InvoiceOrLineItem)
-        ):
+        if issubclass(field.related_model, (StripeModel, DjstripePaymentMethod)):
             if field_name in manipulated_data:
                 raw_field_data = manipulated_data.get(field_name)
 

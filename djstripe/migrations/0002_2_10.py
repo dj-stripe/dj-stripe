@@ -94,8 +94,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(model_name="invoice", name="invoice_pdf"),
         migrations.RemoveField(model_name="invoice", name="next_payment_attempt"),
         migrations.RemoveField(model_name="invoice", name="paid"),
-        migrations.RemoveField(model_name="invoice", name="period_end"),
-        migrations.RemoveField(model_name="invoice", name="period_start"),
         migrations.RemoveField(
             model_name="invoice", name="post_payment_credit_notes_amount"
         ),
@@ -258,8 +256,6 @@ class Migration(migrations.Migration):
             model_name="upcominginvoice", name="next_payment_attempt"
         ),
         migrations.RemoveField(model_name="upcominginvoice", name="paid"),
-        migrations.RemoveField(model_name="upcominginvoice", name="period_end"),
-        migrations.RemoveField(model_name="upcominginvoice", name="period_start"),
         migrations.RemoveField(
             model_name="upcominginvoice", name="post_payment_credit_notes_amount"
         ),

@@ -254,14 +254,8 @@ class CustomerAdmin(StripeModelAdmin):
 
 @admin.register(models.Discount)
 class DiscountAdmin(ReadOnlyMixin, StripeModelAdmin):
-    list_display = (
-        "customer",
-        "coupon",
-        "invoice_item",
-        "promotion_code",
-        "subscription",
-    )
-    list_filter = ("customer", "start", "end", "promotion_code", "coupon")
+    list_display = ("customer", "promotion_code", "subscription")
+    list_filter = ("customer", "promotion_code")
 
     def get_actions(self, request):
         """
@@ -521,8 +515,7 @@ class ShippingRateAdmin(StripeModelAdmin):
 
 @admin.register(models.Subscription)
 class SubscriptionAdmin(StripeModelAdmin):
-    list_display = ("customer", "status")
-    list_filter = ("status", "cancel_at_period_end")
+    list_display = ("customer",)
 
     inlines = (SubscriptionItemInline, SubscriptionScheduleInline, LineItemInline)
 
@@ -664,19 +657,12 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
                 "djstripe_validation_method",
             ]
             if obj.djstripe_uuid:
-                core_fields = [
-                    "enabled",
-                    "base_url",
-                    "description",
-                ]
+                core_fields = ["enabled", "base_url"]
             else:
-                core_fields = [
-                    "enabled",
-                    "description",
-                ]
+                core_fields = ["enabled"]
         else:
             header_fields = ["djstripe_owner_account", "livemode"]
-            core_fields = ["description", "base_url", "connect"]
+            core_fields = ["base_url", "connect"]
             advanced_fields = [
                 "metadata",
                 "api_version",
