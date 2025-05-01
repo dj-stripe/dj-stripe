@@ -118,7 +118,6 @@ class Command(BaseCommand):
                 models.LineItem,
                 models.TransferReversal,
                 models.TaxId,
-                models.UsageRecordSummary,
             ):
                 return True, ""
             return False, "no stripe_class.list"
@@ -467,7 +466,6 @@ class Command(BaseCommand):
             "ApplicationFeeRefund": self.get_list_kwargs_fee_refund,
             "TaxCode": self.get_list_kwargs_txcd,
             "TaxId": self.get_list_kwargs_tax_id,
-            "UsageRecordSummary": self.get_list_kwargs_sis,
         }
 
         # get all Stripe Accounts for the given platform account.

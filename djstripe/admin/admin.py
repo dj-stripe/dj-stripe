@@ -571,36 +571,6 @@ class ApplicationFeeReversalAdmin(StripeModelAdmin):
     list_display = ("amount", "fee")
 
 
-@admin.register(models.UsageRecord)
-class UsageRecordAdmin(StripeModelAdmin):
-    list_display = ("quantity", "subscription_item", "timestamp")
-
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related("subscription_item")
-
-    def get_actions(self, request):
-        """
-        Returns _resync_instances only for
-        models with a defined model.stripe_class.retrieve
-        """
-        actions = super().get_actions(request)
-
-        # remove "_sync_all_instances" as UsageRecords cannot be listed
-        actions.pop("_sync_all_instances", None)
-
-        return actions
-
-
-@admin.register(models.UsageRecordSummary)
-class UsageRecordSummaryAdmin(StripeModelAdmin):
-    list_display = ("invoice", "subscription_item", "total_usage")
-
-    def get_queryset(self, request):
-        return (
-            super().get_queryset(request).select_related("invoice", "subscription_item")
-        )
-
-
 @admin.register(models.WebhookEndpoint)
 class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
     change_form_template = "djstripe/admin/webhook_endpoint/change_form.html"
