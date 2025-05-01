@@ -62,7 +62,9 @@ class ConfirmCustomAction(FormView):
 
         model_admin = site._registry.get(model)
         for msg in form.errors.values():
-            messages.add_message(self.request, messages.ERROR, msg.as_text())
+            messages.add_message(
+                self.request, messages.ERROR, msg.as_text(), fail_silently=True
+            )
 
         return model_admin.get_action(action_name)[0](
             model_admin, self.request, queryset
@@ -86,9 +88,11 @@ class ConfirmCustomAction(FormView):
                 else:
                     stripe_data = instance.api_retrieve()
                 instance.__class__.sync_from_stripe_data(stripe_data, api_key=api_key)
-                messages.success(request, f"Successfully Synced: {instance}")
+                messages.success(
+                    request, f"Successfully Synced: {instance}", fail_silently=True
+                )
             except stripe.error.PermissionError as error:
-                messages.warning(request, error)
+                messages.warning(request, error, fail_silently=True)
             except stripe.error.InvalidRequestError:
                 raise
 
@@ -102,24 +106,30 @@ class ConfirmCustomAction(FormView):
         for subscription in queryset:
             try:
                 instance = subscription.cancel()
-                messages.success(request, f"Successfully Canceled: {instance}")
+                messages.success(
+                    request, f"Successfully Canceled: {instance}", fail_silently=True
+                )
             except stripe.error.InvalidRequestError as error:
-                messages.warning(request, error)
+                messages.warning(request, error, fail_silently=True)
 
     def _release_subscription_schedule(self, request, queryset):
         """Release a SubscriptionSchedule."""
         for subscription_schedule in queryset:
             try:
                 instance = subscription_schedule.release()
-                messages.success(request, f"Successfully Released: {instance}")
+                messages.success(
+                    request, f"Successfully Released: {instance}", fail_silently=True
+                )
             except stripe.error.InvalidRequestError as error:
-                messages.warning(request, error)
+                messages.warning(request, error, fail_silently=True)
 
     def _cancel_subscription_schedule(self, request, queryset):
         """Cancel a SubscriptionSchedule."""
         for subscription_schedule in queryset:
             try:
                 instance = subscription_schedule.cancel()
-                messages.success(request, f"Successfully Canceled: {instance}")
+                messages.success(
+                    request, f"Successfully Canceled: {instance}", fail_silently=True
+                )
             except stripe.error.InvalidRequestError as error:
-                messages.warning(request, error)
+                messages.warning(request, error, fail_silently=True)
