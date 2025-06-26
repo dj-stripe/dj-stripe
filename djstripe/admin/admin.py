@@ -75,6 +75,7 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
     add_form_template = "djstripe/admin/add_form.html"
     actions = ("_resync_instances", "_sync_all_instances")
+    detail_excluded_properties = ["pk"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -98,10 +99,9 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
         if obj is None:
             return self.readonly_fields
 
-        excluded_properties = ["pk"]
         properties = []
         for name in dir(self.model):
-            if name in excluded_properties:
+            if name in self.detail_excluded_properties:
                 continue
             if (
                 isinstance(getattr(self.model, name), property)
@@ -243,7 +243,7 @@ class CustomerAdmin(StripeModelAdmin):
         "coupon",
         "balance",
     )
-
+    detail_excluded_properties = StripeModelAdmin.detail_excluded_properties + ["subscription"]
     list_filter = ("deleted",)
     search_fields = ("email", "description", "deleted")
     inlines = (SubscriptionInline, SubscriptionScheduleInline, TaxIdInline)
