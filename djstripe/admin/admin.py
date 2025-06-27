@@ -18,7 +18,7 @@ from .admin_inline import (
     SubscriptionInline,
     SubscriptionItemInline,
     SubscriptionScheduleInline,
-    TaxIdInline,
+    TaxIdInline, PriceInline,
 )
 from .forms import (
     APIKeyAdminCreateForm,
@@ -482,7 +482,7 @@ class PriceAdmin(StripeModelAdmin):
     raw_id_fields = ("product",)
     search_fields = ("nickname",)
     radio_fields = {"type": admin.HORIZONTAL}
-
+    inlines = (PriceInline, )
     def get_queryset(self, request):
         return (
             super()
