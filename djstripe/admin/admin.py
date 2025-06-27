@@ -18,7 +18,8 @@ from .admin_inline import (
     SubscriptionInline,
     SubscriptionItemInline,
     SubscriptionScheduleInline,
-    TaxIdInline, PriceInline,
+    TaxIdInline,
+    PriceInline,
 )
 from .forms import (
     APIKeyAdminCreateForm,
@@ -243,7 +244,9 @@ class CustomerAdmin(StripeModelAdmin):
         "coupon",
         "balance",
     )
-    detail_excluded_properties = StripeModelAdmin.detail_excluded_properties + ["subscription"]
+    detail_excluded_properties = StripeModelAdmin.detail_excluded_properties + [
+        "subscription"
+    ]
     list_filter = ("deleted",)
     search_fields = ("email", "description", "deleted")
     inlines = (SubscriptionInline, SubscriptionScheduleInline, TaxIdInline)
@@ -505,6 +508,7 @@ class ProductAdmin(StripeModelAdmin):
     list_filter = ("type", "active", "shippable")
     search_fields = ("name", "statement_descriptor")
     inlines = (PriceInline,)
+
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("prices")
 
