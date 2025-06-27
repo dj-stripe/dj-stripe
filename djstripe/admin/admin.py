@@ -2,7 +2,7 @@
 Django Administration interface definitions
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from django.contrib import admin
 from django.db import IntegrityError, transaction
@@ -19,6 +19,7 @@ from .admin_inline import (
     SubscriptionItemInline,
     SubscriptionScheduleInline,
     TaxIdInline,
+    PriceInline,
 )
 from .forms import (
     APIKeyAdminCreateForm,
@@ -243,7 +244,9 @@ class CustomerAdmin(StripeModelAdmin):
         "coupon",
         "balance",
     )
-    detail_excluded_properties = StripeModelAdmin.detail_excluded_properties + ["subscription"]
+    detail_excluded_properties = StripeModelAdmin.detail_excluded_properties + [
+        "subscription"
+    ]
     list_filter = ("deleted",)
     search_fields = ("email", "description", "deleted")
     inlines = (SubscriptionInline, SubscriptionScheduleInline, TaxIdInline)
@@ -504,6 +507,7 @@ class ProductAdmin(StripeModelAdmin):
     )
     list_filter = ("type", "active", "shippable")
     search_fields = ("name", "statement_descriptor")
+    inlines = (PriceInline,)
 
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("prices")
@@ -758,7 +762,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
             ),
         ]
 
-    def get_changeform_initial_data(self, request) -> Dict[str, str]:
+    def get_changeform_initial_data(self, request) -> dict[str, str]:
         ret = super().get_changeform_initial_data(request)
         base_url = f"{request.scheme}://{request.get_host()}"
         ret.setdefault("base_url", base_url)
