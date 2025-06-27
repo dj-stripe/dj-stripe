@@ -482,7 +482,7 @@ class PriceAdmin(StripeModelAdmin):
     raw_id_fields = ("product",)
     search_fields = ("nickname",)
     radio_fields = {"type": admin.HORIZONTAL}
-    inlines = (PriceInline, )
+
     def get_queryset(self, request):
         return (
             super()
@@ -504,7 +504,7 @@ class ProductAdmin(StripeModelAdmin):
     )
     list_filter = ("type", "active", "shippable")
     search_fields = ("name", "statement_descriptor")
-
+    inlines = (PriceInline,)
     def get_queryset(self, request):
         return super().get_queryset(request).prefetch_related("prices")
 
