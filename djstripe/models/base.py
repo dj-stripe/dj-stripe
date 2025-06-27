@@ -1,7 +1,7 @@
 import logging
 import uuid
 from datetime import timedelta
-from typing import Optional, Type
+from typing import Optional
 
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class StripeBaseModel(models.Model):
-    stripe_class: Type[APIResource] = APIResource
+    stripe_class: type[APIResource] = APIResource
 
     djstripe_created = models.DateTimeField(auto_now_add=True, editable=False)
     djstripe_updated = models.DateTimeField(auto_now=True, editable=False)

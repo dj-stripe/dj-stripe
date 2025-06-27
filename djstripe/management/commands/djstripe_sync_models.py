@@ -26,8 +26,6 @@ Invoke like so:
         python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY
 """
 
-import typing
-
 from django.apps import apps
 from django.core.exceptions import FieldDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
