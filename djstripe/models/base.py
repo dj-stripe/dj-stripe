@@ -1,7 +1,7 @@
 import logging
 import uuid
 from datetime import timedelta
-from typing import Dict, List, Optional, Type
+from typing import Optional, Type
 
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
@@ -89,7 +89,7 @@ class StripeBaseModel(models.Model):
 class StripeModel(StripeBaseModel):
     # This must be defined in descendants of this model/mixin
     # e.g. Event, Charge, Customer, etc.
-    expand_fields: List[str] = []
+    expand_fields: list[str] = []
     stripe_dashboard_item_name = ""
 
     objects = models.Manager()
@@ -362,7 +362,7 @@ class StripeModel(StripeBaseModel):
         pending_relations: list = None,
         stripe_account: str = None,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
-    ) -> Dict:
+    ) -> dict:
         """
         This takes an object, as it is formatted in Stripe's current API for our object
         type. In return, it provides a dict. The dict can be used to create a record or

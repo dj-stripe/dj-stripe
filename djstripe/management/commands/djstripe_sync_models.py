@@ -65,10 +65,10 @@ class Command(BaseCommand):
             help="Specify the api_keys you would like to perform this sync for.",
         )
 
-    def handle(self, *args, api_keys: typing.List[str], **options):
+    def handle(self, *args, api_keys: list[str], **options):
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
-        model_list: typing.List[models.StripeModel] = []
+        model_list: list[models.StripeModel] = []
 
         if args:
             for model_label in args:
