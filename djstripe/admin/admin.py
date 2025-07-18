@@ -2,7 +2,7 @@
 Django Administration interface definitions
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from django.contrib import admin
 from django.db import IntegrityError, transaction
@@ -82,14 +82,17 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
         self.raw_id_fields = get_forward_relation_fields_for_model(self.model)
 
     def get_list_display(self, request):
-        return (
-            ("__str__", "id", "djstripe_owner_account")
-            + self.list_display
-            + ("created", "livemode")
-        )
+        return [
+            "__str__",
+            "id",
+            "djstripe_owner_account",
+            *self.list_display,
+            "created",
+            "livemode",
+        ]
 
     def get_list_filter(self, request):
-        return self.list_filter + ("created", "livemode")
+        return [*self.list_filter, "created", "livemode"]
 
     def get_readonly_fields(self, request, obj=None):
         if obj is None:
@@ -104,20 +107,21 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
                 and name not in properties
             ):
                 properties.append(name)
-        return list(self.readonly_fields) + properties
+
+        return [*self.readonly_fields, *properties]
 
     def get_search_fields(self, request):
-        return self.search_fields + ("id",)
+        return [*self.search_fields, "id"]
 
     def get_fieldsets(self, request, obj=None):
         common_fields = ("livemode", "id", "djstripe_owner_account", "created")
         # Have to remove the fields from the common set,
         # otherwise they'll show up twice.
         fields = [f for f in self.get_fields(request, obj) if f not in common_fields]
-        return (
+        return [
             (None, {"fields": common_fields}),
             (self.model.__name__, {"fields": fields}),
-        )
+        ]
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("djstripe_owner_account")
@@ -581,7 +585,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
             del actions["delete_selected"]
         return actions
 
-    def get_form(self, request, obj=None, **kwargs):
+    def get_form(self, request, obj=None, *args, **kwargs):
         if obj:
             return WebhookEndpointAdminEditForm
         return WebhookEndpointAdminCreateForm
@@ -635,7 +639,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
             ),
         ]
 
-    def get_changeform_initial_data(self, request) -> Dict[str, str]:
+    def get_changeform_initial_data(self, request) -> dict[str, str]:
         ret = super().get_changeform_initial_data(request)
         base_url = f"{request.scheme}://{request.get_host()}"
         ret.setdefault("base_url", base_url)
@@ -645,7 +649,9 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
         try:
             obj._api_delete()
         except InvalidRequestError as e:
-            if e.user_message.startswith("No such webhook endpoint: "):
+            if e.user_message and e.user_message.startswith(
+                "No such webhook endpoint: "
+            ):
                 # Webhook was already deleted in Stripe
                 pass
             else:

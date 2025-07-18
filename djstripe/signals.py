@@ -269,8 +269,9 @@ ENABLED_EVENTS = [
 
 # A signal for each Event type. See https://stripe.com/docs/api/events/types
 
-WEBHOOK_SIGNALS = dict(
-    [  # providing_args=["event"]
-        (hook, Signal()) for hook in ENABLED_EVENTS if hook != "*"
-    ]
-)
+WEBHOOK_SIGNALS = {
+    # providing_args=["event"]
+    hook: Signal()
+    for hook in ENABLED_EVENTS
+    if hook != "*"
+}

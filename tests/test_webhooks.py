@@ -62,7 +62,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(WebhookEventTrigger.objects.count(), 1)
-        event_trigger = WebhookEventTrigger.objects.first()
 
     def test___str__(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)

@@ -1,8 +1,7 @@
 import stripe
-from django.db import models, transaction
+from django.db import transaction
 
 from ..enums import APIKeyType
-from ..fields import JSONField
 from ..settings import djstripe_settings
 from .api import APIKey, get_api_key_details_by_prefix
 from .base import StripeModel, logger
