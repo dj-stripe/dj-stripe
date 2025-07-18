@@ -126,7 +126,7 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
 @admin.register(models.Account)
 class AccountAdmin(StripeModelAdmin):
     list_display = ("business_url", "country", "default_currency")
-    list_filter = ("details_submitted",)
+
     search_fields = ("settings", "business_profile")
 
 
@@ -178,9 +178,8 @@ class BalanceTransactionAdmin(ReadOnlyMixin, StripeModelAdmin):
         "fee",
         "currency",
         "available_on",
-        "status",
     )
-    list_filter = ("status", "type")
+    list_filter = ("type",)
 
 
 @admin.register(models.Charge)
@@ -191,14 +190,12 @@ class ChargeAdmin(StripeModelAdmin):
         "invoice",
         "payment_method",
         "description",
-        "paid",
         "disputed",
-        "refunded",
         "fee",
     )
 
     search_fields = ("customer__id", "invoice__id")
-    list_filter = ("status", "paid", "refunded", "captured")
+    list_filter = ("status",)
 
     def get_queryset(self, request):
         return (
@@ -221,18 +218,14 @@ class CouponAdmin(StripeModelAdmin):
         "percent_off",
         "duration",
         "duration_in_months",
-        "redeem_by",
         "max_redemptions",
         "times_redeemed",
     )
-    list_filter = ("duration", "redeem_by")
-    radio_fields = {"duration": admin.HORIZONTAL}
 
 
 @admin.register(models.Customer)
 class CustomerAdmin(StripeModelAdmin):
     list_display = (
-        "deleted",
         "subscriber",
         "email",
         "currency",
@@ -240,8 +233,7 @@ class CustomerAdmin(StripeModelAdmin):
         "default_payment_method",
     )
 
-    list_filter = ("deleted",)
-    search_fields = ("email", "description", "deleted")
+    search_fields = ("email", "description")
     inlines = (SubscriptionInline, SubscriptionScheduleInline, TaxIdInline)
 
     def get_queryset(self, request):
@@ -336,7 +328,7 @@ class SetupIntentAdmin(StripeModelAdmin):
 @admin.register(models.Session)
 class SessionAdmin(StripeModelAdmin):
     list_display = ("customer", "customer_email", "subscription")
-    list_filter = ("customer", "mode")
+    list_filter = ("customer",)
     search_fields = ("customer__id", "customer_email")
 
     def get_queryset(self, request):
@@ -352,9 +344,8 @@ class InvoiceAdmin(StripeModelAdmin):
         "currency",
         "number",
         "customer",
-        "due_date",
     )
-    list_filter = ("status", "created", "due_date")
+    list_filter = ("created",)
     search_fields = ("number", "receipt_number")
     inlines = (InvoiceItemInline,)
 
@@ -380,16 +371,14 @@ class LineItemAdmin(StripeModelAdmin):
         "invoice_item",
         "subscription",
         "subscription_item",
-        "type",
     )
-    list_filter = ("type", "invoice_item", "subscription", "subscription_item")
+    list_filter = ("invoice_item", "subscription", "subscription_item")
     list_select_related = ("invoice_item", "subscription", "subscription_item")
 
 
 @admin.register(models.Mandate)
 class MandateAdmin(StripeModelAdmin):
     list_display = ("status", "type", "payment_method")
-    list_filter = ("multi_use", "single_use")
     search_fields = ("payment_method__id",)
 
     def get_queryset(self, request):
@@ -459,7 +448,6 @@ class RefundAdmin(StripeModelAdmin):
 @admin.register(models.PaymentMethod)
 class PaymentMethodAdmin(StripeModelAdmin):
     list_display = ("customer", "type", "billing_details")
-    list_filter = ("type",)
     search_fields = ("customer__id",)
 
     def get_queryset(self, request):
@@ -508,8 +496,7 @@ class BankAccountAdmin(StripeModelAdmin):
 
 @admin.register(models.ShippingRate)
 class ShippingRateAdmin(StripeModelAdmin):
-    list_display = ("display_name", "active", "tax_behavior", "tax_code")
-    list_filter = ("active", "tax_behavior")
+    list_display = ("display_name", "tax_code")
     list_select_related = ("tax_code",)
 
 
@@ -541,14 +528,12 @@ class SubscriptionScheduleAdmin(StripeModelAdmin):
 
 @admin.register(models.TaxCode)
 class TaxCodeAdmin(StripeModelAdmin):
-    list_display = ("name", "description")
-    list_filter = ("name",)
+    list_display = ("description",)
 
 
 @admin.register(models.TaxRate)
 class TaxRateAdmin(StripeModelAdmin):
-    list_display = ("active", "display_name", "inclusive", "jurisdiction", "percentage")
-    list_filter = ("active", "inclusive", "jurisdiction")
+    list_display = ("display_name", "percentage")
 
 
 @admin.register(models.Transfer)

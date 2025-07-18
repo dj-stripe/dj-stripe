@@ -3,13 +3,8 @@ from django.db import models
 
 from djstripe.settings import djstripe_settings
 
-from .. import enums
 from ..fields import (
-    JSONField,
-    StripeCurrencyCodeField,
-    StripeEnumField,
     StripeForeignKey,
-    StripeQuantumCurrencyAmountField,
 )
 from .base import StripeModel
 
@@ -29,108 +24,18 @@ class Session(StripeModel):
     ]
     stripe_class = stripe.checkout.Session
 
-    amount_total = StripeQuantumCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text="Total of all items after discounts and taxes are applied.",
-    )
-    amount_subtotal = StripeQuantumCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text="Total of all items after discounts and taxes are applied.",
-    )
-    billing_address_collection = StripeEnumField(
-        enum=enums.SessionBillingAddressCollection,
-        blank=True,
-        help_text=(
-            "The value (auto or required) for whether Checkout"
-            "collected the customer's billing address."
-        ),
-    )
-    cancel_url = models.TextField(
-        max_length=5000,
-        blank=True,
-        help_text=(
-            "The URL the customer will be directed to if they"
-            "decide to cancel payment and return to your website."
-        ),
-    )
-    client_reference_id = models.TextField(
-        max_length=5000,
-        blank=True,
-        help_text=(
-            "A unique string to reference the Checkout Session."
-            "This can be a customer ID, a cart ID, or similar, and"
-            "can be used to reconcile the session with your internal systems."
-        ),
-    )
-    currency = StripeCurrencyCodeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Three-letter ISO currency code, in lowercase. Must be a supported"
-            " currency."
-        ),
-    )
+    # Foreign key fields (kept as Django model fields)
     customer = StripeForeignKey(
         "Customer",
         null=True,
         on_delete=models.SET_NULL,
         help_text="Customer this Checkout is for if one exists.",
     )
-    customer_email = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text=(
-            "If provided, this value will be used when the Customer object is created."
-        ),
-    )
-    display_items = JSONField(
-        null=True,
-        blank=True,
-        help_text="The line items, plans, or SKUs purchased by the customer.",
-    )
-    line_items = JSONField(
-        null=True,
-        blank=True,
-        help_text="The line items purchased by the customer.",
-    )
-    locale = models.CharField(
-        max_length=255,
-        blank=True,
-        help_text=(
-            "The IETF language tag of the locale Checkout is displayed in."
-            "If blank or auto, the browser's locale is used."
-        ),
-    )
-    mode = StripeEnumField(
-        enum=enums.SessionMode,
-        blank=True,
-        help_text=(
-            "The mode of the Checkout Session, one of payment, setup, or subscription."
-        ),
-    )
     payment_intent = StripeForeignKey(
         "PaymentIntent",
         null=True,
         on_delete=models.SET_NULL,
         help_text="PaymentIntent created if SKUs or line items were provided.",
-    )
-    payment_method_types = JSONField(
-        help_text=(
-            "The list of payment method types (e.g. card) that this "
-            "Checkout Session is allowed to accept."
-        )
-    )
-    payment_status = StripeEnumField(
-        enum=enums.SessionPaymentStatus,
-        null=True,
-        blank=True,
-        help_text=(
-            "The payment status of the Checkout Session, one of paid, unpaid, or"
-            " no_payment_required. You can use this value to decide when to fulfill"
-            " your customer's order."
-        ),
     )
     setup_intent = StripeForeignKey(
         "SetupIntent",
@@ -139,78 +44,123 @@ class Session(StripeModel):
         on_delete=models.SET_NULL,
         help_text="The ID of the SetupIntent for Checkout Sessions in setup mode.",
     )
-    shipping_address_collection = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "When set, provides configuration for Checkout to collect a shipping"
-            " address from a customer."
-        ),
-    )
-    shipping_cost = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The details of the customer cost of shipping, including the customer"
-            " chosen ShippingRate."
-        ),
-    )
-    shipping_details = JSONField(
-        null=True,
-        blank=True,
-        help_text="Shipping information for this Checkout Session.",
-    )
-    shipping_options = JSONField(
-        null=True,
-        blank=True,
-        help_text="The shipping rate options applied to this Session.",
-    )
-    status = StripeEnumField(
-        enum=enums.SessionStatus,
-        null=True,
-        blank=True,
-        help_text=(
-            "The status of the Checkout Session, one of open, complete, or expired."
-        ),
-    )
-    submit_type = StripeEnumField(
-        enum=enums.SubmitTypeStatus,
-        blank=True,
-        help_text=(
-            "Describes the type of transaction being performed by Checkoutin order to"
-            " customize relevant text on the page, such as the submit button."
-        ),
-    )
     subscription = StripeForeignKey(
         "Subscription",
         null=True,
         on_delete=models.SET_NULL,
         help_text="Subscription created if one or more plans were provided.",
     )
-    success_url = models.TextField(
-        max_length=5000,
-        blank=True,
-        help_text=(
-            "The URL the customer will be directed to after the payment or subscription"
-            "creation is successful."
-        ),
-    )
-    total_details = JSONField(
-        null=True,
-        blank=True,
-        help_text="Tax and discount details for the computed total amount.",
-    )
-    url = models.TextField(
-        max_length=5000,
-        blank=True,
-        null=True,
-        help_text=(
-            "The URL to the Checkout Session. Redirect customers to this URL to take"
-            " them to Checkout. If you’re using Custom Domains, the URL will use your"
-            " subdomain. Otherwise, it’ll use checkout.stripe.com. This value is only"
-            " present when the session is active."
-        ),
-    )
+
+    # Properties for fields stored in stripe_data
+    @property
+    def amount_total(self):
+        """Total of all items after discounts and taxes are applied."""
+        return self.stripe_data.get("amount_total")
+
+    @property
+    def amount_subtotal(self):
+        """Total of all items before discounts and taxes are applied."""
+        return self.stripe_data.get("amount_subtotal")
+
+    @property
+    def billing_address_collection(self):
+        """The value (auto or required) for whether Checkout collected the customer's billing address."""
+        return self.stripe_data.get("billing_address_collection")
+
+    @property
+    def cancel_url(self):
+        """The URL the customer will be directed to if they decide to cancel payment and return to your website."""
+        return self.stripe_data.get("cancel_url", "")
+
+    @property
+    def client_reference_id(self):
+        """A unique string to reference the Checkout Session."""
+        return self.stripe_data.get("client_reference_id", "")
+
+    @property
+    def currency(self):
+        """Three-letter ISO currency code, in lowercase. Must be a supported currency."""
+        return self.stripe_data.get("currency")
+
+    @property
+    def customer_email(self):
+        """If provided, this value will be used when the Customer object is created."""
+        return self.stripe_data.get("customer_email", "")
+
+    @property
+    def display_items(self):
+        """The line items, plans, or SKUs purchased by the customer."""
+        return self.stripe_data.get("display_items")
+
+    @property
+    def line_items(self):
+        """The line items purchased by the customer."""
+        return self.stripe_data.get("line_items")
+
+    @property
+    def locale(self):
+        """The IETF language tag of the locale Checkout is displayed in."""
+        return self.stripe_data.get("locale", "")
+
+    @property
+    def mode(self):
+        """The mode of the Checkout Session, one of payment, setup, or subscription."""
+        return self.stripe_data.get("mode")
+
+    @property
+    def payment_method_types(self):
+        """The list of payment method types (e.g. card) that this Checkout Session is allowed to accept."""
+        return self.stripe_data.get("payment_method_types", [])
+
+    @property
+    def payment_status(self):
+        """The payment status of the Checkout Session, one of paid, unpaid, or no_payment_required."""
+        return self.stripe_data.get("payment_status")
+
+    @property
+    def shipping_address_collection(self):
+        """When set, provides configuration for Checkout to collect a shipping address from a customer."""
+        return self.stripe_data.get("shipping_address_collection")
+
+    @property
+    def shipping_cost(self):
+        """The details of the customer cost of shipping, including the customer chosen ShippingRate."""
+        return self.stripe_data.get("shipping_cost")
+
+    @property
+    def shipping_details(self):
+        """Shipping information for this Checkout Session."""
+        return self.stripe_data.get("shipping_details")
+
+    @property
+    def shipping_options(self):
+        """The shipping rate options applied to this Session."""
+        return self.stripe_data.get("shipping_options")
+
+    @property
+    def status(self):
+        """The status of the Checkout Session, one of open, complete, or expired."""
+        return self.stripe_data.get("status")
+
+    @property
+    def submit_type(self):
+        """Describes the type of transaction being performed by Checkout."""
+        return self.stripe_data.get("submit_type")
+
+    @property
+    def success_url(self):
+        """The URL the customer will be directed to after successful payment or subscription creation."""
+        return self.stripe_data.get("success_url", "")
+
+    @property
+    def total_details(self):
+        """Tax and discount details for the computed total amount."""
+        return self.stripe_data.get("total_details")
+
+    @property
+    def url(self):
+        """The URL to the Checkout Session. Redirect customers to this URL to take them to Checkout."""
+        return self.stripe_data.get("url")
 
     def _attach_objects_post_save_hook(
         self,

@@ -98,10 +98,7 @@ class APIKey(StripeModel):
         )
         # NOTE: Do not immediately use _get_or_create_from_stripe_object() here.
         # Account needs to exist for things to work. Make a stub if necessary.
-        account, created = Account.objects.get_or_create(
-            id=account_data["id"],
-            defaults={"charges_enabled": False, "details_submitted": False},
-        )
+        account, created = Account.objects.get_or_create(id=account_data["id"])
         if created:
             # If it's just been created, now we can sync the account.
             Account.sync_from_stripe_data(account_data, api_key=self.secret)

@@ -38,14 +38,6 @@ class ApplicationFee(StripeModel):
         related_name="application_fees",
         help_text="ID of the Stripe account this fee was taken from.",
     )
-    amount = StripeQuantumCurrencyAmountField(help_text="Amount earned, in cents.")
-    amount_refunded = StripeQuantumCurrencyAmountField(
-        help_text=(
-            "Amount in cents refunded (can be less than the amount attribute "
-            "on the fee if a partial refund was issued)"
-        )
-    )
-    # TODO application = ...
     # balance_transaction exists on the platform account
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
@@ -60,14 +52,24 @@ class ApplicationFee(StripeModel):
         on_delete=models.CASCADE,
         help_text="The charge that the application fee was taken from.",
     )
-    currency = StripeCurrencyCodeField()
+    # TODO application = ...
     # TODO originating_transaction = ... (refs. both Charge and Transfer)
-    refunded = models.BooleanField(
-        help_text=(
-            "Whether the fee has been fully refunded. If the fee is only "
-            "partially refunded, this attribute will still be false."
-        )
-    )
+
+    @property
+    def amount(self):
+        return self.stripe_data.get("amount")
+
+    @property
+    def amount_refunded(self):
+        return self.stripe_data.get("amount_refunded")
+
+    @property
+    def currency(self):
+        return self.stripe_data.get("currency")
+
+    @property
+    def refunded(self):
+        return self.stripe_data.get("refunded")
 
 
 # TODO Add Tests
@@ -83,7 +85,6 @@ class ApplicationFeeRefund(StripeModel):
 
     stripe_class = stripe.ApplicationFeeRefund
 
-    amount = StripeQuantumCurrencyAmountField(help_text="Amount refunded, in cents.")
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.CASCADE,
@@ -91,13 +92,20 @@ class ApplicationFeeRefund(StripeModel):
             "Balance transaction that describes the impact on your account balance."
         ),
     )
-    currency = StripeCurrencyCodeField()
     fee = StripeForeignKey(
         "ApplicationFee",
         on_delete=models.CASCADE,
         related_name="refunds",
         help_text="The application fee that was refunded",
     )
+
+    @property
+    def amount(self):
+        return self.stripe_data.get("amount")
+
+    @property
+    def currency(self):
+        return self.stripe_data.get("currency")
 
 
 class CountrySpec(StripeBaseModel):
@@ -192,15 +200,6 @@ class Transfer(StripeModel):
 
     objects = TransferManager()
 
-    amount = StripeDecimalCurrencyAmountField(help_text="The amount transferred")
-    amount_reversed = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The amount (as decimal) reversed (can be less than the amount "
-            "attribute on the transfer if a partial reversal was issued)."
-        ),
-    )
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
@@ -210,50 +209,43 @@ class Transfer(StripeModel):
             "Balance transaction that describes the impact on your account balance."
         ),
     )
-    currency = StripeCurrencyCodeField()
 
-    destination = StripeIdField(
-        max_length=255,
-        null=True,
-        help_text=(
-            "ID of the bank account, card, or Stripe account the transfer was sent to."
-        ),
-    )
+    @property
+    def amount(self):
+        return self.stripe_data.get("amount")
+
+    @property
+    def amount_reversed(self):
+        return self.stripe_data.get("amount_reversed")
+
+    @property
+    def currency(self):
+        return self.stripe_data.get("currency")
+
+    @property
+    def destination(self):
+        return self.stripe_data.get("destination")
 
     # todo implement payment model (for some reason py ids are showing up in the charge model)
-    destination_payment = StripeIdField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If the destination is a Stripe account, this will be the ID of the "
-            "payment that the destination account received for the transfer."
-        ),
-    )
-    reversed = models.BooleanField(
-        default=False,
-        help_text=(
-            "Whether or not the transfer has been fully reversed. "
-            "If the transfer is only partially reversed, this attribute will still "
-            "be false."
-        ),
-    )
-    source_transaction = StripeIdField(
-        null=True,
-        help_text=(
-            "ID of the charge (or other transaction) that was used to fund "
-            "the transfer. If null, the transfer was funded from the available balance."
-        ),
-    )
-    source_type = StripeEnumField(
-        enum=enums.LegacySourceType,
-        help_text="The source balance from which this transfer came.",
-    )
-    transfer_group = models.CharField(
-        max_length=255,
-        default="",
-        blank=True,
-        help_text="A string that identifies this transaction as part of a group.",
-    )
+    @property
+    def destination_payment(self):
+        return self.stripe_data.get("destination_payment")
+
+    @property
+    def reversed(self):
+        return self.stripe_data.get("reversed")
+
+    @property
+    def source_transaction(self):
+        return self.stripe_data.get("source_transaction")
+
+    @property
+    def source_type(self):
+        return self.stripe_data.get("source_type")
+
+    @property
+    def transfer_group(self):
+        return self.stripe_data.get("transfer_group")
 
     @property
     def fee(self):
@@ -261,11 +253,13 @@ class Transfer(StripeModel):
             return self.balance_transaction.fee
 
     def __str__(self):
-        amount = get_friendly_currency_amount(self.amount, self.currency)
-        if self.reversed:
+        amount = get_friendly_currency_amount(
+            self.stripe_data.get("amount"), self.stripe_data.get("currency")
+        )
+        if self.stripe_data.get("reversed"):
             # Complete Reversal
             return f"{amount} Reversed"
-        elif self.amount_reversed:
+        elif self.stripe_data.get("amount_reversed"):
             # Partial Reversal
             return f"{amount} Partially Reversed"
         # No Reversal
@@ -311,7 +305,6 @@ class TransferReversal(StripeModel):
     # and attached to the stripe.Transfer class
     stripe_class = stripe.Transfer
 
-    amount = StripeQuantumCurrencyAmountField(help_text="Amount, in cents.")
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",
         on_delete=models.SET_NULL,
@@ -322,13 +315,20 @@ class TransferReversal(StripeModel):
             "Balance transaction that describes the impact on your account balance."
         ),
     )
-    currency = StripeCurrencyCodeField()
     transfer = StripeForeignKey(
         "Transfer",
         on_delete=models.CASCADE,
         help_text="The transfer that was reversed.",
         related_name="reversals",
     )
+
+    @property
+    def amount(self):
+        return self.stripe_data.get("amount")
+
+    @property
+    def currency(self):
+        return self.stripe_data.get("currency")
 
     def __str__(self):
         return str(self.transfer)

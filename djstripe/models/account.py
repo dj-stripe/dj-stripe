@@ -1,9 +1,8 @@
 import stripe
 from django.db import models, transaction
 
-from .. import enums
 from ..enums import APIKeyType
-from ..fields import JSONField, StripeCurrencyCodeField, StripeEnumField
+from ..fields import JSONField
 from ..settings import djstripe_settings
 from .api import APIKey, get_api_key_details_by_prefix
 from .base import StripeModel, logger
@@ -20,78 +19,98 @@ class Account(StripeModel):
     """
 
     stripe_class = stripe.Account
-    business_profile = JSONField(
-        null=True, blank=True, help_text="Optional information related to the business."
-    )
-    business_type = StripeEnumField(
-        enum=enums.BusinessType, default="", blank=True, help_text="The business type."
-    )
-    charges_enabled = models.BooleanField(
-        help_text="Whether the account can create live charges"
-    )
-    country = models.CharField(max_length=2, help_text="The country of the account")
-    company = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Information about the company or business. "
-            "This field is null unless business_type is set to company."
-        ),
-    )
-    default_currency = StripeCurrencyCodeField(
-        help_text="The currency this account has chosen to use as the default"
-    )
-    details_submitted = models.BooleanField(
-        help_text=(
-            "Whether account details have been submitted. "
-            "Standard accounts cannot receive payouts before this is true."
-        )
-    )
-    email = models.CharField(
-        max_length=255, help_text="The primary user's email address."
-    )
+
+    @property
+    def business_profile(self):
+        """Optional information related to the business."""
+        return self.stripe_data.get("business_profile")
+
+    @property
+    def business_type(self):
+        """The business type."""
+        return self.stripe_data.get("business_type", "")
+
+    @property
+    def charges_enabled(self):
+        """Whether the account can create live charges"""
+        return self.stripe_data.get("charges_enabled", False)
+
+    @property
+    def country(self):
+        """The country of the account"""
+        return self.stripe_data.get("country", "")
+
+    @property
+    def company(self):
+        """
+        Information about the company or business.
+        This field is null unless business_type is set to company.
+        """
+        return self.stripe_data.get("company")
+
+    @property
+    def default_currency(self):
+        """The currency this account has chosen to use as the default"""
+        return self.stripe_data.get("default_currency", "")
+
+    @property
+    def details_submitted(self):
+        """
+        Whether account details have been submitted.
+        Standard accounts cannot receive payouts before this is true.
+        """
+        return self.stripe_data.get("details_submitted", False)
+
+    @property
+    def email(self):
+        """The primary user's email address."""
+        return self.stripe_data.get("email", "")
+
     # TODO external_accounts = ...
-    individual = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Information about the person represented by the account. "
-            "This field is null unless business_type is set to individual."
-        ),
-    )
-    payouts_enabled = models.BooleanField(
-        null=True, help_text="Whether Stripe can send payouts to this account"
-    )
-    product_description = models.CharField(
-        max_length=255,
-        default="",
-        blank=True,
-        help_text=(
-            "Internal-only description of the product sold or service provided "
-            "by the business. It's used by Stripe for risk and underwriting purposes."
-        ),
-    )
-    requirements = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Information about the requirements for the account, "
-            "including what information needs to be collected, and by when."
-        ),
-    )
-    settings = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Account options for customizing how the account functions within Stripe."
-        ),
-    )
-    type = StripeEnumField(enum=enums.AccountType, help_text="The Stripe account type.")
-    tos_acceptance = JSONField(
-        null=True,
-        blank=True,
-        help_text="Details on the acceptance of the Stripe Services Agreement",
-    )
+
+    @property
+    def individual(self):
+        """
+        Information about the person represented by the account.
+        This field is null unless business_type is set to individual.
+        """
+        return self.stripe_data.get("individual")
+
+    @property
+    def payouts_enabled(self):
+        """Whether Stripe can send payouts to this account"""
+        return self.stripe_data.get("payouts_enabled")
+
+    @property
+    def product_description(self):
+        """
+        Internal-only description of the product sold or service provided
+        by the business. It's used by Stripe for risk and underwriting purposes.
+        """
+        return self.stripe_data.get("product_description", "")
+
+    @property
+    def requirements(self):
+        """
+        Information about the requirements for the account,
+        including what information needs to be collected, and by when.
+        """
+        return self.stripe_data.get("requirements")
+
+    @property
+    def settings(self):
+        """Account options for customizing how the account functions within Stripe."""
+        return self.stripe_data.get("settings")
+
+    @property
+    def type(self):
+        """The Stripe account type."""
+        return self.stripe_data.get("type", "")
+
+    @property
+    def tos_acceptance(self):
+        """Details on the acceptance of the Stripe Services Agreement"""
+        return self.stripe_data.get("tos_acceptance")
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
