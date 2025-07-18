@@ -42,105 +42,81 @@ class Coupon(StripeModel):
     expand_fields = ["applies_to"]
     stripe_dashboard_item_name = "coupons"
 
+    # Critical fields to keep
     id = StripeIdField(max_length=500)
-    applies_to = JSONField(
-        null=True,
-        blank=True,
-        help_text="Contains information about what this coupon applies to.",
-    )
-    amount_off = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Amount (as decimal) that will be taken off the subtotal of any "
-            "invoices for this customer."
-        ),
-    )
-    currency = StripeCurrencyCodeField(null=True, blank=True)
-    duration = StripeEnumField(
-        enum=enums.CouponDuration,
-        help_text=(
-            "Describes how long a customer who applies this coupon "
-            "will get the discount."
-        ),
-        default=enums.CouponDuration.once,
-    )
-    duration_in_months = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If `duration` is `repeating`, the number of months the coupon applies."
-        ),
-    )
-    max_redemptions = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Maximum number of times this coupon can be redeemed, in total, "
-            "before it is no longer valid."
-        ),
-    )
-    name = models.TextField(
-        max_length=5000,
-        default="",
-        blank=True,
-        help_text=(
-            "Name of the coupon displayed to customers on for instance invoices "
-            "or receipts."
-        ),
-    )
-    percent_off = StripePercentField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Percent that will be taken off the subtotal of any invoices for "
-            "this customer for the duration of the coupon. "
-            "For example, a coupon with percent_off of 50 will make a "
-            "$100 invoice $50 instead."
-        ),
-    )
-    redeem_by = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Date after which the coupon can no longer be redeemed. "
-            "Max 5 years in the future."
-        ),
-    )
-    times_redeemed = models.PositiveIntegerField(
-        editable=False,
-        default=0,
-        help_text="Number of times this coupon has been applied to a customer.",
-    )
-    # valid = models.BooleanField(editable=False)
+
+    # Property accessors for commonly used fields
+    @property
+    def applies_to(self):
+        return self.stripe_data.get("applies_to")
+
+    @property
+    def amount_off(self):
+        return self.stripe_data.get("amount_off")
+
+    @property
+    def currency(self):
+        return self.stripe_data.get("currency")
+
+    @property
+    def duration(self):
+        return self.stripe_data.get("duration")
+
+    @property
+    def duration_in_months(self):
+        return self.stripe_data.get("duration_in_months")
+
+    @property
+    def max_redemptions(self):
+        return self.stripe_data.get("max_redemptions")
+
+    @property
+    def name(self):
+        return self.stripe_data.get("name")
+
+    @property
+    def percent_off(self):
+        return self.stripe_data.get("percent_off")
+
+    @property
+    def redeem_by(self):
+        return self.stripe_data.get("redeem_by")
+
+    @property
+    def times_redeemed(self):
+        return self.stripe_data.get("times_redeemed", 0)
 
     class Meta(StripeModel.Meta):
         unique_together = ("id", "livemode")
 
     def __str__(self):
-        if self.name:
-            return self.name
+        name = self.stripe_data.get("name")
+        if name:
+            return name
         return self.human_readable
 
     @property
     def human_readable_amount(self):
-        if self.percent_off:
-            amount = f"{self.percent_off}%"
-        elif self.currency:
-            amount = get_friendly_currency_amount(self.amount_off or 0, self.currency)
+        percent_off = self.stripe_data.get("percent_off")
+        if percent_off:
+            amount = f"{percent_off}%"
+        elif self.stripe_data.get("currency"):
+            amount = get_friendly_currency_amount(
+                self.stripe_data.get("amount_off", 0), self.stripe_data.get("currency")
+            )
         else:
             amount = "(invalid amount)"
         return f"{amount} off"
 
     @property
     def human_readable(self):
-        if self.duration == enums.CouponDuration.repeating:
-            if self.duration_in_months == 1:
+        duration = self.stripe_data.get("duration")
+        if duration == "repeating":
+            duration_in_months = self.stripe_data.get("duration_in_months")
+            if duration_in_months == 1:
                 duration = "for 1 month"
             else:
-                duration = f"for {self.duration_in_months} months"
-        else:
-            duration = self.duration
+                duration = f"for {duration_in_months} months"
         return f"{self.human_readable_amount} {duration}"
 
 
@@ -255,7 +231,7 @@ class BaseInvoice(StripeModel):
         related_name="latest_%(class)s",
         help_text="The latest charge generated for this invoice, if any.",
     )
-    currency = StripeCurrencyCodeField()
+    # Critical fields to keep
     customer = StripeForeignKey(
         "Customer",
         on_delete=models.CASCADE,
@@ -277,24 +253,6 @@ class BaseInvoice(StripeModel):
             "method in the customer's invoice settings."
         ),
     )
-    due_date = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The date on which payment for this invoice is due. "
-            "This value will be null for invoices where billing=charge_automatically."
-        ),
-    )
-    number = models.CharField(
-        max_length=64,
-        default="",
-        blank=True,
-        help_text=(
-            "A unique, identifying string that appears on emails sent to the customer "
-            "for this invoice. "
-            "This starts with the customer's unique invoice_prefix if it is specified."
-        ),
-    )
     payment_intent = models.OneToOneField(
         "PaymentIntent",
         on_delete=models.CASCADE,
@@ -306,36 +264,6 @@ class BaseInvoice(StripeModel):
             "Note that voiding an invoice will cancel the PaymentIntent"
         ),
     )
-    period_end = StripeDateTimeField(
-        help_text=(
-            "End of the usage period during which invoice items were "
-            "added to this invoice."
-        )
-    )
-    period_start = StripeDateTimeField(
-        help_text=(
-            "Start of the usage period during which invoice items were "
-            "added to this invoice."
-        )
-    )
-    receipt_number = models.CharField(
-        max_length=64,
-        null=True,
-        blank=True,
-        help_text=(
-            "This is the transaction number that appears on email receipts "
-            "sent for this invoice."
-        ),
-    )
-    status = StripeEnumField(
-        default="",
-        blank=True,
-        enum=enums.InvoiceStatus,
-        help_text=(
-            "The status of the invoice, one of draft, open, paid, "
-            "uncollectible, or void."
-        ),
-    )
     subscription = StripeForeignKey(
         "Subscription",
         null=True,
@@ -345,41 +273,68 @@ class BaseInvoice(StripeModel):
         on_delete=models.SET_NULL,
         help_text="The subscription that this invoice was prepared for, if any.",
     )
-    subtotal = StripeDecimalCurrencyAmountField(
-        help_text=(
-            "Total (as decimal) of all subscriptions, invoice items, "
-            "and prorations on the invoice before any discount or tax is applied."
-        )
-    )
-    tax = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The amount (as decimal) of tax included in the total, calculated "
-            "from ``tax_percent`` and the subtotal. If no "
-            "``tax_percent`` is defined, this value will be null."
-        ),
-    )
-    tax_percent = StripePercentField(
-        null=True,
-        blank=True,
-        help_text=(
-            "This percentage of the subtotal has been added to the total amount of the"
-            " invoice, including invoice line items and discounts. This field is"
-            " inherited from the subscription's ``tax_percent`` field, but can be"
-            " changed before the invoice is paid. This field defaults to null."
-        ),
-    )
-    total = StripeDecimalCurrencyAmountField("Total (as decimal) after discount.")
+
+    # Property accessors for commonly used fields
+    @property
+    def currency(self):
+        return self.stripe_data.get("currency")
+
+    @property
+    def due_date(self):
+        return self.stripe_data.get("due_date")
+
+    @property
+    def number(self):
+        return self.stripe_data.get("number")
+
+    @property
+    def period_end(self):
+        return self.stripe_data.get("period_end")
+
+    @property
+    def period_start(self):
+        return self.stripe_data.get("period_start")
+
+    @property
+    def receipt_number(self):
+        return self.stripe_data.get("receipt_number")
+
+    @property
+    def status(self):
+        return self.stripe_data.get("status")
+
+    @property
+    def subtotal(self):
+        return self.stripe_data.get("subtotal")
+
+    @property
+    def tax(self):
+        return self.stripe_data.get("tax")
+
+    @property
+    def tax_percent(self):
+        return self.stripe_data.get("tax_percent")
+
+    @property
+    def total(self):
+        return self.stripe_data.get("total")
 
     class Meta(StripeModel.Meta):
         abstract = True
         ordering = ["-created"]
 
     def __str__(self):
-        invoice_number = self.number or self.receipt_number or self.id
-        amount = get_friendly_currency_amount(self.amount_paid or 0, self.currency)
-        return f"Invoice #{invoice_number} for {amount} ({self.status})"
+        invoice_number = (
+            self.stripe_data.get("number")
+            or self.stripe_data.get("receipt_number")
+            or self.id
+        )
+        amount = get_friendly_currency_amount(
+            self.stripe_data.get("amount_paid", 0), self.stripe_data.get("currency")
+        )
+        return (
+            f"Invoice #{invoice_number} for {amount} ({self.stripe_data.get('status')})"
+        )
 
     @classmethod
     def upcoming(
@@ -704,30 +659,14 @@ class InvoiceItem(StripeModel):
     stripe_class = stripe.InvoiceItem
     expand_fields = ["discounts"]
 
-    amount = StripeDecimalCurrencyAmountField(help_text="Amount invoiced (as decimal).")
-    currency = StripeCurrencyCodeField()
+    # Foreign keys remain as model fields
     customer = StripeForeignKey(
         "Customer",
         on_delete=models.CASCADE,
         related_name="invoiceitems",
         help_text="The customer associated with this invoiceitem.",
     )
-    date = StripeDateTimeField(help_text="The date on the invoiceitem.")
-    discountable = models.BooleanField(
-        default=False,
-        help_text=(
-            "If True, discounts will apply to this invoice item. "
-            "Always False for prorations."
-        ),
-    )
-    discounts = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The discounts which apply to the invoice item. Item discounts are applied"
-            " before invoice discounts."
-        ),
-    )
+    # Fields converted to properties - see below
     invoice = StripeForeignKey(
         "Invoice",
         on_delete=models.CASCADE,
@@ -735,13 +674,7 @@ class InvoiceItem(StripeModel):
         related_name="invoiceitems",
         help_text="The invoice to which this invoiceitem is attached.",
     )
-    period = JSONField()
-    period_end = StripeDateTimeField(
-        help_text="Might be the date when this invoiceitem's invoice was sent."
-    )
-    period_start = StripeDateTimeField(
-        help_text="Might be the date when this invoiceitem was added to the invoice"
-    )
+    # Period fields converted to properties - see below
     plan = models.ForeignKey(
         "Plan",
         null=True,
@@ -761,21 +694,7 @@ class InvoiceItem(StripeModel):
             "for which the proration was computed."
         ),
     )
-    proration = models.BooleanField(
-        default=False,
-        help_text=(
-            "Whether or not the invoice item was created automatically as a "
-            "proration adjustment when the customer switched plans."
-        ),
-    )
-    quantity = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If the invoice item is a proration, the quantity of the "
-            "subscription for which the proration was computed."
-        ),
-    )
+    # Proration and quantity fields converted to properties - see below
     subscription = StripeForeignKey(
         "Subscription",
         null=True,
@@ -799,21 +718,68 @@ class InvoiceItem(StripeModel):
             "invoice item."
         ),
     )
-    unit_amount = StripeQuantumCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text="Unit amount (in the `currency` specified) of the invoice item.",
-    )
-    unit_amount_decimal = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        max_digits=djstripe_settings.decimal_max_digits,
-        decimal_places=djstripe_settings.decimal_places,
-        help_text=(
-            "Same as `unit_amount`, but contains a decimal value with "
-            "at most 12 decimal places."
-        ),
-    )
+    # Unit amount fields converted to properties - see below
+
+    # Properties replacing field definitions
+    @property
+    def amount(self):
+        """Amount invoiced (as decimal)."""
+        return self.stripe_data.get("amount")
+
+    @property
+    def currency(self):
+        """Currency code."""
+        return self.stripe_data.get("currency")
+
+    @property
+    def date(self):
+        """The date on the invoiceitem."""
+        return self.stripe_data.get("date")
+
+    @property
+    def discountable(self):
+        """If True, discounts will apply to this invoice item. Always False for prorations."""
+        return self.stripe_data.get("discountable", False)
+
+    @property
+    def discounts(self):
+        """The discounts which apply to the invoice item. Item discounts are applied before invoice discounts."""
+        return self.stripe_data.get("discounts")
+
+    @property
+    def period(self):
+        """Period information."""
+        return self.stripe_data.get("period", {})
+
+    @property
+    def period_end(self):
+        """Might be the date when this invoiceitem's invoice was sent."""
+        return self.stripe_data.get("period_end")
+
+    @property
+    def period_start(self):
+        """Might be the date when this invoiceitem was added to the invoice."""
+        return self.stripe_data.get("period_start")
+
+    @property
+    def proration(self):
+        """Whether or not the invoice item was created automatically as a proration adjustment when the customer switched plans."""
+        return self.stripe_data.get("proration", False)
+
+    @property
+    def quantity(self):
+        """If the invoice item is a proration, the quantity of the subscription for which the proration was computed."""
+        return self.stripe_data.get("quantity")
+
+    @property
+    def unit_amount(self):
+        """Unit amount (in the currency specified) of the invoice item."""
+        return self.stripe_data.get("unit_amount")
+
+    @property
+    def unit_amount_decimal(self):
+        """Same as unit_amount, but contains a decimal value with at most 12 decimal places."""
+        return self.stripe_data.get("unit_amount_decimal")
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
@@ -872,34 +838,7 @@ class LineItem(StripeModel):
     stripe_class = stripe.InvoiceLineItem
     expand_fields = ["discounts"]
 
-    amount = StripeQuantumCurrencyAmountField(help_text="The amount, in cents.")
-    amount_excluding_tax = StripeQuantumCurrencyAmountField(
-        help_text=(
-            "The integer amount in cents representing the amount for this line item,"
-            " excluding all tax and discounts."
-        )
-    )
-    currency = StripeCurrencyCodeField()
-    discount_amounts = JSONField(
-        null=True,
-        blank=True,
-        help_text="The amount of discount calculated per discount for this line item.",
-    )
-    discountable = models.BooleanField(
-        default=False,
-        help_text=(
-            "If True, discounts will apply to this line item. "
-            "Always False for prorations."
-        ),
-    )
-    discounts = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The discounts applied to the invoice line item. Line item discounts are"
-            " applied before invoice discounts."
-        ),
-    )
+    # Foreign keys remain as model fields
     invoice_item = StripeForeignKey(
         "InvoiceItem",
         null=True,
@@ -907,34 +846,7 @@ class LineItem(StripeModel):
         on_delete=models.CASCADE,
         help_text="The ID of the invoice item associated with this line item if any.",
     )
-    period = JSONField(
-        help_text=(
-            "The period this line_item covers. For subscription line items, this is the"
-            " subscription period. For prorations, this starts when the proration was"
-            " calculated, and ends at the period end of the subscription. For invoice"
-            " items, this is the time at which the invoice item was created or the"
-            " period of the item."
-        )
-    )
-    period_end = StripeDateTimeField(
-        help_text=(
-            "The end of the period, which must be greater than or equal to the start."
-        )
-    )
-    period_start = StripeDateTimeField(help_text="The start of the period.")
-    price = JSONField(
-        help_text="The price of the line item.",
-    )
-    proration = models.BooleanField(
-        default=False,
-        help_text=(
-            "Whether or not the invoice item was created automatically as a "
-            "proration adjustment when the customer switched plans."
-        ),
-    )
-    proration_details = JSONField(
-        help_text="Additional details for proration line items"
-    )
+    # Fields converted to properties - see below
     subscription = StripeForeignKey(
         "Subscription",
         null=True,
@@ -952,31 +864,93 @@ class LineItem(StripeModel):
             " line item is not an explicit result of a subscription."
         ),
     )
-    tax_amounts = JSONField(
-        null=True,
-        blank=True,
-        help_text="The amount of tax calculated per tax rate for this line item",
-    )
-    tax_rates = JSONField(
-        null=True, blank=True, help_text="The tax rates which apply to the line item."
-    )
-    type = StripeEnumField(enum=enums.LineItem)
-    unit_amount_excluding_tax = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The amount in cents representing the unit amount for this line item,"
-            " excluding all tax and discounts."
-        ),
-    )
-    quantity = models.IntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The quantity of the subscription, if the line item is a subscription or a"
-            " proration."
-        ),
-    )
+    # Tax and other fields converted to properties - see below
+
+    # Properties replacing field definitions
+    @property
+    def amount(self):
+        """The amount, in cents."""
+        return self.stripe_data.get("amount")
+
+    @property
+    def amount_excluding_tax(self):
+        """The integer amount in cents representing the amount for this line item, excluding all tax and discounts."""
+        return self.stripe_data.get("amount_excluding_tax")
+
+    @property
+    def currency(self):
+        """Currency code."""
+        return self.stripe_data.get("currency")
+
+    @property
+    def discount_amounts(self):
+        """The amount of discount calculated per discount for this line item."""
+        return self.stripe_data.get("discount_amounts")
+
+    @property
+    def discountable(self):
+        """If True, discounts will apply to this line item. Always False for prorations."""
+        return self.stripe_data.get("discountable", False)
+
+    @property
+    def discounts(self):
+        """The discounts applied to the invoice line item. Line item discounts are applied before invoice discounts."""
+        return self.stripe_data.get("discounts")
+
+    @property
+    def period(self):
+        """The period this line_item covers."""
+        return self.stripe_data.get("period", {})
+
+    @property
+    def period_end(self):
+        """The end of the period, which must be greater than or equal to the start."""
+        return self.stripe_data.get("period_end")
+
+    @property
+    def period_start(self):
+        """The start of the period."""
+        return self.stripe_data.get("period_start")
+
+    @property
+    def price(self):
+        """The price of the line item."""
+        return self.stripe_data.get("price")
+
+    @property
+    def proration(self):
+        """Whether or not the invoice item was created automatically as a proration adjustment when the customer switched plans."""
+        return self.stripe_data.get("proration", False)
+
+    @property
+    def proration_details(self):
+        """Additional details for proration line items."""
+        return self.stripe_data.get("proration_details")
+
+    @property
+    def tax_amounts(self):
+        """The amount of tax calculated per tax rate for this line item."""
+        return self.stripe_data.get("tax_amounts")
+
+    @property
+    def tax_rates(self):
+        """The tax rates which apply to the line item."""
+        return self.stripe_data.get("tax_rates")
+
+    @property
+    def type(self):
+        """Type of line item."""
+        return self.stripe_data.get("type")
+
+    @property
+    def unit_amount_excluding_tax(self):
+        """The amount in cents representing the unit amount for this line item, excluding all tax and discounts."""
+        return self.stripe_data.get("unit_amount_excluding_tax")
+
+    @property
+    def quantity(self):
+        """The quantity of the subscription, if the line item is a subscription or a proration."""
+        return self.stripe_data.get("quantity")
 
     @classmethod
     def _manipulate_stripe_object_hook(cls, data):
@@ -1049,6 +1023,82 @@ class Plan(StripeModel):
     stripe_class = stripe.Plan
     expand_fields = ["product", "tiers"]
     stripe_dashboard_item_name = "plans"
+
+    # Properties for Plan model fields
+    @property
+    def active(self):
+        """Whether the plan is currently available for new subscriptions."""
+        return self.stripe_data.get("active", True)
+
+    @property
+    def aggregate_usage(self):
+        """Specifies a usage aggregation strategy for plans of `usage_type=metered`."""
+        return self.stripe_data.get("aggregate_usage")
+
+    @property
+    def amount(self):
+        """The amount in cents to be charged on the interval specified."""
+        return self.stripe_data.get("amount")
+
+    @property
+    def amount_decimal(self):
+        """Same as `amount`, but contains a decimal value with at most 12 decimal places."""
+        return self.stripe_data.get("amount_decimal")
+
+    @property
+    def billing_scheme(self):
+        """Describes how to compute the price per period. Either `per_unit` or `tiered`."""
+        return self.stripe_data.get("billing_scheme", "per_unit")
+
+    @property
+    def currency(self):
+        """Three-letter ISO currency code."""
+        return self.stripe_data.get("currency")
+
+    @property
+    def interval(self):
+        """The frequency at which a subscription is billed. One of `day`, `week`, `month` or `year`."""
+        return self.stripe_data.get("interval")
+
+    @property
+    def interval_count(self):
+        """The number of intervals between subscription billings."""
+        return self.stripe_data.get("interval_count", 1)
+
+    @property
+    def nickname(self):
+        """A brief description of the plan, hidden from customers."""
+        return self.stripe_data.get("nickname")
+
+    @property
+    def product(self):
+        """The product whose pricing this plan determines."""
+        return self.stripe_data.get("product")
+
+    @property
+    def tiers(self):
+        """Each element represents a pricing tier."""
+        return self.stripe_data.get("tiers", [])
+
+    @property
+    def tiers_mode(self):
+        """Defines if the tiering price should be `graduated` or `volume` based."""
+        return self.stripe_data.get("tiers_mode")
+
+    @property
+    def transform_usage(self):
+        """Apply a transformation to the reported usage or set quantity."""
+        return self.stripe_data.get("transform_usage")
+
+    @property
+    def trial_period_days(self):
+        """Number of trial period days granted when subscribing a customer to this plan."""
+        return self.stripe_data.get("trial_period_days")
+
+    @property
+    def usage_type(self):
+        """Configures how the quantity per period should be determined."""
+        return self.stripe_data.get("usage_type", "licensed")
 
     @classmethod
     def get_or_create(cls, **kwargs):
@@ -1165,6 +1215,172 @@ class Subscription(StripeModel):
     )
 
     objects = SubscriptionManager()
+
+    # Properties for Subscription model fields
+    @property
+    def application_fee_percent(self):
+        """A non-negative decimal between 0 and 100, with at most two decimal places."""
+        return self.stripe_data.get("application_fee_percent")
+
+    @property
+    def automatic_tax(self):
+        """Automatic tax settings for this subscription."""
+        return self.stripe_data.get("automatic_tax", {})
+
+    @property
+    def billing_cycle_anchor(self):
+        """Determines the date of the first full invoice."""
+        return self.stripe_data.get("billing_cycle_anchor")
+
+    @property
+    def billing_thresholds(self):
+        """Define thresholds at which an invoice will be sent."""
+        return self.stripe_data.get("billing_thresholds")
+
+    @property
+    def cancel_at(self):
+        """A date in the future at which the subscription will automatically get canceled."""
+        return self.stripe_data.get("cancel_at")
+
+    @property
+    def cancel_at_period_end(self):
+        """If the subscription has been canceled with the at_period_end flag set to true."""
+        return self.stripe_data.get("cancel_at_period_end", False)
+
+    @property
+    def canceled_at(self):
+        """If the subscription has been canceled, the date of that cancellation."""
+        return self.stripe_data.get("canceled_at")
+
+    @property
+    def collection_method(self):
+        """Either charge_automatically, or send_invoice."""
+        return self.stripe_data.get("collection_method", "charge_automatically")
+
+    @property
+    def current_period_end(self):
+        """End of the current period that the subscription has been invoiced for."""
+        return self.stripe_data.get("current_period_end")
+
+    @property
+    def current_period_start(self):
+        """Start of the current period that the subscription has been invoiced for."""
+        return self.stripe_data.get("current_period_start")
+
+    @property
+    def days_until_due(self):
+        """Number of days a customer has to pay invoices generated by this subscription."""
+        return self.stripe_data.get("days_until_due")
+
+    @property
+    def default_payment_method(self):
+        """ID of the default payment method for the subscription."""
+        return self.stripe_data.get("default_payment_method")
+
+    @property
+    def default_source(self):
+        """ID of the default payment source for the subscription."""
+        return self.stripe_data.get("default_source")
+
+    @property
+    def default_tax_rates(self):
+        """The tax rates that will apply to any subscription item that does not have tax_rates set."""
+        return self.stripe_data.get("default_tax_rates", [])
+
+    @property
+    def discount(self):
+        """Describes the current discount applied to this subscription, if there is one."""
+        return self.stripe_data.get("discount")
+
+    @property
+    def ended_at(self):
+        """If the subscription has ended, the date the subscription ended."""
+        return self.stripe_data.get("ended_at")
+
+    @property
+    def items(self):
+        """List of subscription items, each with an attached price."""
+        return self.stripe_data.get("items", {})
+
+    @property
+    def latest_invoice(self):
+        """The most recent invoice this subscription has generated."""
+        return self.stripe_data.get("latest_invoice")
+
+    @property
+    def next_pending_invoice_item_invoice(self):
+        """Specifies the date on which the next invoice will be generated."""
+        return self.stripe_data.get("next_pending_invoice_item_invoice")
+
+    @property
+    def pause_collection(self):
+        """If specified, payment collection for this subscription will be paused."""
+        return self.stripe_data.get("pause_collection")
+
+    @property
+    def payment_settings(self):
+        """Payment settings passed on to invoices created by the subscription."""
+        return self.stripe_data.get("payment_settings", {})
+
+    @property
+    def pending_invoice_item_interval(self):
+        """Specifies an interval for how often to invoice for any pending invoice items."""
+        return self.stripe_data.get("pending_invoice_item_interval")
+
+    @property
+    def pending_setup_intent(self):
+        """ID of a setup intent for this subscription if one exists."""
+        return self.stripe_data.get("pending_setup_intent")
+
+    @property
+    def pending_update(self):
+        """If specified, pending updates that will be applied to the subscription."""
+        return self.stripe_data.get("pending_update")
+
+    @property
+    def plan(self):
+        """The plan the customer is subscribed to. Only set if single plan."""
+        return self.stripe_data.get("plan")
+
+    @property
+    def quantity(self):
+        """The quantity of the plan to which the customer is subscribed."""
+        return self.stripe_data.get("quantity")
+
+    @property
+    def schedule(self):
+        """The schedule attached to the subscription."""
+        return self.stripe_data.get("schedule")
+
+    @property
+    def start_date(self):
+        """Date when the subscription was created."""
+        return self.stripe_data.get("start_date")
+
+    @property
+    def status(self):
+        """The status of this subscription."""
+        return self.stripe_data.get("status")
+
+    @property
+    def test_clock(self):
+        """ID of the test clock this subscription belongs to."""
+        return self.stripe_data.get("test_clock")
+
+    @property
+    def transfer_data(self):
+        """The account (if any) the subscription's payments will be attributed to."""
+        return self.stripe_data.get("transfer_data")
+
+    @property
+    def trial_end(self):
+        """If the subscription has a trial, the end of that trial."""
+        return self.stripe_data.get("trial_end")
+
+    @property
+    def trial_start(self):
+        """If the subscription has a trial, the beginning of that trial."""
+        return self.stripe_data.get("trial_start")
 
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
@@ -1388,14 +1604,7 @@ class SubscriptionItem(StripeModel):
 
     stripe_class = stripe.SubscriptionItem
 
-    billing_thresholds = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Define thresholds at which an invoice will be sent, and the "
-            "related subscription advanced to a new billing period."
-        ),
-    )
+    # Fields converted to properties - see below
     plan = models.ForeignKey(
         "Plan",
         on_delete=models.CASCADE,
@@ -1410,35 +1619,7 @@ class SubscriptionItem(StripeModel):
         related_name="subscription_items",
         help_text="The price the customer is subscribed to.",
     )
-    proration_behavior = StripeEnumField(
-        enum=enums.SubscriptionProrationBehavior,
-        help_text=(
-            "Determines how to handle prorations when the billing cycle changes (e.g.,"
-            " when switching plans, resetting billing_cycle_anchor=now, or starting a"
-            " trial), or if an item’s quantity changes"
-        ),
-        default=enums.SubscriptionProrationBehavior.create_prorations,
-        blank=True,
-    )
-    proration_date = StripeDateTimeField(
-        null=True,
-        blank=True,
-        help_text=(
-            "If set, the proration will be calculated as though the subscription was"
-            " updated at the given time. This can be used to apply exactly the same"
-            " proration that was previewed with upcoming invoice endpoint. It can also"
-            " be used to implement custom proration logic, such as prorating by day"
-            " instead of by second, by providing the time that you wish to use for"
-            " proration calculations"
-        ),
-    )
-    quantity = models.PositiveIntegerField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The quantity of the plan to which the customer should be subscribed."
-        ),
-    )
+    # Other fields converted to properties - see below
     subscription = StripeForeignKey(
         "Subscription",
         on_delete=models.CASCADE,
@@ -1458,6 +1639,27 @@ class SubscriptionItem(StripeModel):
             "subscription_item."
         ),
     )
+
+    # Properties replacing field definitions
+    @property
+    def billing_thresholds(self):
+        """Define thresholds at which an invoice will be sent, and the related subscription advanced to a new billing period."""
+        return self.stripe_data.get("billing_thresholds")
+
+    @property
+    def proration_behavior(self):
+        """Determines how to handle prorations when the billing cycle changes."""
+        return self.stripe_data.get("proration_behavior", "create_prorations")
+
+    @property
+    def proration_date(self):
+        """If set, the proration will be calculated as though the subscription was updated at the given time."""
+        return self.stripe_data.get("proration_date")
+
+    @property
+    def quantity(self):
+        """The quantity of the plan to which the customer should be subscribed."""
+        return self.stripe_data.get("quantity")
 
     def _attach_objects_post_save_hook(
         self,
@@ -1654,50 +1856,7 @@ class ShippingRate(StripeModel):
     stripe_dashboard_item_name = "shipping-rates"
     description = None
 
-    active = models.BooleanField(
-        default=True,
-        help_text=(
-            "Whether the shipping rate can be used for new purchases. Defaults to true"
-        ),
-    )
-    display_name = models.CharField(
-        max_length=50,
-        default="",
-        blank=True,
-        help_text=(
-            "The name of the shipping rate, meant to be displayable to the customer."
-            " This will appear on CheckoutSessions."
-        ),
-    )
-    fixed_amount = JSONField(
-        help_text=(
-            "Describes a fixed amount to charge for shipping. Must be present if type"
-            " is fixed_amount"
-        ),
-    )
-    type = StripeEnumField(
-        enum=enums.ShippingRateType,
-        default=enums.ShippingRateType.fixed_amount,
-        help_text=_(
-            "The type of calculation to use on the shipping rate. Can only be"
-            " fixed_amount for now."
-        ),
-    )
-    delivery_estimate = JSONField(
-        null=True,
-        blank=True,
-        help_text=(
-            "The estimated range for how long shipping will take, meant to be"
-            " displayable to the customer. This will appear on CheckoutSessions."
-        ),
-    )
-    tax_behavior = StripeEnumField(
-        enum=enums.ShippingRateTaxBehavior,
-        help_text=_(
-            "Specifies whether the rate is considered inclusive of taxes or exclusive"
-            " of taxes."
-        ),
-    )
+    # Foreign key remains as model field
     tax_code = StripeForeignKey(
         "TaxCode",
         null=True,
@@ -1705,6 +1864,37 @@ class ShippingRate(StripeModel):
         on_delete=models.CASCADE,
         help_text="The shipping tax code",
     )
+
+    # Properties replacing field definitions
+    @property
+    def active(self):
+        """Whether the shipping rate can be used for new purchases. Defaults to true."""
+        return self.stripe_data.get("active", True)
+
+    @property
+    def display_name(self):
+        """The name of the shipping rate, meant to be displayable to the customer. This will appear on CheckoutSessions."""
+        return self.stripe_data.get("display_name", "")
+
+    @property
+    def fixed_amount(self):
+        """Describes a fixed amount to charge for shipping. Must be present if type is fixed_amount."""
+        return self.stripe_data.get("fixed_amount", {})
+
+    @property
+    def type(self):
+        """The type of calculation to use on the shipping rate. Can only be fixed_amount for now."""
+        return self.stripe_data.get("type", "fixed_amount")
+
+    @property
+    def delivery_estimate(self):
+        """The estimated range for how long shipping will take, meant to be displayable to the customer. This will appear on CheckoutSessions."""
+        return self.stripe_data.get("delivery_estimate")
+
+    @property
+    def tax_behavior(self):
+        """Specifies whether the rate is considered inclusive of taxes or exclusive of taxes."""
+        return self.stripe_data.get("tax_behavior")
 
     class Meta(StripeModel.Meta):
         verbose_name = "Shipping Rate"
@@ -1728,10 +1918,11 @@ class TaxCode(StripeModel):
     stripe_class = stripe.TaxCode
     metadata = None
 
-    name = models.CharField(
-        max_length=128,
-        help_text="A short name for the tax code.",
-    )
+    # Properties replacing field definitions
+    @property
+    def name(self):
+        """A short name for the tax code."""
+        return self.stripe_data.get("name", "")
 
     class Meta(StripeModel.Meta):
         verbose_name = "Tax Code"
@@ -1758,10 +1949,7 @@ class TaxId(StripeModel):
     description = None
     metadata = None
 
-    country = models.CharField(
-        max_length=2,
-        help_text="Two-letter ISO code representing the country of the tax ID.",
-    )
+    # Foreign key remains as model field
     customer = StripeForeignKey(
         "djstripe.customer",
         on_delete=models.CASCADE,
@@ -1769,10 +1957,22 @@ class TaxId(StripeModel):
         blank=True,
         related_name="tax_ids",
     )
-    type = StripeEnumField(
-        enum=enums.TaxIdType, help_text="The status of this subscription."
-    )
-    value = models.CharField(max_length=50, help_text="Value of the tax ID.")
+
+    # Properties replacing field definitions
+    @property
+    def country(self):
+        """Two-letter ISO code representing the country of the tax ID."""
+        return self.stripe_data.get("country", "")
+
+    @property
+    def type(self):
+        """The type of tax ID."""
+        return self.stripe_data.get("type")
+
+    @property
+    def value(self):
+        """Value of the tax ID."""
+        return self.stripe_data.get("value", "")
 
     def __str__(self):
         return f"{enums.TaxIdType.humanize(self.type)} {self.value}"
@@ -1795,55 +1995,46 @@ class TaxRate(StripeModel):
     stripe_class = stripe.TaxRate
     stripe_dashboard_item_name = "tax-rates"
 
-    active = models.BooleanField(
-        default=True,
-        help_text=(
-            "Defaults to true. When set to false, this tax rate cannot be "
-            "applied to objects in the API, but will still be applied to subscriptions "
-            "and invoices that already have it set."
-        ),
-    )
-    country = models.CharField(
-        max_length=2,
-        default="",
-        blank=True,
-        help_text="Two-letter country code.",
-    )
-    display_name = models.CharField(
-        max_length=50,
-        default="",
-        blank=True,
-        help_text=(
-            "The display name of the tax rates as it will appear to your "
-            "customer on their receipt email, PDF, and the hosted invoice page."
-        ),
-    )
-    inclusive = models.BooleanField(
-        help_text="This specifies if the tax rate is inclusive or exclusive."
-    )
-    jurisdiction = models.CharField(
-        max_length=50,
-        default="",
-        blank=True,
-        help_text="The jurisdiction for the tax rate.",
-    )
-    percentage = StripePercentField(
-        decimal_places=4,
-        max_digits=7,
-        help_text="This represents the tax rate percent out of 100.",
-    )
-    state = models.CharField(
-        max_length=2,
-        default="",
-        blank=True,
-        help_text="ISO 3166-2 subdivision code, without country prefix.",
-    )
-    tax_type = models.CharField(
-        default="",
-        blank=True,
-        max_length=50,
-        help_text="The high-level tax type, such as vat, gst, sales_tax or custom.",
-    )
+    # Properties replacing field definitions
+    @property
+    def active(self):
+        """Defaults to true. When set to false, this tax rate cannot be applied to objects in the API, but will still be applied to subscriptions and invoices that already have it set."""
+        return self.stripe_data.get("active", True)
+
+    @property
+    def country(self):
+        """Two-letter country code."""
+        return self.stripe_data.get("country", "")
+
+    @property
+    def display_name(self):
+        """The display name of the tax rates as it will appear to your customer on their receipt email, PDF, and the hosted invoice page."""
+        return self.stripe_data.get("display_name", "")
+
+    @property
+    def inclusive(self):
+        """This specifies if the tax rate is inclusive or exclusive."""
+        return self.stripe_data.get("inclusive", False)
+
+    @property
+    def jurisdiction(self):
+        """The jurisdiction for the tax rate."""
+        return self.stripe_data.get("jurisdiction", "")
+
+    @property
+    def percentage(self):
+        """This represents the tax rate percent out of 100."""
+        return self.stripe_data.get("percentage", 0.0)
+
+    @property
+    def state(self):
+        """ISO 3166-2 subdivision code, without country prefix."""
+        return self.stripe_data.get("state", "")
+
+    @property
+    def tax_type(self):
+        """The high-level tax type, such as vat, gst, sales_tax or custom."""
+        return self.stripe_data.get("tax_type", "")
 
     def __str__(self):
         return f"{self.display_name} at {self.percentage}%"

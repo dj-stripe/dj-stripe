@@ -52,7 +52,13 @@ from .issuing import (
     IssuingDispute,
     IssuingTransaction,
 )
-from .payment_methods import BankAccount, Card, DjstripePaymentMethod, PaymentMethod
+from .payment_methods import (
+    BankAccount,
+    Card,
+    DjstripePaymentMethod,
+    PaymentMethod,
+    Source,
+)
 from .radar import EarlyFraudWarning, Review
 from .sigma import ScheduledQueryRun
 from .webhooks import WebhookEndpoint, WebhookEventTrigger
@@ -102,6 +108,7 @@ __all__ = [
     "ScheduledQueryRun",
     "SetupIntent",
     "Session",
+    "Source",
     "StripeModel",
     "Subscription",
     "SubscriptionItem",
