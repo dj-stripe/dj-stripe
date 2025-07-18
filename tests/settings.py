@@ -1,7 +1,43 @@
 import json
 import os
 
-test_db_vendor = os.environ.get("DJSTRIPE_TEST_DB_VENDOR", "postgres")
+
+def get_auto_db_vendor():
+    """Auto-detect database vendor by trying Django connections."""
+    # Try PostgreSQL first
+    postgres_config = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("DJSTRIPE_TEST_DB_NAME", "djstripe"),
+        "USER": os.environ.get("DJSTRIPE_TEST_DB_USER", "postgres"),
+        "PASSWORD": os.environ.get("DJSTRIPE_TEST_DB_PASS", "djstripe"),
+        "HOST": os.environ.get("DJSTRIPE_TEST_DB_HOST", "localhost"),
+        "PORT": os.environ.get("DJSTRIPE_TEST_DB_PORT", "5432"),
+        "OPTIONS": {
+            "connect_timeout": 3,
+        },
+    }
+
+    # Use Django's database backend to check connectivity
+    try:
+        from django.db.backends.postgresql.base import DatabaseWrapper
+
+        # Try to create a test connection
+        test_conn = DatabaseWrapper(postgres_config, "test_postgres")
+        test_conn.ensure_connection()
+        test_conn.close()
+        return "postgres"
+    except Exception:
+        # PostgreSQL not available, fall back to SQLite
+        return "sqlite"
+
+
+# If DJSTRIPE_TEST_DB_VENDOR is not set, auto-detect
+test_db_vendor = os.environ.get("DJSTRIPE_TEST_DB_VENDOR")
+if test_db_vendor is None:
+    # Auto-detect: try postgres first, fall back to sqlite
+    test_db_vendor = get_auto_db_vendor()
+    print(f"Auto-detected database backend: {test_db_vendor}")
+
 test_db_name = os.environ.get("DJSTRIPE_TEST_DB_NAME", "djstripe")
 test_db_user = os.environ.get("DJSTRIPE_TEST_DB_USER", test_db_vendor)
 test_db_pass = os.environ.get("DJSTRIPE_TEST_DB_PASS", "djstripe")
