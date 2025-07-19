@@ -8,7 +8,7 @@ is allowed, as a string in the format of YYYY-MM-DD.
 
 For example, you can specify `"2020-03-02"` to use that API version:
 
-```py
+```python
 STRIPE_API_VERSION = "2020-03-02"
 ```
 
@@ -61,9 +61,9 @@ get.
 
 The function takes the following signature:
 
-```py
+```python
 def get_idempotency_key(object_type: str, action: str, livemode: bool):
-    return "<idempotency key>"
+    return "{idempotency key}"
 ```
 
 The function MUST return a string suitably random for the object_type/action pair, and
@@ -94,7 +94,7 @@ of 'app.model'.
 
 Example Model:
 
-```py
+```python
 class Organization(models.Model):
     name = CharField(max_length=200, unique=True)
     admin = ForeignKey(settings.AUTH_USER_MODEL, on_delete=CASCADE)
@@ -123,7 +123,7 @@ processing.
 
 Examples:
 
-```py
+```python
 # callbacks.py
 def webhook_event_callback(event, api_key):
     """ Dispatches the event to celery for processing. """
@@ -132,7 +132,7 @@ def webhook_event_callback(event, api_key):
     tasks.process_webhook_event.s(event.pk, api_key).apply_async()
 ```
 
-```py
+```python
 # tasks.py
 from djstripe.models import WebhookEventTrigger
 from stripe import StripeError
@@ -163,7 +163,7 @@ def process_webhook_event(self, pk, api_key):
     return event.type or "Stripe Event Processed"
 ```
 
-```py
+```python
 # settings.py
 DJSTRIPE_WEBHOOK_EVENT_CALLBACK = 'callbacks.webhook_event_callback'
 ```

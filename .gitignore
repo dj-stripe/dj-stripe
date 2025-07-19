@@ -7,9 +7,6 @@ dj_stripe.egg-info
 # Environments
 .venv
 
-# mkdocs
-site/
-
 # SQLite
 *.sqlite3
 

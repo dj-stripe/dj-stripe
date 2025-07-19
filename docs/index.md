@@ -1,6 +1,5 @@
 ---
 title: Home
-template: home.html
 hide:
   - navigation
   - toc
@@ -71,7 +70,7 @@ The dj-stripe community has come up with some great tutorials:
 
 ## Videos
 
---
+*Video tutorials coming soon! If you have created a video tutorial about dj-stripe, please submit a pull request to add it here.*
 
 ## Blogs
 

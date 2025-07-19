@@ -37,7 +37,7 @@ API fields from Stripe), do the following:
 
 2.  If you already had this account ready and want to start again from
     scratch, you can delete all of the test data via the button in
-    Settings &gt; Data <https://dashboard.stripe.com/account/data>
+    Settings > Data [https://dashboard.stripe.com/account/data](https://dashboard.stripe.com/account/data)
 
 3.  Activate a virtualenv with the dj-stripe project (see Getting
     Started)

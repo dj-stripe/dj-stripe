@@ -39,8 +39,8 @@ endpoint from the urls.py step above (e.g.
 Add your Stripe keys and set the operating mode:
 ```bash
 
-    STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY", "<your secret key>")
-    STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "<your secret key>")
+    STRIPE_LIVE_SECRET_KEY = os.environ.get("STRIPE_LIVE_SECRET_KEY", "{your secret key}")
+    STRIPE_TEST_SECRET_KEY = os.environ.get("STRIPE_TEST_SECRET_KEY", "{your secret key}")
     STRIPE_LIVE_MODE = False  # Change to True in production
     DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 ```

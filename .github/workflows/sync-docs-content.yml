@@ -1,0 +1,41 @@
+name: Trigger Documentation Sync
+
+on:
+  push:
+    branches:
+      - main
+      - "stable/*"
+    paths:
+      - "docs/**"
+      - ".github/workflows/sync-docs-content.yml"
+  workflow_dispatch:
+
+jobs:
+  trigger-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine target version
+        id: version
+        run: |
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            echo "version=dev" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.ref }}" == refs/heads/stable/* ]]; then
+            VERSION="${{ github.ref }}"
+            VERSION="${VERSION#refs/heads/stable/}"
+            echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          else
+            echo "version=dev" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Trigger docs-content sync
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.DOCS_SYNC_TOKEN }}
+          repository: dj-stripe/docs-content
+          event-type: sync-docs
+          client-payload: |
+            {
+              "source_ref": "${{ github.ref }}",
+              "source_sha": "${{ github.sha }}",
+              "version": "${{ steps.version.outputs.version }}"
+            }

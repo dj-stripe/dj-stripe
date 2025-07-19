@@ -13,7 +13,7 @@ existing Stripe account.
 
     ./manage.py djstripe_sync_models
 ```
-With no arguments this will sync all supported models for all in database API Keys , or a list of
+With no arguments this will sync all supported models for all in database API Keys, or a list of
 models to sync can also be provided.
 ```bash
     ./manage.py djstripe_sync_models Invoice Subscription

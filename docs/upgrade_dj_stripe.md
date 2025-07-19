@@ -19,10 +19,10 @@ For example, if your `dj-stripe` version is `2.4.0` and your migration files are
 First, you need to find which version has that old migration. For example:
 
 1. Search for the latest version that is closest to your package version, for example: `2.4.0` to `2.5.0`.
-2. Visit this link to find it: <https://github.com/dj-stripe/dj-stripe/releases>
+2. Visit this link to find it: [https://github.com/dj-stripe/dj-stripe/releases](https://github.com/dj-stripe/dj-stripe/releases)
 3. Cross-check the release notes.
 4. Find which dj-stripe version is still compatible with your migration file, for example: `0006_2_3.py`.
-5. Find the last migration file of the latest version at <https://github.com/dj-stripe/dj-stripe/tree/2.5.0/djstripe/migrations> (for example: `0008_2_5.py`) (both files must exist; if not, it means the new version is no longer compatible with your version).
+5. Find the last migration file of the latest version at [https://github.com/dj-stripe/dj-stripe/tree/2.5.0/djstripe/migrations](https://github.com/dj-stripe/dj-stripe/tree/2.5.0/djstripe/migrations) (for example: `0008_2_5.py`) (both files must exist; if not, it means the new version is no longer compatible with your version).
 
 | Old Migration | New Migration |
 | ------------- | ------------- |
@@ -31,7 +31,7 @@ First, you need to find which version has that old migration. For example:
 6. Update your `requirements.txt` file from `dj-stripe==2.4.0` to `dj-stripe==2.5.0`
 7. Run the `manage.py migrate djstripe` command _(this command must not fail; if it does, cross-check steps 1-6)._
 
-```
+```bash
 (env-my-project) ➜  my-project git:(development) ✗ docker-compose -f local.yml run django python manage.py migrate djstripe
 [+] Creating 3/0
  ✔ Container my-project-redis-1     Running                                                                                                                                                                                  0.0s
@@ -55,9 +55,9 @@ Running migrations:
 
 
 If you have an issue with the Stripe version, we can also try upgrading it in the `requirements.txt` file.
-Check out this issue for more information: <https://github.com/dj-stripe/dj-stripe/issues/1842#issuecomment-1319185657>.
+Check out this issue for more information: [https://github.com/dj-stripe/dj-stripe/issues/1842#issuecomment-1319185657](https://github.com/dj-stripe/dj-stripe/issues/1842#issuecomment-1319185657).
 
-```
+```txt
 stripe>=4.0.0,<5.0.0  # https://github.com/dj-stripe/dj-stripe/issues/1842#issuecomment-1319185657
 ```
 
@@ -72,4 +72,4 @@ stripe>=4.0.0,<5.0.0  # https://github.com/dj-stripe/dj-stripe/issues/1842#issue
 
 ## Alternatives
 
-- <https://stackoverflow.com/a/31122841>
+- [https://stackoverflow.com/a/31122841](https://stackoverflow.com/a/31122841)

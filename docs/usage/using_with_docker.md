@@ -28,7 +28,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: <PATH_TO_DOCKERFILE>
+      dockerfile: {PATH_TO_DOCKERFILE}
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
@@ -52,7 +52,7 @@ services:
   stripe:
     image: stripe/stripe-cli:v1.7.4
     # In case Stripe CLI is used to perform local webhook testing, set x-djstripe-webhook-secret custom header to output of Stripe CLI.
-    command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_******", "--forward-to", "http://web:8000/djstripe/webhook/<uuid>/"]
+    command: ["listen", "-H", "x-djstripe-webhook-secret: whsec_******", "--forward-to", "http://web:8000/djstripe/webhook/{uuid}/"]
     depends_on:
       - web
     environment:
