@@ -1,4 +1,0 @@
-# Enumerations
-
-
-::: djstripe.enums

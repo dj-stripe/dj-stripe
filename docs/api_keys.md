@@ -2,10 +2,7 @@
 
 Stripe API keys are stored in the database, and editable from the Django admin.
 
-!!! attention "Important Note"
-    By default, keys are visible by anyone who has access to the
-    dj-stripe administration.
-
+_NOTE_: By default, keys are visible by anyone who has access to the dj-stripe administration.
 
 ## Adding new API keys
 

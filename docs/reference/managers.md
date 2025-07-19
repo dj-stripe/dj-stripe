@@ -1,3 +1,0 @@
-# Managers
-
-::: djstripe.managers

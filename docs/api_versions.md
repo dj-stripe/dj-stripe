@@ -11,7 +11,6 @@ New Stripe accounts are always on the latest version.
 
 Read more about it on [stripe.com/docs/api/versioning](https://stripe.com/docs/api/versioning).
 
-
 ## Stripe's current latest API version
 
 You can find this on your Stripe dashboard labelled "**latest**" or in
@@ -33,9 +32,7 @@ It is defined by [`STRIPE_API_VERSION`](reference/settings.md#stripe_api_version
 You mustn't change this as it ensures that
 dj-stripe receives data in the format it expects.
 
-!!! note
-    dj-stripe will always use `STRIPE_API_VERSION` in its requests
-    regardless of what `stripe.api_version` is set to.
+_NOTE_: dj-stripe will always use `STRIPE_API_VERSION` in its requests regardless of what `stripe.api_version` is set to.
 
 ## Dj-stripe Latest Tested Version
 

@@ -1,7 +1,6 @@
 # dj-stripe - Django + Stripe Made Easy
 
 [![Stripe Verified Partner](https://img.shields.io/static/v1?label=Stripe&message=Verified%20Partner&color=red&style=for-the-badge)](https://stripe.com/docs/libraries#community-libraries)
-<br>
 
 [![CI tests](https://github.com/dj-stripe/dj-stripe/actions/workflows/ci.yml/badge.svg)](https://github.com/dj-stripe/dj-stripe/actions/workflows/ci.yml)
 [![Package Downloads](https://img.shields.io/pypi/dm/dj-stripe)](https://pypi.org/project/dj-stripe/)
@@ -28,7 +27,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 -   Payment Methods and Payment Intents (SCA support)
 -   Support for multiple accounts and API keys
 -   Stripe Connect (partial support)
--   Tested with Stripe API `2020-08-27` (see [API versions](api_versions.md#dj-stripe_latest_tested_version))
+-   Tested with latest Stripe API (see [API versions](api_versions.md#dj-stripe_latest_tested_version))
 
 ## Requirements
 
@@ -40,23 +39,15 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 
 ## Installation
 
-See [installation](https://dj-stripe.dev/dj-stripe/2.7/installation/) instructions.
+See [installation](https://dj-stripe.dev/docs/latest/installation/) instructions.
 
 ## Changelog
 
-[See release notes on Read the Docs](history/2_7_0/).
-
-<!-- This link *will* get stale again eventually. There should be an index page for the
-     changelog that can be linked to.
-
-     For example:
-     https://squidfunk.github.io/mkdocs-material/setup/setting-up-navigation/#section-index-pages -->
+[See release notes](https://dj-stripe.dev/changes).
 
 ## Funding and Support
 
-<a href="https://stripe.com">
-  <img alt="Stripe Logo" src="./logos/stripe_blurple.svg" width="250px" />
-</a>
+[![Funded by Stripe](./logos/stripe_blurple.svg)](https://stripe.com)
 
 You can now become a sponsor to dj-stripe with [GitHub Sponsors](https://github.com/sponsors/dj-stripe).
 
@@ -67,15 +58,6 @@ Your sponsorship helps us keep a team of maintainers actively working to improve
 ensure it stays up-to-date with the latest Stripe changes. If you use dj-stripe commercially, we would encourage you to invest in its continued
 development by [signing up for a paid plan](https://github.com/sponsors/dj-stripe).
 Corporate sponsors [receive priority support and development time](project/support.md).
-
-All contributions through GitHub sponsors flow into our [Open Collective](https://opencollective.com/dj-stripe), which holds our funds and keeps
-an open ledger on how donations are spent.
-
-## Our Gold sponsors
-
-<a href="https://stripe.com">
-  <img alt="Stripe Logo" src="./logos/stripe_blurple.svg" width="250px" />
-</a>
 
 ## Similar libraries
 

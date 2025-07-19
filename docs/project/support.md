@@ -4,7 +4,7 @@
 
 dj-stripe offers paid support plans via Github Sponsors:
 
-<https://github.com/sponsors/dj-stripe>
+[https://github.com/sponsors/dj-stripe](https://github.com/sponsors/dj-stripe)
 
 All issues and feature requests raised by corporate sponsors will be prioritized.
 Gold Sponsors also get a dedicated developer point of contact, to help with any

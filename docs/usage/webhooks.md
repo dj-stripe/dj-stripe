@@ -25,8 +25,8 @@ by brute-force.
 
 dj-stripe provides the following settings to tune how your webhooks work:
 
-- [`DJSTRIPE_WEBHOOK_VALIDATION`][djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION]
-- [`DJSTRIPE_WEBHOOK_EVENT_CALLBACK`][djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK]
+-   [`DJSTRIPE_WEBHOOK_VALIDATION`][djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION]
+-   [`DJSTRIPE_WEBHOOK_EVENT_CALLBACK`][djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK]
 
 ## Handling Stripe Webhooks Using Django Signals in dj-stripe
 
@@ -93,9 +93,9 @@ class MyAppConfig(AppConfig):
 ## Official documentation
 
 Stripe docs for types of Events:
-<https://stripe.com/docs/api/events/types>
+[https://stripe.com/docs/api/events/types](https://stripe.com/docs/api/events/types)
 
-Stripe docs for Webhooks: <https://stripe.com/docs/webhooks>
+Stripe docs for Webhooks: [https://stripe.com/docs/webhooks](https://stripe.com/docs/webhooks)
 
 Django docs for transactions:
-<https://docs.djangoproject.com/en/dev/topics/db/transactions/#performing-actions-after-commit>
+[https://docs.djangoproject.com/en/dev/topics/db/transactions/#performing-actions-after-commit](https://docs.djangoproject.com/en/dev/topics/db/transactions/#performing-actions-after-commit)

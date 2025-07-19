@@ -7,8 +7,8 @@ you created via the Django admin or the Stripe Dashboard.
 New Style `UUID` urls are also supported from `v2.7` onwards.
 For example:
 
-```sh
-stripe listen --forward-to http://localhost:8000/stripe/webhook/<UUID>/
+```bash
+stripe listen --forward-to http://localhost:8000/stripe/webhook/{UUID}/
 ```
 
 The [signatures of events sent by Stripe to the webhooks are verified][signatures]
@@ -22,9 +22,9 @@ In order to let dj-stripe know about the secret key to verify the signature,
 it can be passed as an HTTP header;
 dj-stripe looks for a header called `X-Djstripe-Webhook-Secret`:
 
-```sh
+```bash
 stripe listen \
-  --forward-to http://localhost:8000/djstripe/webhook/<UUID>/ \
+  --forward-to http://localhost:8000/djstripe/webhook/{UUID}/ \
   -H "x-djstripe-webhook-secret: $(stripe listen --print-secret)"
 ```
 
@@ -32,14 +32,13 @@ From now on, whenever you make changes on the Stripe Dashboard,
 the webhook endpoint you specified with `--forward-to` will called
 with the respective changes.
 
-!!! hint
-    If the webhook secret is not passed to dj-stripe,
-    signature validation will fail with an HTTP status code 400
-    and the message "Failed to verify header".
+*HINT*: If the webhook secret is not passed to dj-stripe,
+signature validation will fail with an HTTP status code 400
+and the message "Failed to verify header".
 
 Stripe events can now be triggered like so:
 
-```sh
+```bash
 stripe trigger customer.created
 ```
 

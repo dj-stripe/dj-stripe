@@ -9,7 +9,7 @@ You can contribute in many ways:
 
 ### Report Bugs
 
-Report bugs at <https://github.com/dj-stripe/dj-stripe/issues>.
+Report bugs on [the GitHub issue tracker](https://github.com/dj-stripe/dj-stripe/issues).
 
 If you are reporting a bug, please include:
 
@@ -35,22 +35,20 @@ To see the project's documentation live, run the following command:
 
     mkdocs serve
 
-The documentation site will then be served on <http://127.0.0.1:8000>.
+The documentation site will then be served on http://127.0.0.1:8000.
 
-!!! attention "In case of any installation error"
+In case you get the error that some plugin is not installed, please run:
 
-    In case you get the error that some plugin is not installed, please run:
-        ``` bash
-        poetry install --with docs
-        ```
+```bash
+poetry install --with docs
+```
 
 If you wish to just generate the documentation, you can replace `serve` with `build`,
 and the docs will be generated into the `site/` folder.
 
 ### Submit Feedback
 
-The best way to send feedback is to file an issue at
-<https://github.com/dj-stripe/dj-stripe/issues>.
+The best way to send feedback is to file an issue [on GitHub](https://github.com/dj-stripe/dj-stripe/issues).
 
 If you are proposing a feature:
 
@@ -163,7 +161,7 @@ Use the `JSONField` in `djstripe.fields`.
 
 Stripe handles all currency amounts as integer cents, we currently have a mixture of
 fields as integer cents and decimal (eg dollar, euro etc) values, but we are aiming to
-standardise on cents (see <https://github.com/dj-stripe/dj-stripe/issues/955>).
+standardise on cents (see [https://github.com/dj-stripe/dj-stripe/issues/955](https://github.com/dj-stripe/dj-stripe/issues/955)).
 
 All new currency amount fields should use `StripeQuantumCurrencyAmountField`.
 
@@ -174,7 +172,7 @@ datetimes. We store this as a datetime field, using `StripeDateTimeField`.
 
 ## Django Migration Policy
 
-Migrations are considered a breaking change, so it's not usually not acceptable to add a
+Migrations are considered a breaking change, so it's usually not acceptable to add a
 migration to a stable branch, it will be a new `MAJOR.MINOR.0` release.
 
 A workaround to this in the case that the Stripe API data isn't compatible with out
@@ -187,8 +185,7 @@ If a code change produces a migration that doesn't alter the database schema (eg
 changing `help_text`) then instead of adding a new migration you can edit the most
 recent migration that affects the field in question.
 
-e.g.:
-<https://github.com/dj-stripe/dj-stripe/commit/e2762c38918a90f00c42ecf21187a920bd3a2087>
+e.g.: https://github.com/dj-stripe/dj-stripe/commit/e2762c38918a90f00c42ecf21187a920bd3a2087
 
 ## Pull Request Guidelines
 
