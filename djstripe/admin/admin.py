@@ -75,6 +75,7 @@ class StripeModelAdmin(CustomActionMixin, admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
     add_form_template = "djstripe/admin/add_form.html"
     actions = ("_resync_instances", "_sync_all_instances")
+    search_fields = ("id",)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
