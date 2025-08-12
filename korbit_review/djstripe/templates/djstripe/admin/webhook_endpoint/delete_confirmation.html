@@ -1,0 +1,52 @@
+{% extends "admin/delete_confirmation.html" %}
+{% block extrahead %}
+    {{ block.super }}
+    <script>
+
+    // Handler for .ready() called.
+    django.jQuery(function() {
+        // show loader whenever a link is clicked
+        django.jQuery('a').
+        on('click', function(e) {
+            django.jQuery('#div_spinner').show();
+        });
+
+        // show the spinner whenever a form is submitted
+        django.jQuery('form').on('submit', function(e) {
+            django.jQuery('#div_spinner').show();
+        });
+
+    });
+
+    </script>
+
+{% endblock %}
+
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .stripe-confirmation-warning {
+        padding: 1rem;
+        background: var(--message-warning-bg);
+    }
+</style>
+{% endblock extrastyle %}
+
+{% block content %}
+
+{% comment %} Page Loader Icon {% endcomment %}
+<div id="div_spinner" style="display: none;">
+    <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+        <div id="spinner" role="status">
+            <span>Loading...</span>
+        </div>
+    </div>
+</div>
+
+<p class="stripe-confirmation-warning">
+    <strong>Warning:</strong> This {{ object_name }} will also be deleted from Stripe.
+</p>
+
+{{ block.super }}
+{% endblock %}
