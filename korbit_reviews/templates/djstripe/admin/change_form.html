@@ -1,0 +1,35 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    {% with original.get_stripe_dashboard_url as stripe_url %}
+    {% if stripe_url %}
+        <li><a href="{{ stripe_url }}" target="_blank" id="djstripe-view-on-stripe"><i class="icon-user icon-alpha75"></i>{% trans "View on Stripe Dashboard" %}</a></li>
+    {% endif %}
+    {% endwith %}
+{% endblock %}
+
+
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .stripe-danger-warning {
+        padding: 1rem;
+        background: var(--message-error-bg);
+    }
+
+    .stripe-confirmation-warning {
+        padding: 1rem;
+        background: var(--message-warning-bg);
+    }
+</style>
+{% endblock extrastyle %}
+
+{% block content %}
+    {% block djstripewarning %}
+        <p class="stripe-confirmation-warning">Any Changes made here will <strong>not</strong> be updated on your Stripe Account.</p>
+    {% endblock djstripewarning %}
+    {{ block.super }}
+{% endblock content %}
