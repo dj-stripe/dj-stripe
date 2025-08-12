@@ -1,0 +1,73 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static l10n admin_urls %}
+
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media.js }}
+    {% comment %} Load Jquery shipped with Django {% endcomment %}
+    <script src="{% static 'admin/js/vendor/jquery/jquery.min.js' %}" ></script>
+    <script src="{% static 'admin/js/jquery.init.js' %}" ></script>
+
+    <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    .stripe-confirmation-warning {
+        padding: 1rem;
+        background: var(--message-warning-bg);
+    }
+</style>
+{% endblock extrastyle %}
+
+
+{% block bodyclass %}{{ block.super }} delete-confirmation{% endblock %}
+
+
+{% block content %}
+    {{ block.super }}
+
+    {% comment %} Page Loader Icon {% endcomment %}
+    <div id="div_spinner" style="display: none;">
+        <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+            <div id="spinner" role="status">
+                    <span>Loading...</span>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="main_content">
+
+        <h1>Are you Sure? </h1>
+
+        {% if action_name == "_resync_instances" %}
+            <p class="stripe-confirmation-warning">Are you sure you want to sync the selected instances? All of the following objects and their related items will be synced.</p>
+        {% elif action_name == "_sync_all_instances" %}
+            <p class="stripe-confirmation-warning">Are you sure you want to sync all instances? Please note this will be a best effort sync and we will silence any errors encountered.</p>
+            {% if info %}<p>All of the following objects and their related items will be synced:</p>{% endif %}
+        {% elif action_name == "_cancel" %}
+            <p class="stripe-confirmation-warning">Are you sure you want to cancel the selected subscriptions? The following subscriptions will be cancelled.</p>
+        {% endif %}
+
+        <ul>
+            {% for instance in info %}
+            <li>{{instance}}</li>
+            {% endfor %}
+        </ul>
+
+        <form id="form_custom_action" method="post" onsubmit="django.jQuery('#main_content').hide(); django.jQuery('.messagelist').hide(); django.jQuery('#div_spinner').show();" action="{% url 'admin:djstripe_custom_action' action_name=action_name model_name=model_name %}">
+            {% csrf_token %}
+            {{form}}
+
+            <div>
+                <input type="submit" value="{% translate 'Yes, I’m sure' %}">
+                <a href="{{changelist_url}}" class="button cancel-link" onclick="django.jQuery('#main_content').hide(); django.jQuery('#div_spinner').show()">{% translate "No, take me back" %}</a>
+            </div>
+        </form>
+    </div>
+
+
+{% endblock content %}
