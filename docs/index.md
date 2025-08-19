@@ -25,22 +25,6 @@ For example, if you need to interact with a customer subscription, you can use *
 
 -   Tested with Stripe API 2020-08-27 (see API versions)
 
--   We support the following Stripe functionalities:
-
--   **Stripe Core**
-
--   **Payment Methods**
-
--   **Product**
-
--   **Checkout**
-
--   **Billing**
-
--   **Connect**
-
--   **Sigma**
-
 # Tutorials
 
 The dj-stripe community has come up with some great tutorials:
