@@ -202,9 +202,9 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         assert subscription
 
-        self.assertEqual(subscription.default_tax_rates.count(), 1)
+        self.assertEqual(len(subscription.default_tax_rates), 1)
         self.assertEqual(
-            subscription.default_tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
+            subscription.default_tax_rates[0]["id"], FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
         )
 
         self.assert_fks(
@@ -267,7 +267,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             subscription, expected_blank_fks=self.default_expected_blank_fks
         )
 
-        self.assertEqual(subscription.default_tax_rates.count(), 0)
+        self.assertEqual(len(subscription.default_tax_rates), 0)
         first_item = subscription.items.first()
 
         self.assertEqual(first_item.tax_rates.count(), 1)
