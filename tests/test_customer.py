@@ -76,7 +76,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
         self.card = self.payment_method.resolve()
 
-        self.customer.default_source = self.payment_method
+        self.customer.stripe_data["default_source"] = self.payment_method.id
         self.customer.save()
 
     def test___str__(self):
@@ -94,6 +94,26 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         unsaved_customer = Customer()
         self.assertEqual(unsaved_customer.get_stripe_dashboard_url(), "")
+
+    def test_customer_credits_with_none_balance(self):
+        """Test that credits property handles None balance gracefully."""
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["id"] = "cus_test_none_balance"
+        fake_customer["balance"] = None
+        fake_customer["deleted"] = True
+
+        customer = Customer.sync_from_stripe_data(fake_customer)
+
+        # Test that balance property returns 0 when stripe_data has None
+        self.assertEqual(customer.balance, 0)
+
+        # Test that credits property handles None balance without error
+        self.assertEqual(customer.credits, 0)
+
+        # Test with negative balance to ensure credits still works
+        customer.stripe_data["balance"] = -500
+        self.assertEqual(customer.balance, -500)
+        self.assertEqual(customer.credits, 500)
 
     def test_customer_sync_unsupported_source(self):
         fake_customer = deepcopy(FAKE_CUSTOMER_II)
@@ -455,7 +475,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         fake_customer["default_source"] = None
         customer_retrieve_mock.return_value = fake_customer
 
-        self.customer.default_source = None
+        self.customer.stripe_data["default_source"] = None
         self.customer.save()
 
         self.assertEqual(
@@ -505,7 +525,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         fake_customer["default_source"] = None
         customer_retrieve_mock.return_value = fake_customer
 
-        self.customer.default_source = None
+        self.customer.stripe_data["default_source"] = None
         self.customer.save()
 
         self.assertEqual(
@@ -2037,7 +2057,7 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
         self.card = self.payment_method.resolve()
 
-        self.customer.default_source = self.payment_method
+        self.customer.stripe_data["default_source"] = self.payment_method.id
         self.customer.save()
 
     @patch(

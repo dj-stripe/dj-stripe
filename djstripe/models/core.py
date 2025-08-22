@@ -642,14 +642,16 @@ class Customer(StripeModel):
 
     @property
     def balance(self) -> int:
-        return self.stripe_data.get("balance", 0)
+        balance = self.stripe_data.get("balance", 0)
+        return balance if balance is not None else 0
 
     @property
     def credits(self):
         """
         The customer is considered to have credits if their balance is below 0.
         """
-        return abs(min(self.balance, 0))
+        balance = self.balance or 0
+        return abs(min(balance, 0))
 
     @property
     def delinquent(self) -> bool:
