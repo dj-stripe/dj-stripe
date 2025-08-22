@@ -315,6 +315,11 @@ class BaseInvoice(StripeModel):
     def total(self):
         return self.stripe_data.get("total")
 
+    @property
+    def discounts(self):
+        """The discounts applied to the invoice."""
+        return self.stripe_data.get("discounts")
+
     class Meta(StripeModel.Meta):
         abstract = True
         ordering = ["-created"]
