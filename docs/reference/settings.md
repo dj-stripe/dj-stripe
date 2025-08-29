@@ -86,7 +86,7 @@ If the AUTH_USER_MODEL doesn't represent the object your application's subscript
 holder, you may define a subscriber model to use here. It should be a string in the form
 of 'app.model'.
 
-!!! note
+**Note:**
 
     DJSTRIPE_SUBSCRIBER_MODEL must have an `email` field. If your
     existing model has no email field, add an email property that

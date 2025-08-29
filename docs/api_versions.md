@@ -33,8 +33,8 @@ It is defined by [`STRIPE_API_VERSION`](reference/settings.md#stripe_api_version
 You mustn't change this as it ensures that
 dj-stripe receives data in the format it expects.
 
-!!! note
-    dj-stripe will always use `STRIPE_API_VERSION` in its requests
+**Note:**
+dj-stripe will always use `STRIPE_API_VERSION` in its requests
     regardless of what `stripe.api_version` is set to.
 
 ## Dj-stripe Latest Tested Version

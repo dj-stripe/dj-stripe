@@ -1,6 +1,6 @@
 # Release Process
 
-!!! note
+**Note:**
 
     Before `MAJOR` or `MINOR` releases:
 
@@ -37,7 +37,7 @@ new release:
     and tag the release
 
 See
-<https://docs.djangoproject.com/en/dev/topics/migrations/#migration-squashing>
+https://docs.djangoproject.com/en/dev/topics/migrations/#migration-squashing
 
 ## Tag + package squashed migrations as rc package (optional)
 
@@ -56,7 +56,7 @@ migrate, or alternatively check out the `x.y.0rc0` git tag and migrate.
 
 ## Prepare changes for the release commit
 
--   Choose your version number (using <https://semver.org/> )
+-   Choose your version number (using https://semver.org/ )
 
     -   if there's a new migration, it should be a `MAJOR.0.0` or
         `MAJOR.MINOR.0` version.
@@ -78,12 +78,12 @@ migrate, or alternatively check out the `x.y.0rc0` git tag and migrate.
 
 ## Create signed release commit tag
 
-!!! note
+**Note:**
 
     Before doing this you should have a GPG key set up on github
 
     If you don't have a GPG key already, one method is via
-    <https://keybase.io/> , and then add it to your github profile.
+    https://keybase.io/ , and then add it to your github profile.
 
 -   Create a release tag with the above staged changes (where `$VERSION`
     is the version number to be released:
@@ -108,4 +108,4 @@ trigger the readthedocs build
 ## Release on pypi
 
 See
-<https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives>
+https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives
