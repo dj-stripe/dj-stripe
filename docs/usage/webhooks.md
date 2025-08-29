@@ -76,7 +76,7 @@ def my_handler(event, **kwargs):
     print("Triggered webhook " + event.type)
 ```
 
-!!! warning
+**Warning:**
 
     In order to get registrations picked up, you need to put them in a
     module that is imported like models.py or make sure you import it manually.
@@ -104,9 +104,9 @@ def my_handler(event, **kwargs):
 ## Official documentation
 
 Stripe docs for types of Events:
-<https://stripe.com/docs/api/events/types>
+https://stripe.com/docs/api/events/types
 
-Stripe docs for Webhooks: <https://stripe.com/docs/webhooks>
+Stripe docs for Webhooks: https://stripe.com/docs/webhooks
 
 Django docs for transactions:
-<https://docs.djangoproject.com/en/dev/topics/db/transactions/#performing-actions-after-commit>
+https://docs.djangoproject.com/en/dev/topics/db/transactions/#performing-actions-after-commit
