@@ -3,8 +3,8 @@
 A point that can cause confusion to new users of dj-stripe is that there
 are several different Stripe API versions in play at once.
 
-!!! attention
-    Don't touch the [STRIPE_API_VERSION](reference/settings.md#stripe_api_version-2020-08-27) setting, but don't worry,
+**Attention:**
+Don't touch the [STRIPE_API_VERSION](reference/settings.md#stripe_api_version-2020-08-27) setting, but don't worry,
     it doesn't need to match your Stripe account api version.
 
 See also [Stripe API Versioning](https://stripe.com/docs/api/versioning)
@@ -16,12 +16,12 @@ You can find this on [your Stripe dashboard](https://dashboard.stripe.com/develo
 For new accounts this will be the latest Stripe version. When upgrading
 version Stripe only allows you to upgrade to the **latest** version.
 
-!!! tip
-    Checkout [Stripe Version Upgrade](https://stripe.com/docs/upgrades#how-can-i-upgrade-my-api) Documentation for Upgrading Stripe API version
+**Tip:**
+Checkout [Stripe Version Upgrade](https://stripe.com/docs/upgrades#how-can-i-upgrade-my-api) Documentation for Upgrading Stripe API version
 
 
-!!! note
-    This is the version used by Stripe when sending webhook data to you
+**Note:**
+This is the version used by Stripe when sending webhook data to you
     (though during webhook processing, dj-stripe re-fetches the data with
     its preferred version). It's also the default version used by the Stripe
     API, but dj-stripe overrides the API version when talking to stripe
@@ -41,8 +41,8 @@ You can find this on your Stripe dashboard labelled "**latest**" or in
 This is the version used by new accounts and it's also "**true**" internal
 version of Stripe's API
 
-!!! tip
-    Checkout [Stripe API Versioning](https://stripe.com/blog/api-versioning)
+**Tip:**
+Checkout [Stripe API Versioning](https://stripe.com/blog/api-versioning)
 
 
 ## Dj-stripe API version

@@ -22,6 +22,6 @@ stripe trigger customer.created
 
 ```
 
-!!! note
+**Note:**
 
     In case the `Stripe CLI` is used to perform local webhook testing, set `-H` to `x-djstripe-webhook-secret` Custom Header in Stripe `listen` to the `Webhook Signing Secret` output of `Stripe CLI`. That is what Stripe expects and uses to create the `stripe-signature` header.

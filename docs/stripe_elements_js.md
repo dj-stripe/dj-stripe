@@ -1,14 +1,14 @@
 # Integrating Stripe Elements (JS SDK)
 
-!!! tip
+**Tip:**
 
     TLDR: If you haven't yet migrated to PaymentIntents, prefer
     `stripe.createSource()` over `stripe.createToken()` for better
     compatibility with PaymentMethods.
 
 
-!!! attention
-    A point that can cause confusion when integrating Stripe on the web is
+**Attention:**
+A point that can cause confusion when integrating Stripe on the web is
     that there are multiple generations of frontend JS APIs that use Stripe
     Elements with stripe js v3.
 
@@ -35,5 +35,5 @@ This predates `stripe.createSource`, and creates legacy Card objects within Stri
 If you're using `stripe.createToken`, see if you can upgrade to
 `stripe.createSource` or ideally to Payment Intents .
 
-!!! tip
+**Tip:**
 Checkout [Card Elements Quickstart JS](https://stripe.com/docs/payments/accept-a-payment-charges?platform=web)
