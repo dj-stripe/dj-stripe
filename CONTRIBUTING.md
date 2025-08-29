@@ -9,7 +9,7 @@ You can contribute in many ways:
 
 ### Report Bugs
 
-Report bugs at <https://github.com/dj-stripe/dj-stripe/issues>.
+Report bugs at https://github.com/dj-stripe/dj-stripe/issues
 
 If you are reporting a bug, please include:
 
@@ -35,7 +35,7 @@ To see the project's documentation live, run the following command:
 
     DJANGO_SETTINGS_MODULE=docs.django_settings mkdocs serve
 
-The documentation site will then be served on <http://127.0.0.1:8000>.
+The documentation site will then be served on http://127.0.0.1:8000
 
 If you wish to just generate the documentation, you can replace `serve` with `build`,
 and the docs will be generated into the `site/` folder.
@@ -43,7 +43,7 @@ and the docs will be generated into the `site/` folder.
 ### Submit Feedback
 
 The best way to send feedback is to file an issue at
-<https://github.com/dj-stripe/dj-stripe/issues>.
+https://github.com/dj-stripe/dj-stripe/issues
 
 If you are proposing a feature:
 
@@ -55,7 +55,7 @@ If you are proposing a feature:
 ### Contributor Discussion
 
 For questions regarding contributions to dj-stripe, another avenue is our Discord
-channel at <https://discord.gg/UJY8fcc>.
+channel at https://discord.gg/UJY8fcc
 
 ## Get Started!
 
