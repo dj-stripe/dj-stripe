@@ -35,7 +35,7 @@ To see the project's documentation live, run the following command:
 
     mkdocs serve
 
-The documentation site will then be served on http://127.0.0.1:8000.
+The documentation site will then be served on http://127.0.0.1:8000
 
 In case you get the error that some plugin is not installed, please run:
 

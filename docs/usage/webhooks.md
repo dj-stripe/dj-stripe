@@ -6,7 +6,7 @@ As of dj-stripe 2.7.0, dj-stripe can create its own webhook endpoints on Stripe 
 Django administration.
 
 Create a new webhook endpoint from the Django administration by going to dj-stripe
--> Webhook endpoints -> Add webhook endpoint (or `/admin/djstripe/webhookendpoint/add/`).
+→ Webhook endpoints → Add webhook endpoint (or `/admin/djstripe/webhookendpoint/add/`).
 
 From there, you can choose an account to create the endpoint for.
 If no account is chosen, the default Stripe API key will be used to create the endpoint.
@@ -34,7 +34,7 @@ dj-stripe integrates with Django's signals framework to provide a robust mechani
 
 ### Configuring Webhook Endpoints
 
-Before you can handle webhook events, ensure you've configured your webhook endpoints correctly in Stripe and dj-stripe. This can typically be done from the Django admin panel under dj-stripe -> Webhook endpoints.
+Before you can handle webhook events, ensure you've configured your webhook endpoints correctly in Stripe and dj-stripe. This can typically be done from the Django admin panel under dj-stripe → Webhook endpoints.
 
 ### Event Processing Flow
 

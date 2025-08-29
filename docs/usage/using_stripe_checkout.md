@@ -15,10 +15,11 @@ Please note that in order for dj-stripe to create a link between your `customers
 ### Example Code Structure
 
 The example implementation shows:
-- How to create a checkout session
-- How to handle success and cancel URLs
-- How to properly set metadata for customer linking
-- How to handle the redirect flow
+
+-   How to create a checkout session
+-   How to handle success and cancel URLs
+-   How to properly set metadata for customer linking
+-   How to handle the redirect flow
 
 ### Integration Steps
 
