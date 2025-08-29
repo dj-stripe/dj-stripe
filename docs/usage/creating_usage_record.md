@@ -5,8 +5,8 @@ Usage records allow you to report customer usage and metrics to Stripe for meter
 Usage records created using Djstripe's [`UsageRecord.create()`][djstripe.models.UsageRecord.create] method will both create and sync the created `UsageRecord` object with your db.
 
 
-!!! note
-     UsageRecord objects created directly will not sync because Stripe does not expose a way to retrieve UsageRecord objects directly. They can thus only be synced at creation time.
+**Note:**
+ UsageRecord objects created directly will not sync because Stripe does not expose a way to retrieve UsageRecord objects directly. They can thus only be synced at creation time.
 
 ## Code:
 

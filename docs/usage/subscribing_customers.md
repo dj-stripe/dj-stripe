@@ -52,7 +52,7 @@ However in some cases `subscribe()` might not
 support all the arguments you need for your implementation. When this
 happens you can just call the official `stripe.Customer.subscribe()`.
 
-!!! tip
+**Tip:**
 Check out the following examples:
 
 -   [form_valid view example](https://github.com/dj-stripe/dj-stripe/blob/6574b9c66d45dabb846ff9bb279d0cb941a51b71/tests/apps/example/views.py#L182)

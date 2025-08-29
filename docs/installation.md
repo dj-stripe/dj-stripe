@@ -47,7 +47,7 @@ Add your Stripe keys and set the operating mode:
     DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 ```
 
-!!! note
+**Note:**
 
     djstripe expects `STRIPE_LIVE_MODE` to be a Boolean Type. In case you use `Bash env vars or equivalent` to inject its value, make sure to convert it to a Boolean type. We highly recommended the library [django-environ](https://django-environ.readthedocs.io/en/latest/)
 

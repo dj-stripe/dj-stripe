@@ -9,7 +9,7 @@ You can contribute in many ways:
 
 ### Report Bugs
 
-Report bugs at <https://github.com/dj-stripe/dj-stripe/issues>.
+Report bugs at https://github.com/dj-stripe/dj-stripe/issues.
 
 If you are reporting a bug, please include:
 
@@ -35,7 +35,7 @@ To see the project's documentation live, run the following command:
 
     mkdocs serve
 
-The documentation site will then be served on <http://127.0.0.1:8000>.
+The documentation site will then be served on http://127.0.0.1:8000.
 
 !!! attention "In case of any installation error"
 
@@ -51,7 +51,7 @@ and the docs will be generated into the `site/` folder.
 ### Submit Feedback
 
 The best way to send feedback is to file an issue at
-<https://github.com/dj-stripe/dj-stripe/issues>.
+https://github.com/dj-stripe/dj-stripe/issues.
 
 If you are proposing a feature:
 
@@ -63,7 +63,7 @@ If you are proposing a feature:
 ### Contributor Discussion
 
 For questions regarding contributions to dj-stripe, another avenue is our Discord
-channel at <https://discord.gg/UJY8fcc>.
+channel at https://discord.gg/UJY8fcc.
 
 ## Get Started!
 
@@ -169,7 +169,7 @@ Use the `JSONField` in `djstripe.fields`.
 
 Stripe handles all currency amounts as integer cents, we currently have a mixture of
 fields as integer cents and decimal (eg dollar, euro etc) values, but we are aiming to
-standardise on cents (see <https://github.com/dj-stripe/dj-stripe/issues/955>).
+standardise on cents (see https://github.com/dj-stripe/dj-stripe/issues/955).
 
 All new currency amount fields should use `StripeQuantumCurrencyAmountField`.
 
@@ -194,7 +194,7 @@ changing `help_text`) then instead of adding a new migration you can edit the mo
 recent migration that affects the field in question.
 
 e.g.:
-<https://github.com/dj-stripe/dj-stripe/commit/e2762c38918a90f00c42ecf21187a920bd3a2087>
+https://github.com/dj-stripe/dj-stripe/commit/e2762c38918a90f00c42ecf21187a920bd3a2087
 
 ## Pull Request Guidelines
 

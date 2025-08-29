@@ -72,7 +72,7 @@ usable in the Stripe `Idempotency-Key` HTTP header. For more information, see th
 
 ## DJSTRIPE_PRORATION_POLICY (=False)
 
-!!! warning
+**Warning:**
 
     This setting is deprecated and will be removed in dj-stripe 2.8.
 
@@ -93,7 +93,7 @@ prorating the previous customer's plan towards their new plan's amount.
 
 ## DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS (=())
 
-!!! warning
+**Warning:**
 
     This functionality is deprecated.
 
@@ -119,7 +119,7 @@ DJSTRIPE_SUBSCRIPTION_REQUIRED_EXCEPTION_URLS = (
 )
 ```
 
-!!! note
+**Note:**
 
     Adding app_names to applications.
 
@@ -147,7 +147,7 @@ If the AUTH_USER_MODEL doesn't represent the object your application's subscript
 holder, you may define a subscriber model to use here. It should be a string in the form
 of 'app.model'.
 
-!!! note
+**Note:**
 
     DJSTRIPE_SUBSCRIBER_MODEL must have an `email` field. If your
     existing model has no email field, add an email property that
@@ -173,7 +173,7 @@ migration of an app you can specify the migration name to depend on here. For ex
 
 ## DJSTRIPE_USE_NATIVE_JSONFIELD (=True)
 
-!!! warning
+**Warning:**
 
     This setting is deprecated and will be removed in dj-stripe 2.8.
 

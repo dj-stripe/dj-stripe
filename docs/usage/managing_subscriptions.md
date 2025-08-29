@@ -11,7 +11,7 @@ useful if you want to offer time-cards, gift-cards, or some other
 external way of subscribing users or extending subscriptions, while
 keeping the billing handling within Stripe.
 
-!!! warning
+**Warning:**
 
     Subscription extensions are achieved by manipulating the `trial_end` of
     the subscription instance, which means that Stripe will change the
