@@ -245,7 +245,7 @@ class CustomerAdmin(StripeModelAdmin):
         return (
             super()
             .get_queryset(request)
-            .select_related("subscriber", "default_source", "default_payment_method")
+            .select_related("subscriber", "default_payment_method")
         )
 
 
