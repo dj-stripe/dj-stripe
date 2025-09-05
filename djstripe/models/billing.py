@@ -1109,8 +1109,9 @@ class Plan(StripeModel):
         return plan
 
     def __str__(self):
-        if self.product and self.product.name:
-            return f"{self.human_readable_price} for {self.product.name}"
+        if self.product and self.product.get('name'):
+            name = self.product.get('name')
+            return f"{self.human_readable_price} for {name}"
         return self.human_readable_price
 
     @property
