@@ -234,7 +234,6 @@ class CustomerAdmin(StripeModelAdmin):
         "subscriber",
         "email",
         "currency",
-        "default_source",
         "default_payment_method",
     )
 
@@ -474,7 +473,6 @@ class CardAdmin(StripeModelAdmin):
             .get_queryset(request)
             .select_related(
                 "customer",
-                "customer__default_source",
                 "customer__default_payment_method",
                 "account",
             )
@@ -492,7 +490,6 @@ class BankAccountAdmin(StripeModelAdmin):
             .get_queryset(request)
             .select_related(
                 "customer",
-                "customer__default_source",
                 "customer__default_payment_method",
                 "account",
             )
