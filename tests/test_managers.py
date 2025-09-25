@@ -55,10 +55,7 @@ class SubscriptionManagerTest(CreateAccountMixin, TestCase):
                 id=f"sub_xxxxxxxxxxxxxx{i}",
                 customer=customer,
                 plan=self.plan,
-                current_period_start=period_start,
-                current_period_end=period_end,
                 status="active",
-                start_date=start,
                 quantity=1,
             )
 
