@@ -1128,17 +1128,15 @@ class Plan(StripeModel):
             # tiered billing scheme
             tiers = self.tiers
             if not tiers:
-
                 amount = "Tiered pricing"
             else:
                 tier_1 = tiers[0]
                 flat_amount_tier_1 = tier_1.get("flat_amount")
-                unit_amount_tier_1 = tier_1.get("unit_amount", 0) or 0
+                unit_amount_tier_1 = tier_1.get("unit_amount", 0)
                 formatted_unit_amount_tier_1 = get_friendly_currency_amount(
                     unit_amount_tier_1 / 100, self.currency
                 )
                 amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
-
 
                 if flat_amount_tier_1 is not None:
                     formatted_flat_amount_tier_1 = get_friendly_currency_amount(
