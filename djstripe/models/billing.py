@@ -1109,8 +1109,9 @@ class Plan(StripeModel):
         return plan
 
     def __str__(self):
-        if self.product and self.product.get('name'):
-            name = self.product.get('name')
+        product = self.product
+        if product and isinstance(product, dict) and product.get('name'):
+            name = product.get('name')
             return f"{self.human_readable_price} for {name}"
         return self.human_readable_price
 
@@ -1125,19 +1126,25 @@ class Plan(StripeModel):
             amount = get_friendly_currency_amount(unit_amount, self.currency)
         else:
             # tiered billing scheme
-            tier_1 = self.tiers[0]
-            flat_amount_tier_1 = tier_1["flat_amount"]
-            formatted_unit_amount_tier_1 = get_friendly_currency_amount(
-                (tier_1["unit_amount"] or 0) / 100, self.currency
-            )
-            amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
+            tiers = self.tiers
+            if not tiers:
 
-            # stripe shows flat fee even if it is set to 0.00
-            if flat_amount_tier_1 is not None:
-                formatted_flat_amount_tier_1 = get_friendly_currency_amount(
-                    flat_amount_tier_1 / 100, self.currency
+                amount = "Tiered pricing"
+            else:
+                tier_1 = tiers[0]
+                flat_amount_tier_1 = tier_1.get("flat_amount")
+                unit_amount_tier_1 = tier_1.get("unit_amount", 0) or 0
+                formatted_unit_amount_tier_1 = get_friendly_currency_amount(
+                    unit_amount_tier_1 / 100, self.currency
                 )
-                amount = f"{amount} + {formatted_flat_amount_tier_1}"
+                amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
+
+
+                if flat_amount_tier_1 is not None:
+                    formatted_flat_amount_tier_1 = get_friendly_currency_amount(
+                        flat_amount_tier_1 / 100, self.currency
+                    )
+                    amount = f"{amount} + {formatted_flat_amount_tier_1}"
 
         format_args = {"amount": amount}
 
@@ -1883,9 +1890,15 @@ class ShippingRate(StripeModel):
         verbose_name = "Shipping Rate"
 
     def __str__(self):
-        amount = get_friendly_currency_amount(
-            self.fixed_amount.get("amount") / 100, self.fixed_amount.get("currency")
-        )
+        fixed_amount = self.fixed_amount or {}
+        amount_value = fixed_amount.get("amount")
+        currency = fixed_amount.get("currency")
+        
+        if amount_value is not None and currency:
+            amount = get_friendly_currency_amount(amount_value / 100, currency)
+        else:
+            amount = "N/A"
+        
         if self.active:
             return f"{self.display_name} - {amount} (Active)"
         return f"{self.display_name} - {amount} (Archived)"

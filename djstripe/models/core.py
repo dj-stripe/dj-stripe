@@ -130,15 +130,6 @@ class Charge(StripeModel):
         related_name="charges",
         help_text="The customer associated with this charge.",
     )
-
-    customer = StripeForeignKey(
-        "Customer",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="charges",
-        help_text="The customer associated with this charge.",
-    )
     invoice = StripeForeignKey(
         "Invoice",
         on_delete=models.CASCADE,
