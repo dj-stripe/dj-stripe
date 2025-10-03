@@ -330,12 +330,15 @@ class BaseInvoice(StripeModel):
             or self.stripe_data.get("receipt_number")
             or self.id
         )
-        amount = get_friendly_currency_amount(
-            self.stripe_data.get("amount_paid", 0), self.stripe_data.get("currency")
-        )
-        return (
-            f"Invoice #{invoice_number} for {amount} ({self.stripe_data.get('status')})"
-        )
+        currency = self.stripe_data.get("currency")
+        if currency:
+            amount = get_friendly_currency_amount(
+                self.stripe_data.get("amount_paid", 0), currency
+            )
+        else:
+            amount = str(self.stripe_data.get("amount_paid", 0))
+        status = self.stripe_data.get('status', 'unknown')
+        return f"Invoice #{invoice_number} for {amount} ({status})"
 
     @classmethod
     def upcoming(
