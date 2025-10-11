@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import Optional, Union
+from typing import Optional
 
 import stripe
 from django.db import models
@@ -145,7 +145,7 @@ class PromotionCode(StripeModel):
 
     # https://docs.stripe.com/api/promotion_codes/object#promotion_code_object-max_redemptions
     @property
-    def max_redemptions(self) -> Optional[int]:
+    def max_redemptions(self) -> int | None:
         return self.stripe_data.get("max_redemptions")
 
 
@@ -1391,7 +1391,7 @@ class Subscription(StripeModel):
             kwargs["status"] = "all"
         return super().api_list(api_key=api_key, **kwargs)
 
-    def update(self, plan: Union[StripeModel, str] = None, **kwargs):
+    def update(self, plan: StripeModel | str = None, **kwargs):
         """
         See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 
