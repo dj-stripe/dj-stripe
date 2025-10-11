@@ -1005,17 +1005,6 @@ class Customer(StripeModel):
             #                           specific error message.
             return False  # There was nothing to invoice
 
-    def retry_unpaid_invoices(self, **kwargs):
-        """Attempt to retry collecting payment on the customer's unpaid invoices."""
-
-        self._sync_invoices()
-        for invoice in self.invoices.filter(auto_advance=True).exclude(status="paid"):
-            try:
-                invoice.retry(**kwargs)  # Always retry unpaid invoices
-            except InvalidRequestError as exc:
-                if str(exc) != "Invoice is already paid":
-                    raise
-
     def add_coupon(self, coupon, idempotency_key=None):
         """
         Add a coupon to a Customer.
