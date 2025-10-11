@@ -45,7 +45,6 @@ class Migration(migrations.Migration):
         migrations.RemoveField(model_name="customer", name="shipping"),
         migrations.RemoveField(model_name="customer", name="tax_exempt"),
         migrations.RemoveField(model_name="discount", name="description"),
-        migrations.RemoveField(model_name="discount", name="invoice_item"),
         migrations.RemoveField(model_name="dispute", name="amount"),
         migrations.RemoveField(model_name="dispute", name="balance_transactions"),
         migrations.RemoveField(model_name="dispute", name="currency"),

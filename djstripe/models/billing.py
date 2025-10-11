@@ -1113,8 +1113,8 @@ class Plan(StripeModel):
 
     def __str__(self):
         product = self.product
-        if product and isinstance(product, dict) and product.get('name'):
-            name = product.get('name')
+        if product and isinstance(product, dict) and product.get("name"):
+            name = product.get("name")
             return f"{self.human_readable_price} for {name}"
         return self.human_readable_price
 
@@ -1894,12 +1894,12 @@ class ShippingRate(StripeModel):
         fixed_amount = self.fixed_amount or {}
         amount_value = fixed_amount.get("amount")
         currency = fixed_amount.get("currency")
-        
+
         if amount_value is not None and currency:
             amount = get_friendly_currency_amount(amount_value / 100, currency)
         else:
             amount = "N/A"
-        
+
         if self.active:
             return f"{self.display_name} - {amount} (Active)"
         return f"{self.display_name} - {amount} (Archived)"

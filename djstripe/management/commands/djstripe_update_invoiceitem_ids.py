@@ -40,7 +40,7 @@ class Command(BaseCommand):
                 first_few_ids = invoice_items[:10].values_list("id", flat=True)
                 self.stdout.write(f"I have found {count} InvoiceItems to migrate:")
                 self.stdout.write(
-                    "    " + ", ".join(first_few_ids) + f", … (and {count-10} more)"
+                    "    " + ", ".join(first_few_ids) + f", … (and {count - 10} more)"
                     if count > 10
                     else ""
                 )

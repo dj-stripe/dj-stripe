@@ -90,7 +90,7 @@ class SubscriptionStrTest(CreateAccountMixin, TestCase):
 
         self.assertEqual(
             str(Subscription.objects.get(id=subscription_fake["id"])),
-            f'<id={subscription_fake["id"]}>',
+            f"<id={subscription_fake['id']}>",
         )
 
 

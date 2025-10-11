@@ -649,11 +649,6 @@ class PriceUsageType(Enum):
     licensed = _("Licensed")
 
 
-# Legacy
-PlanTiersMode = PriceTiersMode
-PlanUsageType = PriceUsageType
-
-
 class ProductType(Enum):
     good = _("Good")
     service = _("Service")
