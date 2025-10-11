@@ -4559,16 +4559,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "invoice_item",
-                    djstripe.fields.InvoiceOrLineItemForeignKey(
-                        blank=True,
-                        help_text="The invoice item id (or invoice line item id for invoice line items of type=‘subscription’) that the discount’s coupon was applied to, if it was applied directly to a particular invoice item or invoice line item.",
-                        null=True,
-                        on_delete=django.db.models.deletion.CASCADE,
-                        to="djstripe.invoiceorlineitem",
-                    ),
-                ),
-                (
                     "checkout_session",
                     djstripe.fields.StripeForeignKey(
                         blank=True,
