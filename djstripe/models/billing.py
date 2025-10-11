@@ -216,7 +216,7 @@ class BaseInvoice(StripeModel):
 
     stripe_class = stripe.Invoice
     stripe_dashboard_item_name = "invoices"
-    expand_fields = ["discounts", "lines.data.discounts", "lines.data.invoice_item"]
+    expand_fields = ["discounts", "lines.data.discounts"]
 
     charge = models.OneToOneField(
         "Charge",
@@ -410,7 +410,7 @@ class BaseInvoice(StripeModel):
     def retry(self, **kwargs):
         """Retry payment on this invoice if it isn't paid."""
 
-        if self.status != enums.InvoiceStatus.paid and self.auto_advance:
+        if self.status != enums.InvoiceStatus.paid:
             stripe_invoice = self.api_retrieve()
             updated_stripe_invoice = stripe_invoice.pay(
                 **kwargs
