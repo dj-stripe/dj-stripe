@@ -3,8 +3,10 @@ dj-stripe model managers
 """
 
 import decimal
+from datetime import timedelta
 
 from django.db import models
+from django.utils import timezone
 
 
 class StripeModelManager(models.Manager):
@@ -61,10 +63,27 @@ class SubscriptionManager(models.Manager):
         )
 
     def churn(self):
-        """Return number of canceled Subscriptions divided by active Subscriptions."""
         canceled = self.canceled().count()
         active = self.active().count()
+        if active == 0:
+            return decimal.Decimal('0')
         return decimal.Decimal(str(canceled)) / decimal.Decimal(str(active))
+
+    def trialing(self):
+        return self.filter(status="trialing")
+
+    def expiring_trials(self, days=7):
+        cutoff_date = timezone.now() + timedelta(days=days)
+        return self.trialing().filter(
+            trial_end__lte=cutoff_date,
+            trial_end__gte=timezone.now()
+        )
+
+    def past_due(self):
+        return self.filter(status="past_due")
+
+    def incomplete(self):
+        return self.filter(status="incomplete")
 
 
 class TransferManager(models.Manager):
@@ -75,10 +94,13 @@ class TransferManager(models.Manager):
         return self.filter(created__year=year, created__month=month)
 
     def paid_totals_for(self, year, month):
-        """
-        Return paid Transfers during a certain year, month with total amounts annotated.
-        """
         return self.during(year, month).aggregate(total_amount=models.Sum("amount"))
+
+    def failed(self):
+        return self.filter(failure_code__isnull=False)
+
+    def pending(self):
+        return self.filter(status="pending")
 
 
 class ChargeManager(models.Manager):
@@ -89,10 +111,6 @@ class ChargeManager(models.Manager):
         return self.filter(created__year=year, created__month=month)
 
     def paid_totals_for(self, year, month):
-        """
-        Return paid Charges during a certain year, month with total amount,
-        fee and refunded annotated.
-        """
         return (
             self.during(year, month)
             .filter(paid=True)
@@ -101,3 +119,15 @@ class ChargeManager(models.Manager):
                 total_refunded=models.Sum("amount_refunded"),
             )
         )
+
+    def succeeded(self):
+        return self.filter(status="succeeded")
+
+    def failed(self):
+        return self.filter(status="failed")
+
+    def refunded(self):
+        return self.filter(refunded=True)
+
+    def disputed(self):
+        return self.filter(disputed=True)
