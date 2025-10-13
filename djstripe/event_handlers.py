@@ -489,21 +489,30 @@ def _handle_crud_like_event(
 
 @djstripe_receiver("entitlements.active_entitlement_summary.updated")
 def handle_customer_entitlements_event(sender, event, **kwargs):
-    # The `entitlements` object is a list of entitlements.
-    # The event does not carry a normal id. It carries a customer id.
-    # So we track this in `Customer.entitlements`.
+    """
+    Handle entitlements.active_entitlement_summary.updated events.
+
+    This event tracks changes to a customer's active entitlements. We sync the
+    Customer object to update the entitlements data stored in stripe_data.
+    """
     object = event.data["object"]
     customer_id = object.get("customer")
+
     if not customer_id or not isinstance(customer_id, str):
         logger.debug(f"Ignoring malformed event id {event.id!r}")
         return
-    customer = models.Customer.objects.filter(id=customer_id).first()
-    if not customer:
+
+    # Check if customer exists locally - we don't create customers that don't exist
+    if not models.Customer.objects.filter(id=customer_id).exists():
         logger.warning(
             f"Discarding event {event.id!r} because customer {customer_id!r} does not exist"
         )
         return
 
-    entitlements_list = object["entitlements"].get("data", [])
-    customer.entitlements = entitlements_list
-    customer.save()
+    # Use standard CRUD handler to retrieve and sync the full Customer
+    _handle_crud_like_event(
+        target_cls=models.Customer,
+        event=event,
+        id=customer_id,
+        crud_type=CrudType.UPDATED,
+    )
