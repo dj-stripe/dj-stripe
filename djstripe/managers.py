@@ -73,10 +73,11 @@ class SubscriptionManager(models.Manager):
         return self.filter(status="trialing")
 
     def expiring_trials(self, days=7):
-        cutoff_date = timezone.now() + timedelta(days=days)
+        now = timezone.now()
+        cutoff_date = now + timedelta(days=days)
         return self.trialing().filter(
             trial_end__lte=cutoff_date,
-            trial_end__gte=timezone.now()
+            trial_end__gte=now
         )
 
     def past_due(self):
