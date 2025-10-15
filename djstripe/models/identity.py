@@ -22,6 +22,10 @@ class VerificationSession(StripeModel):
     status = StripeEnumField(enum=enums.VerificationSessionStatus)
     type = StripeEnumField(enum=enums.VerificationType)
 
+    @property
+    def client_reference_id(self):
+        return self.stripe_data.get("client_reference_id")
+
     # The following attributes are not stored because they are sensitive.
     url = None
     client_secret = None
