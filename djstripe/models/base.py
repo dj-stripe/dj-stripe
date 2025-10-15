@@ -1,7 +1,6 @@
 import logging
 import uuid
 from datetime import timedelta
-from typing import Optional
 
 from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
@@ -94,7 +93,7 @@ class StripeModel(StripeBaseModel):
     )
     id = StripeIdField(unique=True)
 
-    djstripe_owner_account: Optional[StripeForeignKey] = StripeForeignKey(
+    djstripe_owner_account: StripeForeignKey | None = StripeForeignKey(
         "djstripe.Account",
         on_delete=models.CASCADE,
         to_field="id",
@@ -162,7 +161,7 @@ class StripeModel(StripeBaseModel):
     def description(self) -> str:
         return self.stripe_data.get("description", "") or ""
 
-    def _get_stripe_account_id(self, api_key=None) -> Optional[str]:
+    def _get_stripe_account_id(self, api_key=None) -> str | None:
         """
         Call the stripe API's retrieve operation for this model.
 

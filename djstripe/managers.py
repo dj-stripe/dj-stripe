@@ -66,7 +66,7 @@ class SubscriptionManager(models.Manager):
         canceled = self.canceled().count()
         active = self.active().count()
         if active == 0:
-            return decimal.Decimal('0')
+            return decimal.Decimal("0")
         return decimal.Decimal(str(canceled)) / decimal.Decimal(str(active))
 
     def trialing(self):
@@ -75,10 +75,7 @@ class SubscriptionManager(models.Manager):
     def expiring_trials(self, days=7):
         now = timezone.now()
         cutoff_date = now + timedelta(days=days)
-        return self.trialing().filter(
-            trial_end__lte=cutoff_date,
-            trial_end__gte=now
-        )
+        return self.trialing().filter(trial_end__lte=cutoff_date, trial_end__gte=now)
 
     def past_due(self):
         return self.filter(status="past_due")

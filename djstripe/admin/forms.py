@@ -2,7 +2,6 @@
 Module for all dj-stripe Admin app forms
 """
 
-from typing import Optional
 from urllib.parse import urljoin
 
 from django import forms
@@ -86,7 +85,7 @@ class WebhookEndpointAdminBaseForm(forms.ModelForm):
             "djstripe_validation_method"
         )
 
-    def _get_field_name(self, stripe_field: Optional[str]) -> Optional[str]:
+    def _get_field_name(self, stripe_field: str | None) -> str | None:
         if stripe_field is None:
             return None
         if stripe_field == "url":

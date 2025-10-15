@@ -3,7 +3,6 @@ Utility functions related to the djstripe app.
 """
 
 import datetime
-from typing import Optional
 
 import stripe
 from django.apps import apps
@@ -36,7 +35,7 @@ def clear_expired_idempotency_keys():
     IdempotencyKey.objects.filter(created__lt=threshold).delete()
 
 
-def convert_tstamp(response) -> Optional[datetime.datetime]:
+def convert_tstamp(response) -> datetime.datetime | None:
     """
     Convert a Stripe API timestamp response (unix epoch) to a native datetime.
     """

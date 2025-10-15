@@ -540,9 +540,8 @@ class TestAccountSTRIPE:
 
         except Exception:
             raise
-
-        # deleted created Account
         finally:
+            # deleted created Account
             # try to delete
             stripe.Account.delete(
                 account_json["id"], api_key=settings.STRIPE_TEST_SECRET_KEY
