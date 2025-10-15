@@ -852,8 +852,11 @@ class Customer(StripeModel):
         """
         from .payment_methods import PaymentMethod
 
-        stripe_customer = self.api_retrieve()
-        payment_method = PaymentMethod.attach(payment_method, stripe_customer)
+        api_key = self.default_api_key
+        stripe_customer = self.api_retrieve(api_key=api_key)
+        payment_method = PaymentMethod.attach(
+            payment_method, stripe_customer, api_key=api_key
+        )
 
         if set_default:
             stripe_customer["invoice_settings"]["default_payment_method"] = (
@@ -865,7 +868,7 @@ class Customer(StripeModel):
             # 1) sets self.default_payment_method (we rely on logic in
             # Customer._manipulate_stripe_object_hook to do this)
             # 2) updates self.invoice_settings.default_payment_methods
-            self.sync_from_stripe_data(stripe_customer, api_key=self.default_api_key)
+            self.sync_from_stripe_data(stripe_customer, api_key=api_key)
             self.refresh_from_db()
 
         return payment_method
