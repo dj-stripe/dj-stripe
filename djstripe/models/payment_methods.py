@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Union
 
 import stripe
 from django.db import models, transaction
@@ -141,8 +141,8 @@ class LegacySourceMixin:
     Mixin for functionality shared between the legacy Card & BankAccount sources
     """
 
-    customer: Optional[StripeForeignKey]
-    account: Optional[StripeForeignKey]
+    customer: StripeForeignKey | None
+    account: StripeForeignKey | None
     id: str
     default_api_key: str
 
@@ -958,7 +958,7 @@ class PaymentMethod(StripeModel):
     def attach(
         cls,
         payment_method: Union[str, "PaymentMethod"],
-        customer: Union[str, Customer],
+        customer: str | Customer,
         api_key: str = djstripe_settings.STRIPE_SECRET_KEY,
     ) -> "PaymentMethod":
         """
