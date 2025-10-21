@@ -39,7 +39,7 @@ The full documentation is available [on Read the Docs](https://dj-stripe.github.
 
 ## Installation
 
-See [installation](https://dj-stripe.dev/docs/latest/installation/) instructions.
+See [installation](https://dj-stripe.dev/docs/latest/installation) instructions.
 
 ## Changelog
 
