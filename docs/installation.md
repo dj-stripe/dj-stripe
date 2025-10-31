@@ -46,7 +46,7 @@ STRIPE_LIVE_MODE = False  # Change to True in production
 DJSTRIPE_FOREIGN_KEY_TO_FIELD = "id"
 ```
 
-_NOTE_: jstripe expects `STRIPE_LIVE_MODE` to be a Boolean Type. In case you use `Bash env vars or equivalent` to inject its value, make sure to convert it to a Boolean type. We highly recommended the library [django-environ](https://django-environ.readthedocs.io/en/latest/)
+_NOTE_: djstripe expects `STRIPE_LIVE_MODE` to be a Boolean Type. In case you use `Bash env vars or equivalent` to inject its value, make sure to convert it to a Boolean type. We highly recommended the library [django-environ](https://django-environ.readthedocs.io/en/latest/)
 
 Sync data from Stripe:
 
