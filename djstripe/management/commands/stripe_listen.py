@@ -24,7 +24,6 @@ class Command(BaseCommand):
         parser.add_argument(
             "--host",
             metavar="host",
-            nargs=1,
             default="localhost",
             type=str,
             help="The host on which Django is running (defaults to localhost).",
@@ -32,7 +31,6 @@ class Command(BaseCommand):
         parser.add_argument(
             "--port",
             metavar="port",
-            nargs=1,
             default=8000,
             type=int,
             help="The port on which Django is running (defaults to 8000).",
