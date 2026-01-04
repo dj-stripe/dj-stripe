@@ -887,10 +887,6 @@ class Customer(StripeModel):
                 # The exception was raised for another reason, re-raise it
                 raise
 
-        # toggle the deleted flag on Customer to indicate it has been
-        # deleted upstream in Stripe
-        self.deleted = True
-
         if self.subscriber:
             # Delete the idempotency key used by Customer.create()
             # So re-creating a customer for this subscriber before the key expires
