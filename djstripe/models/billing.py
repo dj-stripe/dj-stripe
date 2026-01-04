@@ -19,7 +19,7 @@ from ..fields import (
 )
 from ..managers import SubscriptionManager
 from ..settings import djstripe_settings
-from ..utils import QuerySetMock, get_friendly_currency_amount
+from ..utils import QuerySetMock, convert_tstamp, get_friendly_currency_amount
 from .base import StripeModel
 
 logger = logging.getLogger(__name__)
@@ -1250,12 +1250,12 @@ class Subscription(StripeModel):
     @property
     def current_period_end(self):
         """End of the current period that the subscription has been invoiced for."""
-        return self.stripe_data.get("current_period_end")
+        return convert_tstamp(self.stripe_data.get("current_period_end"))
 
     @property
     def current_period_start(self):
         """Start of the current period that the subscription has been invoiced for."""
-        return self.stripe_data.get("current_period_start")
+        return convert_tstamp(self.stripe_data.get("current_period_start"))
 
     @property
     def days_until_due(self):
@@ -1365,12 +1365,12 @@ class Subscription(StripeModel):
     @property
     def trial_end(self):
         """If the subscription has a trial, the end of that trial."""
-        return self.stripe_data.get("trial_end")
+        return convert_tstamp(self.stripe_data.get("trial_end"))
 
     @property
     def trial_start(self):
         """If the subscription has a trial, the beginning of that trial."""
-        return self.stripe_data.get("trial_start")
+        return convert_tstamp(self.stripe_data.get("trial_start"))
 
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
