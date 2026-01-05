@@ -523,12 +523,17 @@ class TestAccountSTRIPE:
         """Ensure sync_from_stripe_data() on Account model works as expected."""
 
         # Create Account on Stripe.
-        account_json = stripe.Account.create(
-            type="standard",
-            country="US",
-            email="jenny.standard.rosen@example.com",
-            api_key=settings.STRIPE_TEST_SECRET_KEY,
-        )
+        try:
+            account_json = stripe.Account.create(
+                type="standard",
+                country="US",
+                email="jenny.standard.rosen@example.com",
+                api_key=settings.STRIPE_TEST_SECRET_KEY,
+            )
+        except stripe.InvalidRequestError as exc:
+            if "signed up for Connect" in str(exc):
+                pytest.skip("Connect not enabled for this Stripe account.")
+            raise
         try:
             account_instance = Account.sync_from_stripe_data(
                 account_json, api_key=settings.STRIPE_TEST_SECRET_KEY
@@ -538,8 +543,6 @@ class TestAccountSTRIPE:
             assert account_instance.type == account_json["type"]
             assert account_instance.email == account_json["email"]
 
-        except Exception:
-            raise
         finally:
             # deleted created Account
             # try to delete

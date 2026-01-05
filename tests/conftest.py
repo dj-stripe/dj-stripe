@@ -93,12 +93,17 @@ def standard_account_fixture(django_db_setup, django_db_blocker, configure_setti
     # See: https://pytest-django.readthedocs.io/en/latest/database.html#populate-the-test-database-if-you-don-t-use-transactional-or-live-server
     with django_db_blocker.unblock():
         # setup_stuff
-        account_json = models.Account._api_create(
-            type="standard",
-            country="US",
-            email="jenny.standard.rosen@example.com",
-            api_key=settings.STRIPE_SECRET_KEY,
-        )
+        try:
+            account_json = models.Account._api_create(
+                type="standard",
+                country="US",
+                email="jenny.standard.rosen@example.com",
+                api_key=settings.STRIPE_SECRET_KEY,
+            )
+        except InvalidRequestError as exc:
+            if "signed up for Connect" in str(exc):
+                pytest.skip("Connect not enabled for this Stripe account.")
+            raise
         account_instance = models.Account.sync_from_stripe_data(
             account_json,
             api_key=settings.STRIPE_SECRET_KEY,
@@ -120,16 +125,21 @@ def custom_account_fixture(django_db_setup, django_db_blocker, configure_setting
     # See: https://pytest-django.readthedocs.io/en/latest/database.html#populate-the-test-database-if-you-don-t-use-transactional-or-live-server
     with django_db_blocker.unblock():
         # setup_stuff
-        account_json = models.Account._api_create(
-            type="custom",
-            country="US",
-            email="jenny.custom.rosen@example.com",
-            capabilities={
-                "card_payments": {"requested": True},
-                "transfers": {"requested": True},
-            },
-            api_key=settings.STRIPE_SECRET_KEY,
-        )
+        try:
+            account_json = models.Account._api_create(
+                type="custom",
+                country="US",
+                email="jenny.custom.rosen@example.com",
+                capabilities={
+                    "card_payments": {"requested": True},
+                    "transfers": {"requested": True},
+                },
+                api_key=settings.STRIPE_SECRET_KEY,
+            )
+        except InvalidRequestError as exc:
+            if "signed up for Connect" in str(exc):
+                pytest.skip("Connect not enabled for this Stripe account.")
+            raise
         account_instance = models.Account.sync_from_stripe_data(
             account_json,
             api_key=settings.STRIPE_SECRET_KEY,
@@ -155,16 +165,21 @@ def custom_account_func_fixture(django_db_setup, django_db_blocker, configure_se
     # See: https://pytest-django.readthedocs.io/en/latest/database.html#populate-the-test-database-if-you-don-t-use-transactional-or-live-server
     with django_db_blocker.unblock():
         # setup_stuff
-        account_json = models.Account._api_create(
-            type="custom",
-            country="US",
-            email="jenny.custom.rosen@example.com",
-            capabilities={
-                "card_payments": {"requested": True},
-                "transfers": {"requested": True},
-            },
-            api_key=settings.STRIPE_SECRET_KEY,
-        )
+        try:
+            account_json = models.Account._api_create(
+                type="custom",
+                country="US",
+                email="jenny.custom.rosen@example.com",
+                capabilities={
+                    "card_payments": {"requested": True},
+                    "transfers": {"requested": True},
+                },
+                api_key=settings.STRIPE_SECRET_KEY,
+            )
+        except InvalidRequestError as exc:
+            if "signed up for Connect" in str(exc):
+                pytest.skip("Connect not enabled for this Stripe account.")
+            raise
         account_instance = models.Account.sync_from_stripe_data(
             account_json,
             api_key=settings.STRIPE_SECRET_KEY,

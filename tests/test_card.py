@@ -2,11 +2,13 @@
 dj-stripe Card Model Tests.
 """
 
+import uuid
 from copy import deepcopy
 from unittest.mock import ANY, patch
 
 import pytest
 import stripe
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
@@ -16,7 +18,6 @@ from djstripe.models import Account, Card, Customer
 
 from . import (
     FAKE_CARD,
-    FAKE_CARD_III,
     FAKE_CARD_IV,
     FAKE_CUSTOM_ACCOUNT,
     FAKE_CUSTOMER,
@@ -379,10 +380,35 @@ class CardTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             stripe_account=stripe_account,
         )
 
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_api_list(self, customer_retrieve_mock):
-        card_list = Card.api_list(customer=self.customer)
+    @pytest.mark.stripe_api
+    @pytest.mark.usefixtures("configure_settings")
+    def test_api_list(self):
+        stripe_customer = stripe.Customer.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            email=f"card-api-list-{uuid.uuid4().hex}@example.com",
+            metadata={"djstripe_test": "card_api_list"},
+        )
+        try:
+            customer = Customer.sync_from_stripe_data(
+                stripe_customer, api_key=settings.STRIPE_SECRET_KEY
+            )
+            stripe_card = Card._api_create(
+                customer=customer,
+                source="tok_visa",
+                api_key=settings.STRIPE_SECRET_KEY,
+            )
+            stripe_card_id = (
+                stripe_card["id"] if isinstance(stripe_card, dict) else stripe_card.id
+            )
 
-        self.assertCountEqual([FAKE_CARD, FAKE_CARD_III], [i for i in card_list])
+            card_list = list(
+                Card.api_list(
+                    customer=customer, api_key=settings.STRIPE_SECRET_KEY, limit=100
+                )
+            )
+
+            self.assertTrue(any(card.id == stripe_card_id for card in card_list))
+        finally:
+            stripe.Customer.delete(
+                stripe_customer.id, api_key=settings.STRIPE_SECRET_KEY
+            )

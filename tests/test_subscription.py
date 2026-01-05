@@ -2,12 +2,14 @@
 dj-stripe Subscription Model Tests.
 """
 
+import uuid
 from copy import deepcopy
 from decimal import Decimal
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 import pytest
 import stripe
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.utils import timezone
@@ -16,7 +18,6 @@ from stripe import InvalidRequestError
 from djstripe.enums import SubscriptionStatus
 from djstripe.models import Plan, Product, Subscription
 from djstripe.models.billing import Invoice
-from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -1151,35 +1152,94 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             ),
         )
 
-    @patch("stripe.Subscription.list")
-    def test_api_list(self, subscription_list_mock):
-        p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
-        type(subscription_list_mock).auto_paging_iter = p
-
-        # invoke Subscription.api_list with status enum populated
-        Subscription.api_list(status=SubscriptionStatus.canceled)
-
-        subscription_list_mock.assert_called_once_with(
-            status=SubscriptionStatus.canceled,
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            expand=[],
+    @pytest.mark.stripe_api
+    @pytest.mark.usefixtures("configure_settings")
+    def test_api_list(self):
+        stripe_customer = stripe.Customer.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            email=f"subscription-api-list-{uuid.uuid4().hex}@example.com",
+            metadata={"djstripe_test": "subscription_api_list"},
         )
-
-    @patch("stripe.Subscription.list")
-    def test_api_list_with_no_status(self, subscription_list_mock):
-        p = PropertyMock(return_value=deepcopy(FAKE_SUBSCRIPTION))
-        type(subscription_list_mock).auto_paging_iter = p
-
-        # invoke Subscription.api_list without status enum populated
-        Subscription.api_list()
-
-        subscription_list_mock.assert_called_once_with(
-            status="all",
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            expand=[],
+        product = stripe.Product.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            name=f"djstripe-subscription-product-{uuid.uuid4().hex}",
         )
+        price = stripe.Price.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            product=product.id,
+            unit_amount=0,
+            currency="usd",
+            recurring={"interval": "month"},
+        )
+        subscription = stripe.Subscription.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            customer=stripe_customer.id,
+            items=[{"price": price.id}],
+        )
+        try:
+            subscriptions = list(
+                Subscription.api_list(
+                    status=SubscriptionStatus.active,
+                    api_key=settings.STRIPE_SECRET_KEY,
+                    limit=100,
+                )
+            )
+            self.assertTrue(any(item.id == subscription.id for item in subscriptions))
+        finally:
+            stripe.Subscription.delete(
+                subscription.id, api_key=settings.STRIPE_SECRET_KEY
+            )
+            stripe.Price.modify(
+                price.id, api_key=settings.STRIPE_SECRET_KEY, active=False
+            )
+            stripe.Product.delete(product.id, api_key=settings.STRIPE_SECRET_KEY)
+            stripe.Customer.delete(
+                stripe_customer.id, api_key=settings.STRIPE_SECRET_KEY
+            )
+
+    @pytest.mark.stripe_api
+    @pytest.mark.usefixtures("configure_settings")
+    def test_api_list_with_no_status(self):
+        stripe_customer = stripe.Customer.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            email=f"subscription-api-list-all-{uuid.uuid4().hex}@example.com",
+            metadata={"djstripe_test": "subscription_api_list_all"},
+        )
+        product = stripe.Product.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            name=f"djstripe-subscription-product-{uuid.uuid4().hex}",
+        )
+        price = stripe.Price.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            product=product.id,
+            unit_amount=0,
+            currency="usd",
+            recurring={"interval": "month"},
+        )
+        subscription = stripe.Subscription.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            customer=stripe_customer.id,
+            items=[{"price": price.id}],
+        )
+        try:
+            subscriptions = list(
+                Subscription.api_list(
+                    api_key=settings.STRIPE_SECRET_KEY,
+                    limit=100,
+                )
+            )
+            self.assertTrue(any(item.id == subscription.id for item in subscriptions))
+        finally:
+            stripe.Subscription.delete(
+                subscription.id, api_key=settings.STRIPE_SECRET_KEY
+            )
+            stripe.Price.modify(
+                price.id, api_key=settings.STRIPE_SECRET_KEY, active=False
+            )
+            stripe.Product.delete(product.id, api_key=settings.STRIPE_SECRET_KEY)
+            stripe.Customer.delete(
+                stripe_customer.id, api_key=settings.STRIPE_SECRET_KEY
+            )
 
 
 class TestSubscriptionDecimal(CreateAccountMixin):

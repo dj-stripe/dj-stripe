@@ -2,10 +2,13 @@
 dj-stripe TaxId model tests
 """
 
+import uuid
 from copy import deepcopy
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 
 import pytest
+import stripe
+from django.conf import settings
 from django.test.testcases import TestCase
 
 from djstripe import enums
@@ -169,22 +172,32 @@ class TestTransfer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
         )
 
-    @patch(
-        "stripe.Customer.list_tax_ids",
-        autospec=True,
-    )
-    def test_api_list(
-        self,
-        tax_id_list_mock,
-    ):
-        p = PropertyMock(return_value=deepcopy(FAKE_TAX_ID))
-        type(tax_id_list_mock).auto_paging_iter = p
-
-        TaxId.api_list(id=FAKE_CUSTOMER["id"])
-
-        tax_id_list_mock.assert_called_once_with(
-            id=FAKE_CUSTOMER["id"],
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            expand=[],
+    @pytest.mark.stripe_api
+    @pytest.mark.usefixtures("configure_settings")
+    def test_api_list(self):
+        stripe_customer = stripe.Customer.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            email=f"tax-id-api-list-{uuid.uuid4().hex}@example.com",
+            metadata={"djstripe_test": "tax_id_api_list"},
         )
+        try:
+            tax_id = stripe.Customer.create_tax_id(
+                stripe_customer.id,
+                api_key=settings.STRIPE_SECRET_KEY,
+                type="eu_vat",
+                value="DE123456789",
+            )
+
+            tax_id_list = list(
+                TaxId.api_list(
+                    id=stripe_customer.id,
+                    api_key=settings.STRIPE_SECRET_KEY,
+                    limit=100,
+                )
+            )
+
+            self.assertTrue(any(item.id == tax_id.id for item in tax_id_list))
+        finally:
+            stripe.Customer.delete(
+                stripe_customer.id, api_key=settings.STRIPE_SECRET_KEY
+            )

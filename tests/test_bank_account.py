@@ -2,11 +2,13 @@
 dj-stripe Bank Account Model Tests.
 """
 
+import uuid
 from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
 import stripe
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
@@ -521,14 +523,42 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         bank_account_object.remove()
         self.assertEqual(self.customer.bank_account.count(), 0)
 
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_IV),
-        autospec=True,
-    )
-    def test_api_list(self, customer_retrieve_mock):
-        bank_account_list = BankAccount.api_list(customer=self.customer)
-
-        self.assertCountEqual(
-            [FAKE_BANK_ACCOUNT_SOURCE], [i for i in bank_account_list]
+    @pytest.mark.stripe_api
+    @pytest.mark.usefixtures("configure_settings")
+    def test_api_list(self):
+        stripe_customer = stripe.Customer.create(
+            api_key=settings.STRIPE_SECRET_KEY,
+            email=f"bank-account-api-list-{uuid.uuid4().hex}@example.com",
+            metadata={"djstripe_test": "bank_account_api_list"},
         )
+        try:
+            customer = Customer.sync_from_stripe_data(
+                stripe_customer, api_key=settings.STRIPE_SECRET_KEY
+            )
+            stripe_bank_account = BankAccount._api_create(
+                customer=customer,
+                source="btok_us_verified",
+                api_key=settings.STRIPE_SECRET_KEY,
+            )
+            stripe_bank_account_id = (
+                stripe_bank_account["id"]
+                if isinstance(stripe_bank_account, dict)
+                else stripe_bank_account.id
+            )
+
+            bank_account_list = list(
+                BankAccount.api_list(
+                    customer=customer, api_key=settings.STRIPE_SECRET_KEY, limit=100
+                )
+            )
+
+            self.assertTrue(
+                any(
+                    bank_account.id == stripe_bank_account_id
+                    for bank_account in bank_account_list
+                )
+            )
+        finally:
+            stripe.Customer.delete(
+                stripe_customer.id, api_key=settings.STRIPE_SECRET_KEY
+            )
