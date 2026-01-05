@@ -156,3 +156,5 @@ DJSTRIPE_WEBHOOK_VALIDATION = "verify_signature"
 STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+FORMS_URLFIELD_ASSUME_HTTPS = True
