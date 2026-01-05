@@ -52,15 +52,18 @@ def pytest_collection_modifyitems(items, config):
 
 @pytest.fixture
 def configure_settings(settings):
-    settings.STRIPE_TEST_SECRET_KEY = settings.STRIPE_SECRET_KEY = os.environ.get(
-        "STRIPE_TEST_SECRET_KEY"
+    key = os.environ.get("STRIPE_TEST_SECRET_KEY") or os.environ.get(
+        "STRIPE_SECRET_KEY"
     )
+    settings.STRIPE_TEST_SECRET_KEY = settings.STRIPE_SECRET_KEY = key
 
 
 def pytest_configure(config):
     markexpr = config.getoption("markexpr")
     if markexpr == "stripe_api":
-        key = os.environ.get("STRIPE_TEST_SECRET_KEY")
+        key = os.environ.get("STRIPE_TEST_SECRET_KEY") or os.environ.get(
+            "STRIPE_SECRET_KEY"
+        )
         if not key:
             pytest.exit(
                 f"Expected Real Stripe Account Testing key to be provided. Got {key}."
