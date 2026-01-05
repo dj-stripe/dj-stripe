@@ -45,6 +45,7 @@ mypy = "^1.18.2"
 pre-commit = "^4.3.0"
 pytest = "^8.4.2"
 pytest-django = "^4.11.1"
+pytest-dotenv = "^0.5.2"
 ruff = "^0.14.0"
 
 [tool.poetry.group.docs]
@@ -96,6 +97,7 @@ commands = ["pytest {posargs}"]
 deps = [
     "pytest-django",
     "pytest-cov",
+    "pytest-dotenv",
     "django50: Django>=5.0,<5.1",
     "django51: Django>=5.1,<5.2",
     "djangomain: https://github.com/django/django/archive/main.tar.gz",
@@ -109,6 +111,7 @@ sqlite = "DJSTRIPE_TEST_DB_VENDOR=sqlite"
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "tests.settings"
 markers = ["stripe_api: mark a test as using Stripe API."]
+env_files = [".env"]
 
 [tool.coverage.run]
 branch = true

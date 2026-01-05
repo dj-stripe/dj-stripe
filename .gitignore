@@ -3,6 +3,7 @@ __pycache__
 .tox
 dj_stripe.egg-info
 *.mo
+.env
 
 # Environments
 .venv
