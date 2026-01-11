@@ -105,7 +105,6 @@ class SubscriptionScheduleTest(CreateAccountMixin, AssertStripeFksMixin, TestCas
             "djstripe.PaymentIntent.on_behalf_of",
             "djstripe.PaymentIntent.payment_method",
             "djstripe.PaymentIntent.upcominginvoice (related name)",
-            "djstripe.Product.default_price",
             "djstripe.Invoice.default_payment_method",
             "djstripe.Invoice.default_source",
             "djstripe.Subscription.default_payment_method",

@@ -71,7 +71,6 @@ class TestUsageRecord(CreateAccountMixin, AssertStripeFksMixin, TestCase):
                 "djstripe.Customer.coupon",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
-                "djstripe.Product.default_price",
                 "djstripe.Subscription.default_payment_method",
                 "djstripe.Subscription.default_source",
                 "djstripe.Subscription.pending_setup_intent",

@@ -1481,13 +1481,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
 
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-
         self.customer.subscribe(items=[{"price": price.id}])
 
         updated_subscriptions = self.customer.subscriptions.count()
@@ -1517,13 +1510,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         current_subscriptions = self.customer.subscriptions.count()
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
 
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-
         self.customer.subscribe(price=price.id)
 
         updated_subscriptions = self.customer.subscriptions.count()
@@ -1542,13 +1528,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self, product_retrieve_mock, customer_retrieve_mock, subscription_create_mock
     ):
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
-
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
 
         subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
         subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
@@ -1591,12 +1570,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription_api_create_mock,
     ):
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
 
         subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
         subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
@@ -1645,18 +1618,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
 
         subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
         subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
@@ -1698,13 +1659,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self, product_retrieve_mock, customer_retrieve_mock
     ):
         price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
-
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
 
         fake_subscription_upd = deepcopy(FAKE_SUBSCRIPTION)
         # latest_invoice has to be None for an invoice that doesn't exist yet
@@ -2076,13 +2030,6 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
         # latest_invoice has to be None for an invoice that doesn't exist yet
         # and hence cannot have been billed yet
@@ -2115,13 +2062,6 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
 
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
         # latest_invoice has to be None for an invoice that doesn't exist yet
         # and hence cannot have been billed yet
@@ -2152,12 +2092,6 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription_api_create_mock,
     ):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
 
         subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
         subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
@@ -2199,13 +2133,6 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self, product_retrieve_mock, customer_retrieve_mock
     ):
         plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
 
         fake_subscription_upd = deepcopy(FAKE_SUBSCRIPTION)
         # latest_invoice has to be None for an invoice that doesn't exist yet

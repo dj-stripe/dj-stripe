@@ -1,5 +1,4 @@
 from decimal import Decimal
-from typing import Optional, Union
 
 import stripe
 from django.apps import apps
@@ -413,7 +412,7 @@ class Charge(StripeModel):
             self.fraud_details and list(self.fraud_details.values())[0] == "fraudulent"
         )
 
-    def _calculate_refund_amount(self, amount: Optional[Decimal]) -> int:
+    def _calculate_refund_amount(self, amount: Decimal | None) -> int:
         """
         Returns the amount that can be refunded (in cents)
         """
@@ -562,14 +561,6 @@ class Product(StripeModel):
             "The product's name, meant to be displayable to the customer. "
             "Applicable to both `service` and `good` types."
         ),
-    )
-    default_price = StripeForeignKey(
-        "Price",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="products",
-        help_text="The default price this product is associated with.",
     )
     type = StripeEnumField(
         enum=enums.ProductType,
@@ -1011,7 +1002,7 @@ class Customer(StripeModel):
         amount: Decimal,
         *,
         application_fee: Decimal = None,
-        source: Union[str, StripeModel] = None,
+        source: str | StripeModel = None,
         **kwargs,
     ) -> Charge:
         """
@@ -1200,7 +1191,7 @@ class Customer(StripeModel):
             if subscription.is_valid()
         ]
 
-    def is_subscribed_to(self, product: Union[Product, str]) -> bool:
+    def is_subscribed_to(self, product: Product | str) -> bool:
         """
         Checks to see if this customer has an active subscription to the given product.
 

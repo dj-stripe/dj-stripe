@@ -90,7 +90,7 @@ class SubscriptionStrTest(CreateAccountMixin, TestCase):
 
         self.assertEqual(
             str(Subscription.objects.get(id=subscription_fake["id"])),
-            f'<id={subscription_fake["id"]}>',
+            f"<id={subscription_fake['id']}>",
         )
 
 
@@ -167,7 +167,6 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             "djstripe.PaymentIntent.on_behalf_of",
             "djstripe.PaymentIntent.payment_method",
             "djstripe.PaymentIntent.upcominginvoice (related name)",
-            "djstripe.Product.default_price",
             "djstripe.Invoice.default_payment_method",
             "djstripe.Invoice.default_source",
             "djstripe.Subscription.default_payment_method",
@@ -601,13 +600,6 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
-
-        self.assert_fks(
-            new_plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
         )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)

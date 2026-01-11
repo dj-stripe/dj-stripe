@@ -58,7 +58,6 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             price,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -87,7 +86,6 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             price,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -115,7 +113,6 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             price,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -145,7 +142,6 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             price,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -176,7 +172,6 @@ class PriceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             price,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -194,7 +189,6 @@ class PriceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             price,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -210,7 +204,6 @@ class PriceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             price,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -227,7 +220,6 @@ class PriceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             price,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 

@@ -56,7 +56,6 @@ class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             plan,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -85,7 +84,6 @@ class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             plan,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -113,7 +111,6 @@ class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             plan,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -143,7 +140,6 @@ class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             plan,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -193,7 +189,6 @@ class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             plan,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -223,7 +218,6 @@ class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             plan,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 
@@ -238,7 +232,6 @@ class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             plan,
             expected_blank_fks={
                 "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
             },
         )
 

@@ -2,7 +2,7 @@
 Django Administration interface definitions
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from django.contrib import admin
 from django.db import IntegrityError, transaction
@@ -493,7 +493,6 @@ class PriceAdmin(StripeModelAdmin):
 class ProductAdmin(StripeModelAdmin):
     list_display = (
         "name",
-        "default_price",
         "type",
         "active",
         "url",
@@ -762,7 +761,7 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
             ),
         ]
 
-    def get_changeform_initial_data(self, request) -> Dict[str, str]:
+    def get_changeform_initial_data(self, request) -> dict[str, str]:
         ret = super().get_changeform_initial_data(request)
         base_url = f"{request.scheme}://{request.get_host()}"
         ret.setdefault("base_url", base_url)
