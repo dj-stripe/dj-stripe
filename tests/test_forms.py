@@ -7,8 +7,10 @@ from django import forms
 from django.contrib.admin import helpers
 from django.forms.utils import ErrorDict
 
+from django.core.exceptions import ValidationError
+
 from djstripe import enums, utils
-from djstripe.admin.forms import APIKeyAdminCreateForm, CustomActionForm
+from djstripe.admin.forms import APIKeyAdminCreateForm, CustomActionForm, validate_public_url
 from tests import FAKE_PLATFORM_ACCOUNT
 
 from .conftest import CreateAccountMixin
@@ -85,3 +87,33 @@ class TestAPIKeyAdminCreateForm(CreateAccountMixin):
             assert form.instance.type == enums.APIKeyType.restricted
 
         assert form.instance.djstripe_owner_account.id == FAKE_PLATFORM_ACCOUNT["id"]
+
+
+class TestValidatePublicUrl:
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://example.com",
+            "https://mysite.io/webhooks",
+            "https://8.8.8.8",
+        ],
+    )
+    def test_valid_public_urls(self, url):
+        assert validate_public_url(url) == url
+
+    @pytest.mark.parametrize(
+        "url",
+        [
+            "https://127.0.0.1",
+            "http://127.0.0.1:8000",
+            "http://localhost",
+            "http://localhost:8000/webhook",
+            "https://[::1]",
+            "http://192.168.1.1",
+            "http://10.0.0.1",
+            "http://172.16.0.1",
+        ],
+    )
+    def test_rejects_non_public_urls(self, url):
+        with pytest.raises(ValidationError, match="not publicly accessible"):
+            validate_public_url(url)
