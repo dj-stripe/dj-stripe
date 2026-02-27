@@ -800,6 +800,7 @@ class SubscriptionStatus(Enum):
     incomplete_expired = _("Incomplete Expired")
     trialing = _("Trialing")
     active = _("Active")
+    paused = _("Paused")
     past_due = _("Past due")
     canceled = _("Canceled")
     unpaid = _("Unpaid")
