@@ -1,4 +1,5 @@
 from django.core.management import call_command
+from django.template.loader import get_template
 from django.test import TestCase
 from django.test.utils import override_settings
 
@@ -13,3 +14,6 @@ class TestRunManagePyCheck(TestCase):
     )
     def test_manage_py_check(self):
         call_command("check")
+
+    def test_webhook_endpoint_admin_change_form_template_compiles(self):
+        get_template("djstripe/admin/webhook_endpoint/change_form.html")

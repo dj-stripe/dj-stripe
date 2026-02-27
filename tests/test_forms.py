@@ -10,7 +10,11 @@ from django.forms.utils import ErrorDict
 from django.core.exceptions import ValidationError
 
 from djstripe import enums, utils
-from djstripe.admin.forms import APIKeyAdminCreateForm, CustomActionForm, validate_public_url
+from djstripe.admin.forms import (
+    APIKeyAdminCreateForm,
+    CustomActionForm,
+    validate_public_url,
+)
 from tests import FAKE_PLATFORM_ACCOUNT
 
 from .conftest import CreateAccountMixin
