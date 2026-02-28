@@ -13,7 +13,7 @@ runs:
   using: "composite"
   steps:
     - name: Set up Python ${{ inputs.python_version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v6
       with:
         python-version: ${{ inputs.python_version }}
 
@@ -23,7 +23,7 @@ runs:
       shell: bash
 
     - name: Set up cache
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       id: cache
       with:
         path: .venv

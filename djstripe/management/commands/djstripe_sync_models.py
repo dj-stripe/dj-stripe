@@ -269,7 +269,9 @@ class Command(BaseCommand):
                                     try:
                                         # need to prepend "field_name." to each of the entry in the expand_fields list
                                         related_model_expand_fields = map(
-                                            lambda i: f"data.{field_inst.name}.{related_model_expand_field}.{i}",
+                                            lambda i: (
+                                                f"data.{field_inst.name}.{related_model_expand_field}.{i}"
+                                            ),
                                             related_model_expand_field_inst.related_model.expand_fields,
                                         )
 

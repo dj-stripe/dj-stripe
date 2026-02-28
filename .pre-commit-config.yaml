@@ -4,7 +4,7 @@ fail_fast: false
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: "v5.0.0"
+    rev: "v6.0.0"
     hooks:
       - id: check-builtin-literals
       - id: check-case-conflict
@@ -19,18 +19,18 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.8.2"
+    rev: "v0.15.4"
     hooks:
       - id: ruff
       - id: ruff-format
 
   - repo: https://github.com/asottile/pyupgrade
-    rev: "v3.19.0"
+    rev: "v3.21.2"
     hooks:
       - id: pyupgrade
 
   - repo: https://github.com/adamchainz/django-upgrade
-    rev: "1.13.0"
+    rev: "1.30.0"
     hooks:
       - id: django-upgrade
         args: [--target-version, "3.2"]

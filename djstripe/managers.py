@@ -66,7 +66,7 @@ class SubscriptionManager(models.Manager):
         canceled = self.canceled().count()
         active = self.active().count()
         if active == 0:
-            return decimal.Decimal("0")
+            return decimal.Decimal(0)
         return decimal.Decimal(str(canceled)) / decimal.Decimal(str(active))
 
     def trialing(self):
