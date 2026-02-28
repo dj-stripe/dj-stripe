@@ -1,5 +1,6 @@
 import stripe
 from django.db import transaction
+from stripe import AuthenticationError, InvalidRequestError, PermissionError
 
 from ..enums import APIKeyType
 from ..settings import djstripe_settings
@@ -278,26 +279,40 @@ class Account(StripeModel):
             )
             if file_upload_id:
                 try:
+                    file = File(id=file_upload_id)
+                    try:
+                        file_data = file.api_retrieve(
+                            stripe_account=self.id,
+                            api_key=api_key,
+                        )
+                    except InvalidRequestError as e:
+                        # Connect Express accounts can reference platform-owned
+                        # branding files. Retry without connected-account context.
+                        if "No such file upload:" in str(e) or "No such file:" in str(
+                            e
+                        ):
+                            file_data = file.api_retrieve(api_key=api_key)
+                        else:
+                            raise
+
                     File.sync_from_stripe_data(
-                        File(id=file_upload_id).api_retrieve(
-                            stripe_account=self.id, api_key=api_key
-                        ),
+                        file_data,
                         api_key=api_key,
                     )
-                except stripe.error.PermissionError:
+                except PermissionError:
                     # No permission to retrieve the data with the key
                     logger.warning(
                         f"Cannot retrieve business branding {field} for acct"
                         f" {self.id} with the key."
                     )
-                except stripe.error.InvalidRequestError as e:
+                except InvalidRequestError as e:
                     if "a similar object exists in" in str(e):
                         # HACK around a Stripe bug.
                         # See #830 and commit c09d25f52bfdcf883e9eec0bf6c25af1771a644a
                         pass
                     else:
                         raise
-                except stripe.error.AuthenticationError:
+                except AuthenticationError:
                     # This may happen if saving an account that has a logo, using
                     # a different API key to the default.
                     # OK, concretely, there is a chicken-and-egg problem here.

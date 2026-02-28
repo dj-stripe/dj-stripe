@@ -187,6 +187,49 @@ class TestAccount(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch("stripe.Account.retrieve", autospec=True)
     @patch(
         "stripe.File.retrieve",
+        autospec=True,
+    )
+    def test__attach_objects_post_save_hook_retries_platform_file_context(
+        self, fileupload_retrieve_mock, account_retrieve_mock
+    ):
+        fake_account = deepcopy(FAKE_EXPRESS_ACCOUNT)
+        fake_account["settings"]["branding"]["icon"] = None
+        fake_account["settings"]["branding"]["logo"] = FAKE_FILEUPLOAD_LOGO["id"]
+        account_retrieve_mock.return_value = fake_account
+
+        fileupload_retrieve_mock.side_effect = [
+            stripe.InvalidRequestError(
+                f"No such file upload: '{FAKE_FILEUPLOAD_LOGO['id']}'", {}
+            ),
+            deepcopy(FAKE_FILEUPLOAD_LOGO),
+        ]
+
+        account = Account.sync_from_stripe_data(fake_account)
+        assert account.branding_logo.id == FAKE_FILEUPLOAD_LOGO["id"]
+
+        fileupload_retrieve_mock.assert_has_calls(
+            [
+                call(
+                    id=fake_account["settings"]["branding"]["logo"],
+                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                    expand=[],
+                    stripe_account=fake_account["id"],
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                ),
+                call(
+                    id=fake_account["settings"]["branding"]["logo"],
+                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
+                    expand=[],
+                    stripe_account=None,
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                ),
+            ]
+        )
+        assert fileupload_retrieve_mock.call_count == 2
+
+    @patch("stripe.Account.retrieve", autospec=True)
+    @patch(
+        "stripe.File.retrieve",
         return_value=deepcopy(FAKE_FILEUPLOAD_LOGO),
         autospec=True,
     )
