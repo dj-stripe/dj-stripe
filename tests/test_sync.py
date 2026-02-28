@@ -4,16 +4,18 @@ dj-stripe Sync Method Tests.
 
 import contextlib
 from copy import deepcopy
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from stripe import InvalidRequestError
 
 from djstripe.models import Customer
+from djstripe.management.commands.djstripe_sync_models import Command
+from djstripe.settings import djstripe_settings
 from djstripe.sync import sync_subscriber
 
-from . import FAKE_CUSTOMER
+from . import FAKE_CUSTOMER, StripeList
 from .conftest import CreateAccountMixin
 
 
@@ -80,3 +82,42 @@ class TestSyncSubscriber(CreateAccountMixin, TestCase):
             sync_subscriber(self.user)
 
         self.assertEqual("ERROR: No such customer:", stdout.getvalue().strip())
+
+
+class TestSyncModelsCommand(CreateAccountMixin, TestCase):
+    @patch("stripe.Customer.list_sources", autospec=True)
+    def test_sync_bank_accounts_and_cards_customer_does_not_pass_id(
+        self, list_sources_mock
+    ):
+        command = Command()
+        customer = Customer(id="cus_test")
+        list_sources_mock.return_value = StripeList(data=[])
+
+        with patch.object(command, "start_sync") as start_sync_mock:
+            command.sync_bank_accounts_and_cards(
+                customer, stripe_account="acct_test", api_key="sk_test_123"
+            )
+
+        list_sources_mock.assert_has_calls(
+            [
+                call(
+                    customer="cus_test",
+                    object="card",
+                    api_key="sk_test_123",
+                    stripe_account="acct_test",
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                ),
+                call(
+                    customer="cus_test",
+                    object="bank_account",
+                    api_key="sk_test_123",
+                    stripe_account="acct_test",
+                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
+                ),
+            ]
+        )
+
+        for _, kwargs in list_sources_mock.call_args_list:
+            assert "id" not in kwargs
+
+        assert start_sync_mock.call_count == 2

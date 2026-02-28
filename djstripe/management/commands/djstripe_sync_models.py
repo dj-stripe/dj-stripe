@@ -487,7 +487,6 @@ class Command(BaseCommand):
         """
         type = getattr(instance, "type", None)
         kwargs = {
-            "id": instance.id,
             "api_key": api_key,
             "stripe_account": stripe_account,
             "stripe_version": djstripe_settings.STRIPE_API_VERSION,
@@ -498,17 +497,15 @@ class Command(BaseCommand):
         ):
             # fetch all Card and BankAccount objects associated with the instance
             items = models.Account.stripe_class.list_external_accounts(
-                **kwargs
+                id=instance.id, **kwargs
             ).auto_paging_iter()
 
             self.start_sync(items, instance, api_key=api_key)
         elif isinstance(instance, models.Customer):
             for object in ("card", "bank_account"):
-                kwargs["object"] = object
-
                 # fetch all Card and BankAccount objects associated with the instance
                 items = models.Customer.stripe_class.list_sources(
-                    customer=instance.id, **kwargs
+                    customer=instance.id, object=object, **kwargs
                 ).auto_paging_iter()
 
                 self.start_sync(items, instance, api_key=api_key)
