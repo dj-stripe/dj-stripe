@@ -279,11 +279,10 @@ class Charge(StripeModel):
     @property
     def fraudulent(self) -> bool:
         fraud_details = self.stripe_data.get("fraud_details")
-        return (
-            (fraud_details and list(fraud_details.values())[0] == "fraudulent")
-            if fraud_details
-            else False
-        )
+        if fraud_details and isinstance(fraud_details, dict) and fraud_details:
+            values = list(fraud_details.values())
+            return values[0] == "fraudulent" if values else False
+        return False
 
     def _calculate_refund_amount(self, amount: Decimal | None) -> int:
         """
@@ -452,7 +451,13 @@ class Product(StripeModel):
             return None
         if isinstance(default_price_id, dict):
             default_price_id = default_price_id["id"]
-        return Price.objects.get(id=default_price_id)
+        try:
+            return Price.objects.get(id=default_price_id)
+        except Price.DoesNotExist:
+            logger.warning(
+                f"Default price {default_price_id} for product {self.id} does not exist"
+            )
+            return None
 
     @property
     def type(self):
@@ -1175,9 +1180,13 @@ class Dispute(StripeModel):
     )
 
     def __str__(self):
-        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
-        status = enums.DisputeStatus.humanize(self.status)
-        return f"{amount} ({status}) "
+        amount_value = self.stripe_data.get("amount", 0)
+        currency = self.stripe_data.get("currency", "usd")
+        amount = get_friendly_currency_amount(amount_value / 100, currency)
+        status = self.stripe_data.get("status", "unknown")
+        if hasattr(enums.DisputeStatus, "humanize"):
+            status = enums.DisputeStatus.humanize(status)
+        return f"{amount} ({status})"
 
     @property
     def amount(self) -> int:
@@ -1213,10 +1222,14 @@ class Dispute(StripeModel):
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
-        return (
-            f"{self._get_base_stripe_dashboard_url()}"
-            f"{self.stripe_dashboard_item_name}/{self.payment_intent.id}"
-        )
+        if self.payment_intent:
+            return (
+                f"{self._get_base_stripe_dashboard_url()}"
+                f"{self.stripe_dashboard_item_name}/{self.payment_intent.id}"
+            )
+        if self.charge:
+            return self.charge.get_stripe_dashboard_url()
+        return self._get_base_stripe_dashboard_url() + self.stripe_dashboard_item_name
 
     def _attach_objects_post_save_hook(
         self,
@@ -1230,10 +1243,12 @@ class Dispute(StripeModel):
         )
 
         # iterate and sync every balance transaction
-        for stripe_balance_transaction in self.balance_transactions:
-            BalanceTransaction.sync_from_stripe_data(
-                stripe_balance_transaction, api_key=api_key
-            )
+        balance_transactions = self.balance_transactions
+        if balance_transactions:
+            for stripe_balance_transaction in balance_transactions:
+                BalanceTransaction.sync_from_stripe_data(
+                    stripe_balance_transaction, api_key=api_key
+                )
 
 
 class Event(StripeModel):
@@ -1344,8 +1359,14 @@ class Event(StripeModel):
 
     @property
     def customer(self):
-        data = self.data["object"]
-        if data["object"] == "customer":
+        if not self.data or not isinstance(self.data, dict):
+            return None
+        
+        data = self.data.get("object")
+        if not data or not isinstance(data, dict):
+            return None
+        
+        if data.get("object") == "customer":
             customer_id = get_id_from_stripe_data(data.get("id"))
         else:
             customer_id = get_id_from_stripe_data(data.get("customer"))
@@ -1356,6 +1377,7 @@ class Event(StripeModel):
                 stripe_account=getattr(self.djstripe_owner_account, "id", None),
                 api_key=self.default_api_key,
             )
+        return None
 
 
 class File(StripeModel):
@@ -1375,7 +1397,7 @@ class File(StripeModel):
         return data and data.get("object") in ("file", "file_upload")
 
     def __str__(self):
-        return self.filename
+        return self.filename or f"File {self.id}"
 
     @property
     def filename(self):
@@ -1418,7 +1440,7 @@ class FileLink(StripeModel):
     file = StripeForeignKey("File", on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.url
+        return self.url or f"FileLink {self.id}"
 
     @property
     def expires_at(self):
@@ -1752,7 +1774,10 @@ class Price(StripeModel):
         return price
 
     def __str__(self):
-        return f"{self.human_readable_price} for {self.product.name}"
+        product = self.product
+        if product and hasattr(product, 'name'):
+            return f"{self.human_readable_price} for {product.name}"
+        return str(self.human_readable_price)
 
     @property
     def human_readable_price(self):
@@ -1760,20 +1785,24 @@ class Price(StripeModel):
             unit_amount = (self.unit_amount or 0) / 100
             amount = get_friendly_currency_amount(unit_amount, self.currency)
         elif self.tiers:
-            # tiered billing scheme
-            tier_1 = self.tiers[0]
-            formatted_unit_amount_tier_1 = get_friendly_currency_amount(
-                (tier_1["unit_amount"] or 0) / 100, self.currency
-            )
-            amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
 
-            # stripe shows flat fee even if it is set to 0.00
-            flat_amount_tier_1 = tier_1["flat_amount"]
-            if flat_amount_tier_1 is not None:
-                formatted_flat_amount_tier_1 = get_friendly_currency_amount(
-                    flat_amount_tier_1 / 100, self.currency
+            if len(self.tiers) > 0:
+                tier_1 = self.tiers[0]
+                unit_amount_tier_1 = tier_1.get("unit_amount", 0) or 0
+                formatted_unit_amount_tier_1 = get_friendly_currency_amount(
+                    unit_amount_tier_1 / 100, self.currency
                 )
-                amount = f"{amount} + {formatted_flat_amount_tier_1}"
+                amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
+
+
+                flat_amount_tier_1 = tier_1.get("flat_amount")
+                if flat_amount_tier_1 is not None:
+                    formatted_flat_amount_tier_1 = get_friendly_currency_amount(
+                        flat_amount_tier_1 / 100, self.currency
+                    )
+                    amount = f"{amount} + {formatted_flat_amount_tier_1}"
+            else:
+                amount = "Tiered pricing"
         else:
             amount = "0"
 
