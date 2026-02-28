@@ -21,3 +21,5 @@ dj_stripe.egg-info
 
 # Do not commit Poetry lockfiles for libraries
 poetry.lock
+
+dist/
