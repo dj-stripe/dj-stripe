@@ -1,5 +1,7 @@
 import stripe
+from django.db import models
 
+from ..fields import StripeForeignKey
 from .base import StripeModel
 
 
@@ -23,6 +25,31 @@ class Feature(StripeModel):
     @property
     def name(self) -> str:
         return self.stripe_data["name"]
+
+
+class ProductFeature(StripeModel):
+    """
+    A product_feature represents a feature attached to a product.
+    When a product is purchased that has a feature, Stripe will create
+    an entitlement to that feature for the purchasing customer.
+
+    Stripe Documentation: https://stripe.com/docs/api/product-feature
+    """
+
+    stripe_class = stripe.ProductFeature
+
+    product = StripeForeignKey(
+        "Product",
+        on_delete=models.CASCADE,
+        related_name="features",
+        help_text="The product this feature is attached to.",
+    )
+    entitlement_feature = StripeForeignKey(
+        "Feature",
+        on_delete=models.CASCADE,
+        related_name="product_features",
+        help_text="The feature that this product feature references.",
+    )
 
 
 class ActiveEntitlement(StripeModel):

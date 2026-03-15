@@ -666,6 +666,12 @@ class FeatureAdmin(StripeModelAdmin):
     pass
 
 
+@admin.register(models.ProductFeature)
+class ProductFeatureAdmin(StripeModelAdmin):
+    list_display = ("id", "product", "entitlement_feature")
+    list_filter = ("product",)
+
+
 @admin.register(models.ActiveEntitlement)
 class ActiveEntitlementAdmin(StripeModelAdmin):
     pass

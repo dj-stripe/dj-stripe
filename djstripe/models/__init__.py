@@ -43,7 +43,7 @@ from .core import (
     Refund,
     SetupIntent,
 )
-from .entitlements import ActiveEntitlement, Feature
+from .entitlements import ActiveEntitlement, Feature, ProductFeature
 from .identity import VerificationReport, VerificationSession
 from .issuing import (
     IssuingAuthorization,
@@ -101,6 +101,7 @@ __all__ = [
     "Plan",
     "Price",
     "Product",
+    "ProductFeature",
     "PromotionCode",
     "Refund",
     "Review",

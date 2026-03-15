@@ -458,6 +458,49 @@ class Product(StripeModel):
     def type(self):
         return self.stripe_data.get("type")
 
+    def _attach_objects_post_save_hook(
+        self,
+        cls,
+        data,
+        api_key=djstripe_settings.STRIPE_SECRET_KEY,
+        pending_relations=None,
+    ):
+        super()._attach_objects_post_save_hook(
+            cls, data, api_key=api_key, pending_relations=pending_relations
+        )
+
+        self._sync_product_features(api_key=api_key)
+
+    def _sync_product_features(self, api_key=djstripe_settings.STRIPE_SECRET_KEY):
+        from .entitlements import ProductFeature
+
+        stripe_account = self.djstripe_owner_account
+        stripe_account_id = str(stripe_account.id) if stripe_account else None
+
+        try:
+            features_data = stripe.Product.list_features(
+                self.id,
+                api_key=api_key,
+                stripe_account=stripe_account_id,
+            )
+        except Exception:
+            logger.warning(
+                "Failed to fetch product features for %s", self.id, exc_info=True
+            )
+            return
+
+        synced_pks = []
+        for feature_data in features_data.auto_paging_iter():
+            # Inject product reference so the FK can be resolved
+            feature_data["product"] = self.id
+            instance = ProductFeature.sync_from_stripe_data(
+                feature_data, api_key=api_key
+            )
+            synced_pks.append(instance.pk)
+
+        # Remove features no longer attached to this product
+        self.features.exclude(pk__in=synced_pks).delete()
+
 
 class Customer(StripeModel):
     """
