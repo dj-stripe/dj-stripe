@@ -70,7 +70,7 @@ Ready to contribute? Here's how to set up local development.
 1.  Set up [pre-commit](https://pre-commit.com/):
 
         $ git init # A git repo is required to install pre-commit
-        $ pre-commit install
+        $ pre-commit install --with dev
 
 1.  Set up your test database. If you're running tests using PostgreSQL:
 
