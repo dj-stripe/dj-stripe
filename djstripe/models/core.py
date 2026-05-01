@@ -942,8 +942,9 @@ class Customer(StripeModel):
 
         self.subscriber = None
 
-        # Remove sources
-        self.default_source = None
+        # Remove sources. default_source is a read-only @property over
+        # stripe_data, so write to the underlying dict instead.
+        self.stripe_data["default_source"] = None
         for source in self.sources.all():
             source.detach()
 

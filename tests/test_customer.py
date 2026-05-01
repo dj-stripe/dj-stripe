@@ -777,6 +777,33 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             charge._calculate_refund_amount(amount=decimal.Decimal("600.00")), 50000
         )
 
+    @patch(
+        "stripe.Customer.delete_source",
+        autospec=True,
+    )
+    @patch(
+        "stripe.Customer.retrieve_source",
+        return_value=deepcopy(FAKE_CARD),
+        autospec=True,
+    )
+    @patch("djstripe.models.Customer._api_delete", autospec=True)
+    def test_purge_clears_default_source(
+        self,
+        api_delete_mock,
+        source_retrieve_mock,
+        source_delete_mock,
+    ):
+        # default_source is now a read-only @property over stripe_data, so
+        # purge() must write to stripe_data rather than the descriptor.
+        self.assertEqual(self.customer.default_source, self.payment_method.id)
+
+        self.customer.purge()
+
+        self.customer.refresh_from_db()
+        self.assertIsNone(self.customer.default_source)
+        self.assertIsNotNone(self.customer.date_purged)
+        self.assertIsNone(self.customer.subscriber)
+
     def test_calculate_refund_amount_after_partial_refund(self):
         # amount_refunded comes from stripe_data and is in cents; amount is
         # stored in dollars. Mixing units used to produce negative results on
