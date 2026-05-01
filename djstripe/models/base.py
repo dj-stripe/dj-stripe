@@ -778,6 +778,16 @@ class StripeModel(StripeBaseModel):
                         # but still present during sync. For example, if a refund is
                         # issued on a charge whose payment method has been deleted.
                         return None, False
+                    elif (
+                        "No such subscription_item:" in str(e)
+                        or "Invalid subscription_item id:" in str(e)
+                    ):
+                        # subscription items removed during a SubscriptionSchedule
+                        # phase change can become irretrievable from Stripe even
+                        # though invoices created during the prior phase still
+                        # reference their ids.
+                        # Context: https://github.com/dj-stripe/dj-stripe/issues/2025
+                        return None, False
                     else:
                         raise
                 should_expand = False
@@ -932,6 +942,12 @@ class StripeModel(StripeBaseModel):
 
         If the subscription item doesn't exist already then it is created.
 
+        Items removed from the subscription upstream are NOT deleted locally:
+        Stripe still references their ids on invoices created during prior
+        phases (see https://github.com/dj-stripe/dj-stripe/issues/2025), and
+        deleting them would break LineItem.subscription_item FK resolution
+        when those invoices are later synced.
+
         :param target_cls: The target class to instantiate per invoice item.
         :type target_cls: type[djstripe.models.SubscriptionItem]
         :param data: The data dictionary received from the Stripe API.
@@ -942,10 +958,8 @@ class StripeModel(StripeBaseModel):
 
         items = data.get("items")
         if not items:
-            subscription.items.delete()
             return []
 
-        pks = []
         subscriptionitems = []
         for item_data in items.auto_paging_iter():
             item, _ = target_cls._get_or_create_from_stripe_object(
@@ -955,9 +969,7 @@ class StripeModel(StripeBaseModel):
             # sync the SubscriptionItem
             target_cls.sync_from_stripe_data(item_data, api_key=api_key)
 
-            pks.append(item.pk)
             subscriptionitems.append(item)
-        subscription.items.exclude(pk__in=pks).delete()
 
         return subscriptionitems
 

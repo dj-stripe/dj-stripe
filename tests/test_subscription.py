@@ -16,7 +16,7 @@ from django.utils import timezone
 from stripe import InvalidRequestError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Plan, Product, Subscription
+from djstripe.models import Plan, Product, Subscription, SubscriptionItem
 from djstripe.models.billing import Invoice
 
 from . import (
@@ -964,13 +964,16 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         items = subscription.items.all()
         self.assertEqual(2, len(items))
 
-        # Simulate a webhook received with one plan that has been removed
+        # Simulate a webhook received with one plan that has been removed.
+        # Items removed upstream are intentionally preserved locally so that
+        # invoices created during the prior phase can still resolve their
+        # LineItem.subscription_item FKs (see issue #2025).
         del subscription_fake["items"]["data"][1]
         subscription_fake["items"]["total_count"] = 1
 
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         items = subscription.items.all()
-        self.assertEqual(1, len(items))
+        self.assertEqual(2, len(items))
 
         # delete pydanny customer as that causes issues with Invoice and Latest_invoice FKs
         self.customer.delete()
@@ -1086,14 +1089,17 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         items = subscription.items.all()
         self.assertEqual(2, len(items))
 
-        # Simulate a webhook received with no more plan
+        # Simulate a webhook received with no more plan.
+        # Items removed upstream are intentionally preserved locally so that
+        # invoices created during the prior phase can still resolve their
+        # LineItem.subscription_item FKs (see issue #2025).
         del fake_subscription["items"]["data"][1]
         del fake_subscription["items"]["data"][0]
         fake_subscription["items"]["total_count"] = 0
 
         subscription = Subscription.sync_from_stripe_data(fake_subscription)
         items = subscription.items.all()
-        self.assertEqual(0, len(items))
+        self.assertEqual(2, len(items))
 
         self.assert_fks(
             subscription,
@@ -1326,3 +1332,89 @@ class TestSubscriptionDecimal(CreateAccountMixin):
 
         assert isinstance(field_data, Decimal)
         assert field_data == expected
+
+
+class StaleSubscriptionItemRegressionTest(CreateAccountMixin, TestCase):
+    """
+    Regression tests for https://github.com/dj-stripe/dj-stripe/issues/2025
+
+    After a SubscriptionSchedule phase change, invoices created during the prior
+    phase still reference the now-removed SubscriptionItem ids. Two failure
+    modes existed:
+      1. The old `customer.subscription.updated` sync hard-deleted local
+         SubscriptionItems no longer in the items list, breaking later
+         LineItem.subscription_item FK resolution.
+      2. If the FK resolution did fall through to a Stripe API retrieve,
+         Stripe also no longer has the SubscriptionItem, so it returned a 404
+         which crashed the webhook handler.
+    """
+
+    def _build_data_without_item(self, item_id):
+        """Build a `data` payload whose `items` list does not include item_id."""
+        from tests import StripeList
+
+        empty_items = StripeList(
+            {
+                "object": "list",
+                "url": "/v1/subscription_items",
+                "has_more": False,
+                "data": [],
+            }
+        )
+        return {"id": "sub_test_2025", "items": empty_items}
+
+    def test_subscription_items_preserved_after_upstream_removal(self):
+        # Build minimal rows directly. Plan/Subscription expose most fields
+        # as read-only @properties over stripe_data; only the FK columns
+        # are concrete model fields.
+        from djstripe.models import Customer
+
+        customer = Customer(id="cus_test_2025")
+        customer.save()
+        plan = Plan(id="plan_test_2025", stripe_data={"product": "prod_x"})
+        plan.save()
+        subscription = Subscription(
+            id="sub_test_2025",
+            customer=customer,
+            stripe_data={"status": SubscriptionStatus.active},
+        )
+        subscription.save()
+        item = SubscriptionItem(
+            id="si_stale_2025",
+            subscription=subscription,
+            plan=plan,
+            stripe_data={"id": "si_stale_2025"},
+        )
+        item.save()
+
+        # Sync the subscription with a payload whose items list excludes our item.
+        Subscription._stripe_object_to_subscription_items(
+            target_cls=SubscriptionItem,
+            data=self._build_data_without_item(item.id),
+            subscription=subscription,
+        )
+
+        # The item must still exist locally so future invoice LineItem FKs
+        # referencing it can resolve without hitting the Stripe API.
+        self.assertTrue(SubscriptionItem.objects.filter(id=item.id).exists())
+
+    def test_get_or_create_returns_none_for_404_subscription_item(self):
+        # Stripe's two known 404 messages for stale subscription_items.
+        for message in (
+            "No such subscription_item: si_gone",
+            "Invalid subscription_item id: si_gone",
+        ):
+            with patch.object(
+                SubscriptionItem,
+                "api_retrieve",
+                side_effect=InvalidRequestError(
+                    message=message, param="subscription_item"
+                ),
+            ):
+                result, created = SubscriptionItem._get_or_create_from_stripe_object(
+                    {"subscription_item": "si_gone"},
+                    field_name="subscription_item",
+                    refetch=True,
+                )
+            self.assertIsNone(result, msg=f"Expected None for {message!r}")
+            self.assertFalse(created, msg=f"Expected created=False for {message!r}")
