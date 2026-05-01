@@ -777,6 +777,24 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             charge._calculate_refund_amount(amount=decimal.Decimal("600.00")), 50000
         )
 
+    def test_calculate_refund_amount_after_partial_refund(self):
+        # amount_refunded comes from stripe_data and is in cents; amount is
+        # stored in dollars. Mixing units used to produce negative results on
+        # subsequent refunds.
+        charge = Charge(
+            id="ch_111111",
+            customer=self.customer,
+            amount=decimal.Decimal("500.00"),
+            stripe_data={"amount_refunded": 30000},
+        )
+        self.assertEqual(charge._calculate_refund_amount(amount=None), 20000)
+        self.assertEqual(
+            charge._calculate_refund_amount(amount=decimal.Decimal("100.00")), 10000
+        )
+        self.assertEqual(
+            charge._calculate_refund_amount(amount=decimal.Decimal("300.00")), 20000
+        )
+
     @patch(
         "djstripe.models.Account.get_default_account",
         autospec=True,

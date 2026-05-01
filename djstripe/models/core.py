@@ -289,7 +289,10 @@ class Charge(StripeModel):
         """
         Returns the amount that can be refunded (in cents)
         """
-        eligible_to_refund = self.amount - (self.amount_refunded or 0)
+        # self.amount is in dollars (StripeDecimalCurrencyAmountField);
+        # amount_refunded comes from stripe_data and is in cents.
+        amount_refunded = Decimal(self.amount_refunded or 0) / 100
+        eligible_to_refund = self.amount - amount_refunded
         amount_to_refund = (
             min(eligible_to_refund, amount) if amount else eligible_to_refund
         )
