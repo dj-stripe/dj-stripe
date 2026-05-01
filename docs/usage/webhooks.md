@@ -43,6 +43,20 @@ Before you can handle webhook events, ensure you've configured your webhook endp
 3. **Database Operations by dj-stripe**: dj-stripe also listens to these signals to perform CRUD operations on corresponding Django models, such as `Charge` or `PaymentMethod`. This ensures that your database stays in sync with the Stripe data.
 4. **Handling Events**: You can handle these signals with custom functions linked via the `djstripe_receiver` decorator.
 
+The `Event` model class is the `sender` of every webhook signal, and the saved
+`Event` instance is passed as the `event` keyword argument. Receivers run
+synchronously inside the same request that delivered the webhook, wrapped in a
+single database transaction. If any receiver — including dj-stripe's own
+internal sync receivers — raises an exception, the transaction is rolled back,
+the `webhook_processing_error` signal fires, and the exception is re-raised so
+Stripe sees a non-2xx response and retries. Make your handlers idempotent.
+
+Receiver ordering follows Django's standard signal semantics (connection order)
+and is not part of dj-stripe's public contract — do not rely on your handler
+running before or after dj-stripe's built-in sync handlers. If you need to read
+the synced model from the database, retrieve it by ID inside the handler rather
+than assuming it has already been written.
+
 ### Implementing Custom Event Handlers
 
 To create custom handlers for Stripe webhook events, follow these steps:
@@ -76,6 +90,18 @@ def handle_payment_method_attached(sender, **kwargs):
     print(f"Payment Method: {payment_method}")
 ```
 
+A single receiver can subscribe to multiple event types by passing a list:
+
+```python
+@djstripe_receiver([
+    "customer.subscription.created",
+    "customer.subscription.updated",
+    "customer.subscription.deleted",
+])
+def handle_subscription_change(sender, event, **kwargs):
+    ...
+```
+
 #### 2. Ensure Proper Loading of Handlers
 
 Ensure that your custom signal handlers are loaded at the appropriate time by including their module in your application's startup sequence. Typically, this can be handled in the `apps.py` of your Django application by overriding the `ready()` method.
@@ -89,6 +115,21 @@ class MyAppConfig(AppConfig):
     def ready(self):
         import my_app.signals  # ensure your signals are imported
 ```
+
+## Webhook lifecycle signals
+
+In addition to the per-event signals described above, dj-stripe emits four
+signals during the lifecycle of every inbound webhook. These are useful for
+cross-cutting concerns like logging, metrics, or auditing, and fire once per
+webhook regardless of event type:
+
+-   `djstripe.signals.webhook_pre_validate(instance, api_key)` — before signature validation.
+-   `djstripe.signals.webhook_post_validate(instance, api_key, valid)` — after signature validation, including failed validations.
+-   `djstripe.signals.webhook_pre_process(instance, api_key)` — before the event is processed. Not fired if validation failed.
+-   `djstripe.signals.webhook_post_process(instance, api_key)` — after a successful processing pass.
+-   `djstripe.signals.webhook_processing_error(instance, api_key, exception, data)` — when processing raises.
+
+`instance` is the `WebhookEndpoint` model that received the request.
 
 ## Official documentation
 
