@@ -23,15 +23,34 @@ from . import (
 from .conftest import CreateAccountMixin
 
 
+def _unix(*args, **kwargs):
+    """Build a Unix timestamp from a datetime spec."""
+    return int(datetime.datetime(*args, tzinfo=get_timezone_utc(), **kwargs).timestamp())
+
+
+def _make_subscription(*, id, customer, plan, status, start_date, canceled_at=None):
+    """Create a Subscription row with stripe_data populated for ORM lookups.
+
+    Most Subscription fields (status, start_date, canceled_at, plan, ...) live
+    in stripe_data since the dj-stripe 2.10 refactor, so the manager methods
+    filter via JSONField key paths.
+    """
+    stripe_data = {
+        "id": id,
+        "object": "subscription",
+        "status": status,
+        "start_date": start_date,
+        "plan": {"id": plan.id} if plan is not None else None,
+    }
+    if canceled_at is not None:
+        stripe_data["canceled_at"] = canceled_at
+    sub = Subscription(id=id, customer=customer, stripe_data=stripe_data)
+    sub.save()
+    return sub
+
+
 class SubscriptionManagerTest(CreateAccountMixin, TestCase):
     def setUp(self):
-        # create customers and current subscription records
-        period_start = datetime.datetime(2013, 4, 1, tzinfo=get_timezone_utc())
-        period_end = datetime.datetime(2013, 4, 30, tzinfo=get_timezone_utc())
-        start = datetime.datetime(
-            2013, 1, 1, 0, 0, 1, tzinfo=get_timezone_utc()
-        )  # more realistic start
-
         with patch(
             "stripe.Product.retrieve",
             return_value=deepcopy(FAKE_PRODUCT),
@@ -40,58 +59,51 @@ class SubscriptionManagerTest(CreateAccountMixin, TestCase):
             self.plan = Plan.sync_from_stripe_data(FAKE_PLAN)
             self.plan2 = Plan.sync_from_stripe_data(FAKE_PLAN_II)
 
+        # 10 active subscriptions on plan, started in Jan 2013
         for i in range(10):
             user = get_user_model().objects.create_user(
-                username=f"patrick{i}",
-                email=f"patrick{i}@example.com",
+                username=f"patrick{i}", email=f"patrick{i}@example.com"
             )
             customer = Customer.objects.create(
-                subscriber=user,
-                id=f"cus_xxxxxxxxxxxxxx{i}",
-                livemode=False,
+                subscriber=user, id=f"cus_xxxxxxxxxxxxxx{i}", livemode=False
             )
-
-            Subscription.objects.create(
+            _make_subscription(
                 id=f"sub_xxxxxxxxxxxxxx{i}",
                 customer=customer,
                 plan=self.plan,
                 status="active",
-                quantity=1,
+                start_date=_unix(2013, 1, 1, 0, 0, 1),
             )
 
+        # 1 canceled subscription on plan, canceled in April 2013
         user = get_user_model().objects.create_user(
             username="patrick11", email="patrick11@example.com"
         )
         customer = Customer.objects.create(
             subscriber=user, id="cus_xxxxxxxxxxxxxx11", livemode=False
         )
-        Subscription.objects.create(
+        _make_subscription(
             id="sub_xxxxxxxxxxxxxx11",
             customer=customer,
             plan=self.plan,
-            current_period_start=period_start,
-            current_period_end=period_end,
             status="canceled",
-            canceled_at=period_end,
-            start_date=start,
-            quantity=1,
+            start_date=_unix(2013, 1, 1, 0, 0, 1),
+            canceled_at=_unix(2013, 4, 30),
         )
 
+        # 1 active subscription on plan2
         user = get_user_model().objects.create_user(
             username="patrick12", email="patrick12@example.com"
         )
         customer = Customer.objects.create(
             subscriber=user, id="cus_xxxxxxxxxxxxxx12", livemode=False
         )
-        Subscription.objects.create(
+        _make_subscription(
             id="sub_xxxxxxxxxxxxxx12",
             customer=customer,
             plan=self.plan2,
-            current_period_start=period_start,
-            current_period_end=period_end,
             status="active",
-            start_date=start,
-            quantity=1,
+            start_date=_unix(2013, 1, 1, 0, 0, 1),
         )
 
     def test_started_during_no_records(self):
@@ -109,31 +121,38 @@ class SubscriptionManagerTest(CreateAccountMixin, TestCase):
     def test_active_all(self):
         self.assertEqual(Subscription.objects.active().count(), 11)
 
-    def test_started_plan_summary(self):
-        for plan in Subscription.objects.started_plan_summary_for(2013, 1):
-            if plan["plan"] == self.plan:
-                self.assertEqual(plan["count"], 11)
-            if plan["plan"] == self.plan2:
-                self.assertEqual(plan["count"], 1)
-
-    def test_active_plan_summary(self):
-        for plan in Subscription.objects.active_plan_summary():
-            if plan["plan"] == self.plan:
-                self.assertEqual(plan["count"], 10)
-            if plan["plan"] == self.plan2:
-                self.assertEqual(plan["count"], 1)
-
-    def test_canceled_plan_summary(self):
-        for plan in Subscription.objects.canceled_plan_summary_for(2013, 1):
-            if plan["plan"] == self.plan:
-                self.assertEqual(plan["count"], 1)
-            if plan["plan"] == self.plan2:
-                self.assertEqual(plan["count"], 0)
-
     def test_churn(self):
         self.assertEqual(
             Subscription.objects.churn(), decimal.Decimal(1) / decimal.Decimal(11)
         )
+
+    def test_started_plan_summary(self):
+        results = list(Subscription.objects.started_plan_summary_for(2013, 1))
+        # 11 subscriptions on plan, 1 on plan2
+        keyed = {r["stripe_data__plan__id"]: r["count"] for r in results}
+        self.assertEqual(keyed.get(self.plan.id), 11)
+        self.assertEqual(keyed.get(self.plan2.id), 1)
+
+    def test_active_plan_summary(self):
+        results = list(Subscription.objects.active_plan_summary())
+        # 10 active on plan, 1 active on plan2 (canceled one excluded)
+        keyed = {r["stripe_data__plan__id"]: r["count"] for r in results}
+        self.assertEqual(keyed.get(self.plan.id), 10)
+        self.assertEqual(keyed.get(self.plan2.id), 1)
+
+    def test_canceled_plan_summary(self):
+        results = list(Subscription.objects.canceled_plan_summary_for(2013, 4))
+        keyed = {r["stripe_data__plan__id"]: r["count"] for r in results}
+        self.assertEqual(keyed.get(self.plan.id), 1)
+
+    def test_status_filter_does_not_raise_field_error(self):
+        # Regression test for issue #2197: Subscription.status was demoted from
+        # a model column to a @property over stripe_data, but the manager
+        # methods kept filtering on `status` as if it were still a column,
+        # raising FieldError. Each lookup should now produce a queryset
+        # backed by a stripe_data JSON path, not raise.
+        for method in ("active", "canceled", "trialing", "past_due", "incomplete"):
+            list(getattr(Subscription.objects, method)())
 
 
 class TransferManagerTest(TestCase):
@@ -166,93 +185,93 @@ class TransferManagerTest(TestCase):
         self.assertEqual(Transfer.objects.during(2015, 8).count(), 2)
 
         totals = Transfer.objects.paid_totals_for(2015, 12)
-        self.assertEqual(totals["total_amount"], decimal.Decimal("190.10"))
+        self.assertEqual(totals["total_amount"], 19010)
 
 
 class ChargeManagerTest(TestCase):
     def setUp(self):
         customer = Customer.objects.create(id="cus_XXXXXXX", livemode=False)
 
-        self.march_charge = Charge.objects.create(
+        def make_charge(*, id, created, amount, amount_refunded, status, paid=False):
+            stripe_data = {
+                "id": id,
+                "object": "charge",
+                "amount_refunded": int(amount_refunded * 100)
+                if isinstance(amount_refunded, decimal.Decimal)
+                else amount_refunded,
+                "paid": paid,
+                "refunded": False,
+                "disputed": False,
+            }
+            charge = Charge(
+                id=id,
+                customer=customer,
+                created=created,
+                amount=amount,
+                currency="usd",
+                status=status,
+                stripe_data=stripe_data,
+            )
+            charge.save()
+            return charge
+
+        self.march_charge = make_charge(
             id="ch_XXXXMAR1",
-            customer=customer,
             created=datetime.datetime(2015, 3, 31, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
-            currency="usd",
             status="pending",
         )
-
-        self.april_charge_1 = Charge.objects.create(
+        self.april_charge_1 = make_charge(
             id="ch_XXXXAPR1",
-            customer=customer,
             created=datetime.datetime(2015, 4, 1, tzinfo=get_timezone_utc()),
             amount=decimal.Decimal("20.15"),
             amount_refunded=0,
-            currency="usd",
             status="succeeded",
             paid=True,
         )
-
-        self.april_charge_2 = Charge.objects.create(
+        self.april_charge_2 = make_charge(
             id="ch_XXXXAPR2",
-            customer=customer,
             created=datetime.datetime(2015, 4, 18, tzinfo=get_timezone_utc()),
             amount=decimal.Decimal("10.35"),
             amount_refunded=decimal.Decimal("5.35"),
-            currency="usd",
             status="succeeded",
             paid=True,
         )
-
-        self.april_charge_3 = Charge.objects.create(
+        self.april_charge_3 = make_charge(
             id="ch_XXXXAPR3",
-            customer=customer,
             created=datetime.datetime(2015, 4, 30, tzinfo=get_timezone_utc()),
             amount=decimal.Decimal("100.00"),
             amount_refunded=decimal.Decimal("80.00"),
-            currency="usd",
             status="pending",
             paid=False,
         )
-
-        self.may_charge = Charge.objects.create(
+        self.may_charge = make_charge(
             id="ch_XXXXMAY1",
-            customer=customer,
             created=datetime.datetime(2015, 5, 1, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
-            currency="usd",
             status="pending",
         )
-
-        self.november_charge = Charge.objects.create(
+        self.november_charge = make_charge(
             id="ch_XXXXNOV1",
-            customer=customer,
             created=datetime.datetime(2015, 11, 16, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
-            currency="usd",
             status="pending",
         )
-
-        self.charge_2014 = Charge.objects.create(
+        self.charge_2014 = make_charge(
             id="ch_XXXX20141",
-            customer=customer,
             created=datetime.datetime(2014, 12, 31, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
-            currency="usd",
             status="pending",
         )
-
-        self.charge_2016 = Charge.objects.create(
+        self.charge_2016 = make_charge(
             id="ch_XXXX20161",
-            customer=customer,
             created=datetime.datetime(2016, 1, 1, tzinfo=get_timezone_utc()),
             amount=0,
             amount_refunded=0,
-            currency="usd",
             status="pending",
         )
 
@@ -289,7 +308,7 @@ class ChargeManagerTest(TestCase):
             "Total amount is not correct.",
         )
         self.assertEqual(
-            decimal.Decimal("5.35"),
+            535,
             paid_totals["total_refunded"],
             "Total amount refunded is not correct.",
         )
