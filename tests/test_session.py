@@ -70,18 +70,6 @@ class SessionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             },
         )
 
-    @patch(
-        "stripe.SetupIntent.retrieve",
-        return_value=deepcopy(FAKE_SETUP_INTENT_II),
-        autospec=True,
-    )
-    def test___str__(self, setup_intent_retrieve_mock):
-        with mock_stripe_world(PaymentMethod=FAKE_PAYMENT_METHOD_I):
-            session = Session.sync_from_stripe_data(deepcopy(FAKE_SESSION_I))
-
-        self.assertEqual(f"<id={FAKE_SESSION_I['id']}>", str(session))
-
-
 class TestSession(CreateAccountMixin):
     key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
 

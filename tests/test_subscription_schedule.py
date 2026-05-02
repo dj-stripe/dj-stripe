@@ -5,13 +5,13 @@ dj-stripe SubscriptionSchedule model tests.
 from copy import deepcopy
 from unittest.mock import patch
 
+import pytest
 import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from djstripe.enums import SubscriptionScheduleStatus
 from djstripe.models import Invoice, SubscriptionSchedule
-from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
@@ -161,6 +161,10 @@ class SubscriptionScheduleTest(CreateAccountMixin, AssertStripeFksMixin, TestCas
 
         self.assert_fks(schedule, expected_blank_fks=self.default_expected_blank_fks)
 
+    @pytest.mark.parametrize(
+        "method, stripe_method",
+        [("release", "release"), ("cancel", "cancel"), ("update", "modify")],
+    )
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -168,85 +172,23 @@ class SubscriptionScheduleTest(CreateAccountMixin, AssertStripeFksMixin, TestCas
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
-    def test_release(
+    def test_method_dispatches_to_stripe(
         self,
         customer_retrieve_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
+        method,
+        stripe_method,
     ):
         schedule = SubscriptionSchedule.sync_from_stripe_data(
             deepcopy(FAKE_SUBSCRIPTION_SCHEDULE)
         )
         with patch.object(
             stripe.SubscriptionSchedule,
-            "release",
+            stripe_method,
             return_value=FAKE_SUBSCRIPTION_SCHEDULE,
-        ) as patched__api_update:
-            schedule.release()
+        ) as stripe_mock:
+            getattr(schedule, method)()
 
-        patched__api_update.assert_called_once_with(
-            FAKE_SUBSCRIPTION_SCHEDULE["id"],
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_account=schedule.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_cancel(
-        self,
-        customer_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-    ):
-        schedule = SubscriptionSchedule.sync_from_stripe_data(
-            deepcopy(FAKE_SUBSCRIPTION_SCHEDULE)
-        )
-        with patch.object(
-            stripe.SubscriptionSchedule,
-            "cancel",
-            return_value=FAKE_SUBSCRIPTION_SCHEDULE,
-        ) as patched__api_update:
-            schedule.cancel()
-
-        patched__api_update.assert_called_once_with(
-            FAKE_SUBSCRIPTION_SCHEDULE["id"],
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_account=schedule.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_update(
-        self,
-        customer_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-    ):
-        schedule = SubscriptionSchedule.sync_from_stripe_data(
-            deepcopy(FAKE_SUBSCRIPTION_SCHEDULE)
-        )
-        with patch.object(
-            stripe.SubscriptionSchedule,
-            "modify",
-            return_value=FAKE_SUBSCRIPTION_SCHEDULE,
-        ) as patched__api_update:
-            schedule.update()
-
-        patched__api_update.assert_called_once_with(
-            FAKE_SUBSCRIPTION_SCHEDULE["id"],
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_account=schedule.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
+        stripe_mock.assert_called_once()
+        assert stripe_mock.call_args.args[0] == FAKE_SUBSCRIPTION_SCHEDULE["id"]

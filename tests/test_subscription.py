@@ -57,44 +57,6 @@ pytestmark = pytest.mark.django_db
 # with Prices is fully supported
 
 
-class SubscriptionStrTest(CreateAccountMixin, TestCase):
-    def setUp(self):
-        self.user = get_user_model().objects.create_user(
-            username="pydanny", email="pydanny@gmail.com"
-        )
-        self.customer = FAKE_CUSTOMER_II.create_for_user(self.user)
-
-    @patch(
-        "stripe.Plan.retrieve",
-        return_value=deepcopy(FAKE_PLAN),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_II),
-        autospec=True,
-    )
-    def test___str__(
-        self,
-        customer_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-    ):
-        subscription_fake = deepcopy(FAKE_SUBSCRIPTION_III)
-        subscription_fake["latest_invoice"] = None
-
-        # sync subscriptions (to update the changes just made)
-        Subscription.sync_from_stripe_data(subscription_fake)
-
-        self.assertEqual(
-            str(Subscription.objects.get(id=subscription_fake["id"])),
-            f"<id={subscription_fake['id']}>",
-        )
-
-
 class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve",

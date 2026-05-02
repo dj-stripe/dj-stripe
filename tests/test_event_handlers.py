@@ -580,110 +580,35 @@ class TestAccountEvents(CreateAccountMixin, EventTestCase):
 
     # account.updated events
 
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_EVENT_STANDARD_ACCOUNT_UPDATED["data"]["object"]),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_standard_account_updated_event(
-        self, event_retrieve_mock, account_retrieve_mock
-    ):
-        # fetch the Stripe Account
-        standard_account = self.standard_account
+    def test_account_updated_event(self):
+        for account_type in ("standard", "express", "custom"):
+            with self.subTest(account_type=account_type):
+                fake_event = deepcopy(
+                    {
+                        "standard": FAKE_EVENT_STANDARD_ACCOUNT_UPDATED,
+                        "express": FAKE_EVENT_EXPRESS_ACCOUNT_UPDATED,
+                        "custom": FAKE_EVENT_CUSTOM_ACCOUNT_UPDATED,
+                    }[account_type]
+                )
+                account = getattr(self, f"{account_type}_account")
+                self.assertEqual(account.metadata, {})
 
-        # assert metadata is empty
-        self.assertEqual(standard_account.metadata, {})
+                with (
+                    patch(
+                        "stripe.Account.retrieve",
+                        return_value=deepcopy(fake_event["data"]["object"]),
+                        autospec=True,
+                    ),
+                    patch("stripe.Event.retrieve", autospec=True),
+                ):
+                    event = Event.sync_from_stripe_data(fake_event)
+                    event.invoke_webhook_handlers()
 
-        fake_stripe_update_event = deepcopy(FAKE_EVENT_STANDARD_ACCOUNT_UPDATED)
-
-        event = Event.sync_from_stripe_data(fake_stripe_update_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the updated Account object
-        updated_standard_account = Account.objects.get(id=standard_account.id)
-
-        # assert we are updating the metadata
-        self.assertNotEqual(
-            updated_standard_account.metadata,
-            standard_account.metadata,
-        )
-
-        # assert the meta got updated
-        self.assertEqual(
-            updated_standard_account.metadata,
-            fake_stripe_update_event["data"]["object"]["metadata"],
-        )
-
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_EVENT_EXPRESS_ACCOUNT_UPDATED["data"]["object"]),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_express_account_updated_event(
-        self, event_retrieve_mock, account_retrieve_mock
-    ):
-        # fetch the Stripe Account
-        express_account = self.express_account
-
-        # assert metadata is empty
-        self.assertEqual(express_account.metadata, {})
-
-        fake_stripe_update_event = deepcopy(FAKE_EVENT_EXPRESS_ACCOUNT_UPDATED)
-
-        event = Event.sync_from_stripe_data(fake_stripe_update_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the updated Account object
-        updated_express_account = Account.objects.get(id=express_account.id)
-
-        # assert we are updating the metadata
-        self.assertNotEqual(
-            updated_express_account.metadata,
-            express_account.metadata,
-        )
-
-        # assert the meta got updated
-        self.assertEqual(
-            updated_express_account.metadata,
-            fake_stripe_update_event["data"]["object"]["metadata"],
-        )
-
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_EVENT_CUSTOM_ACCOUNT_UPDATED["data"]["object"]),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_custom_account_updated_event(
-        self, event_retrieve_mock, account_retrieve_mock
-    ):
-        # fetch the Stripe Account
-        custom_account = self.custom_account
-
-        # assert metadata is empty
-        self.assertEqual(custom_account.metadata, {})
-
-        fake_stripe_update_event = deepcopy(FAKE_EVENT_CUSTOM_ACCOUNT_UPDATED)
-
-        event = Event.sync_from_stripe_data(fake_stripe_update_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the updated Account object
-        updated_custom_account = Account.objects.get(id=custom_account.id)
-
-        # assert we are updating the metadata
-        self.assertNotEqual(
-            updated_custom_account.metadata,
-            custom_account.metadata,
-        )
-
-        # assert the meta got updated
-        self.assertEqual(
-            updated_custom_account.metadata,
-            fake_stripe_update_event["data"]["object"]["metadata"],
-        )
+                updated = Account.objects.get(id=account.id)
+                self.assertNotEqual(updated.metadata, account.metadata)
+                self.assertEqual(
+                    updated.metadata, fake_event["data"]["object"]["metadata"]
+                )
 
 
 class TestChargeEvents(CreateAccountMixin, EventTestCase):
