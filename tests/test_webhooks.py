@@ -274,7 +274,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         invalid_event["data"]["valid"] = "not really"
 
         # ensure warning is raised
-        with pytest.warns(None, match=r"WEBHOOK VALIDATION is disabled."):
+        with pytest.warns(Warning, match=r"WEBHOOK VALIDATION is disabled."):
             resp = self._send_event(invalid_event)
 
         self.assertEqual(resp.status_code, 200)
@@ -377,8 +377,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
     ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
-        with pytest.warns(None):
-            resp = self._send_event(fake_event)
+        resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         webhook_event_trigger = WebhookEventTrigger.objects.get()
         webhook_event_callback_mock.called_once_with(webhook_event_trigger)
@@ -405,16 +404,14 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
     ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
-        with pytest.warns(None):
-            resp = self._send_event(fake_event)
+        resp = self._send_event(fake_event)
 
         self.assertEqual(resp.status_code, 200)
         self.assertTrue(Event.objects.filter(type="transfer.created").exists())
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 
         # Duplication
-        with pytest.warns(None):
-            resp = self._send_event(fake_event)
+        resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(1, Event.objects.filter(type="transfer.created").count())
 
@@ -440,8 +437,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
     ):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
-        with pytest.warns(None):
-            resp = self._send_event(fake_event)
+        resp = self._send_event(fake_event)
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Event.objects.count(), 1)
@@ -475,8 +471,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         fake_event["account"] = FAKE_CUSTOM_ACCOUNT["id"]
         event_retrieve_mock.return_value = fake_event
-        with pytest.warns(None):
-            resp = self._send_event(fake_event)
+        resp = self._send_event(fake_event)
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(Event.objects.count(), 1)
@@ -509,8 +504,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
         event_retrieve_mock.return_value = fake_event
         with self.assertRaises(KeyError):
-            with pytest.warns(None):
-                self._send_event(fake_event)
+            self._send_event(fake_event)
 
         self.assertEqual(Event.objects.count(), 0)
         self.assertEqual(WebhookEventTrigger.objects.count(), 1)

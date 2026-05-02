@@ -657,7 +657,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
         view = ConfirmCustomAction()
         view.setup(request, **kwargs)
 
-        with pytest.warns(None, match=r"some random error message"):
+        with pytest.warns(Warning, match=r"some random error message"):
             # Invoke the Custom Actions
             view._cancel(request, [instance])
 
@@ -971,7 +971,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
         view = ConfirmCustomAction()
         view.setup(request, **kwargs)
 
-        with pytest.warns(None, match=r"some random error message"):
+        with pytest.warns(Warning, match=r"some random error message"):
             # Invoke the Custom Actions
             view._release_subscription_schedule(request, [instance])
 
@@ -1069,6 +1069,6 @@ class TestConfirmCustomActionView(CreateAccountMixin):
         view = ConfirmCustomAction()
         view.setup(request, **kwargs)
 
-        with pytest.warns(None, match=r"some random error message"):
+        with pytest.warns(Warning, match=r"some random error message"):
             # Invoke the Custom Actions
             view._cancel_subscription_schedule(request, [instance])
