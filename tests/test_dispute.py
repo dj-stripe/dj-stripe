@@ -158,10 +158,17 @@ class TestDispute(CreateAccountMixin, TestCase):
 
         # assert File was retrieved correctly
         file_retrieve_mock.assert_called_once()
-        assert file_retrieve_mock.call_args.kwargs["id"] == FAKE_DISPUTE_III["evidence"]["receipt"]
+        assert (
+            file_retrieve_mock.call_args.kwargs["id"]
+            == FAKE_DISPUTE_III["evidence"]["receipt"]
+        )
         # assert Balance Transactions were retrieved correctly
         balance_transaction_retrieve_mock.assert_called_once()
-        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_DISPUTE_BALANCE_TRANSACTION["id"]
+        assert (
+            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            == FAKE_DISPUTE_BALANCE_TRANSACTION["id"]
+        )
+
     @patch(
         "stripe.PaymentMethod.retrieve",
         return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),

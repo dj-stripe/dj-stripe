@@ -25,7 +25,9 @@ from .conftest import CreateAccountMixin
 
 def _unix(*args, **kwargs):
     """Build a Unix timestamp from a datetime spec."""
-    return int(datetime.datetime(*args, tzinfo=get_timezone_utc(), **kwargs).timestamp())
+    return int(
+        datetime.datetime(*args, tzinfo=get_timezone_utc(), **kwargs).timestamp()
+    )
 
 
 def _make_subscription(*, id, customer, plan, status, start_date, canceled_at=None):

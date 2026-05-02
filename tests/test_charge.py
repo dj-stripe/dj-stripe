@@ -245,7 +245,10 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once()
-        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
+        assert (
+            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            == FAKE_BALANCE_TRANSACTION["id"]
+        )
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
@@ -351,7 +354,10 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once()
-        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION_REFUND["id"]
+        assert (
+            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            == FAKE_BALANCE_TRANSACTION_REFUND["id"]
+        )
         refunds = list(charge_refunded.refunds.all())
         self.assertEqual(len(refunds), 1)
 
@@ -647,7 +653,10 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         charge_retrieve_mock.assert_not_called()
 
         balance_transaction_retrieve_mock.assert_called_once()
-        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
+        assert (
+            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            == FAKE_BALANCE_TRANSACTION["id"]
+        )
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
@@ -701,7 +710,10 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once()
-        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
+        assert (
+            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            == FAKE_BALANCE_TRANSACTION["id"]
+        )
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
@@ -801,7 +813,10 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once()
-        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
+        assert (
+            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            == FAKE_BALANCE_TRANSACTION["id"]
+        )
         self.assert_fks(
             charge,
             expected_blank_fks=(
@@ -889,7 +904,10 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
         balance_transaction_retrieve_mock.assert_called_once()
-        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
+        assert (
+            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            == FAKE_BALANCE_TRANSACTION["id"]
+        )
         self.assert_fks(charge, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(

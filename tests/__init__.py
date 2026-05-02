@@ -2444,3 +2444,54 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["data"]["previous_attributes"] = {
     "released_at": None,
     "status": "not_started",
 }
+
+
+import contextlib  # noqa: E402
+from unittest.mock import patch  # noqa: E402
+
+
+@contextlib.contextmanager
+def mock_stripe_world(**overrides):
+    """Patch the stripe.<X>.retrieve calls that ``sync_from_stripe_data`` walks.
+
+    Most model tests need to sync a fixture whose foreign-key references chain
+    out to a half-dozen other Stripe objects. Each test would otherwise stack
+    8-13 ``@patch("stripe.X.retrieve", return_value=deepcopy(FAKE_X))``
+    decorators and never actually inspect the resulting mocks. Use this
+    context manager instead:
+
+        with mock_stripe_world() as mocks:
+            invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+
+    ``overrides`` lets a test substitute a different fixture for one of the
+    classes (e.g. ``Invoice=FAKE_INVOICE_II``) without touching the rest of
+    the registry.
+    """
+    registry = {
+        "Account": FAKE_PLATFORM_ACCOUNT,
+        "BalanceTransaction": FAKE_BALANCE_TRANSACTION,
+        "Charge": FAKE_CHARGE,
+        "Customer": FAKE_CUSTOMER,
+        "Invoice": FAKE_INVOICE,
+        "InvoiceItem": FAKE_INVOICEITEM,
+        "PaymentIntent": FAKE_PAYMENT_INTENT_I,
+        "PaymentMethod": FAKE_CARD_AS_PAYMENT_METHOD,
+        "Plan": FAKE_PLAN,
+        "Price": FAKE_PRICE,
+        "Product": FAKE_PRODUCT,
+        "Subscription": FAKE_SUBSCRIPTION,
+        "SubscriptionItem": FAKE_SUBSCRIPTION_ITEM,
+    }
+    registry.update(overrides)
+
+    with contextlib.ExitStack() as stack:
+        mocks = {}
+        for class_name, fake in registry.items():
+            mocks[class_name] = stack.enter_context(
+                patch(
+                    f"stripe.{class_name}.retrieve",
+                    return_value=deepcopy(fake),
+                    autospec=True,
+                )
+            )
+        yield mocks

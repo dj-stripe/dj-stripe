@@ -430,7 +430,10 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         invoice_retrieve_mock.assert_called_once()
         assert invoice_retrieve_mock.call_args.kwargs["id"] == invoice.id
-        assert invoice_retrieve_mock.call_args.kwargs["expand"] == ["discounts", "lines.data.discounts"]
+        assert invoice_retrieve_mock.call_args.kwargs["expand"] == [
+            "discounts",
+            "lines.data.discounts",
+        ]
         self.assertTrue(return_value)
 
         self.assert_fks(invoice, expected_blank_fks=self.default_expected_blank_fks)

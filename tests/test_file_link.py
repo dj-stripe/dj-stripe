@@ -53,6 +53,8 @@ class TestFileLink(CreateAccountMixin, TestCase):
 
         mock_file_link_retrieve.assert_not_called()
         mock_file_upload_retrieve.assert_called_once()
-        assert mock_file_upload_retrieve.call_args.kwargs["id"] == file_link_data["file"]
+        assert (
+            mock_file_upload_retrieve.call_args.kwargs["id"] == file_link_data["file"]
+        )
         assert file_link.file == File.objects.get(id=file_link_data["file"])
         assert file_link.url == file_link_data["url"]

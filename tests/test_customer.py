@@ -571,6 +571,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         customer_retrieve_mock.assert_called_once()
         assert customer_retrieve_mock.call_args.kwargs["id"] == FAKE_CUSTOMER["id"]
         assert customer_retrieve_mock.call_args.kwargs["expand"] == ANY
+
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True

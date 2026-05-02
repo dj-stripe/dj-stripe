@@ -9,33 +9,27 @@ from django.test.testcases import TestCase
 
 from djstripe.models import Invoice, InvoiceItem
 from djstripe.models.payment_methods import Card
-from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
-    FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CARD_II,
-    FAKE_CHARGE,
     FAKE_CHARGE_II,
-    FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
     FAKE_INVOICE,
     FAKE_INVOICE_II,
     FAKE_INVOICEITEM,
     FAKE_INVOICEITEM_III,
-    FAKE_PAYMENT_INTENT_I,
     FAKE_PAYMENT_INTENT_II,
     FAKE_PAYMENT_METHOD_II,
-    FAKE_PLAN,
     FAKE_PLAN_II,
     FAKE_PLATFORM_ACCOUNT,
     FAKE_PRICE_II,
     FAKE_PRODUCT,
-    FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_III,
     FAKE_SUBSCRIPTION_ITEM,
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
     AssertStripeFksMixin,
+    mock_stripe_world,
 )
 from .conftest import CreateAccountMixin
 
@@ -71,79 +65,17 @@ class InvoiceItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             "djstripe.Subscription.schedule",
         }
 
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        autospec=True,
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-    )
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Charge.retrieve",
-        return_value=deepcopy(FAKE_CHARGE),
-        autospec=True,
-    )
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve",
-        return_value=deepcopy(FAKE_INVOICE),
-        autospec=True,
-    )
-    def test___str__(
-        self,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        charge_retrieve_mock,
-        customer_retrieve_mock,
-        paymentintent_retrieve_mock,
-        paymentmethod_retrieve_mock,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-        balance_transaction_retrieve_mock,
-    ):
+    def test___str__(self):
         fake_card = deepcopy(FAKE_CARD_II)
         fake_card["customer"] = None
 
         # create Card for FAKE_CUSTOMER_III
         Card.sync_from_stripe_data(fake_card)
 
-        # create invoice for latest_invoice in subscription to work.
-        Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
-
-        invoiceitem = InvoiceItem.sync_from_stripe_data(deepcopy(FAKE_INVOICEITEM))
+        with mock_stripe_world():
+            # create invoice for latest_invoice in subscription to work.
+            Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+            invoiceitem = InvoiceItem.sync_from_stripe_data(deepcopy(FAKE_INVOICEITEM))
 
         self.assertEqual(
             invoiceitem.get_stripe_dashboard_url(),
@@ -259,7 +191,11 @@ class InvoiceItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         invoice_retrieve_mock.assert_called_once()
         assert invoice_retrieve_mock.call_args.kwargs["id"] == FAKE_INVOICE_II["id"]
-        assert invoice_retrieve_mock.call_args.kwargs["expand"] == ["discounts", "lines.data.discounts"]
+        assert invoice_retrieve_mock.call_args.kwargs["expand"] == [
+            "discounts",
+            "lines.data.discounts",
+        ]
+
     @patch(
         "djstripe.models.Account.get_default_account",
         autospec=True,

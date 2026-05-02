@@ -25,6 +25,7 @@ from tests import (
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_ITEM,
     AssertStripeFksMixin,
+    mock_stripe_world,
 )
 
 from .conftest import CreateAccountMixin
@@ -38,61 +39,9 @@ class SessionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         return_value=deepcopy(FAKE_SETUP_INTENT_II),
         autospec=True,
     )
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    def test_sync_from_stripe_data(
-        self,
-        payment_intent_retrieve_mock,
-        customer_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        product_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        charge_retrieve_mock,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        setup_intent_retrieve_mock,
-    ):
-        session = Session.sync_from_stripe_data(deepcopy(FAKE_SESSION_I))
+    def test_sync_from_stripe_data(self, setup_intent_retrieve_mock):
+        with mock_stripe_world(PaymentMethod=FAKE_PAYMENT_METHOD_I):
+            session = Session.sync_from_stripe_data(deepcopy(FAKE_SESSION_I))
 
         self.assert_fks(
             session,
@@ -126,61 +75,9 @@ class SessionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         return_value=deepcopy(FAKE_SETUP_INTENT_II),
         autospec=True,
     )
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_METHOD_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    def test___str__(
-        self,
-        payment_intent_retrieve_mock,
-        customer_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        product_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        charge_retrieve_mock,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        setup_intent_retrieve_mock,
-    ):
-        session = Session.sync_from_stripe_data(deepcopy(FAKE_SESSION_I))
+    def test___str__(self, setup_intent_retrieve_mock):
+        with mock_stripe_world(PaymentMethod=FAKE_PAYMENT_METHOD_I):
+            session = Session.sync_from_stripe_data(deepcopy(FAKE_SESSION_I))
 
         self.assertEqual(f"<id={FAKE_SESSION_I['id']}>", str(session))
 
