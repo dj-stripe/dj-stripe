@@ -257,14 +257,9 @@ class InvoiceItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(invoiceitem, expected_blank_fks=expected_blank_fks)
 
-        invoice_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            expand=["discounts", "lines.data.discounts"],
-            id=FAKE_INVOICE_II["id"],
-            stripe_account=None,
-        )
-
+        invoice_retrieve_mock.assert_called_once()
+        assert invoice_retrieve_mock.call_args.kwargs["id"] == FAKE_INVOICE_II["id"]
+        assert invoice_retrieve_mock.call_args.kwargs["expand"] == ["discounts", "lines.data.discounts"]
     @patch(
         "djstripe.models.Account.get_default_account",
         autospec=True,

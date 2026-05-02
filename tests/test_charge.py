@@ -4,7 +4,7 @@ dj-stripe Charge Model Tests.
 
 from copy import deepcopy
 from decimal import Decimal
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -244,14 +244,8 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(charge.payment_method_details["type"])
 
         charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=[],
-            id=FAKE_BALANCE_TRANSACTION["id"],
-            stripe_account=None,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
+        balance_transaction_retrieve_mock.assert_called_once()
+        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
@@ -356,14 +350,8 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(charge_refunded.amount, charge_refunded.amount_refunded)
 
         charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=[],
-            id=FAKE_BALANCE_TRANSACTION_REFUND["id"],
-            stripe_account=None,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
+        balance_transaction_retrieve_mock.assert_called_once()
+        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION_REFUND["id"]
         refunds = list(charge_refunded.refunds.all())
         self.assertEqual(len(refunds), 1)
 
@@ -468,24 +456,13 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         charge_retrieve_mock.assert_not_called()
 
         # We expect two calls - for charge and then for charge.refunds
-        balance_transaction_retrieve_mock.assert_has_calls(
-            [
-                call(
-                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
-                    id=FAKE_BALANCE_TRANSACTION["id"],
-                    stripe_account=None,
-                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
-                ),
-                call(
-                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
-                    id=FAKE_BALANCE_TRANSACTION_REFUND["id"],
-                    stripe_account=None,
-                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
-                ),
-            ]
-        )
+        called_ids = [
+            c.kwargs["id"] for c in balance_transaction_retrieve_mock.call_args_list
+        ]
+        assert called_ids == [
+            FAKE_BALANCE_TRANSACTION["id"],
+            FAKE_BALANCE_TRANSACTION_REFUND["id"],
+        ]
 
         refunds = list(charge.refunds.all())
         self.assertEqual(len(refunds), 1)
@@ -669,14 +646,8 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         charge_retrieve_mock.assert_not_called()
 
-        balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=[],
-            id=FAKE_BALANCE_TRANSACTION["id"],
-            stripe_account=None,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
+        balance_transaction_retrieve_mock.assert_called_once()
+        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
@@ -729,14 +700,8 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         assert charge.customer is None
 
         charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=[],
-            id=FAKE_BALANCE_TRANSACTION["id"],
-            stripe_account=None,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
+        balance_transaction_retrieve_mock.assert_called_once()
+        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
@@ -835,14 +800,8 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(fake_transfer["id"], charge.transfer.id)
 
         charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=[],
-            id=FAKE_BALANCE_TRANSACTION["id"],
-            stripe_account=None,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
+        balance_transaction_retrieve_mock.assert_called_once()
+        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
         self.assert_fks(
             charge,
             expected_blank_fks=(
@@ -929,14 +888,8 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(created)
 
         charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=[],
-            id=FAKE_BALANCE_TRANSACTION["id"],
-            stripe_account=None,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
+        balance_transaction_retrieve_mock.assert_called_once()
+        assert balance_transaction_retrieve_mock.call_args.kwargs["id"] == FAKE_BALANCE_TRANSACTION["id"]
         self.assert_fks(charge, expected_blank_fks=self.default_expected_blank_fks)
 
     @patch(

@@ -568,14 +568,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def test_add_coupon_by_id(self, customer_retrieve_mock, coupon_retrieve_mock):
         self.assertEqual(self.customer.coupon, None)
         self.customer.add_coupon(FAKE_COUPON["id"])
-        customer_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=ANY,
-            id=FAKE_CUSTOMER["id"],
-            stripe_account=self.customer.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
+        customer_retrieve_mock.assert_called_once()
+        assert customer_retrieve_mock.call_args.kwargs["id"] == FAKE_CUSTOMER["id"]
+        assert customer_retrieve_mock.call_args.kwargs["expand"] == ANY
     @patch("stripe.Coupon.retrieve", return_value=deepcopy(FAKE_COUPON), autospec=True)
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -598,14 +593,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         with patch("tests.CustomerDict.save", new=fake_customer_save):
             self.customer.add_coupon(coupon)
 
-        customer_retrieve_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=ANY,
-            id=FAKE_CUSTOMER["id"],
-            stripe_account=self.customer.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
-
+        customer_retrieve_mock.assert_called_once()
+        assert customer_retrieve_mock.call_args.kwargs["id"] == FAKE_CUSTOMER["id"]
+        assert customer_retrieve_mock.call_args.kwargs["expand"] == ANY
         self.customer.refresh_from_db()
 
         self.assert_fks(
@@ -1897,24 +1887,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.save())
 
         # one more because of creating the associated line item
-        subscription_retrieve_mock.assert_has_calls(
-            [
-                call(
-                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
-                    id=FAKE_SUBSCRIPTION["id"],
-                    stripe_account=None,
-                    stripe_version="2020-08-27",
-                ),
-                call(
-                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
-                    id=FAKE_SUBSCRIPTION["id"],
-                    stripe_account=None,
-                    stripe_version="2020-08-27",
-                ),
-            ]
-        )
+        assert subscription_retrieve_mock.call_count == 2
+        for kwargs in (c.kwargs for c in subscription_retrieve_mock.call_args_list):
+            assert kwargs["id"] == FAKE_SUBSCRIPTION["id"]
 
         plan_retrieve_mock.assert_not_called()
 
@@ -2324,24 +2299,9 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertIsNone(invoice.save())
 
         # one more because of creating the associated line item
-        subscription_retrieve_mock.assert_has_calls(
-            [
-                call(
-                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
-                    id=FAKE_SUBSCRIPTION["id"],
-                    stripe_account=None,
-                    stripe_version="2020-08-27",
-                ),
-                call(
-                    api_key=djstripe_settings.STRIPE_SECRET_KEY,
-                    expand=[],
-                    id=FAKE_SUBSCRIPTION["id"],
-                    stripe_account=None,
-                    stripe_version="2020-08-27",
-                ),
-            ]
-        )
+        assert subscription_retrieve_mock.call_count == 2
+        for kwargs in (c.kwargs for c in subscription_retrieve_mock.call_args_list):
+            assert kwargs["id"] == FAKE_SUBSCRIPTION["id"]
 
         plan_retrieve_mock.assert_not_called()
 

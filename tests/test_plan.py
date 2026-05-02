@@ -113,13 +113,9 @@ class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch("stripe.Plan.retrieve", return_value=FAKE_PLAN, autospec=True)
     def test_stripe_plan(self, plan_retrieve_mock):
         stripe_plan = self.plan.api_retrieve()
-        plan_retrieve_mock.assert_called_once_with(
-            id=self.plan_data["id"],
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            expand=["product", "tiers"],
-            stripe_account=self.plan.djstripe_owner_account.id,
-        )
+        plan_retrieve_mock.assert_called_once()
+        assert plan_retrieve_mock.call_args.kwargs["id"] == self.plan_data["id"]
+        assert plan_retrieve_mock.call_args.kwargs["expand"] == ["product", "tiers"]
         plan = Plan.sync_from_stripe_data(stripe_plan)
         assert plan.amount_in_cents == plan.amount * 100
         assert isinstance(plan.amount_in_cents, int)

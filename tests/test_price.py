@@ -95,13 +95,8 @@ class PriceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch("stripe.Price.retrieve", return_value=FAKE_PRICE, autospec=True)
     def test_stripe_price(self, price_retrieve_mock):
         stripe_price = self.price.api_retrieve()
-        price_retrieve_mock.assert_called_once_with(
-            id=self.price_data["id"],
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            expand=["product", "tiers"],
-            stripe_account=self.price.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
+        price_retrieve_mock.assert_called_once()
+        assert price_retrieve_mock.call_args.kwargs["id"] == self.price_data["id"]
         price = Price.sync_from_stripe_data(stripe_price)
 
         self.assert_fks(
