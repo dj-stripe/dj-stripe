@@ -16,7 +16,7 @@ from django.utils import timezone
 from stripe import InvalidRequestError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import Plan, Product, Subscription, SubscriptionItem
+from djstripe.models import LineItem, Plan, Product, Subscription, SubscriptionItem
 from djstripe.models.billing import Invoice
 
 from . import (
@@ -1418,3 +1418,33 @@ class StaleSubscriptionItemRegressionTest(CreateAccountMixin, TestCase):
                 )
             self.assertIsNone(result, msg=f"Expected None for {message!r}")
             self.assertFalse(created, msg=f"Expected created=False for {message!r}")
+
+    def test_line_item_syncs_when_referenced_subscription_item_is_404(self):
+        # Regression test for issue #2105: an item removed from a subscription
+        # mid-period is gone from Stripe by the time the next invoice (which
+        # still references its id on a line item) is processed. The LineItem
+        # sync must not crash; the FK should be left null.
+        line_data = {
+            "id": "il_test_2105",
+            "object": "line_item",
+            "amount": 1234,
+            "currency": "usd",
+            "discounts": [],
+            "metadata": {},
+            "period": {"start": 1700000000, "end": 1702592000},
+            "type": "subscription",
+            "subscription_item": "si_gone_upstream",
+        }
+
+        with patch.object(
+            SubscriptionItem,
+            "api_retrieve",
+            side_effect=InvalidRequestError(
+                message="No such subscription_item: si_gone_upstream",
+                param="subscription_item",
+            ),
+        ):
+            line_item = LineItem.sync_from_stripe_data(line_data)
+
+        self.assertEqual(line_item.id, "il_test_2105")
+        self.assertIsNone(line_item.subscription_item)
