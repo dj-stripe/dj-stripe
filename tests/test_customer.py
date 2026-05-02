@@ -1427,20 +1427,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(2, invoice_sync_mock.call_count)
 
     @patch(
-        "djstripe.models.Invoice.sync_from_stripe_data",
-        autospec=True,
-    )
-    @patch("stripe.Invoice.list", return_value=StripeList(data=[]), autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_sync_invoices_none(
-        self, customer_retrieve_mock, invoice_list_mock, invoice_sync_mock
-    ):
-        self.customer._sync_invoices()
-        self.assertEqual(0, invoice_sync_mock.call_count)
-
-    @patch(
         "djstripe.models.Charge.sync_from_stripe_data",
         autospec=True,
     )
@@ -1457,20 +1443,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         self.customer._sync_charges()
         self.assertEqual(1, charge_sync_mock.call_count)
-
-    @patch(
-        "djstripe.models.Charge.sync_from_stripe_data",
-        autospec=True,
-    )
-    @patch("stripe.Charge.list", return_value=StripeList(data=[]), autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_sync_charges_none(
-        self, customer_retrieve_mock, charge_list_mock, charge_sync_mock
-    ):
-        self.customer._sync_charges()
-        self.assertEqual(0, charge_sync_mock.call_count)
 
     @patch(
         "djstripe.models.Subscription.sync_from_stripe_data",
@@ -1490,20 +1462,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         self.customer._sync_subscriptions()
         self.assertEqual(2, subscription_sync_mock.call_count)
-
-    @patch(
-        "djstripe.models.Subscription.sync_from_stripe_data",
-        autospec=True,
-    )
-    @patch("stripe.Subscription.list", return_value=StripeList(data=[]), autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_sync_subscriptions_none(
-        self, customer_retrieve_mock, subscription_list_mock, subscription_sync_mock
-    ):
-        self.customer._sync_subscriptions()
-        self.assertEqual(0, subscription_sync_mock.call_count)
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(

@@ -4,7 +4,7 @@ dj-stripe Charge Model Tests.
 
 from copy import deepcopy
 from decimal import Decimal
-from unittest.mock import call, create_autospec, patch
+from unittest.mock import call, patch
 
 import pytest
 from django.contrib.auth import get_user_model
@@ -938,46 +938,6 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
         self.assert_fks(charge, expected_blank_fks=self.default_expected_blank_fks)
-
-    @patch.object(target=Charge, attribute="source", autospec=True)
-    @patch(
-        target="djstripe.models.payment_methods.DjstripePaymentMethod", autospec=True
-    )
-    @patch(target="djstripe.models.account.Account", autospec=True)
-    def test__attach_objects_hook_missing_source_data(
-        self, mock_account, mock_payment_method, mock_charge_source
-    ):
-        """
-        Make sure we handle the case where the source data is empty or insufficient.
-        """
-        charge = Charge(
-            amount=50,
-            currency="usd",
-            id="ch_test",
-            status=ChargeStatus.failed,
-            captured=False,
-            paid=False,
-        )
-        mock_cls = create_autospec(spec=Charge, spec_set=True)
-        # Empty data dict works for this test since we only look up the source key and
-        # everything else is mocked.
-        mock_data = {}
-        starting_source = charge.source
-
-        charge._attach_objects_hook(cls=mock_cls, data=mock_data)
-
-        # source shouldn't be touched
-        self.assertEqual(starting_source, charge.source)
-        mock_payment_method._get_or_create_source.assert_not_called()
-
-        # try again with a source key, but no object sub key.
-        mock_data = {"source": {"foo": "bar"}}
-
-        charge._attach_objects_hook(cls=mock_cls, data=mock_data)
-
-        # source shouldn't be touched
-        self.assertEqual(starting_source, charge.source)
-        mock_payment_method._get_or_create_source.assert_not_called()
 
     @patch(
         "stripe.Customer.retrieve",

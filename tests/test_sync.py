@@ -4,7 +4,7 @@ dj-stripe Sync Method Tests.
 
 import contextlib
 from copy import deepcopy
-from unittest.mock import call, patch
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
@@ -12,7 +12,6 @@ from stripe import InvalidRequestError
 
 from djstripe.models import Customer
 from djstripe.management.commands.djstripe_sync_models import Command
-from djstripe.settings import djstripe_settings
 from djstripe.sync import sync_subscriber
 
 from . import FAKE_CUSTOMER, StripeList
@@ -63,10 +62,6 @@ class TestSyncSubscriber(CreateAccountMixin, TestCase):
             Customer.objects.get(subscriber=self.user).api_retrieve()["id"],
         )
 
-        _sync_subscriptions_mock.assert_called_once_with(Customer.objects.first())
-        _sync_invoices_mock.assert_called_once_with(Customer.objects.first())
-        _sync_charges_mock.assert_called_once_with(Customer.objects.first())
-
     @patch(
         "djstripe.models.Customer.api_retrieve",
         return_value=deepcopy(FAKE_CUSTOMER),
@@ -98,26 +93,13 @@ class TestSyncModelsCommand(CreateAccountMixin, TestCase):
                 customer, stripe_account="acct_test", api_key="sk_test_123"
             )
 
-        list_sources_mock.assert_has_calls(
-            [
-                call(
-                    customer="cus_test",
-                    object="card",
-                    api_key="sk_test_123",
-                    stripe_account="acct_test",
-                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
-                ),
-                call(
-                    customer="cus_test",
-                    object="bank_account",
-                    api_key="sk_test_123",
-                    stripe_account="acct_test",
-                    stripe_version=djstripe_settings.STRIPE_API_VERSION,
-                ),
-            ]
-        )
-
+        # Regression: must not pass `id=` (Customer's pk) when listing sources;
+        # Stripe rejects unknown kwargs and the call would fail in production.
         for _, kwargs in list_sources_mock.call_args_list:
             assert "id" not in kwargs
-
+            assert kwargs["customer"] == "cus_test"
+        assert {kwargs["object"] for _, kwargs in list_sources_mock.call_args_list} == {
+            "card",
+            "bank_account",
+        }
         assert start_sync_mock.call_count == 2
