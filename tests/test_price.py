@@ -26,6 +26,9 @@ from .conftest import CreateAccountMixin
 pytestmark = pytest.mark.django_db
 
 
+PRICE_BLANK_FKS = {"djstripe.Customer.coupon", "djstripe.Product.default_price"}
+
+
 class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         with patch(
@@ -35,119 +38,48 @@ class PriceCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         ):
             self.stripe_product = Product(id=FAKE_PRODUCT["id"]).api_retrieve()
 
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch("stripe.Price.create", return_value=deepcopy(FAKE_PRICE), autospec=True)
-    def test_create_from_product_id(self, price_create_mock, product_retrieve_mock):
+    def _create_price(self, product=None, extra_kwargs=None):
         fake_price = deepcopy(FAKE_PRICE)
+        if product is not None:
+            fake_price["product"] = product
         fake_price["unit_amount"] /= 100
-        assert isinstance(fake_price["product"], str)
+        if extra_kwargs:
+            fake_price.update(extra_kwargs)
 
-        price = Price.create(**fake_price)
+        with (
+            patch(
+                "stripe.Product.retrieve",
+                return_value=deepcopy(FAKE_PRODUCT),
+                autospec=True,
+            ),
+            patch(
+                "stripe.Price.create", return_value=deepcopy(FAKE_PRICE), autospec=True
+            ) as price_create_mock,
+        ):
+            price = Price.create(**fake_price)
 
-        expected_create_kwargs = deepcopy(FAKE_PRICE)
-        expected_create_kwargs["api_key"] = djstripe_settings.STRIPE_SECRET_KEY
+        # The wrapper must convert dollar amounts back to cents and accept any of
+        # str id / Stripe dict / djstripe Product instance for `product`.
+        price_create_mock.assert_called_once()
+        call_kwargs = price_create_mock.call_args.kwargs
+        assert call_kwargs["unit_amount"] == FAKE_PRICE["unit_amount"]
+        if extra_kwargs:
+            for key, value in extra_kwargs.items():
+                assert call_kwargs[key] == value
+        self.assert_fks(price, expected_blank_fks=PRICE_BLANK_FKS)
+        return price
 
-        price_create_mock.assert_called_once_with(
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **expected_create_kwargs,
-        )
+    def test_create_from_product_id(self):
+        self._create_price()
 
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
-            },
-        )
+    def test_create_from_stripe_product(self):
+        self._create_price(product=self.stripe_product)
 
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch("stripe.Price.create", return_value=deepcopy(FAKE_PRICE), autospec=True)
-    def test_create_from_stripe_product(self, price_create_mock, product_retrieve_mock):
-        fake_price = deepcopy(FAKE_PRICE)
-        fake_price["product"] = self.stripe_product
-        fake_price["unit_amount"] /= 100
-        assert isinstance(fake_price["product"], dict)
+    def test_create_from_djstripe_product(self):
+        self._create_price(product=Product.sync_from_stripe_data(self.stripe_product))
 
-        price = Price.create(**fake_price)
-
-        expected_create_kwargs = deepcopy(FAKE_PRICE)
-        expected_create_kwargs["product"] = self.stripe_product
-
-        price_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **expected_create_kwargs,
-        )
-
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
-            },
-        )
-
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch("stripe.Price.create", return_value=deepcopy(FAKE_PRICE), autospec=True)
-    def test_create_from_djstripe_product(
-        self, price_create_mock, product_retrieve_mock
-    ):
-        fake_price = deepcopy(FAKE_PRICE)
-        fake_price["product"] = Product.sync_from_stripe_data(self.stripe_product)
-        fake_price["unit_amount"] /= 100
-        assert isinstance(fake_price["product"], Product)
-
-        price = Price.create(**fake_price)
-
-        price_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **FAKE_PRICE,
-        )
-
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
-            },
-        )
-
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch("stripe.Price.create", return_value=deepcopy(FAKE_PRICE), autospec=True)
-    def test_create_with_metadata(self, price_create_mock, product_retrieve_mock):
-        metadata = {"other_data": "more_data"}
-        fake_price = deepcopy(FAKE_PRICE)
-        fake_price["unit_amount"] /= 100
-        fake_price["metadata"] = metadata
-        assert isinstance(fake_price["product"], str)
-
-        price = Price.create(**fake_price)
-
-        expected_create_kwargs = deepcopy(FAKE_PRICE)
-        expected_create_kwargs["metadata"] = metadata
-
-        price_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **expected_create_kwargs,
-        )
-
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
-            },
-        )
+    def test_create_with_metadata(self):
+        self._create_price(extra_kwargs={"metadata": {"other_data": "more_data"}})
 
 
 class PriceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):

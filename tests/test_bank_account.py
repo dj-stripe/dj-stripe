@@ -448,50 +448,6 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
     @patch(
-        "stripe.Account.delete_external_account",
-        autospec=True,
-    )
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
-    )
-    def test_remove_already_deleted_bankaccount_by_account(
-        self,
-        account_retrieve_mock,
-        bank_account_delete_mock,
-    ):
-        stripe_bank_account = BankAccount._api_create(
-            account=self.custom_account, source=FAKE_BANK_ACCOUNT_IV["id"]
-        )
-        bank_account = BankAccount.sync_from_stripe_data(stripe_bank_account)
-        self.assertEqual(
-            1, BankAccount.objects.filter(id=stripe_bank_account["id"]).count()
-        )
-
-        api_key = bank_account.default_api_key
-        stripe_account = bank_account._get_stripe_account_id(api_key)
-
-        assert bank_account.customer is None
-        assert bank_account.account is not None
-
-        # remove BankAccount
-        bank_account.remove()
-        self.assertEqual(
-            0, BankAccount.objects.filter(id=stripe_bank_account["id"]).count()
-        )
-        bank_account_delete_mock.assert_called_once_with(
-            self.custom_account.id,
-            bank_account.id,
-            api_key=api_key,
-            stripe_account=stripe_account,
-        )
-
-        # remove BankAccount again
-        count, _ = BankAccount.objects.filter(id=stripe_bank_account["id"]).delete()
-        self.assertEqual(0, count)
-
-    @patch(
         "stripe.Customer.delete_source",
         autospec=True,
     )

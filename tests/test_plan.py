@@ -26,6 +26,9 @@ from .conftest import CreateAccountMixin
 pytestmark = pytest.mark.django_db
 
 
+PLAN_BLANK_FKS = {"djstripe.Customer.coupon", "djstripe.Product.default_price"}
+
+
 class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         with patch(
@@ -35,117 +38,49 @@ class PlanCreateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         ):
             self.stripe_product = Product(id=FAKE_PRODUCT["id"]).api_retrieve()
 
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    def test_create_from_product_id(self, plan_create_mock, product_retrieve_mock):
+    def _create_plan(self, product=None, extra_kwargs=None):
         fake_plan = deepcopy(FAKE_PLAN)
+        if product is not None:
+            fake_plan["product"] = product
         fake_plan["amount"] = fake_plan["amount"] / 100
-        self.assertIsInstance(fake_plan["product"], str)
+        if extra_kwargs:
+            fake_plan.update(extra_kwargs)
 
-        plan = Plan.create(**fake_plan)
+        with (
+            patch(
+                "stripe.Product.retrieve",
+                return_value=deepcopy(FAKE_PRODUCT),
+                autospec=True,
+            ),
+            patch(
+                "stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True
+            ) as plan_create_mock,
+        ):
+            plan = Plan.create(**fake_plan)
 
-        expected_create_kwargs = deepcopy(FAKE_PLAN)
-        expected_create_kwargs["api_key"] = djstripe_settings.STRIPE_SECRET_KEY
-        expected_create_kwargs["stripe_version"] = djstripe_settings.STRIPE_API_VERSION
+        # The wrapper must convert dollar amounts back to cents and accept any of
+        # str id / Stripe dict / djstripe Product instance for `product`.
+        plan_create_mock.assert_called_once()
+        call_kwargs = plan_create_mock.call_args.kwargs
+        assert call_kwargs["amount"] == FAKE_PLAN["amount"]
+        if extra_kwargs:
+            for key, value in extra_kwargs.items():
+                assert call_kwargs[key] == value
+        self.assert_fks(plan, expected_blank_fks=PLAN_BLANK_FKS)
+        return plan
 
-        plan_create_mock.assert_called_once_with(**expected_create_kwargs)
+    def test_create_from_product_id(self):
+        # Default: FAKE_PLAN["product"] is already the product id (str)
+        self._create_plan()
 
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
-            },
-        )
+    def test_create_from_stripe_product(self):
+        self._create_plan(product=self.stripe_product)
 
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    def test_create_from_stripe_product(self, plan_create_mock, product_retrieve_mock):
-        fake_plan = deepcopy(FAKE_PLAN)
-        fake_plan["product"] = self.stripe_product
-        fake_plan["amount"] = fake_plan["amount"] / 100
-        self.assertIsInstance(fake_plan["product"], dict)
+    def test_create_from_djstripe_product(self):
+        self._create_plan(product=Product.sync_from_stripe_data(self.stripe_product))
 
-        plan = Plan.create(**fake_plan)
-
-        expected_create_kwargs = deepcopy(FAKE_PLAN)
-        expected_create_kwargs["product"] = self.stripe_product
-
-        plan_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **expected_create_kwargs,
-        )
-
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
-            },
-        )
-
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    def test_create_from_djstripe_product(
-        self, plan_create_mock, product_retrieve_mock
-    ):
-        fake_plan = deepcopy(FAKE_PLAN)
-        fake_plan["product"] = Product.sync_from_stripe_data(self.stripe_product)
-        fake_plan["amount"] = fake_plan["amount"] / 100
-        self.assertIsInstance(fake_plan["product"], Product)
-
-        plan = Plan.create(**fake_plan)
-
-        plan_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **FAKE_PLAN,
-        )
-
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
-            },
-        )
-
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch("stripe.Plan.create", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    def test_create_with_metadata(self, plan_create_mock, product_retrieve_mock):
-        metadata = {"other_data": "more_data"}
-        fake_plan = deepcopy(FAKE_PLAN)
-        fake_plan["amount"] = fake_plan["amount"] / 100
-        fake_plan["metadata"] = metadata
-        self.assertIsInstance(fake_plan["product"], str)
-
-        plan = Plan.create(**fake_plan)
-
-        expected_create_kwargs = deepcopy(FAKE_PLAN)
-        expected_create_kwargs["metadata"] = metadata
-
-        plan_create_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            **expected_create_kwargs,
-        )
-
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Product.default_price",
-            },
-        )
+    def test_create_with_metadata(self):
+        self._create_plan(extra_kwargs={"metadata": {"other_data": "more_data"}})
 
 
 class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):

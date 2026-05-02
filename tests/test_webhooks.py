@@ -290,37 +290,25 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
 
-    def test_webhook_remote_addr_is_none(self):
-        self.assertEqual(WebhookEventTrigger.objects.count(), 0)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            Client().post(
-                reverse("djstripe:webhook"),
-                "{}",
-                content_type="application/json",
-                HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
-                REMOTE_ADDR=None,
-            )
+    def test_webhook_remote_addr_missing(self):
+        # REMOTE_ADDR=None and REMOTE_ADDR="" both mean "no client IP";
+        # the webhook should still be recorded with a placeholder address.
+        for remote_addr in (None, ""):
+            with self.subTest(remote_addr=remote_addr):
+                WebhookEventTrigger.objects.all().delete()
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    Client().post(
+                        reverse("djstripe:webhook"),
+                        "{}",
+                        content_type="application/json",
+                        HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
+                        REMOTE_ADDR=remote_addr,
+                    )
 
-        self.assertEqual(WebhookEventTrigger.objects.count(), 1)
-        event_trigger = WebhookEventTrigger.objects.first()
-        self.assertEqual(event_trigger.remote_ip, "0.0.0.0")
-
-    def test_webhook_remote_addr_is_empty_string(self):
-        self.assertEqual(WebhookEventTrigger.objects.count(), 0)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            Client().post(
-                reverse("djstripe:webhook"),
-                "{}",
-                content_type="application/json",
-                HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
-                REMOTE_ADDR="",
-            )
-
-        self.assertEqual(WebhookEventTrigger.objects.count(), 1)
-        event_trigger = WebhookEventTrigger.objects.first()
-        self.assertEqual(event_trigger.remote_ip, "0.0.0.0")
+                self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+                event_trigger = WebhookEventTrigger.objects.first()
+                self.assertEqual(event_trigger.remote_ip, "0.0.0.0")
 
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(

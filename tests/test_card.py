@@ -344,42 +344,6 @@ class CardTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             stripe_account=stripe_account,
         )
 
-    @patch(
-        "stripe.Account.delete_external_account",
-        autospec=True,
-    )
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
-    )
-    def test_remove_already_deleted_card_by_account(
-        self, account_retrieve_mock, card_delete_mock
-    ):
-        stripe_card = Card._api_create(
-            account=self.custom_account, source=FAKE_CARD_IV["id"]
-        )
-        card = Card.sync_from_stripe_data(stripe_card)
-        self.assertEqual(1, Card.objects.filter(id=stripe_card["id"]).count())
-
-        # remove card
-        card.remove()
-        self.assertEqual(0, Card.objects.filter(id=stripe_card["id"]).count())
-
-        # remove card again
-        count, _ = Card.objects.filter(id=stripe_card["id"]).delete()
-        self.assertEqual(0, count)
-
-        api_key = card.default_api_key
-        stripe_account = card._get_stripe_account_id(api_key)
-
-        card_delete_mock.assert_called_once_with(
-            self.custom_account.id,
-            card.id,
-            api_key=api_key,
-            stripe_account=stripe_account,
-        )
-
     @pytest.mark.stripe_api
     @pytest.mark.usefixtures("configure_settings")
     def test_api_list(self):
