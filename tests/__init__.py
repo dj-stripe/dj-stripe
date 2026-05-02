@@ -2449,6 +2449,44 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["data"]["previous_attributes"] = {
 import contextlib  # noqa: E402
 from unittest.mock import patch  # noqa: E402
 
+import stripe  # noqa: E402
+
+
+def _stripe_world_registry(**overrides):
+    """Default registry of stripe class -> FAKE_X used by sync_from_stripe_data."""
+    registry = {
+        "Account": FAKE_PLATFORM_ACCOUNT,
+        "BalanceTransaction": FAKE_BALANCE_TRANSACTION,
+        "Charge": FAKE_CHARGE,
+        "Customer": FAKE_CUSTOMER,
+        "Invoice": FAKE_INVOICE,
+        "InvoiceItem": FAKE_INVOICEITEM,
+        "PaymentIntent": FAKE_PAYMENT_INTENT_I,
+        "PaymentMethod": FAKE_CARD_AS_PAYMENT_METHOD,
+        "Plan": FAKE_PLAN,
+        "Price": FAKE_PRICE,
+        "Product": FAKE_PRODUCT,
+        "Subscription": FAKE_SUBSCRIPTION,
+        "SubscriptionItem": FAKE_SUBSCRIPTION_ITEM,
+    }
+    registry.update(overrides)
+    return registry
+
+
+def monkeypatch_stripe_world(monkeypatch, **overrides):
+    """Apply the stripe.<X>.retrieve registry via pytest's ``monkeypatch`` fixture.
+
+    Use this in tests that already take ``monkeypatch`` as a fixture argument;
+    use :func:`mock_stripe_world` (a context manager) elsewhere.
+    """
+    for class_name, fake in _stripe_world_registry(**overrides).items():
+        # Bind ``fake`` per iteration to avoid the late-binding closure trap.
+        monkeypatch.setattr(
+            getattr(stripe, class_name),
+            "retrieve",
+            lambda *a, _f=fake, **kw: deepcopy(_f),
+        )
+
 
 @contextlib.contextmanager
 def mock_stripe_world(**overrides):
@@ -2467,22 +2505,7 @@ def mock_stripe_world(**overrides):
     classes (e.g. ``Invoice=FAKE_INVOICE_II``) without touching the rest of
     the registry.
     """
-    registry = {
-        "Account": FAKE_PLATFORM_ACCOUNT,
-        "BalanceTransaction": FAKE_BALANCE_TRANSACTION,
-        "Charge": FAKE_CHARGE,
-        "Customer": FAKE_CUSTOMER,
-        "Invoice": FAKE_INVOICE,
-        "InvoiceItem": FAKE_INVOICEITEM,
-        "PaymentIntent": FAKE_PAYMENT_INTENT_I,
-        "PaymentMethod": FAKE_CARD_AS_PAYMENT_METHOD,
-        "Plan": FAKE_PLAN,
-        "Price": FAKE_PRICE,
-        "Product": FAKE_PRODUCT,
-        "Subscription": FAKE_SUBSCRIPTION,
-        "SubscriptionItem": FAKE_SUBSCRIPTION_ITEM,
-    }
-    registry.update(overrides)
+    registry = _stripe_world_registry(**overrides)
 
     with contextlib.ExitStack() as stack:
         mocks = {}
