@@ -962,13 +962,13 @@ class TestAccountSTRIPE:
     @pytest.mark.parametrize("extra_kwargs", ({"reason": "fraud"}, {"reason": "other"}))
     def test_api_reject(
         self,
-        custom_account_func_fixture,
+        custom_account_fixture,
         extra_kwargs,
         platform_account_fixture,
         configure_settings,
     ):
         """Test to ensure correct Account gets rejected."""
-        account_json, account_instance = custom_account_func_fixture
+        account_json, account_instance = custom_account_fixture
 
         # assert "rejected" does not exist
         assert "rejected" not in account_json["requirements"]["disabled_reason"]
