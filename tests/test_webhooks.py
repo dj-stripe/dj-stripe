@@ -380,7 +380,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         resp = self._send_event(fake_event)
         self.assertEqual(resp.status_code, 200)
         webhook_event_trigger = WebhookEventTrigger.objects.get()
-        webhook_event_callback_mock.called_once_with(webhook_event_trigger)
+        webhook_event_callback_mock.assert_called_once_with(webhook_event_trigger)
 
     @patch.object(
         WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
@@ -564,9 +564,9 @@ class TestGetRemoteIp:
     def test_get_remote_ip_remote_addr_is_none(self, data):
         request = self.RequestClass(data)
 
-        # ensure warning is raised
         with pytest.warns(
-            None, match=r"Could not determine remote IP \(missing REMOTE_ADDR\)\."
+            UserWarning,
+            match=r"Could not determine remote IP \(missing REMOTE_ADDR\)\.",
         ):
             assert get_remote_ip(request) == "0.0.0.0"
 

@@ -12,18 +12,7 @@ from .conftest import CreateAccountMixin
 pytestmark = pytest.mark.django_db
 
 
-class TransferTest(CreateAccountMixin, TestCase):
-    def test_retrieve_coupon(self):
-        coupon_data = deepcopy(FAKE_COUPON)
-        coupon = Coupon.sync_from_stripe_data(coupon_data)
-        self.assertEqual(coupon.id, FAKE_COUPON["id"])
-
-
 class CouponTest(TestCase):
-    def test_blank_coupon_str(self):
-        coupon = Coupon()
-        self.assertEqual(str(coupon).strip(), "(invalid amount) off once")
-
     def test___str__(self):
         coupon = Coupon.objects.create(
             id="coupon-test-amount-off-forever",

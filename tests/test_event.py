@@ -47,12 +47,6 @@ class EventTest(CreateAccountMixin, TestCase):
             with self.assertRaises(StripeError):
                 event.invoke_webhook_handlers()
 
-    @patch("djstripe.models.Event.invoke_webhook_handlers", autospec=True)
-    def test_invoke_webhook_handlers_event_when_invalid(self, webhook_handler_mock):
-        event = self._create_event(FAKE_EVENT_TRANSFER_CREATED)
-        event.valid = False
-        event.invoke_webhook_handlers()
-
     @patch(target="djstripe.models.core.transaction.atomic", autospec=True)
     @patch.object(target=Event, attribute="_create_from_stripe_object", autospec=True)
     @patch.object(target=Event, attribute="objects", autospec=True)

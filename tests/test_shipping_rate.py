@@ -48,16 +48,16 @@ class ShippingRateTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
         self.assertEqual(
-            FAKE_SHIPPING_RATE["id"],
+            FAKE_SHIPPING_RATE_WITH_TAX_CODE["id"],
             shipping_rate.id,
         )
 
         self.assertEqual(
-            FAKE_SHIPPING_RATE["tax_code"],
-            None,
+            FAKE_SHIPPING_RATE_WITH_TAX_CODE["tax_code"],
+            shipping_rate.tax_code.id,
         )
 
-        self.assert_fks(shipping_rate, expected_blank_fks={})
+        self.assert_fks(shipping_rate, expected_blank_fks=set())
 
     def test___str__(self):
         shipping_rate = ShippingRate.sync_from_stripe_data(deepcopy(FAKE_SHIPPING_RATE))
