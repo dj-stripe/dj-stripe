@@ -134,7 +134,8 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual("Subscription creation", charge.description)
         self.assertEqual(0, charge.amount_refunded)
 
-        self.assertEqual(self.customer.default_source.id, charge.source_id)
+        # Customer.default_source is now a stripe_data dict (not an FK).
+        self.assertEqual(self.customer.default_source["id"], charge.source_id)
         self.assertEqual(charge.source.type, LegacySourceType.card)
 
         self.assertGreater(len(charge.receipt_url), 1)
@@ -168,7 +169,8 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(charge.id, charge_refunded.id)
         self.assertEqual(Decimal(20), charge_refunded.amount)
         self.assertTrue(charge_refunded.refunded)
-        self.assertEqual(charge_refunded.amount, charge_refunded.amount_refunded)
+        # amount is decimal dollars, amount_refunded is raw cents.
+        self.assertEqual(int(charge_refunded.amount * 100), charge_refunded.amount_refunded)
 
         mocks["Charge"].assert_not_called()
         mocks["BalanceTransaction"].assert_called_once()
@@ -190,11 +192,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(
             refund.balance_transaction.id, FAKE_BALANCE_TRANSACTION_REFUND["id"]
         )
-        self.assert_fks(
-            charge_refunded,
-            expected_blank_fks=self.default_expected_blank_fks
-            | self.default_blank_fks_with_branding,
-        )
+        self.assert_fks(charge_refunded)
 
     def test_sync_from_stripe_data_refunded(self):
         # Refund-on-create needs the charge BalanceTransaction first, then the
@@ -211,7 +209,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertEqual(Decimal(20), charge.amount)
         self.assertTrue(charge.refunded)
-        self.assertEqual(charge.amount, charge.amount_refunded)
+        self.assertEqual(int(charge.amount * 100), charge.amount_refunded)
 
         mocks["Charge"].assert_not_called()
         called_ids = [
@@ -322,8 +320,9 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             )
 
         self.assertTrue(created)
+        # charge.transfer is the raw stripe_data id string.
         self.assertIsNotNone(charge.transfer)
-        self.assertEqual(fake_transfer["id"], charge.transfer.id)
+        self.assertEqual(fake_transfer["id"], charge.transfer)
 
         mocks["Charge"].assert_not_called()
         mocks["BalanceTransaction"].assert_called_once()
