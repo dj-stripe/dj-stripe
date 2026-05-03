@@ -13,8 +13,6 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.db import models
 from django.utils import dateformat
 
 from djstripe.utils import get_timezone_utc
@@ -27,121 +25,9 @@ FUTURE_DATE = datetime.datetime(2100, 4, 30, tzinfo=get_timezone_utc())
 FIXTURE_DIR_PATH = Path(__file__).parent.joinpath("fixtures")
 
 
-# Suite-wide allowlist of foreign-key fields that are allowed to be null.
-#
-# These are fields that Stripe itself treats as nullable AND that tend to be
-# null in fixtures (Connect-only metadata, optional branding, optional
-# defaults, status-derived links). For any FK in this set, ``assert_fks``
-# accepts either None or a populated value — the assertion is "if it's set,
-# the link is consistent", not "it must be set".
-#
-# Tests that need to assert the *opposite* direction ("this specific FK must
-# be None in this scenario") still pass it via ``expected_blank_fks=`` and
-# ``assert_fks`` will enforce that.
-COMMON_BLANK_FKS = frozenset(
-    {
-        # Account branding
-        "djstripe.Account.branding_logo",
-        "djstripe.Account.branding_icon",
-        # Charge: Connect / dispute / refund related
-        "djstripe.Charge.application_fee",
-        "djstripe.Charge.dispute",
-        "djstripe.Charge.latest_upcominginvoice (related name)",
-        "djstripe.Charge.on_behalf_of",
-        "djstripe.Charge.refund",
-        "djstripe.Charge.source_transfer",
-        "djstripe.Charge.transfer",
-        # Customer: optional links and back-references
-        "djstripe.Customer.coupon",
-        "djstripe.Customer.default_payment_method",
-        "djstripe.Customer.subscriber",
-        # Invoice: default payment options + nested refs
-        "djstripe.Invoice.default_payment_method",
-        "djstripe.Invoice.default_source",
-        # InvoiceItem: pre-Price era invoice items have neither plan nor price
-        "djstripe.InvoiceItem.plan",
-        "djstripe.InvoiceItem.price",
-        # PaymentIntent: optional / Connect-only
-        "djstripe.PaymentIntent.on_behalf_of",
-        "djstripe.PaymentIntent.payment_method",
-        "djstripe.PaymentIntent.upcominginvoice (related name)",
-        # Product
-        "djstripe.Product.default_price",
-        # Subscription: optional defaults + scheduling
-        "djstripe.Subscription.default_payment_method",
-        "djstripe.Subscription.default_source",
-        "djstripe.Subscription.pending_setup_intent",
-        "djstripe.Subscription.schedule",
-    }
-)
-
-
-class AssertStripeFksMixin:
-    def _get_field_str(self, field) -> str:
-        if isinstance(field, models.OneToOneRel):
-            if field.parent_link:
-                return ""
-            else:
-                reverse_id_name = str(field.remote_field.foreign_related_fields[0])
-                return (
-                    reverse_id_name.replace("djstripe_id", field.name)
-                    + " (related name)"
-                )
-
-        elif isinstance(field, models.ForeignKey):
-            return str(field)
-
-        else:
-            return ""
-
-    def assert_fks(
-        self,
-        obj,
-        expected_blank_fks=frozenset(),
-        processed_stripe_ids=None,
-        optional_fks=COMMON_BLANK_FKS,
-    ):
-        """Recursively walk obj's foreign keys, asserting their nullness.
-
-        - ``expected_blank_fks``: fields that *must* be None in this scenario.
-        - ``optional_fks``: fields that *may* be None (defaults to the suite
-          allowlist). For these, the value can be either set or unset — the
-          assertion is skipped. If set, the FK is still walked recursively.
-        - Anything not in either set must be non-None.
-        """
-        if processed_stripe_ids is None:
-            processed_stripe_ids = set()
-
-        processed_stripe_ids.add(obj.id)
-
-        for field in obj._meta.get_fields():
-            field_str = self._get_field_str(field)
-            if not field_str or field_str.endswith(".djstripe_owner_account"):
-                continue
-
-            try:
-                field_value = getattr(obj, field.name)
-            except ObjectDoesNotExist:
-                field_value = None
-
-            if field_str in expected_blank_fks:
-                self.assertIsNone(field_value, field_str)
-                continue
-
-            if field_value is None:
-                # Optional fields are allowed to be missing; otherwise fail.
-                if field_str not in optional_fks:
-                    self.assertIsNotNone(field_value, field_str)
-                continue
-
-            # Field is populated — recurse into it.
-            if field_value.id not in processed_stripe_ids:
-                self.assert_fks(
-                    field_value,
-                    expected_blank_fks,
-                    processed_stripe_ids,
-                    optional_fks=optional_fks,
-                )
+# Re-exports for backwards compatibility — tests historically did
+# ``from tests import AssertStripeFksMixin, COMMON_BLANK_FKS``.
+from .asserts import AssertStripeFksMixin, COMMON_BLANK_FKS  # noqa: F401, E402
 
 
 def load_fixture(filename):
@@ -2507,75 +2393,5 @@ FAKE_EVENT_SUBSCRIPTION_SCHEDULE_ABORTED["data"]["previous_attributes"] = {
 }
 
 
-import contextlib  # noqa: E402
-from unittest.mock import patch  # noqa: E402
-
-import stripe  # noqa: E402
-
-
-def _stripe_world_registry(**overrides):
-    """Default registry of stripe class -> FAKE_X used by sync_from_stripe_data."""
-    registry = {
-        "Account": FAKE_PLATFORM_ACCOUNT,
-        "BalanceTransaction": FAKE_BALANCE_TRANSACTION,
-        "Charge": FAKE_CHARGE,
-        "Customer": FAKE_CUSTOMER,
-        "Invoice": FAKE_INVOICE,
-        "InvoiceItem": FAKE_INVOICEITEM,
-        "PaymentIntent": FAKE_PAYMENT_INTENT_I,
-        "PaymentMethod": FAKE_CARD_AS_PAYMENT_METHOD,
-        "Plan": FAKE_PLAN,
-        "Price": FAKE_PRICE,
-        "Product": FAKE_PRODUCT,
-        "Subscription": FAKE_SUBSCRIPTION,
-        "SubscriptionItem": FAKE_SUBSCRIPTION_ITEM,
-    }
-    registry.update(overrides)
-    return registry
-
-
-def monkeypatch_stripe_world(monkeypatch, **overrides):
-    """Apply the stripe.<X>.retrieve registry via pytest's ``monkeypatch`` fixture.
-
-    Use this in tests that already take ``monkeypatch`` as a fixture argument;
-    use :func:`mock_stripe_world` (a context manager) elsewhere.
-    """
-    for class_name, fake in _stripe_world_registry(**overrides).items():
-        # Bind ``fake`` per iteration to avoid the late-binding closure trap.
-        monkeypatch.setattr(
-            getattr(stripe, class_name),
-            "retrieve",
-            lambda *a, _f=fake, **kw: deepcopy(_f),
-        )
-
-
-@contextlib.contextmanager
-def mock_stripe_world(**overrides):
-    """Patch the stripe.<X>.retrieve calls that ``sync_from_stripe_data`` walks.
-
-    Most model tests need to sync a fixture whose foreign-key references chain
-    out to a half-dozen other Stripe objects. Each test would otherwise stack
-    8-13 ``@patch("stripe.X.retrieve", return_value=deepcopy(FAKE_X))``
-    decorators and never actually inspect the resulting mocks. Use this
-    context manager instead:
-
-        with mock_stripe_world() as mocks:
-            invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
-
-    ``overrides`` lets a test substitute a different fixture for one of the
-    classes (e.g. ``Invoice=FAKE_INVOICE_II``) without touching the rest of
-    the registry.
-    """
-    registry = _stripe_world_registry(**overrides)
-
-    with contextlib.ExitStack() as stack:
-        mocks = {}
-        for class_name, fake in registry.items():
-            mocks[class_name] = stack.enter_context(
-                patch(
-                    f"stripe.{class_name}.retrieve",
-                    return_value=deepcopy(fake),
-                    autospec=True,
-                )
-            )
-        yield mocks
+# Re-exports for backwards compatibility.
+from .stripe_world import mock_stripe_world, monkeypatch_stripe_world  # noqa: F401, E402
