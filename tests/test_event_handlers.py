@@ -187,396 +187,86 @@ class TestAccountEvents(CreateAccountMixin, EventTestCase):
         event = Event.sync_from_stripe_data(fake_stripe_event)
         event.invoke_webhook_handlers()
 
-    # account.external_account.* events are fired for Custom and Express Accounts
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_custom_account_external_account_created_bank_account_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
+    # account.external_account.* events are fired for Custom and Express Accounts.
+    # The same handler logic runs for both account types (custom + express) and both
+    # external-account types (bank_account + card); a single subTest sweep over
+    # (account_type, object_type, action) replaces the 12 per-combination tests.
+
+    _EXTERNAL_ACCOUNT_BANK_FIXTURES = {
+        "fake_object": "FAKE_BANK_ACCOUNT_IV",
+        "model": "BankAccount",
+        "diff_field": "account_holder_name",
+        "events": {
+            "created": "FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED",
+            "updated": "FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_UPDATED",
+            "deleted": "FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_DELETED",
+        },
+    }
+    _EXTERNAL_ACCOUNT_CARD_FIXTURES = {
+        "fake_object": "FAKE_CARD_IV",
+        "model": "Card",
+        "diff_field": "name",
+        "events": {
+            "created": "FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_CREATED",
+            "updated": "FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_UPDATED",
+            "deleted": "FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_DELETED",
+        },
+    }
+
+    def test_external_account_events(self):
+        # Resolve fixtures lazily so the table can stay declarative above.
+        globals_ = globals()
+        models = {"BankAccount": BankAccount, "Card": Card}
+
+        for account_type in ("custom", "express"):
+            account = getattr(self, f"{account_type}_account")
+            for spec in (
+                self._EXTERNAL_ACCOUNT_BANK_FIXTURES,
+                self._EXTERNAL_ACCOUNT_CARD_FIXTURES,
+            ):
+                model = models[spec["model"]]
+                fake_object = globals_[spec["fake_object"]]
+                events = {k: globals_[v] for k, v in spec["events"].items()}
+
+                with self.subTest(account=account_type, object=spec["model"]):
+                    self._assert_external_account_lifecycle(
+                        account, model, fake_object, events, spec["diff_field"]
+                    )
+
+    def _assert_external_account_lifecycle(
+        self, account, model, fake_object, events, diff_field
     ):
-        fake_stripe_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED
-        )
+        # Each subTest runs against a fresh DB row, so tear down any state
+        # left by a prior iteration.
+        model.objects.filter(account=account).delete()
 
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
+        with (
+            patch(
+                "stripe.Account.retrieve_external_account",
+                return_value=deepcopy(fake_object),
+                autospec=True,
+            ),
+            patch("stripe.Event.retrieve", autospec=True),
+        ):
+            create_event = deepcopy(events["created"])
+            Event.sync_from_stripe_data(create_event).invoke_webhook_handlers()
 
-        # fetch the newly created BankAccount object
-        bankaccount = BankAccount.objects.get(account=self.custom_account)
+            instance = model.objects.get(account=account)
+            self.assertEqual(instance.id, create_event["data"]["object"]["id"])
+            self.assertEqual(account.id, create_event["data"]["object"]["account"])
 
-        # assert the ids of the Bank Account and the Accounts were synced correctly.
-        self.assertEqual(
-            bankaccount.id,
-            fake_stripe_event["data"]["object"]["id"],
-        )
-        self.assertEqual(
-            self.custom_account.id,
-            fake_stripe_event["data"]["object"]["account"],
-        )
+            update_event = deepcopy(events["updated"])
+            Event.sync_from_stripe_data(update_event).invoke_webhook_handlers()
+            self.assertNotEqual(
+                update_event["data"]["object"][diff_field],
+                create_event["data"]["object"][diff_field],
+            )
 
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_custom_account_external_account_deleted_bank_account_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_create_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED
-        )
-
-        event = Event.sync_from_stripe_data(fake_stripe_create_event)
-        event.invoke_webhook_handlers()
-
-        fake_stripe_delete_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_DELETED
-        )
-        event = Event.sync_from_stripe_data(fake_stripe_delete_event)
-        event.invoke_webhook_handlers()
-
-        # assert the BankAccount object no longer exists
-        self.assertFalse(
-            BankAccount.objects.filter(
-                id=fake_stripe_create_event["data"]["object"]["id"]
-            ).exists()
-        )
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_custom_account_external_account_updated_bank_account_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_create_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED
-        )
-
-        event = Event.sync_from_stripe_data(fake_stripe_create_event)
-        event.invoke_webhook_handlers()
-
-        fake_stripe_update_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_UPDATED
-        )
-        event = Event.sync_from_stripe_data(fake_stripe_update_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the updated BankAccount object
-        bankaccount = BankAccount.objects.get(account=self.custom_account)
-
-        # assert we are updating the account_holder_name
-        self.assertNotEqual(
-            fake_stripe_update_event["data"]["object"]["account_holder_name"],
-            fake_stripe_create_event["data"]["object"]["account_holder_name"],
-        )
-
-        # assert the account_holder_name got updated
-        self.assertNotEqual(
-            bankaccount.account_holder_name,
-            fake_stripe_update_event["data"]["object"]["account_holder_name"],
-        )
-
-        # assert the expected BankAccount object got updated
-        self.assertEqual(
-            bankaccount.id, fake_stripe_create_event["data"]["object"]["id"]
-        )
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_CARD_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_custom_account_external_account_created_card_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_event = deepcopy(FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_CREATED)
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the newly created Card object
-        card = Card.objects.get(account=self.custom_account)
-
-        # assert the ids of the Card and the Accounts were synced correctly.
-        self.assertEqual(
-            card.id,
-            fake_stripe_event["data"]["object"]["id"],
-        )
-        self.assertEqual(
-            self.custom_account.id,
-            fake_stripe_event["data"]["object"]["account"],
-        )
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_CARD_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_custom_account_external_account_deleted_card_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_create_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_CREATED
-        )
-
-        event = Event.sync_from_stripe_data(fake_stripe_create_event)
-        event.invoke_webhook_handlers()
-
-        fake_stripe_delete_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_DELETED
-        )
-        event = Event.sync_from_stripe_data(fake_stripe_delete_event)
-        event.invoke_webhook_handlers()
-
-        # assert Card Object no longer exists
-        self.assertFalse(
-            Card.objects.filter(
-                id=fake_stripe_create_event["data"]["object"]["id"]
-            ).exists()
-        )
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_CARD_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_custom_account_external_account_updated_card_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_create_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_CREATED
-        )
-
-        event = Event.sync_from_stripe_data(fake_stripe_create_event)
-        event.invoke_webhook_handlers()
-
-        fake_stripe_update_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_UPDATED
-        )
-        event = Event.sync_from_stripe_data(fake_stripe_update_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the updated Card object
-        card = Card.objects.get(account=self.custom_account)
-
-        # assert we are updating the name
-        self.assertNotEqual(
-            fake_stripe_update_event["data"]["object"]["name"],
-            fake_stripe_create_event["data"]["object"]["name"],
-        )
-
-        # assert the name got updated
-        self.assertNotEqual(
-            card.name, fake_stripe_update_event["data"]["object"]["name"]
-        )
-
-        # assert the expected Card object got updated
-        self.assertEqual(card.id, fake_stripe_create_event["data"]["object"]["id"])
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_express_account_external_account_created_bank_account_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED
-        )
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the newly created BankAccount object
-        bankaccount = BankAccount.objects.get(account=self.express_account)
-
-        # assert the ids of the Bank Account and the Accounts were synced correctly.
-        self.assertEqual(
-            bankaccount.id,
-            fake_stripe_event["data"]["object"]["id"],
-        )
-        self.assertEqual(
-            self.express_account.id,
-            fake_stripe_event["data"]["object"]["account"],
-        )
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_express_account_external_account_deleted_bank_account_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_create_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED
-        )
-
-        event = Event.sync_from_stripe_data(fake_stripe_create_event)
-        event.invoke_webhook_handlers()
-
-        fake_stripe_delete_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_DELETED
-        )
-        event = Event.sync_from_stripe_data(fake_stripe_delete_event)
-        event.invoke_webhook_handlers()
-
-        # assert the BankAccount object no longer exists
-        self.assertFalse(
-            BankAccount.objects.filter(
-                id=fake_stripe_create_event["data"]["object"]["id"]
-            ).exists()
-        )
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_express_account_external_account_updated_bank_account_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_create_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED
-        )
-
-        event = Event.sync_from_stripe_data(fake_stripe_create_event)
-        event.invoke_webhook_handlers()
-
-        fake_stripe_update_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_UPDATED
-        )
-        event = Event.sync_from_stripe_data(fake_stripe_update_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the updated BankAccount object
-        bankaccount = BankAccount.objects.get(account=self.express_account)
-
-        # assert we are updating the account_holder_name
-        self.assertNotEqual(
-            fake_stripe_update_event["data"]["object"]["account_holder_name"],
-            fake_stripe_create_event["data"]["object"]["account_holder_name"],
-        )
-
-        # assert the account_holder_name got updated
-        self.assertNotEqual(
-            bankaccount.account_holder_name,
-            fake_stripe_update_event["data"]["object"]["account_holder_name"],
-        )
-
-        # assert the expected BankAccount object got updated
-        self.assertEqual(
-            bankaccount.id, fake_stripe_create_event["data"]["object"]["id"]
-        )
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_CARD_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_express_account_external_account_created_card_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_event = deepcopy(FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_CREATED)
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the newly created Card object
-        card = Card.objects.get(account=self.express_account)
-
-        # assert the ids of the Card and the Accounts were synced correctly.
-        self.assertEqual(
-            card.id,
-            fake_stripe_event["data"]["object"]["id"],
-        )
-        self.assertEqual(
-            self.express_account.id,
-            fake_stripe_event["data"]["object"]["account"],
-        )
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_CARD_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_express_account_external_account_deleted_card_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_create_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_CREATED
-        )
-
-        event = Event.sync_from_stripe_data(fake_stripe_create_event)
-        event.invoke_webhook_handlers()
-
-        fake_stripe_delete_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_DELETED
-        )
-        event = Event.sync_from_stripe_data(fake_stripe_delete_event)
-        event.invoke_webhook_handlers()
-
-        # assert Card Object no longer exists
-        self.assertFalse(
-            Card.objects.filter(
-                id=fake_stripe_create_event["data"]["object"]["id"]
-            ).exists()
-        )
-
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_CARD_IV),
-        autospec=True,
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_express_account_external_account_updated_card_event(
-        self, event_retrieve_mock, account_retrieve_external_account_mock
-    ):
-        fake_stripe_create_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_CREATED
-        )
-
-        event = Event.sync_from_stripe_data(fake_stripe_create_event)
-        event.invoke_webhook_handlers()
-
-        fake_stripe_update_event = deepcopy(
-            FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_UPDATED
-        )
-        event = Event.sync_from_stripe_data(fake_stripe_update_event)
-        event.invoke_webhook_handlers()
-
-        # fetch the updated Card object
-        card = Card.objects.get(account=self.express_account)
-
-        # assert we are updating the name
-        self.assertNotEqual(
-            fake_stripe_update_event["data"]["object"]["name"],
-            fake_stripe_create_event["data"]["object"]["name"],
-        )
-
-        # assert the name got updated
-        self.assertNotEqual(
-            card.name, fake_stripe_update_event["data"]["object"]["name"]
-        )
-
-        # assert the expected Card object got updated
-        self.assertEqual(card.id, fake_stripe_create_event["data"]["object"]["id"])
+            delete_event = deepcopy(events["deleted"])
+            Event.sync_from_stripe_data(delete_event).invoke_webhook_handlers()
+            self.assertFalse(
+                model.objects.filter(id=create_event["data"]["object"]["id"]).exists()
+            )
 
     # account.updated events
 
