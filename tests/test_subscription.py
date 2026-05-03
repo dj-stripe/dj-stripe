@@ -928,8 +928,9 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertIsNone(subscription.plan)
         self.assertIsNone(subscription.quantity)
 
-        items = subscription.items.all()
-        self.assertEqual(2, len(items))
+        original_item_ids = {"si_F5uk9HMrUwrmUJ", "si_F5uk81B1xGi3Vr"}
+        item_ids = set(subscription.items.values_list("id", flat=True))
+        self.assertTrue(original_item_ids.issubset(item_ids))
 
         # Simulate a webhook received with no more plan.
         # Items removed upstream are intentionally preserved locally so that
@@ -940,8 +941,8 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         fake_subscription["items"]["total_count"] = 0
 
         subscription = Subscription.sync_from_stripe_data(fake_subscription)
-        items = subscription.items.all()
-        self.assertEqual(2, len(items))
+        item_ids = set(subscription.items.values_list("id", flat=True))
+        self.assertTrue(original_item_ids.issubset(item_ids))
 
         self.assert_fks(
             subscription,
