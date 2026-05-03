@@ -22,15 +22,12 @@ from djstripe.models.billing import Invoice
 from . import (
     FAKE_BALANCE_TRANSACTION,
     FAKE_CARD,
-    FAKE_CARD_AS_PAYMENT_METHOD,
-    FAKE_CHARGE,
     FAKE_CHARGE_II,
     FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
     FAKE_INVOICE,
     FAKE_INVOICE_II,
     FAKE_INVOICEITEM,
-    FAKE_PAYMENT_INTENT_I,
     FAKE_PAYMENT_INTENT_II,
     FAKE_PAYMENT_METHOD_II,
     FAKE_PLAN,
@@ -40,7 +37,6 @@ from . import (
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_CANCELED,
     FAKE_SUBSCRIPTION_II,
-    FAKE_SUBSCRIPTION_III,
     FAKE_SUBSCRIPTION_ITEM,
     FAKE_SUBSCRIPTION_METERED,
     FAKE_SUBSCRIPTION_MULTI_PLAN,
@@ -48,6 +44,8 @@ from . import (
     FAKE_TAX_RATE_EXAMPLE_1_VAT,
     AssertStripeFksMixin,
     datetime_to_unix,
+    mock_stripe_world,
+    monkeypatch_stripe_world,
 )
 from .conftest import CreateAccountMixin
 
@@ -58,71 +56,15 @@ pytestmark = pytest.mark.django_db
 
 
 class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", return_value=deepcopy(FAKE_CHARGE), autospec=True)
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", autospec=True, return_value=deepcopy(FAKE_INVOICE)
-    )
-    def setUp(
-        self,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        product_retrieve_mock,
-        payment_intent_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        charge_retrieve_mock,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        customer_retrieve_mock,
-    ):
+    def setUp(self):
         self.user = get_user_model().objects.create_user(
             username="pydanny", email="pydanny@gmail.com"
         )
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
-        # All test-relevant blank FKs are covered by the suite COMMON_BLANK_FKS allowlist.
-        self.default_expected_blank_fks = set()
-
         # create latest invoice
-        Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
+        with mock_stripe_world():
+            Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -152,9 +94,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             subscription.default_tax_rates[0]["id"], FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
         )
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
         self.assertEqual(datetime_to_unix(subscription.cancel_at), 1624553655)
         self.assertEqual(
             subscription.pause_collection,
@@ -178,10 +118,8 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         assert subscription
         self.assertEqual(subscription.default_source.id, FAKE_CARD["id"])
 
-        # pop out "djstripe.Subscription.default_source" from self.assert_fks
-        expected_blank_fks = deepcopy(self.default_expected_blank_fks)
-        expected_blank_fks.remove("djstripe.Subscription.default_source")
-        self.assert_fks(subscription, expected_blank_fks=expected_blank_fks)
+        # default_source is normally an optional FK; this test sets it.
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II), autospec=True)
     @patch(
@@ -208,9 +146,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         assert subscription
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
         self.assertEqual(len(subscription.default_tax_rates), 0)
         first_item = subscription.items.first()
@@ -246,9 +182,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.is_subscribed_to(product))
         self.assertTrue(self.customer.has_any_active_subscription())
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -272,9 +206,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -300,9 +232,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertFalse(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertFalse(self.customer.has_any_active_subscription())
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -348,9 +278,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.is_subscribed_to(product))
         self.assertTrue(self.customer.has_any_active_subscription())
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -380,9 +308,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertFalse(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertFalse(self.customer.has_any_active_subscription())
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -429,9 +355,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -471,9 +395,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertEqual(4, new_subscription.quantity)
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -544,9 +466,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertEqual(FAKE_PLAN_II["id"], new_subscription.plan.id)
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
         self.assert_fks(
             new_plan,
@@ -598,9 +518,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertFalse(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertFalse(self.customer.has_any_active_subscription())
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -661,9 +579,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -704,9 +620,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertFalse(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertFalse(self.customer.has_any_active_subscription())
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -761,9 +675,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
         self.assertEqual(reactivated_subscription.cancel_at_period_end, False)
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("djstripe.models.Subscription._api_delete", autospec=True)
     @patch(
@@ -790,9 +702,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription.cancel(at_period_end=False)
         self.assertEqual(Subscription.objects.filter(status="canceled").count(), 1)
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("djstripe.models.Subscription._api_delete", autospec=True)
     @patch(
@@ -811,9 +721,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         with self.assertRaises(InvalidRequestError):
             subscription.cancel(at_period_end=False)
 
-        self.assert_fks(
-            subscription, expected_blank_fks=self.default_expected_blank_fks
-        )
+        self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", autospec=True)
     @patch(
@@ -852,28 +760,13 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             subscription,
-            expected_blank_fks=(
-                self.default_expected_blank_fks
-                | {
-                    "djstripe.Customer.subscriber",
-                    "djstripe.Subscription.plan",
-                    "djstripe.Charge.latest_upcominginvoice (related name)",
-                    "djstripe.Charge.application_fee",
-                    "djstripe.Charge.dispute",
-                    "djstripe.Charge.on_behalf_of",
-                    "djstripe.Charge.source_transfer",
-                    "djstripe.Charge.transfer",
-                    "djstripe.PaymentIntent.upcominginvoice (related name)",
-                    "djstripe.PaymentIntent.on_behalf_of",
-                    "djstripe.PaymentIntent.payment_method",
-                    "djstripe.Invoice.default_payment_method",
-                    "djstripe.Invoice.default_source",
-                    "djstripe.Invoice.charge",
-                    "djstripe.Invoice.customer",
-                    "djstripe.Invoice.payment_intent",
-                    "djstripe.Invoice.subscription",
-                }
-            ),
+            expected_blank_fks={
+                "djstripe.Subscription.plan",
+                "djstripe.Invoice.charge",
+                "djstripe.Invoice.customer",
+                "djstripe.Invoice.payment_intent",
+                "djstripe.Invoice.subscription",
+            },
         )
 
     @patch("stripe.Plan.retrieve", autospec=True)
@@ -924,28 +817,13 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             subscription,
-            expected_blank_fks=(
-                self.default_expected_blank_fks
-                | {
-                    "djstripe.Customer.subscriber",
-                    "djstripe.Subscription.plan",
-                    "djstripe.Charge.latest_upcominginvoice (related name)",
-                    "djstripe.Charge.application_fee",
-                    "djstripe.Charge.dispute",
-                    "djstripe.Charge.on_behalf_of",
-                    "djstripe.Charge.source_transfer",
-                    "djstripe.Charge.transfer",
-                    "djstripe.PaymentIntent.upcominginvoice (related name)",
-                    "djstripe.PaymentIntent.on_behalf_of",
-                    "djstripe.PaymentIntent.payment_method",
-                    "djstripe.Invoice.default_payment_method",
-                    "djstripe.Invoice.default_source",
-                    "djstripe.Invoice.charge",
-                    "djstripe.Invoice.customer",
-                    "djstripe.Invoice.payment_intent",
-                    "djstripe.Invoice.subscription",
-                }
-            ),
+            expected_blank_fks={
+                "djstripe.Subscription.plan",
+                "djstripe.Invoice.charge",
+                "djstripe.Invoice.customer",
+                "djstripe.Invoice.payment_intent",
+                "djstripe.Invoice.subscription",
+            },
         )
 
     @patch(
@@ -1047,11 +925,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             subscription,
-            expected_blank_fks=self.default_expected_blank_fks
-            | {
-                "djstripe.Customer.subscriber",
-                "djstripe.Subscription.plan",
-            },
+            expected_blank_fks={"djstripe.Subscription.plan"},
         )
 
     @patch("stripe.Plan.retrieve", autospec=True)
@@ -1096,10 +970,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             subscription,
-            expected_blank_fks=(
-                self.default_expected_blank_fks
-                | {"djstripe.Subscription.latest_invoice"}
-            ),
+            expected_blank_fks={"djstripe.Subscription.latest_invoice"},
         )
 
     @pytest.mark.stripe_api
@@ -1210,63 +1081,11 @@ class TestSubscriptionDecimal(CreateAccountMixin):
             (23.2345678, Decimal("23.24")),
         ],
     )
-    def test_decimal_application_fee_percent(  # noqa: C901
-        self, inputted, expected, monkeypatch
-    ):
+    def test_decimal_application_fee_percent(self, inputted, expected, monkeypatch):
         fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
         fake_subscription["application_fee_percent"] = inputted
 
-        def mock_invoice_get(*args, **kwargs):
-            return FAKE_INVOICE
-
-        def mock_invoice_item_get(*args, **kwargs):
-            return FAKE_INVOICEITEM
-
-        def mock_customer_get(*args, **kwargs):
-            return FAKE_CUSTOMER
-
-        def mock_charge_get(*args, **kwargs):
-            return FAKE_CHARGE
-
-        def mock_payment_method_get(*args, **kwargs):
-            return FAKE_CARD_AS_PAYMENT_METHOD
-
-        def mock_payment_intent_get(*args, **kwargs):
-            return FAKE_PAYMENT_INTENT_I
-
-        def mock_subscription_get(*args, **kwargs):
-            return fake_subscription
-
-        def mock_subscriptionitem_get(*args, **kwargs):
-            return FAKE_SUBSCRIPTION_ITEM
-
-        def mock_balance_transaction_get(*args, **kwargs):
-            return FAKE_BALANCE_TRANSACTION
-
-        def mock_product_get(*args, **kwargs):
-            return FAKE_PRODUCT
-
-        def mock_plan_get(*args, **kwargs):
-            return FAKE_PLAN
-
-        # monkeypatch stripe retrieve calls to return
-        # the desired json response.
-        monkeypatch.setattr(stripe.Invoice, "retrieve", mock_invoice_get)
-        monkeypatch.setattr(stripe.InvoiceItem, "retrieve", mock_invoice_item_get)
-
-        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
-        monkeypatch.setattr(
-            stripe.BalanceTransaction, "retrieve", mock_balance_transaction_get
-        )
-        monkeypatch.setattr(stripe.Subscription, "retrieve", mock_subscription_get)
-        monkeypatch.setattr(
-            stripe.SubscriptionItem, "retrieve", mock_subscriptionitem_get
-        )
-        monkeypatch.setattr(stripe.Charge, "retrieve", mock_charge_get)
-        monkeypatch.setattr(stripe.PaymentMethod, "retrieve", mock_payment_method_get)
-        monkeypatch.setattr(stripe.PaymentIntent, "retrieve", mock_payment_intent_get)
-        monkeypatch.setattr(stripe.Product, "retrieve", mock_product_get)
-        monkeypatch.setattr(stripe.Plan, "retrieve", mock_plan_get)
+        monkeypatch_stripe_world(monkeypatch, Subscription=fake_subscription)
 
         # Create Latest Invoice
         Invoice.sync_from_stripe_data(FAKE_INVOICE)
