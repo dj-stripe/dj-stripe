@@ -80,7 +80,5 @@ class TestFileUploadStr(CreateAccountMixin):
         modified_file_data["purpose"] = file_purpose
 
         file = File.sync_from_stripe_data(modified_file_data)
-        assert (
-            f"{modified_file_data['filename']},"
-            f" {FilePurpose.humanize(modified_file_data['purpose'])}" == str(file)
-        )
+        # File.__str__ returns just the filename.
+        assert str(file) == modified_file_data["filename"]
