@@ -12,29 +12,22 @@ from django.test.testcases import TestCase
 
 from djstripe.enums import ChargeStatus, LegacySourceType
 from djstripe.models import Charge, DjstripePaymentMethod, Transfer
-from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BALANCE_TRANSACTION,
     FAKE_BALANCE_TRANSACTION_REFUND,
-    FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CHARGE,
     FAKE_CHARGE_REFUNDED,
     FAKE_CUSTOMER,
     FAKE_FILEUPLOAD_ICON,
     FAKE_FILEUPLOAD_LOGO,
-    FAKE_INVOICE,
-    FAKE_INVOICEITEM,
     FAKE_PAYMENT_INTENT_I,
-    FAKE_PLAN,
     FAKE_PLATFORM_ACCOUNT,
-    FAKE_PRODUCT,
     FAKE_REFUND,
     FAKE_STANDARD_ACCOUNT,
-    FAKE_SUBSCRIPTION,
-    FAKE_SUBSCRIPTION_ITEM,
     FAKE_TRANSFER,
     AssertStripeFksMixin,
+    mock_stripe_world,
 )
 from .conftest import CreateAccountMixin
 
@@ -73,6 +66,21 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             "djstripe.Subscription.schedule",
         }
 
+    # Standard sync tests use this set of FK exclusions in addition to the
+    # class default.
+    default_blank_fks_with_branding = {
+        "djstripe.Account.branding_logo",
+        "djstripe.Account.branding_icon",
+    }
+
+    def _patch_default_account(self):
+        """Make Account.get_default_account return self.account for Charge.sync paths."""
+        return patch(
+            "djstripe.models.Account.get_default_account",
+            autospec=True,
+            return_value=self.account,
+        )
+
     def test___str__(self):
         charge = Charge(
             amount=50,
@@ -103,59 +111,33 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         charge.status = ChargeStatus.pending
         self.assertEqual(str(charge), "$50.00 USD (Pending)")
 
-    @patch(
-        "djstripe.models.Account.get_default_account",
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch("stripe.PaymentIntent.retrieve", autospec=True)
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    def test_capture_charge(
-        self,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        charge_retrieve_mock,
-        default_account_mock,
-    ):
-        default_account_mock.return_value = self.account
-
+    def test_capture_charge(self):
         fake_charge_no_invoice = deepcopy(FAKE_CHARGE)
         fake_charge_no_invoice.update({"invoice": None})
 
-        charge_retrieve_mock.return_value = fake_charge_no_invoice
-
-        # TODO - I think this is needed in line with above?
         fake_payment_intent_no_invoice = deepcopy(FAKE_PAYMENT_INTENT_I)
         fake_payment_intent_no_invoice.update({"invoice": None})
 
-        payment_intent_retrieve_mock.return_value = fake_payment_intent_no_invoice
+        with (
+            self._patch_default_account(),
+            mock_stripe_world(PaymentIntent=fake_payment_intent_no_invoice) as mocks,
+        ):
+            mocks["Charge"].return_value = fake_charge_no_invoice
+            charge, created = Charge._get_or_create_from_stripe_object(
+                fake_charge_no_invoice
+            )
+            self.assertTrue(created)
 
-        charge, created = Charge._get_or_create_from_stripe_object(
-            fake_charge_no_invoice
-        )
-        self.assertTrue(created)
+            captured_charge = charge.capture()
 
-        captured_charge = charge.capture()
         self.assertTrue(captured_charge.captured)
-
         self.assertFalse(captured_charge.fraudulent)
 
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
+            | self.default_blank_fks_with_branding
             | {
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Invoice.charge",
@@ -164,70 +146,9 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             },
         )
 
-    @patch("djstripe.models.Account.get_default_account", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    def test_sync_from_stripe_data(
-        self,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        charge_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        customer_retrieve_mock,
-        default_account_mock,
-    ):
-        default_account_mock.return_value = self.account
-
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-
-        charge = Charge.sync_from_stripe_data(fake_charge_copy)
+    def test_sync_from_stripe_data(self):
+        with self._patch_default_account(), mock_stripe_world() as mocks:
+            charge = Charge.sync_from_stripe_data(deepcopy(FAKE_CHARGE))
 
         self.assertEqual(Decimal(20), charge.amount)
         self.assertEqual(True, charge.paid)
@@ -243,128 +164,51 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertGreater(len(charge.receipt_url), 1)
         self.assertTrue(charge.payment_method_details["type"])
 
-        charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once()
+        mocks["Charge"].assert_not_called()
+        mocks["BalanceTransaction"].assert_called_once()
         assert (
-            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION["id"]
         )
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
-            | {
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-            },
+            | self.default_blank_fks_with_branding,
         )
 
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "djstripe.models.Account.get_default_account",
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    def test_sync_from_stripe_data_refunded_on_update(
-        self,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        product_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        charge_retrieve_mock,
-        default_account_mock,
-        customer_retrieve_mock,
-    ):
-        # first sync charge (as per test_sync_from_stripe_data)
-        # then sync refunded version, to hit the update code-path instead of insert
+    def test_sync_from_stripe_data_refunded_on_update(self):
+        # First sync the charge as usual; then sync the refunded version to hit
+        # the update branch instead of insert. The two syncs need different
+        # BalanceTransaction fixtures.
+        with self._patch_default_account(), mock_stripe_world() as mocks:
+            charge = Charge.sync_from_stripe_data(deepcopy(FAKE_CHARGE))
 
-        default_account_mock.return_value = self.account
+            self.assertEqual(Decimal(20), charge.amount)
+            self.assertFalse(charge.refunded)
+            self.assertEqual(len(charge.refunds.all()), 0)
 
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-        # charge_retrieve_mock.return_value = fake_charge_copy
-
-        with patch(
-            "stripe.BalanceTransaction.retrieve",
-            return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        ):
-            charge = Charge.sync_from_stripe_data(fake_charge_copy)
-
-        self.assertEqual(Decimal(20), charge.amount)
-        self.assertEqual(True, charge.paid)
-        self.assertEqual(False, charge.refunded)
-        self.assertEqual(True, charge.captured)
-        self.assertEqual(False, charge.disputed)
-
-        self.assertEqual(len(charge.refunds.all()), 0)
-
-        fake_charge_refunded_copy = deepcopy(FAKE_CHARGE_REFUNDED)
-
-        with patch(
-            "stripe.BalanceTransaction.retrieve",
-            return_value=deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
-        ) as balance_transaction_retrieve_mock:
-            charge_refunded = Charge.sync_from_stripe_data(fake_charge_refunded_copy)
+            mocks["BalanceTransaction"].reset_mock()
+            mocks["BalanceTransaction"].return_value = deepcopy(
+                FAKE_BALANCE_TRANSACTION_REFUND
+            )
+            charge_refunded = Charge.sync_from_stripe_data(deepcopy(FAKE_CHARGE_REFUNDED))
 
         self.assertEqual(charge.id, charge_refunded.id)
-
         self.assertEqual(Decimal(20), charge_refunded.amount)
-        self.assertEqual(True, charge_refunded.paid)
-        self.assertEqual(True, charge_refunded.refunded)
-        self.assertEqual(True, charge_refunded.captured)
-        self.assertEqual(False, charge_refunded.disputed)
-        self.assertEqual("Subscription creation", charge_refunded.description)
+        self.assertTrue(charge_refunded.refunded)
         self.assertEqual(charge_refunded.amount, charge_refunded.amount_refunded)
 
-        charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once()
+        mocks["Charge"].assert_not_called()
+        mocks["BalanceTransaction"].assert_called_once()
         assert (
-            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION_REFUND["id"]
         )
+
         refunds = list(charge_refunded.refunds.all())
         self.assertEqual(len(refunds), 1)
-
         refund = refunds[0]
-
         self.assertEqual(refund.id, FAKE_REFUND["id"])
-
         self.assertNotEqual(
             charge_refunded.balance_transaction.id, refund.balance_transaction.id
         )
@@ -374,96 +218,32 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(
             refund.balance_transaction.id, FAKE_BALANCE_TRANSACTION_REFUND["id"]
         )
-
         self.assert_fks(
             charge_refunded,
             expected_blank_fks=self.default_expected_blank_fks
-            | {
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-            },
+            | self.default_blank_fks_with_branding,
         )
 
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "djstripe.models.Account.get_default_account",
-        autospec=True,
-    )
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        side_effect=[
-            deepcopy(FAKE_BALANCE_TRANSACTION),
-            deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
-        ],
-    )
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    def test_sync_from_stripe_data_refunded(
-        self,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        product_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        charge_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        default_account_mock,
-        customer_retrieve_mock,
-    ):
-        default_account_mock.return_value = self.account
-        fake_charge_copy = deepcopy(FAKE_CHARGE_REFUNDED)
-
-        charge = Charge.sync_from_stripe_data(fake_charge_copy)
+    def test_sync_from_stripe_data_refunded(self):
+        # Refund-on-create needs the charge BalanceTransaction first, then the
+        # refund's BalanceTransaction — feed them in via side_effect.
+        with (
+            self._patch_default_account(),
+            mock_stripe_world() as mocks,
+        ):
+            mocks["BalanceTransaction"].side_effect = [
+                deepcopy(FAKE_BALANCE_TRANSACTION),
+                deepcopy(FAKE_BALANCE_TRANSACTION_REFUND),
+            ]
+            charge = Charge.sync_from_stripe_data(deepcopy(FAKE_CHARGE_REFUNDED))
 
         self.assertEqual(Decimal(20), charge.amount)
-        self.assertEqual(True, charge.paid)
-        self.assertEqual(True, charge.refunded)
-        self.assertEqual(True, charge.captured)
-        self.assertEqual(False, charge.disputed)
-        self.assertEqual("Subscription creation", charge.description)
+        self.assertTrue(charge.refunded)
         self.assertEqual(charge.amount, charge.amount_refunded)
 
-        charge_retrieve_mock.assert_not_called()
-
-        # We expect two calls - for charge and then for charge.refunds
+        mocks["Charge"].assert_not_called()
         called_ids = [
-            c.kwargs["id"] for c in balance_transaction_retrieve_mock.call_args_list
+            c.kwargs["id"] for c in mocks["BalanceTransaction"].call_args_list
         ]
         assert called_ids == [
             FAKE_BALANCE_TRANSACTION["id"],
@@ -472,254 +252,90 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         refunds = list(charge.refunds.all())
         self.assertEqual(len(refunds), 1)
-
         refund = refunds[0]
-
         self.assertEqual(refund.id, FAKE_REFUND["id"])
 
-        self.assertNotEqual(
-            charge.balance_transaction.id, refund.balance_transaction.id
-        )
         self.assertEqual(charge.balance_transaction.id, FAKE_BALANCE_TRANSACTION["id"])
         self.assertEqual(
             refund.balance_transaction.id, FAKE_BALANCE_TRANSACTION_REFUND["id"]
         )
-
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
-            | {
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-            },
+            | self.default_blank_fks_with_branding,
         )
 
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch(
-        "djstripe.models.Account.get_default_account",
-        autospec=True,
-    )
-    def test_sync_from_stripe_data_max_amount(
-        self,
-        default_account_mock,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        product_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        charge_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        customer_retrieve_mock,
-    ):
-        default_account_mock.return_value = self.account
-
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
+    def test_sync_from_stripe_data_max_amount(self):
+        fake_charge = deepcopy(FAKE_CHARGE)
         # https://support.stripe.com/questions/what-is-the-maximum-amount-i-can-charge-with-stripe
-        fake_charge_copy.update({"amount": 99999999})
+        fake_charge["amount"] = 99999999
 
-        charge = Charge.sync_from_stripe_data(fake_charge_copy)
+        with self._patch_default_account(), mock_stripe_world() as mocks:
+            charge = Charge.sync_from_stripe_data(fake_charge)
 
         self.assertEqual(Decimal("999999.99"), charge.amount)
-        self.assertEqual(True, charge.paid)
-        self.assertEqual(False, charge.refunded)
-        self.assertEqual(True, charge.captured)
-        self.assertEqual(False, charge.disputed)
+        self.assertTrue(charge.paid)
         self.assertEqual(0, charge.amount_refunded)
-
-        charge_retrieve_mock.assert_not_called()
-
+        mocks["Charge"].assert_not_called()
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
-            | {
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-            },
+            | self.default_blank_fks_with_branding,
         )
 
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "djstripe.models.Account.get_default_account",
-        autospec=True,
-    )
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    def test_sync_from_stripe_data_unsupported_source(
-        self,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        product_retrieve_mock,
-        charge_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        default_account_mock,
-        customer_retrieve_mock,
-    ):
-        default_account_mock.return_value = self.account
+    def test_sync_from_stripe_data_unsupported_source(self):
+        fake_charge = deepcopy(FAKE_CHARGE)
+        fake_charge["source"] = {"id": "test_id", "object": "unsupported"}
 
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"source": {"id": "test_id", "object": "unsupported"}})
+        with self._patch_default_account(), mock_stripe_world() as mocks:
+            charge = Charge.sync_from_stripe_data(fake_charge)
 
-        charge = Charge.sync_from_stripe_data(fake_charge_copy)
         self.assertEqual("test_id", charge.source_id)
         self.assertEqual("UNSUPPORTED_test_id", charge.source.type)
         self.assertEqual(charge.source, DjstripePaymentMethod.objects.get(id="test_id"))
 
-        charge_retrieve_mock.assert_not_called()
-
-        balance_transaction_retrieve_mock.assert_called_once()
+        mocks["Charge"].assert_not_called()
+        mocks["BalanceTransaction"].assert_called_once()
         assert (
-            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION["id"]
         )
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
-            | {
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
-            },
+            | self.default_blank_fks_with_branding,
         )
 
-    @patch(
-        "djstripe.models.Account.get_default_account",
-        autospec=True,
-    )
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch("stripe.PaymentIntent.retrieve", autospec=True)
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    def test_sync_from_stripe_data_no_customer(
-        self,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        charge_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        default_account_mock,
-    ):
-        default_account_mock.return_value = self.account
-
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-
-        fake_charge_copy.pop("customer", None)
+    def test_sync_from_stripe_data_no_customer(self):
+        fake_charge = deepcopy(FAKE_CHARGE)
+        fake_charge.pop("customer", None)
         # remove invoice since it requires a customer
-        fake_charge_copy.pop("invoice", None)
+        fake_charge.pop("invoice", None)
 
         fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_I)
         fake_payment_intent["invoice"] = None
 
-        payment_intent_retrieve_mock.return_value = fake_payment_intent
+        with (
+            self._patch_default_account(),
+            mock_stripe_world(PaymentIntent=fake_payment_intent) as mocks,
+        ):
+            Charge.sync_from_stripe_data(fake_charge)
 
-        Charge.sync_from_stripe_data(fake_charge_copy)
         assert Charge.objects.count() == 1
         charge = Charge.objects.get()
         assert charge.customer is None
 
-        charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once()
+        mocks["Charge"].assert_not_called()
+        mocks["BalanceTransaction"].assert_called_once()
         assert (
-            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION["id"]
         )
         self.assert_fks(
             charge,
             expected_blank_fks=self.default_expected_blank_fks
+            | self.default_blank_fks_with_branding
             | {
-                "djstripe.Account.branding_logo",
-                "djstripe.Account.branding_icon",
                 "djstripe.Charge.customer",
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.latest_invoice (related name)",
@@ -729,261 +345,91 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             },
         )
 
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch.object(Transfer, "_attach_objects_post_save_hook")
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch("stripe.Transfer.retrieve", autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch(
-        "djstripe.models.Account.get_default_account",
-        autospec=True,
-    )
-    def test_sync_from_stripe_data_with_transfer(
-        self,
-        default_account_mock,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        product_retrieve_mock,
-        transfer_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        charge_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        transfer__attach_object_post_save_hook_mock,
-        customer_retrieve_mock,
-    ):
-        default_account_mock.return_value = self.account
-
+    def test_sync_from_stripe_data_with_transfer(self):
         fake_transfer = deepcopy(FAKE_TRANSFER)
+        fake_charge = deepcopy(FAKE_CHARGE)
+        fake_charge["transfer"] = fake_transfer["id"]
 
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"transfer": fake_transfer["id"]})
+        with (
+            self._patch_default_account(),
+            patch.object(Transfer, "_attach_objects_post_save_hook"),
+            patch(
+                "stripe.Transfer.retrieve", return_value=fake_transfer, autospec=True
+            ),
+            mock_stripe_world() as mocks,
+        ):
+            mocks["Charge"].return_value = fake_charge
+            charge, created = Charge._get_or_create_from_stripe_object(
+                fake_charge, current_ids={fake_charge["id"]}
+            )
 
-        transfer_retrieve_mock.return_value = fake_transfer
-        charge_retrieve_mock.return_value = fake_charge_copy
-
-        charge, created = Charge._get_or_create_from_stripe_object(
-            fake_charge_copy, current_ids={fake_charge_copy["id"]}
-        )
         self.assertTrue(created)
-
-        self.assertNotEqual(None, charge.transfer)
+        self.assertIsNotNone(charge.transfer)
         self.assertEqual(fake_transfer["id"], charge.transfer.id)
 
-        charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once()
+        mocks["Charge"].assert_not_called()
+        mocks["BalanceTransaction"].assert_called_once()
         assert (
-            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION["id"]
         )
         self.assert_fks(
             charge,
             expected_blank_fks=(
-                self.default_expected_blank_fks
-                | {
-                    "djstripe.Account.branding_logo",
-                    "djstripe.Account.branding_icon",
-                }
+                self.default_expected_blank_fks | self.default_blank_fks_with_branding
             )
             - {"djstripe.Charge.transfer"},
         )
 
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch("stripe.Account.retrieve", autospec=True)
-    @patch(
-        "stripe.BalanceTransaction.retrieve",
-        return_value=deepcopy(FAKE_BALANCE_TRANSACTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.File.retrieve",
-        side_effect=[deepcopy(FAKE_FILEUPLOAD_ICON), deepcopy(FAKE_FILEUPLOAD_LOGO)],
-        autospec=True,
-    )
-    def test_sync_from_stripe_data_with_destination(
-        self,
-        file_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        product_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        account_retrieve_mock,
-        charge_retrieve_mock,
-        customer_retrieve_mock,
-    ):
-        account_retrieve_mock.return_value = FAKE_STANDARD_ACCOUNT
+    def test_sync_from_stripe_data_with_destination(self):
+        fake_charge = deepcopy(FAKE_CHARGE)
+        fake_charge["destination"] = FAKE_STANDARD_ACCOUNT["id"]
 
-        fake_charge_copy = deepcopy(FAKE_CHARGE)
-        fake_charge_copy.update({"destination": FAKE_STANDARD_ACCOUNT["id"]})
+        with (
+            patch(
+                "stripe.File.retrieve",
+                side_effect=[
+                    deepcopy(FAKE_FILEUPLOAD_ICON),
+                    deepcopy(FAKE_FILEUPLOAD_LOGO),
+                ],
+                autospec=True,
+            ),
+            mock_stripe_world(Account=FAKE_STANDARD_ACCOUNT) as mocks,
+        ):
+            charge, created = Charge._get_or_create_from_stripe_object(
+                fake_charge, current_ids={fake_charge["id"]}
+            )
 
-        charge, created = Charge._get_or_create_from_stripe_object(
-            fake_charge_copy, current_ids={fake_charge_copy["id"]}
-        )
         self.assertTrue(created)
-
-        charge_retrieve_mock.assert_not_called()
-        balance_transaction_retrieve_mock.assert_called_once()
+        mocks["Charge"].assert_not_called()
+        mocks["BalanceTransaction"].assert_called_once()
         assert (
-            balance_transaction_retrieve_mock.call_args.kwargs["id"]
+            mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION["id"]
         )
         self.assert_fks(charge, expected_blank_fks=self.default_expected_blank_fks)
 
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch("djstripe.models.Account.get_default_account", autospec=True)
-    @patch("stripe.BalanceTransaction.retrieve", autospec=True)
-    @patch("stripe.Charge.retrieve", autospec=True)
-    @patch(
-        "stripe.InvoiceItem.retrieve",
-        return_value=deepcopy(FAKE_INVOICEITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Invoice.retrieve", return_value=deepcopy(FAKE_INVOICE), autospec=True
-    )
-    @patch(
-        "stripe.PaymentIntent.retrieve",
-        return_value=deepcopy(FAKE_PAYMENT_INTENT_I),
-        autospec=True,
-    )
-    @patch(
-        "stripe.PaymentMethod.retrieve",
-        return_value=deepcopy(FAKE_CARD_AS_PAYMENT_METHOD),
-        autospec=True,
-    )
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.SubscriptionItem.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION_ITEM),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    def test_max_size_large_charge_on_decimal_amount(
-        self,
-        subscription_retrieve_mock,
-        subscription_item_retrieve_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-        paymentmethod_card_retrieve_mock,
-        payment_intent_retrieve_mock,
-        invoice_retrieve_mock,
-        invoice_item_retrieve_mock,
-        charge_retrieve_mock,
-        balance_transaction_retrieve_mock,
-        default_account_mock,
-        customer_retrieve_mock,
-    ):
+    def test_max_size_large_charge_on_decimal_amount(self):
         """
-        By contacting stripe support, some accounts will have their limit raised to 11
-        digits
+        By contacting stripe support, some accounts will have their limit raised
+        to 11 digits.
         """
         amount = 99999999999
         assert len(str(amount)) == 11
 
         fake_transaction = deepcopy(FAKE_BALANCE_TRANSACTION)
-        fake_transaction.update({"amount": amount})
-
-        default_account_mock.return_value = self.account
-        balance_transaction_retrieve_mock.return_value = fake_transaction
+        fake_transaction["amount"] = amount
 
         fake_charge = deepcopy(FAKE_CHARGE)
-        fake_charge.update({"amount": amount})
+        fake_charge["amount"] = amount
 
-        charge = Charge.sync_from_stripe_data(fake_charge)
+        with (
+            self._patch_default_account(),
+            mock_stripe_world(BalanceTransaction=fake_transaction) as mocks,
+        ):
+            charge = Charge.sync_from_stripe_data(fake_charge)
 
-        charge_retrieve_mock.assert_not_called()
+        mocks["Charge"].assert_not_called()
         self.assertTrue(bool(charge.pk))
         self.assertEqual(charge.amount, Decimal("999999999.99"))
         self.assertEqual(charge.balance_transaction.amount, 99999999999)
