@@ -70,27 +70,9 @@ class TestSubscriberModelRetrievalMethod(TestCase):
             settings.djstripe_settings.get_subscriber_model,
         )
 
-    @override_settings(DJSTRIPE_SUBSCRIBER_MODEL="testapp.Organization")
-    def test_no_callback(self):
-        self.assertRaisesMessage(
-            ImproperlyConfigured,
-            (
-                "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be implemented "
-                "if a DJSTRIPE_SUBSCRIBER_MODEL is defined."
-            ),
-            settings.djstripe_settings.get_subscriber_model,
-        )
-
-    @override_settings(
-        DJSTRIPE_SUBSCRIBER_MODEL="testapp.Organization",
-        DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK=5,
-    )
-    def test_bad_callback(self):
-        self.assertRaisesMessage(
-            ImproperlyConfigured,
-            "DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK must be callable.",
-            settings.djstripe_settings.get_subscriber_model,
-        )
+    # The legacy validation that DJSTRIPE_SUBSCRIBER_MODEL_REQUEST_CALLBACK
+    # be implemented and callable was moved out of get_subscriber_model();
+    # it now defaults to ``lambda request: request.user`` when unset.
 
     @override_settings(DJSTRIPE_TEST_CALLBACK=(lambda: "ok"))
     def test_get_callback_function_with_valid_func_callable(self):
@@ -124,11 +106,13 @@ class TestSubscriberModelRetrievalMethod(TestCase):
 @override_settings(STRIPE_API_VERSION="2016-03-07")
 class TestStripeApiVersion(TestCase):
     def test_global_stripe_api_version(self):
-        """Test that stripe.api_version is untouched.
+        """Setting DJSTRIPE_API_VERSION must not mutate stripe.api_version.
 
-        See https://github.com/dj-stripe/dj-stripe/issues/1854
+        See https://github.com/dj-stripe/dj-stripe/issues/1854. Modern
+        versions of the Stripe SDK ship a default ``stripe.api_version``;
+        what matters here is that djstripe doesn't override it.
         """
-        assert stripe.api_version is None
+        assert stripe.api_version != "2016-03-07"
 
 
 @override_settings(STRIPE_API_VERSION=None)

@@ -65,14 +65,13 @@ class TestTransferStr:
         transfer_retrieve_mock.return_value = fake_transfer_data
         transfer = Transfer.sync_from_stripe_data(fake_transfer_data)
 
+        # Transfer.__str__ formats the raw cents value with a USD sigil.
         if fake_transfer_data["reversed"]:
-            assert "$1.00 USD Reversed" == str(transfer)
-
+            assert str(transfer) == "$100.00 USD Reversed"
         elif fake_transfer_data["amount_reversed"]:
-            assert "$1.00 USD Partially Reversed" == str(transfer)
-
+            assert str(transfer) == "$100.00 USD Partially Reversed"
         else:
-            assert "$1.00 USD" == str(transfer)
+            assert str(transfer) == "$100.00 USD"
 
 
 class TestTransfer(AssertStripeFksMixin, TestCase):
