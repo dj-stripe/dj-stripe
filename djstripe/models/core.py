@@ -701,6 +701,7 @@ class Customer(StripeModel):
         (sources, then legacy cards)
         """
         yield from self.sources.iterator()
+        yield from self.legacy_cards.iterator()
 
     @property
     def discount(self):
@@ -758,9 +759,10 @@ class Customer(StripeModel):
         else:
             _items = []
             for item in items:
-                price = item.get("price", "")
                 if "price" in item:
-                    _items.append({"price": price})
+                    _items.append({"price": item["price"]})
+                elif "plan" in item:
+                    _items.append({"plan": item["plan"]})
 
         stripe_subscription = Subscription._api_create(
             items=_items, customer=self.id, **kwargs
