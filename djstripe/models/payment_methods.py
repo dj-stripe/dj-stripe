@@ -282,7 +282,18 @@ class LegacySourceMixin:
         """
 
         # First, wipe default source on all customers that use this card.
-        Customer.objects.filter(default_source=self.id).update(default_source=None)
+        # ``default_source`` is now stored inside the stripe_data JSON blob;
+        # find rows whose blob references this id (either as a bare string or
+        # as an inline source dict) and clear the entry.
+        from django.db.models import Q
+
+        affected = Customer.objects.filter(
+            Q(stripe_data__default_source=self.id)
+            | Q(stripe_data__default_source__id=self.id)
+        )
+        for customer in affected:
+            customer.stripe_data["default_source"] = None
+            customer.save(update_fields=["stripe_data"])
 
         try:
             self._api_delete()
@@ -442,9 +453,16 @@ class BankAccount(LegacySourceMixin, StripeModel):
         if self.customer:
             default_source = self.customer.default_source
             default_payment_method = self.customer.default_payment_method
+            # default_source is now stripe_data — either a bare id string or
+            # an inline-expanded dict.
+            default_source_id = (
+                default_source.get("id")
+                if isinstance(default_source, dict)
+                else default_source
+            )
 
             if (default_payment_method and self.id == default_payment_method.id) or (
-                default_source and self.id == default_source.id
+                default_source_id and self.id == default_source_id
             ):
                 # current card is the default payment method or source
                 default = True
@@ -597,9 +615,14 @@ class Card(LegacySourceMixin, StripeModel):
         if self.customer:
             default_source = self.customer.default_source
             default_payment_method = self.customer.default_payment_method
+            default_source_id = (
+                default_source.get("id")
+                if isinstance(default_source, dict)
+                else default_source
+            )
 
             if (default_payment_method and self.id == default_payment_method.id) or (
-                default_source and self.id == default_source.id
+                default_source_id and self.id == default_source_id
             ):
                 # current card is the default payment method or source
                 default = True
@@ -755,7 +778,17 @@ class Source(StripeModel):
         """
 
         # First, wipe default source on all customers that use this.
-        Customer.objects.filter(default_source=self.id).update(default_source=None)
+        # See ``LegacySourceMixin.remove`` for the rationale on the JSON path.
+        from django.db.models import Q
+
+        affected = Customer.objects.filter(
+            Q(stripe_data__default_source=self.id)
+            | Q(stripe_data__default_source__id=self.id)
+        )
+        for customer in affected:
+            customer.stripe_data["default_source"] = None
+            customer.save(update_fields=["stripe_data"])
+
         api_key = self.default_api_key
         try:
             # TODO - we could use the return value of sync_from_stripe_data
