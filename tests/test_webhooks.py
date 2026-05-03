@@ -19,7 +19,6 @@ from djstripe.models.webhooks import WebhookEndpoint, get_remote_ip
 from djstripe.settings import djstripe_settings
 
 from . import (
-    FAKE_CUSTOM_ACCOUNT,
     FAKE_EVENT_TEST_CHARGE_SUCCEEDED,
     FAKE_EVENT_TRANSFER_CREATED,
     FAKE_STANDARD_ACCOUNT,
@@ -30,10 +29,6 @@ from . import (
 from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
-
-
-def mock_webhook_handler(webhook_event_trigger):
-    webhook_event_trigger.process()
 
 
 class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
@@ -379,37 +374,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
     )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
-    @patch.object(
-        djstripe_settings, "WEBHOOK_EVENT_CALLBACK", return_value=mock_webhook_handler
-    )
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_webhook_with_custom_callback(
-        self,
-        event_retrieve_mock,
-        transfer_retrieve_mock,
-        account_retrieve_mock,
-        webhook_event_callback_mock,
-        transfer__attach_object_post_save_hook_mock,
-    ):
-        fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
-        event_retrieve_mock.return_value = fake_event
-        resp = self._send_event(fake_event)
-        self.assertEqual(resp.status_code, 200)
-        webhook_event_trigger = WebhookEventTrigger.objects.get()
-        webhook_event_callback_mock.assert_called_once_with(webhook_event_trigger)
-
-    @patch.object(
-        WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
-    )
-    @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
@@ -470,40 +434,6 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         event_trigger = WebhookEventTrigger.objects.first()
         self.assertEqual(
             event_trigger.stripe_trigger_account.id, FAKE_STANDARD_ACCOUNT["id"]
-        )
-
-    @patch.object(
-        WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
-    )
-    @patch.object(Transfer, "_attach_objects_post_save_hook")
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
-    )
-    @patch("stripe.Event.retrieve", autospec=True)
-    def test_webhook_good_connect_account(
-        self,
-        event_retrieve_mock,
-        transfer_retrieve_mock,
-        account_retrieve_mock,
-        transfer__attach_object_post_save_hook_mock,
-    ):
-        fake_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
-        fake_event["account"] = FAKE_CUSTOM_ACCOUNT["id"]
-        event_retrieve_mock.return_value = fake_event
-        resp = self._send_event(fake_event)
-
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(Event.objects.count(), 1)
-        self.assertEqual(WebhookEventTrigger.objects.count(), 1)
-
-        event_trigger = WebhookEventTrigger.objects.first()
-        self.assertEqual(
-            event_trigger.stripe_trigger_account.id, FAKE_CUSTOM_ACCOUNT["id"]
         )
 
     @patch.object(

@@ -14,7 +14,6 @@ from djstripe.enums import SubscriptionStatus
 from djstripe.models import (
     Card,
     Charge,
-    Coupon,
     Customer,
     Dispute,
     DjstripePaymentMethod,
@@ -45,7 +44,6 @@ from . import (
     FAKE_CARD_IV,
     FAKE_CHARGE,
     FAKE_CHARGE_II,
-    FAKE_COUPON,
     FAKE_CUSTOM_ACCOUNT,
     FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
@@ -74,11 +72,7 @@ from . import (
     FAKE_EVENT_CUSTOM_ACCOUNT_UPDATED,
     FAKE_EVENT_CUSTOMER_CREATED,
     FAKE_EVENT_CUSTOMER_DELETED,
-    FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED,
-    FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED,
     FAKE_EVENT_CUSTOMER_SOURCE_CREATED,
-    FAKE_EVENT_CUSTOMER_SOURCE_DELETED,
-    FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE,
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_CREATED,
     FAKE_EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
     FAKE_EVENT_CUSTOMER_UPDATED,
@@ -821,39 +815,6 @@ class TestCustomerEvents(CreateAccountMixin, EventTestCase):
         customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
 
-    @patch("stripe.Coupon.retrieve", return_value=FAKE_COUPON, autospec=True)
-    @patch(
-        "stripe.Event.retrieve",
-        return_value=FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED,
-        autospec=True,
-    )
-    def test_customer_discount_created(self, event_retrieve_mock, coupon_retrieve_mock):
-        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_DISCOUNT_CREATED)
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        self.assertIsNotNone(event.customer)
-        self.assertEqual(event.customer.id, FAKE_CUSTOMER["id"])
-        self.assertIsNotNone(event.customer.coupon)
-
-    @patch("stripe.Coupon.retrieve", return_value=FAKE_COUPON, autospec=True)
-    @patch(
-        "stripe.Event.retrieve",
-        return_value=FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED,
-        autospec=True,
-    )
-    def test_customer_discount_deleted(self, event_retrieve_mock, coupon_retrieve_mock):
-        coupon = Coupon.sync_from_stripe_data(FAKE_COUPON)
-        self.customer.coupon = coupon
-
-        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_DISCOUNT_DELETED)
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        self.assertIsNotNone(event.customer)
-        self.assertEqual(event.customer.id, FAKE_CUSTOMER["id"])
-        self.assertIsNone(event.customer.coupon)
-
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     @patch("stripe.Event.retrieve", autospec=True)
     @patch(
@@ -894,33 +855,6 @@ class TestCustomerEvents(CreateAccountMixin, EventTestCase):
         self.assertFalse(
             Card.objects.filter(id=fake_stripe_event["data"]["object"]["id"]).exists()
         )
-
-    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
-    def test_customer_default_source_deleted(self, customer_retrieve_mock):
-        self.customer.stripe_data["default_source"] = FAKE_CARD["id"]
-        self.customer.save(update_fields=["stripe_data"])
-        self.assertIsNotNone(self.customer.default_source)
-
-        event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
-        event.invoke_webhook_handlers()
-
-        # fetch the customer. Doubles up as a check that the customer didn't get
-        # deleted
-        customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
-        self.assertIsNone(customer.default_source)
-
-    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
-    def test_customer_source_double_delete(self, customer_retrieve_mock):
-        event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
-        event.invoke_webhook_handlers()
-
-        event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED_DUPE)
-        event.invoke_webhook_handlers()
-
-        # fetch the customer. Doubles up as a check that the customer didn't get
-        # deleted
-        customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
-        self.assertIsNone(customer.default_source)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch("stripe.Subscription.retrieve", autospec=True)

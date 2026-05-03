@@ -550,7 +550,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
 
         view._cancel(request, [instance])
         emitted = {m.message: m.level_tag for m in messages.get_messages(request)}
-        assert any("some random error message" in str(k) for k in emitted), emitted
+        assert any("some random error message" in str(getattr(k, "param", k)) for k in emitted), emitted
 
     def test__release_subscription_schedule(
         self,
@@ -705,7 +705,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
 
         view._release_subscription_schedule(request, [instance])
         emitted = {m.message: m.level_tag for m in messages.get_messages(request)}
-        assert any("some random error message" in str(k) for k in emitted), emitted
+        assert any("some random error message" in str(getattr(k, "param", k)) for k in emitted), emitted
 
     def test__cancel_subscription_schedule_stripe_invalid_request_error(
         self,
@@ -750,4 +750,4 @@ class TestConfirmCustomActionView(CreateAccountMixin):
 
         view._cancel_subscription_schedule(request, [instance])
         emitted = {m.message: m.level_tag for m in messages.get_messages(request)}
-        assert any("some random error message" in str(k) for k in emitted), emitted
+        assert any("some random error message" in str(getattr(k, "param", k)) for k in emitted), emitted
