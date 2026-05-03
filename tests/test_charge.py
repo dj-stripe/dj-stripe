@@ -55,30 +55,35 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
     def test___str__(self):
+        # `status` remains a real StripeEnumField on Charge, but
+        # `captured` / `disputed` / `refunded` / `amount_refunded` are now
+        # read-only properties over ``stripe_data``.
         charge = Charge(
-            amount=50,
-            currency="usd",
-            id="ch_test",
-            status=ChargeStatus.failed,
-            captured=False,
-            paid=False,
+            amount=50, currency="usd", id="ch_test", status=ChargeStatus.failed
         )
+        charge.stripe_data = {
+            "captured": False,
+            "paid": False,
+            "disputed": False,
+            "refunded": False,
+            "amount_refunded": 0,
+        }
         self.assertEqual(str(charge), "$50.00 USD (Uncaptured)")
 
-        charge.captured = True
+        charge.stripe_data["captured"] = True
         self.assertEqual(str(charge), "$50.00 USD (Failed)")
-        charge.status = ChargeStatus.succeeded
 
-        charge.disputed = True
+        charge.status = ChargeStatus.succeeded
+        charge.stripe_data["disputed"] = True
         self.assertEqual(str(charge), "$50.00 USD (Disputed)")
 
-        charge.disputed = False
-        charge.refunded = True
-        charge.amount_refunded = 50
+        charge.stripe_data["disputed"] = False
+        charge.stripe_data["refunded"] = True
+        charge.stripe_data["amount_refunded"] = 50
         self.assertEqual(str(charge), "$50.00 USD (Refunded)")
 
-        charge.refunded = False
-        charge.amount_refunded = 0
+        charge.stripe_data["refunded"] = False
+        charge.stripe_data["amount_refunded"] = 0
         self.assertEqual(str(charge), "$50.00 USD (Succeeded)")
 
         charge.status = ChargeStatus.pending
