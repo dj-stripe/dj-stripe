@@ -49,28 +49,8 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
         self.customer = FAKE_CUSTOMER.create_for_user(user)
 
-        self.default_expected_blank_fks = {
-            "djstripe.Account.branding_logo",
-            "djstripe.Account.branding_icon",
-            "djstripe.Charge.application_fee",
-            "djstripe.Charge.dispute",
-            "djstripe.Charge.latest_upcominginvoice (related name)",
-            "djstripe.Charge.on_behalf_of",
-            "djstripe.Charge.source_transfer",
-            "djstripe.Charge.transfer",
-            "djstripe.Customer.coupon",
-            "djstripe.Customer.default_payment_method",
-            "djstripe.Invoice.default_payment_method",
-            "djstripe.Invoice.default_source",
-            "djstripe.PaymentIntent.on_behalf_of",
-            "djstripe.PaymentIntent.payment_method",
-            "djstripe.PaymentIntent.upcominginvoice (related name)",
-            "djstripe.Product.default_price",
-            "djstripe.Subscription.default_payment_method",
-            "djstripe.Subscription.default_source",
-            "djstripe.Subscription.pending_setup_intent",
-            "djstripe.Subscription.schedule",
-        }
+        # All test-relevant blank FKs are covered by the suite COMMON_BLANK_FKS allowlist.
+        self.default_expected_blank_fks = set()
 
     @patch(
         "stripe.Customer.retrieve",

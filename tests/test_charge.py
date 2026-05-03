@@ -14,6 +14,7 @@ from djstripe.enums import ChargeStatus, LegacySourceType
 from djstripe.models import Charge, DjstripePaymentMethod, Transfer
 
 from . import (
+    COMMON_BLANK_FKS,
     FAKE_BALANCE_TRANSACTION,
     FAKE_BALANCE_TRANSACTION_REFUND,
     FAKE_CHARGE,
@@ -44,34 +45,6 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             username="testuser", email="djstripe@example.com"
         )
         self.customer = FAKE_CUSTOMER.create_for_user(user)
-
-        self.default_expected_blank_fks = {
-            "djstripe.Charge.application_fee",
-            "djstripe.Charge.dispute",
-            "djstripe.Charge.latest_upcominginvoice (related name)",
-            "djstripe.Charge.on_behalf_of",
-            "djstripe.Charge.source_transfer",
-            "djstripe.Charge.transfer",
-            "djstripe.Customer.coupon",
-            "djstripe.Customer.default_payment_method",
-            "djstripe.Invoice.default_payment_method",
-            "djstripe.Invoice.default_source",
-            "djstripe.PaymentIntent.on_behalf_of",
-            "djstripe.PaymentIntent.payment_method",
-            "djstripe.PaymentIntent.upcominginvoice (related name)",
-            "djstripe.Product.default_price",
-            "djstripe.Subscription.default_payment_method",
-            "djstripe.Subscription.default_source",
-            "djstripe.Subscription.pending_setup_intent",
-            "djstripe.Subscription.schedule",
-        }
-
-    # Standard sync tests use this set of FK exclusions in addition to the
-    # class default.
-    default_blank_fks_with_branding = {
-        "djstripe.Account.branding_logo",
-        "djstripe.Account.branding_icon",
-    }
 
     def _patch_default_account(self):
         """Make Account.get_default_account return self.account for Charge.sync paths."""
@@ -135,9 +108,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assert_fks(
             charge,
-            expected_blank_fks=self.default_expected_blank_fks
-            | self.default_blank_fks_with_branding
-            | {
+            expected_blank_fks={
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Invoice.charge",
@@ -170,11 +141,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION["id"]
         )
-        self.assert_fks(
-            charge,
-            expected_blank_fks=self.default_expected_blank_fks
-            | self.default_blank_fks_with_branding,
-        )
+        self.assert_fks(charge)
 
     def test_sync_from_stripe_data_refunded_on_update(self):
         # First sync the charge as usual; then sync the refunded version to hit
@@ -259,11 +226,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(
             refund.balance_transaction.id, FAKE_BALANCE_TRANSACTION_REFUND["id"]
         )
-        self.assert_fks(
-            charge,
-            expected_blank_fks=self.default_expected_blank_fks
-            | self.default_blank_fks_with_branding,
-        )
+        self.assert_fks(charge)
 
     def test_sync_from_stripe_data_max_amount(self):
         fake_charge = deepcopy(FAKE_CHARGE)
@@ -277,11 +240,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(charge.paid)
         self.assertEqual(0, charge.amount_refunded)
         mocks["Charge"].assert_not_called()
-        self.assert_fks(
-            charge,
-            expected_blank_fks=self.default_expected_blank_fks
-            | self.default_blank_fks_with_branding,
-        )
+        self.assert_fks(charge)
 
     def test_sync_from_stripe_data_unsupported_source(self):
         fake_charge = deepcopy(FAKE_CHARGE)
@@ -300,11 +259,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION["id"]
         )
-        self.assert_fks(
-            charge,
-            expected_blank_fks=self.default_expected_blank_fks
-            | self.default_blank_fks_with_branding,
-        )
+        self.assert_fks(charge)
 
     def test_sync_from_stripe_data_no_customer(self):
         fake_charge = deepcopy(FAKE_CHARGE)
@@ -333,9 +288,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
         self.assert_fks(
             charge,
-            expected_blank_fks=self.default_expected_blank_fks
-            | self.default_blank_fks_with_branding
-            | {
+            expected_blank_fks={
                 "djstripe.Charge.customer",
                 "djstripe.Charge.invoice",
                 "djstripe.Charge.latest_invoice (related name)",
@@ -373,12 +326,11 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION["id"]
         )
+        # Charge.transfer is normally a COMMON_BLANK_FK (Connect-only); this
+        # test sets it, so verify it's populated rather than allowing-blank.
         self.assert_fks(
             charge,
-            expected_blank_fks=(
-                self.default_expected_blank_fks | self.default_blank_fks_with_branding
-            )
-            - {"djstripe.Charge.transfer"},
+            optional_fks=COMMON_BLANK_FKS - {"djstripe.Charge.transfer"},
         )
 
     def test_sync_from_stripe_data_with_destination(self):
@@ -407,7 +359,7 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             mocks["BalanceTransaction"].call_args.kwargs["id"]
             == FAKE_BALANCE_TRANSACTION["id"]
         )
-        self.assert_fks(charge, expected_blank_fks=self.default_expected_blank_fks)
+        self.assert_fks(charge)
 
     def test_max_size_large_charge_on_decimal_amount(self):
         """

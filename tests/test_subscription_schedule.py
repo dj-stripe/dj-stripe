@@ -93,26 +93,10 @@ class SubscriptionScheduleTest(CreateAccountMixin, AssertStripeFksMixin, TestCas
         )
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
+        # Beyond the suite-wide COMMON_BLANK_FKS allowlist, only the Released
+        # subscription back-link is null in the canonical fixture.
         self.default_expected_blank_fks = {
-            "djstripe.Customer.coupon",
-            "djstripe.Customer.default_payment_method",
-            "djstripe.Charge.application_fee",
-            "djstripe.Charge.dispute",
-            "djstripe.Charge.latest_upcominginvoice (related name)",
-            "djstripe.Charge.on_behalf_of",
-            "djstripe.Charge.source_transfer",
-            "djstripe.Charge.transfer",
-            "djstripe.PaymentIntent.on_behalf_of",
-            "djstripe.PaymentIntent.payment_method",
-            "djstripe.PaymentIntent.upcominginvoice (related name)",
-            "djstripe.Product.default_price",
-            "djstripe.Invoice.default_payment_method",
-            "djstripe.Invoice.default_source",
-            "djstripe.Subscription.default_payment_method",
-            "djstripe.Subscription.default_source",
-            "djstripe.Subscription.pending_setup_intent",
-            "djstripe.Subscription.schedule",
-            "djstripe.SubscriptionSchedule.released_subscription",
+            "djstripe.SubscriptionSchedule.released_subscription"
         }
 
         # create latest invoice

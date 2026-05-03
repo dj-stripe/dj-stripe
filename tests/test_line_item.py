@@ -35,32 +35,9 @@ class LineItemTest(AssertStripeFksMixin, TestCase):
         # create a Stripe Platform Account
         self.account = FAKE_PLATFORM_ACCOUNT.create()
 
-        self.default_expected_blank_fks = {
-            "djstripe.Account.branding_logo",
-            "djstripe.Account.branding_icon",
-            "djstripe.Charge.application_fee",
-            "djstripe.Charge.dispute",
-            "djstripe.Charge.latest_upcominginvoice (related name)",
-            "djstripe.Charge.on_behalf_of",
-            "djstripe.Charge.source_transfer",
-            "djstripe.Charge.transfer",
-            "djstripe.Customer.coupon",
-            "djstripe.Customer.default_payment_method",
-            "djstripe.Customer.subscriber",
-            "djstripe.Invoice.default_payment_method",
-            "djstripe.Invoice.default_source",
-            "djstripe.InvoiceItem.plan",
-            "djstripe.InvoiceItem.price",
-            "djstripe.InvoiceItem.subscription",
-            "djstripe.PaymentIntent.on_behalf_of",
-            "djstripe.PaymentIntent.payment_method",
-            "djstripe.PaymentIntent.upcominginvoice (related name)",
-            "djstripe.Product.default_price",
-            "djstripe.Subscription.default_payment_method",
-            "djstripe.Subscription.default_source",
-            "djstripe.Subscription.pending_setup_intent",
-            "djstripe.Subscription.schedule",
-        }
+        # Beyond the suite-wide COMMON_BLANK_FKS allowlist, line items don't
+        # carry an InvoiceItem.subscription back-reference.
+        self.default_expected_blank_fks = {"djstripe.InvoiceItem.subscription"}
 
     @patch(
         "stripe.BalanceTransaction.retrieve",

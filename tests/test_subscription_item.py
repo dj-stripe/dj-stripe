@@ -49,15 +49,8 @@ class SubscriptionItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
         self.customer = FAKE_CUSTOMER.create_for_user(self.user)
 
-        self.default_expected_blank_fks = {
-            "djstripe.Customer.coupon",
-            "djstripe.Customer.default_payment_method",
-            "djstripe.Product.default_price",
-            "djstripe.Subscription.default_payment_method",
-            "djstripe.Subscription.default_source",
-            "djstripe.Subscription.pending_setup_intent",
-            "djstripe.Subscription.schedule",
-        }
+        # All test-relevant blank FKs are covered by the suite COMMON_BLANK_FKS allowlist.
+        self.default_expected_blank_fks = set()
         # create latest invoice
         with mock_stripe_world():
             Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
