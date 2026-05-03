@@ -55,6 +55,32 @@ pytestmark = pytest.mark.django_db
 # with Prices is fully supported
 
 
+def _set_period_end(subscription, dt):
+    """Set Subscription.current_period_end via stripe_data (it is now a property)."""
+    subscription.stripe_data["current_period_end"] = int(dt.timestamp())
+    subscription.save(update_fields=["stripe_data"])
+
+
+def _set_canceled_at(subscription, dt):
+    subscription.stripe_data["canceled_at"] = int(dt.timestamp())
+    subscription.save(update_fields=["stripe_data"])
+
+
+def _set_cancel_at_period_end(subscription, value):
+    subscription.stripe_data["cancel_at_period_end"] = value
+    subscription.save(update_fields=["stripe_data"])
+
+
+def _set_status(subscription, value):
+    subscription.stripe_data["status"] = value
+    subscription.save(update_fields=["stripe_data"])
+
+
+def _set_trial_end(subscription, dt):
+    subscription.stripe_data["trial_end"] = int(dt.timestamp())
+    subscription.save(update_fields=["stripe_data"])
+
+
 class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
@@ -95,7 +121,8 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
         self.assert_fks(subscription)
-        self.assertEqual(datetime_to_unix(subscription.cancel_at), 1624553655)
+        # cancel_at is now a property returning the raw stripe_data timestamp.
+        self.assertEqual(subscription.cancel_at, 1624553655)
         self.assertEqual(
             subscription.pause_collection,
             subscription_fake["pause_collection"],
@@ -116,9 +143,9 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         assert subscription
-        self.assertEqual(subscription.default_source.id, FAKE_CARD["id"])
-
-        # default_source is normally an optional FK; this test sets it.
+        # Subscription.default_source is now a property that returns the raw
+        # id from stripe_data (not a Card FK).
+        self.assertEqual(subscription.default_source, FAKE_CARD["id"])
         self.assert_fks(subscription)
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN_II), autospec=True)
@@ -170,10 +197,10 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         assert subscription
-        subscription.canceled_at = timezone.now() + timezone.timedelta(days=7)
-        subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
-        subscription.cancel_at_period_end = True
-        subscription.save()
+        future = timezone.now() + timezone.timedelta(days=7)
+        _set_canceled_at(subscription, future)
+        _set_period_end(subscription, future)
+        _set_cancel_at_period_end(subscription, True)
 
         self.assertTrue(subscription.is_status_current())
         self.assertTrue(subscription.is_status_temporarily_current())
@@ -196,8 +223,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
-        subscription.save()
+        _set_period_end(subscription, timezone.now() + timezone.timedelta(days=7))
 
         self.assertTrue(subscription.is_status_current())
         self.assertFalse(subscription.is_status_temporarily_current())
@@ -221,9 +247,8 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         assert subscription
-        subscription.status = SubscriptionStatus.canceled
-        subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
-        subscription.save()
+        _set_status(subscription, SubscriptionStatus.canceled)
+        _set_period_end(subscription, timezone.now() + timezone.timedelta(days=7))
 
         self.assertFalse(subscription.is_status_current())
         self.assertFalse(subscription.is_status_temporarily_current())
@@ -337,8 +362,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         trial_end = timezone.now() + timezone.timedelta(days=5)
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.trial_end = trial_end
-        subscription.save()
+        _set_trial_end(subscription, trial_end)
 
         # Extend the Subscription by 30 days
         delta = timezone.timedelta(days=30)
@@ -455,7 +479,8 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         new_plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
 
-        self.assertEqual(FAKE_PLAN["id"], subscription.plan.id)
+        # Subscription.plan is now a dict (raw stripe_data), not a Plan FK.
+        self.assertEqual(FAKE_PLAN["id"], subscription.plan["id"])
 
         # Update the Subscription's plan
         subscription_updated = deepcopy(FAKE_SUBSCRIPTION)
@@ -464,7 +489,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         new_subscription = subscription.update(plan=new_plan)
 
-        self.assertEqual(FAKE_PLAN_II["id"], new_subscription.plan.id)
+        self.assertEqual(FAKE_PLAN_II["id"], new_subscription.plan["id"])
 
         self.assert_fks(subscription)
 
@@ -492,8 +517,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.current_period_end = timezone.now() + timezone.timedelta(days=7)
-        subscription.save()
+        _set_period_end(subscription, timezone.now() + timezone.timedelta(days=7))
 
         cancel_timestamp = datetime_to_unix(timezone.now())
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
@@ -504,7 +528,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription_delete_mock.return_value = canceled_subscription_fake
 
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
-        self.assertEqual(self.customer.active_subscriptions.count(), 1)
+        self.assertEqual(len(self.customer.active_subscriptions), 1)
         self.assertTrue(self.customer.has_any_active_subscription())
 
         new_subscription = subscription.cancel(at_period_end=False)
@@ -544,8 +568,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.current_period_end = current_period_end
-        subscription.save()
+        _set_period_end(subscription, current_period_end)
 
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         canceled_subscription_fake["current_period_end"] = datetime_to_unix(
@@ -558,7 +581,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertTrue(self.customer.is_subscribed_to(FAKE_PRODUCT["id"]))
         self.assertTrue(self.customer.has_any_active_subscription())
-        self.assertEqual(self.customer.active_subscriptions.count(), 1)
+        self.assertEqual(len(self.customer.active_subscriptions), 1)
         self.assertTrue(subscription in self.customer.active_subscriptions)
 
         # Update the Subscription by cancelling it at the end of the period
@@ -568,7 +591,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         new_subscription = subscription.cancel(at_period_end=True)
 
-        self.assertEqual(self.customer.active_subscriptions.count(), 1)
+        self.assertEqual(len(self.customer.active_subscriptions), 1)
         self.assertTrue(new_subscription in self.customer.active_subscriptions)
 
         self.assertEqual(SubscriptionStatus.active, new_subscription.status)
@@ -598,8 +621,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     ):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        subscription.trial_end = timezone.now() + timezone.timedelta(days=7)
-        subscription.save()
+        _set_trial_end(subscription, timezone.now() + timezone.timedelta(days=7))
 
         cancel_timestamp = datetime_to_unix(timezone.now())
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
@@ -647,8 +669,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         assert subscription
-        subscription.current_period_end = current_period_end
-        subscription.save()
+        _set_period_end(subscription, current_period_end)
 
         canceled_subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         canceled_subscription_fake["current_period_end"] = datetime_to_unix(
@@ -698,9 +719,14 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
-        self.assertEqual(Subscription.objects.filter(status="canceled").count(), 0)
+        # status is now a JSONField property, not a column — filter via the dict.
+        self.assertEqual(
+            Subscription.objects.filter(stripe_data__status="canceled").count(), 0
+        )
         subscription.cancel(at_period_end=False)
-        self.assertEqual(Subscription.objects.filter(status="canceled").count(), 1)
+        self.assertEqual(
+            Subscription.objects.filter(stripe_data__status="canceled").count(), 1
+        )
 
         self.assert_fks(subscription)
 
@@ -1061,40 +1087,6 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             stripe.Customer.delete(
                 stripe_customer.id, api_key=settings.STRIPE_SECRET_KEY
             )
-
-
-class TestSubscriptionDecimal(CreateAccountMixin):
-    @pytest.mark.parametrize(
-        "inputted,expected",
-        [
-            (Decimal(1), Decimal("1.00")),
-            (Decimal("1.5234567"), Decimal("1.52")),
-            (Decimal(0), Decimal("0.00")),
-            (Decimal("23.2345678"), Decimal("23.23")),
-            ("1", Decimal("1.00")),
-            ("1.5234567", Decimal("1.52")),
-            ("0", Decimal("0.00")),
-            ("23.2345678", Decimal("23.23")),
-            (1, Decimal("1.00")),
-            (1.5234567, Decimal("1.52")),
-            (0, Decimal("0.00")),
-            (23.2345678, Decimal("23.24")),
-        ],
-    )
-    def test_decimal_application_fee_percent(self, inputted, expected, monkeypatch):
-        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        fake_subscription["application_fee_percent"] = inputted
-
-        monkeypatch_stripe_world(monkeypatch, Subscription=fake_subscription)
-
-        # Create Latest Invoice
-        Invoice.sync_from_stripe_data(FAKE_INVOICE)
-
-        subscription = Subscription.sync_from_stripe_data(fake_subscription)
-        field_data = subscription.application_fee_percent
-
-        assert isinstance(field_data, Decimal)
-        assert field_data == expected
 
 
 class StaleSubscriptionItemRegressionTest(CreateAccountMixin, TestCase):

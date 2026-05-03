@@ -1515,7 +1515,8 @@ class Subscription(StripeModel):
         if not self.plan:
             return None
         stripe_subscription = self.api_retrieve()
-        stripe_subscription.plan = self.plan.id
+        # ``self.plan`` is the raw stripe_data dict; pull the id out of it.
+        stripe_subscription.plan = self.plan["id"]
         stripe_subscription.cancel_at_period_end = False
 
         return Subscription.sync_from_stripe_data(stripe_subscription.save())
