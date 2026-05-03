@@ -258,7 +258,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertEqual(customer.sources.count(), 1)
         self.assertEqual(
-            customer.default_source.id, fake_customer["default_source"]["id"]
+            customer.default_source["id"], fake_customer["default_source"]["id"]
         )
 
     @patch(
@@ -277,7 +277,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(customer.sources.count(), 0)
         self.assertEqual(customer.bank_account.count(), 1)
         self.assertEqual(
-            customer.default_source.id, fake_customer["default_source"]["id"]
+            customer.default_source["id"], fake_customer["default_source"]["id"]
         )
 
         self.assert_fks(
@@ -324,8 +324,10 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         customer_fake = deepcopy(FAKE_CUSTOMER)
 
         customer = Customer.sync_from_stripe_data(customer_fake)
+        # Customer.default_source is now the raw stripe_data value (dict in
+        # this fixture; sometimes a bare id string from Stripe).
         self.assertEqual(
-            customer.default_source.id, customer_fake["default_source"]["id"]
+            customer.default_source["id"], customer_fake["default_source"]["id"]
         )
         self.assertEqual(len(list(customer.customer_payment_methods)), 2)
 

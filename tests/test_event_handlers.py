@@ -897,10 +897,10 @@ class TestCustomerEvents(CreateAccountMixin, EventTestCase):
 
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     def test_customer_default_source_deleted(self, customer_retrieve_mock):
-        self.customer.default_source = DjstripePaymentMethod.objects.get(
-            id=FAKE_CARD["id"]
-        )
-        self.customer.save()
+        # default_source is now a read-only property over stripe_data; seed it
+        # via the dict.
+        self.customer.stripe_data["default_source"] = FAKE_CARD["id"]
+        self.customer.save(update_fields=["stripe_data"])
         self.assertIsNotNone(self.customer.default_source)
 
         event = self._create_event(FAKE_EVENT_CUSTOMER_SOURCE_DELETED)
