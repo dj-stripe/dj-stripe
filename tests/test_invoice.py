@@ -17,7 +17,6 @@ from . import (
     FAKE_CUSTOMER,
     FAKE_INVOICE,
     FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE,
-    FAKE_INVOICEITEM,
     FAKE_LINE_ITEM_SUBSCRIPTION,
     FAKE_PLAN,
     FAKE_PLATFORM_ACCOUNT,
@@ -172,17 +171,6 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertIsNone(items[0].subscription)
         self.assert_fks(invoice)
 
-    def test_invoice_with_no_invoice_items(self):
-        invoice_data = deepcopy(FAKE_INVOICE)
-        invoice_data["lines"] = []
-
-        with self._patch_default_account(), mock_stripe_world():
-            invoice = Invoice.sync_from_stripe_data(invoice_data)
-
-        self.assertIsNotNone(invoice.plan)  # retrieved from invoice item
-        self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
-        self.assert_fks(invoice)
-
     def test_invoice_with_non_subscription_invoice_items(self):
         invoice_data = deepcopy(FAKE_INVOICE)
         invoice_data["lines"]["data"].append(deepcopy(FAKE_LINE_ITEM_SUBSCRIPTION))
@@ -195,43 +183,6 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         # only 1 line item of type="invoice_item"
         self.assertEqual(1, len(invoice.invoiceitems.all()))
         self.assert_fks(invoice)
-
-    def test_invoice_plan_from_invoice_items(self):
-        with self._patch_default_account(), mock_stripe_world():
-            invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
-
-        self.assertIsNotNone(invoice.plan)  # retrieved from invoice item
-        self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
-        self.assert_fks(invoice)
-
-    def test_invoice_plan_from_subscription(self):
-        invoice_data = deepcopy(FAKE_INVOICE)
-        invoice_data["lines"]["data"][0]["plan"] = None
-
-        with self._patch_default_account(), mock_stripe_world():
-            invoice = Invoice.sync_from_stripe_data(invoice_data)
-
-        self.assertIsNotNone(invoice.plan)  # retrieved from subscription
-        self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
-        self.assert_fks(invoice)
-
-    def test_invoice_without_plan(self):
-        invoice_data = deepcopy(FAKE_INVOICE)
-        invoice_data["lines"]["data"][0]["plan"] = None
-        invoice_data["lines"]["data"][0]["subscription"] = None
-        invoice_data["subscription"] = None
-
-        fake_invoice_item = deepcopy(FAKE_INVOICEITEM)
-        fake_invoice_item["subscription"] = None
-
-        with (
-            self._patch_default_account(),
-            mock_stripe_world(InvoiceItem=fake_invoice_item),
-        ):
-            invoice = Invoice.sync_from_stripe_data(invoice_data)
-
-        self.assertIsNone(invoice.plan)
-        self.assert_fks(invoice, expected_blank_fks={"djstripe.Invoice.subscription"})
 
     def test_upcoming_invoice(self):
         fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
@@ -275,13 +226,9 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(invoice.lineitems.update(), 0)
         self.assertEqual(invoice.lineitems.delete(), 0)
 
-        self.assertIsNotNone(invoice.plan)
-        self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
-
         invoice._lineitems = []
         items = invoice.lineitems.all()
         self.assertEqual(0, len(items))
-        self.assertIsNotNone(invoice.plan)
 
         self.assertEqual(invoice.default_tax_rates.count(), 1)
         self.assertEqual(
@@ -318,9 +265,6 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         # invoice and once when materializing the line items.
         assert mocks["Subscription"].call_count >= 2
         mocks["Plan"].assert_not_called()
-
-        self.assertIsNotNone(invoice.plan)
-        self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
     def test_upcoming_invoice_with_subscription_plan(self):
         fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
@@ -367,9 +311,6 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             == FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
         )
         mocks["Plan"].assert_not_called()
-
-        self.assertIsNotNone(invoice.plan)
-        self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
 
     @patch(
         "stripe.Invoice.create_preview",

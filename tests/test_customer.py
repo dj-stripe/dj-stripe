@@ -4,7 +4,7 @@ Customer Model Tests.
 
 import decimal
 from copy import deepcopy
-from unittest.mock import ANY, call, patch
+from unittest.mock import ANY, patch
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase, override_settings
@@ -1627,13 +1627,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual("il_fakefakefakefakefake0002", items[0].id)
         self.assertEqual(0, invoice.invoiceitems.count())
 
-        self.assertIsNotNone(invoice.plan)
-        self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
-
         invoice._lineitems = []
         items = invoice.lineitems.all()
         self.assertEqual(0, len(items))
-        self.assertIsNotNone(invoice.plan)
 
     @patch("stripe.Subscription.create", autospec=True)
     @patch(
@@ -2039,10 +2035,6 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual("il_fakefakefakefakefake0002", items[0].id)
         self.assertEqual(0, invoice.invoiceitems.count())
 
-        self.assertIsNotNone(invoice.plan)
-        self.assertEqual(FAKE_PLAN["id"], invoice.plan.id)
-
         invoice._lineitems = []
         items = invoice.lineitems.all()
         self.assertEqual(0, len(items))
-        self.assertIsNotNone(invoice.plan)
