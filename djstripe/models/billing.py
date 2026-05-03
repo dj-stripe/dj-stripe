@@ -384,8 +384,14 @@ class BaseInvoice(StripeModel):
         if subscription_plan is not None and isinstance(subscription_plan, StripeModel):
             subscription_plan = subscription_plan.id
 
+        # ``stripe.Invoice.upcoming`` was removed in favour of
+        # ``create_preview``. Fall back to the legacy method on older SDKs
+        # to keep this code working with both.
+        upcoming = getattr(cls.stripe_class, "create_preview", None) or (
+            cls.stripe_class.upcoming
+        )
         try:
-            upcoming_stripe_invoice = cls.stripe_class.upcoming(
+            upcoming_stripe_invoice = upcoming(
                 api_key=api_key,
                 customer=customer,
                 subscription=subscription,
