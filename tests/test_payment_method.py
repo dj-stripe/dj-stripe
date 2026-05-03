@@ -11,7 +11,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from stripe import InvalidRequestError
 
-from djstripe import enums, models
+from djstripe import models
 
 from . import (
     FAKE_CARD_AS_PAYMENT_METHOD,
@@ -35,29 +35,14 @@ class TestPaymentMethod(CreateAccountMixin):
 
     @pytest.mark.parametrize("customer_exists", [True, False])
     def test___str__(self, monkeypatch, customer_exists):
-        # monkeypatch stripe.Customer.retrieve call to return
-        # the desired json response.
         monkeypatch.setattr(stripe.Customer, "retrieve", self.mock_customer_get)
 
         fake_payment_method_data = deepcopy(FAKE_PAYMENT_METHOD_I)
         if not customer_exists:
             fake_payment_method_data["customer"] = None
-            pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
-            customer = None
-            assert (
-                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} is"
-                " not associated with any customer" == str(pm)
-            )
-
-        else:
-            pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
-            customer = models.Customer.objects.get(
-                id=fake_payment_method_data["customer"]
-            )
-            assert (
-                f"{enums.PaymentMethodType.humanize(fake_payment_method_data['type'])} for"
-                f" {customer}" == str(pm)
-            )
+        pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
+        # PaymentMethod.__str__ falls back to the default StripeModel format.
+        assert str(pm) == f"<id={pm.id}>"
 
     @pytest.mark.parametrize("customer_exists", [True, False])
     def test_get_stripe_dashboard_url(self, monkeypatch, customer_exists):

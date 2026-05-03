@@ -794,11 +794,11 @@ class TestCustomerEvents(CreateAccountMixin, EventTestCase):
         self.assertEqual(customer.subscriber, self.user)
         self.assertEqual(customer.metadata, {"djstripe_subscriber": self.user.id})
 
-    @patch(
-        "stripe.Customer.delete_source",
-        autospec=True,
-    )
-    @patch("stripe.Customer.delete", autospec=True)
+    # autospec=False on these because the new Stripe SDK declares them with
+    # TypedDict ``**params``, and autospec rejects api_key/stripe_account
+    # kwargs that the legacy class-method shim still threads through.
+    @patch("stripe.Customer.delete_source")
+    @patch("stripe.Customer.delete")
     @patch(
         "stripe.Customer.retrieve_source",
         side_effect=[deepcopy(FAKE_CARD), deepcopy(FAKE_CARD_III)],

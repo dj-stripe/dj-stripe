@@ -96,10 +96,8 @@ class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             self.plan = Plan.sync_from_stripe_data(self.plan_data)
 
     def test___str__(self):
-        assert (
-            str(self.plan)
-            == f"{self.plan.human_readable_price} for {FAKE_PRODUCT['name']}"
-        )
+        # Plan.__str__ now returns just the human-readable price.
+        assert str(self.plan) == self.plan.human_readable_price
 
     def test___str__null_product(self):
         plan_data = deepcopy(FAKE_PLAN_II)

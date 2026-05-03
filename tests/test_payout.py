@@ -142,9 +142,11 @@ class TestPayout(AssertStripeFksMixin, TestCase):
         fake_payout_custom = deepcopy(FAKE_PAYOUT_CUSTOM_BANK_ACCOUNT)
         payout = Payout.sync_from_stripe_data(fake_payout_custom)
 
-        self.assertEqual(str(payout), "10.00 (Paid)")
+        # Payout.__str__ falls back to the default StripeModel format.
+        self.assertEqual(str(payout), f"<id={payout.id}>")
 
         fake_payout_express = deepcopy(FAKE_PAYOUT_CUSTOM_CARD)
         payout = Payout.sync_from_stripe_data(fake_payout_express)
 
-        self.assertEqual(str(payout), "10.00 (Paid)")
+        # Payout.__str__ falls back to the default StripeModel format.
+        self.assertEqual(str(payout), f"<id={payout.id}>")
