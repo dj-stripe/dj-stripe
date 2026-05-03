@@ -33,8 +33,6 @@ class TestProduct(CreateAccountMixin):
         return deepcopy(FAKE_PRODUCT)
 
     def test___str__(self, monkeypatch):
-        # Product.__str__ now returns just the product name; price-count
-        # decoration was removed.
         monkeypatch.setattr(stripe.Product, "retrieve", self.mock_product_get)
         product = Product.sync_from_stripe_data(deepcopy(FAKE_PRODUCT))
         assert str(product) == FAKE_PRODUCT["name"]

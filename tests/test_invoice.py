@@ -55,13 +55,14 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
 
         assert invoice
-        # Invoice.__str__ formats amount_paid (in cents) as a raw value.
         assert str(invoice) == (
             f"Invoice #{FAKE_INVOICE['number']} for $2,000.00 USD (paid)"
         )
-        self.assertGreater(len(invoice.status_transitions.keys()), 1)
-        self.assertTrue(bool(invoice.account_country))
-        self.assertTrue(bool(invoice.account_name))
+        self.assertGreater(
+            len(invoice.stripe_data.get("status_transitions", {})), 1
+        )
+        self.assertTrue(invoice.stripe_data.get("account_country"))
+        self.assertTrue(invoice.stripe_data.get("account_name"))
         self.assertTrue(bool(invoice.collection_method))
 
         self.assertEqual(invoice.default_tax_rates.count(), 1)

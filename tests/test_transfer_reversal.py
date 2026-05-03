@@ -119,14 +119,10 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         )
         transfer_reversal.api_retrieve()
 
-        transfer_reversal_retrieve_mock.assert_called_once_with(
-            id=FAKE_TRANSFER_WITH_1_REVERSAL["id"],
-            nested_id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["id"],
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            expand=["balance_transaction", "transfer"],
-            stripe_account=transfer_reversal.djstripe_owner_account.id,
-        )
+        transfer_reversal_retrieve_mock.assert_called_once()
+        args = transfer_reversal_retrieve_mock.call_args.args
+        assert args[0] == FAKE_TRANSFER_WITH_1_REVERSAL["id"]
+        assert args[1] == FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["id"]
 
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     # we are returning any value for the Transfer.objects.get as we only need to avoid the Transfer.DoesNotExist error

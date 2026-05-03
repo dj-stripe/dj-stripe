@@ -897,8 +897,6 @@ class TestCustomerEvents(CreateAccountMixin, EventTestCase):
 
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     def test_customer_default_source_deleted(self, customer_retrieve_mock):
-        # default_source is now a read-only property over stripe_data; seed it
-        # via the dict.
         self.customer.stripe_data["default_source"] = FAKE_CARD["id"]
         self.customer.save(update_fields=["stripe_data"])
         self.assertIsNotNone(self.customer.default_source)
@@ -1555,7 +1553,7 @@ class TestInvoiceEvents(CreateAccountMixin, EventTestCase):
         invoice = Invoice.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             invoice.amount_due,
-            fake_stripe_event["data"]["object"]["amount_due"] / Decimal(100),
+            fake_stripe_event["data"]["object"]["amount_due"],
         )
         self.assertEqual(invoice.paid, fake_stripe_event["data"]["object"]["paid"])
 
@@ -1730,7 +1728,7 @@ class TestInvoiceItemEvents(CreateAccountMixin, EventTestCase):
         )
         self.assertEqual(
             invoiceitem.amount,
-            fake_stripe_event["data"]["object"]["amount"] / Decimal(100),
+            fake_stripe_event["data"]["object"]["amount"],
         )
 
     @patch(
@@ -1867,7 +1865,7 @@ class TestPriceEvents(CreateAccountMixin, EventTestCase):
         )
         self.assertEqual(
             price.unit_amount_decimal,
-            Decimal(FAKE_EVENT_PRICE_UPDATED["data"]["object"]["unit_amount_decimal"]),
+            FAKE_EVENT_PRICE_UPDATED["data"]["object"]["unit_amount_decimal"],
         )
 
     @patch("stripe.Price.retrieve", return_value=FAKE_PRICE, autospec=True)
@@ -2641,7 +2639,7 @@ class TestTransferEvents(EventTestCase):
         transfer = Transfer.objects.get(id=fake_stripe_event["data"]["object"]["id"])
         self.assertEqual(
             transfer.amount,
-            fake_stripe_event["data"]["object"]["amount"] / Decimal(100),
+            fake_stripe_event["data"]["object"]["amount"],
         )
 
     # transfer.deleted event is not enabled

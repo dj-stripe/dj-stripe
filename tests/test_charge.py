@@ -55,9 +55,6 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
     def test___str__(self):
-        # `status` remains a real StripeEnumField on Charge, but
-        # `captured` / `disputed` / `refunded` / `amount_refunded` are now
-        # read-only properties over ``stripe_data``.
         charge = Charge(
             amount=50, currency="usd", id="ch_test", status=ChargeStatus.failed
         )
@@ -134,7 +131,6 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual("Subscription creation", charge.description)
         self.assertEqual(0, charge.amount_refunded)
 
-        # Customer.default_source is now a stripe_data dict (not an FK).
         self.assertEqual(self.customer.default_source["id"], charge.source_id)
         self.assertEqual(charge.source.type, LegacySourceType.card)
 
@@ -169,7 +165,6 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(charge.id, charge_refunded.id)
         self.assertEqual(Decimal(20), charge_refunded.amount)
         self.assertTrue(charge_refunded.refunded)
-        # amount is decimal dollars, amount_refunded is raw cents.
         self.assertEqual(int(charge_refunded.amount * 100), charge_refunded.amount_refunded)
 
         mocks["Charge"].assert_not_called()
@@ -320,7 +315,6 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             )
 
         self.assertTrue(created)
-        # charge.transfer is the raw stripe_data id string.
         self.assertIsNotNone(charge.transfer)
         self.assertEqual(fake_transfer["id"], charge.transfer)
 

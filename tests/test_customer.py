@@ -306,9 +306,8 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         Card.objects.all().delete()
 
         customer_fake = deepcopy(FAKE_CUSTOMER)
-        # Earlier tests in this class can mutate FAKE_CUSTOMER's
-        # ``default_source`` (the sync layer normalizes inline source dicts
-        # to bare ids). Resolve the expected id from whatever shape we got.
+        # FAKE_CUSTOMER's default_source can be a dict or a bare id depending
+        # on whether prior tests in the class triggered an in-place sync.
         ds = customer_fake["default_source"]
         expected_id = ds["id"] if isinstance(ds, dict) else ds
 
@@ -773,8 +772,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         source_retrieve_mock,
         source_delete_mock,
     ):
-        # default_source is now a read-only @property over stripe_data, so
-        # purge() must write to stripe_data rather than the descriptor.
         self.assertEqual(self.customer.default_source, self.payment_method.id)
 
         self.customer.purge()
@@ -1079,11 +1076,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             customer=self.customer.id,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
-
-    # The legacy Customer.coupon FK derivation from the discount payload was
-    # removed; coupon is now exposed as a stripe_data passthrough property and
-    # is set directly by sync if present in the incoming payload, not derived
-    # from `discount`.
 
     @patch(
         "djstripe.models.Invoice.sync_from_stripe_data",

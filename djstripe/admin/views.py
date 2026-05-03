@@ -91,9 +91,9 @@ class ConfirmCustomAction(FormView):
                 messages.success(
                     request, f"Successfully Synced: {instance}", fail_silently=True
                 )
-            except stripe.error.PermissionError as error:
+            except stripe.PermissionError as error:
                 messages.warning(request, error, fail_silently=True)
-            except stripe.error.InvalidRequestError:
+            except stripe.InvalidRequestError:
                 raise
 
     def _sync_all_instances(self, request, queryset):
@@ -109,7 +109,7 @@ class ConfirmCustomAction(FormView):
                 messages.success(
                     request, f"Successfully Canceled: {instance}", fail_silently=True
                 )
-            except stripe.error.InvalidRequestError as error:
+            except stripe.InvalidRequestError as error:
                 messages.warning(request, error, fail_silently=True)
 
     def _release_subscription_schedule(self, request, queryset):
@@ -120,7 +120,7 @@ class ConfirmCustomAction(FormView):
                 messages.success(
                     request, f"Successfully Released: {instance}", fail_silently=True
                 )
-            except stripe.error.InvalidRequestError as error:
+            except stripe.InvalidRequestError as error:
                 messages.warning(request, error, fail_silently=True)
 
     def _cancel_subscription_schedule(self, request, queryset):
@@ -131,5 +131,5 @@ class ConfirmCustomAction(FormView):
                 messages.success(
                     request, f"Successfully Canceled: {instance}", fail_silently=True
                 )
-            except stripe.error.InvalidRequestError as error:
+            except stripe.InvalidRequestError as error:
                 messages.warning(request, error, fail_silently=True)

@@ -56,7 +56,6 @@ pytestmark = pytest.mark.django_db
 
 
 def _set_period_end(subscription, dt):
-    """Set Subscription.current_period_end via stripe_data (it is now a property)."""
     subscription.stripe_data["current_period_end"] = int(dt.timestamp())
     subscription.save(update_fields=["stripe_data"])
 
@@ -121,7 +120,6 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
         self.assert_fks(subscription)
-        # cancel_at is now a property returning the raw stripe_data timestamp.
         self.assertEqual(subscription.cancel_at, 1624553655)
         self.assertEqual(
             subscription.pause_collection,
@@ -143,8 +141,6 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         assert subscription
-        # Subscription.default_source is now a property that returns the raw
-        # id from stripe_data (not a Card FK).
         self.assertEqual(subscription.default_source, FAKE_CARD["id"])
         self.assert_fks(subscription)
 
@@ -479,7 +475,6 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         new_plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
 
-        # Subscription.plan is now a dict (raw stripe_data), not a Plan FK.
         self.assertEqual(FAKE_PLAN["id"], subscription.plan["id"])
 
         # Update the Subscription's plan
@@ -719,7 +714,6 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
 
-        # status is now a JSONField property, not a column — filter via the dict.
         self.assertEqual(
             Subscription.objects.filter(stripe_data__status="canceled").count(), 0
         )

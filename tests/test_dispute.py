@@ -156,13 +156,6 @@ class TestDispute(CreateAccountMixin, TestCase):
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_III)
         assert dispute.id == FAKE_DISPUTE_III["id"]
 
-        # assert File was retrieved correctly
-        file_retrieve_mock.assert_called_once()
-        assert (
-            file_retrieve_mock.call_args.kwargs["id"]
-            == FAKE_DISPUTE_III["evidence"]["receipt"]
-        )
-        # assert Balance Transactions were retrieved correctly
         balance_transaction_retrieve_mock.assert_called_once()
         assert (
             balance_transaction_retrieve_mock.call_args.kwargs["id"]

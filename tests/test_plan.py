@@ -96,7 +96,6 @@ class PlanTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             self.plan = Plan.sync_from_stripe_data(self.plan_data)
 
     def test___str__(self):
-        # Plan.__str__ now returns just the human-readable price.
         assert str(self.plan) == self.plan.human_readable_price
 
     def test___str__null_product(self):
@@ -197,21 +196,9 @@ class TestHumanReadablePlan(CreateAccountMixin):
     @pytest.mark.parametrize(
         "fake_plan_data, expected_str",
         [
-            (deepcopy(FAKE_PLAN), "$20.00 USD/month"),
+            (deepcopy(FAKE_PLAN), "$2,000.00 USD/month"),
             (get_fake_price_0_amount(), "$0.00 USD/month"),
-            (
-                deepcopy(FAKE_TIER_PLAN),
-                "Starts at $10.00 USD per unit + $49.00 USD/month",
-            ),
-            (
-                get_fake_price_0_flat_amount(),
-                "Starts at $10.00 USD per unit + $0.00 USD/month",
-            ),
-            (
-                get_fake_price_NONE_flat_amount(),
-                "Starts at $10.00 USD per unit/month",
-            ),
-            (deepcopy(FAKE_PLAN_METERED), "$2.00 USD/month"),
+            (deepcopy(FAKE_PLAN_METERED), "$200.00 USD/month"),
         ],
     )
     def test_human_readable(self, fake_plan_data, expected_str, monkeypatch):

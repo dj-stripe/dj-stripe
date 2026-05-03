@@ -293,7 +293,7 @@ class WebhookEventTrigger(models.Model):
             stripe.WebhookSignature.verify_header(
                 self.body, signature, secret, tolerance
             )
-        except stripe.error.SignatureVerificationError:
+        except stripe.SignatureVerificationError:
             logger.exception("Failed to verify header")
             return False
         else:

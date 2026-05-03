@@ -376,7 +376,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
 
         # monkeypatch instance.api_retrieve and app_config.get_model
         def mock_instance_api_retrieve(*args, **kwargs):
-            raise stripe.error.PermissionError("some random error message")
+            raise stripe.PermissionError("some random error message")
 
         def mock_get_model(*args, **kwargs):
             return model
@@ -425,7 +425,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
 
         # monkeypatch instance.api_retrieve and app_config.get_model
         def mock_instance_api_retrieve(*args, **kwargs):
-            raise stripe.error.InvalidRequestError({}, "some random error message")
+            raise stripe.InvalidRequestError({}, "some random error message")
 
         def mock_get_model(*args, **kwargs):
             return model
@@ -450,7 +450,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
         view = ConfirmCustomAction()
         view.setup(request, **kwargs)
 
-        with pytest.raises(stripe.error.InvalidRequestError) as exc_info:
+        with pytest.raises(stripe.InvalidRequestError) as exc_info:
             # Invoke the Custom Actions
             view._resync_instances(request, [instance])
 
@@ -525,7 +525,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
 
         # monkeypatch subscription.cancel()
         def mock_subscription_cancel(*args, **keywargs):
-            raise stripe.error.InvalidRequestError({}, "some random error message")
+            raise stripe.InvalidRequestError({}, "some random error message")
 
         monkeypatch.setattr(instance, "cancel", mock_subscription_cancel)
 
@@ -677,7 +677,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
 
         # monkeypatch subscription_schedule.release()
         def mock_subscription_schedule_release(*args, **keywargs):
-            raise stripe.error.InvalidRequestError({}, "some random error message")
+            raise stripe.InvalidRequestError({}, "some random error message")
 
         monkeypatch.setattr(instance, "release", mock_subscription_schedule_release)
 
@@ -722,7 +722,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
 
         # monkeypatch subscription_schedule.cancel()
         def mock_subscription_schedule_cancel(*args, **keywargs):
-            raise stripe.error.InvalidRequestError({}, "some random error message")
+            raise stripe.InvalidRequestError({}, "some random error message")
 
         monkeypatch.setattr(instance, "cancel", mock_subscription_schedule_cancel)
 

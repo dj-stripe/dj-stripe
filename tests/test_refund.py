@@ -49,6 +49,5 @@ class RefundTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
     def test___str__(self):
         refund = self._sync_refund(reason="requested_by_customer")
-        # Refund inherits StripeModel.__str__ which formats as <id=...>
         self.assertEqual(str(refund), f"<id={refund.id}>")
         self.assert_fks(refund, expected_blank_fks=self.default_expected_blank_fks)

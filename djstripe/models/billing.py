@@ -384,9 +384,6 @@ class BaseInvoice(StripeModel):
         if subscription_plan is not None and isinstance(subscription_plan, StripeModel):
             subscription_plan = subscription_plan.id
 
-        # ``stripe.Invoice.upcoming`` was removed in favour of
-        # ``create_preview``. Fall back to the legacy method on older SDKs
-        # to keep this code working with both.
         upcoming = getattr(cls.stripe_class, "create_preview", None) or (
             cls.stripe_class.upcoming
         )
@@ -458,8 +455,6 @@ class BaseInvoice(StripeModel):
 
         for line in data.get("lines", []):
             invoice_item_data = line.get("invoice_item")
-            # invoice_item is normally a string id; only inline-expanded
-            # responses contain a dict that we can sync directly.
             if isinstance(invoice_item_data, dict):
                 InvoiceItem.sync_from_stripe_data(invoice_item_data, api_key=api_key)
 
@@ -1515,7 +1510,6 @@ class Subscription(StripeModel):
         if not self.plan:
             return None
         stripe_subscription = self.api_retrieve()
-        # ``self.plan`` is the raw stripe_data dict; pull the id out of it.
         stripe_subscription.plan = self.plan["id"]
         stripe_subscription.cancel_at_period_end = False
 

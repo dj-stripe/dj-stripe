@@ -281,10 +281,9 @@ class LegacySourceMixin:
         Removes a legacy source from this customer's account.
         """
 
-        # First, wipe default source on all customers that use this card.
-        # ``default_source`` is now stored inside the stripe_data JSON blob;
-        # find rows whose blob references this id (either as a bare string or
-        # as an inline source dict) and clear the entry.
+        # Wipe default_source on customers that reference this card. The
+        # value lives in the stripe_data JSON blob and may be either the
+        # bare id or an inline source dict.
         from django.db.models import Q
 
         affected = Customer.objects.filter(
@@ -453,8 +452,6 @@ class BankAccount(LegacySourceMixin, StripeModel):
         if self.customer:
             default_source = self.customer.default_source
             default_payment_method = self.customer.default_payment_method
-            # default_source is now stripe_data — either a bare id string or
-            # an inline-expanded dict.
             default_source_id = (
                 default_source.get("id")
                 if isinstance(default_source, dict)

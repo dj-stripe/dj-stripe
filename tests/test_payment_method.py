@@ -41,7 +41,6 @@ class TestPaymentMethod(CreateAccountMixin):
         if not customer_exists:
             fake_payment_method_data["customer"] = None
         pm = models.PaymentMethod.sync_from_stripe_data(fake_payment_method_data)
-        # PaymentMethod.__str__ falls back to the default StripeModel format.
         assert str(pm) == f"<id={pm.id}>"
 
     @pytest.mark.parametrize("customer_exists", [True, False])

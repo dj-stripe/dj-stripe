@@ -38,7 +38,6 @@ class TestTaxIdStr(CreateAccountMixin, TestCase):
         customer_retrieve_mock,
     ):
         tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
-        # TaxId.__str__ no longer appends the verification status.
         self.assertEqual(
             str(tax_id),
             f"{enums.TaxIdType.humanize(FAKE_TAX_ID['type'])} {FAKE_TAX_ID['value']}",
