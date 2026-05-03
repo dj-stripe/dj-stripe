@@ -25,6 +25,7 @@ from . import (
     FAKE_STANDARD_ACCOUNT,
     FAKE_TRANSFER,
     FAKE_WEBHOOK_ENDPOINT_1,
+    mock_stripe_world,
 )
 from .conftest import CreateAccountMixin
 
@@ -38,9 +39,30 @@ def mock_webhook_handler(webhook_event_trigger):
 class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
     """Test class to test WebhookEventTrigger model and its methods"""
 
-    def _send_event(self, event_data):
+    def setUp(self):
+        # The webhook URL now requires a per-endpoint UUID. Sync the canonical
+        # fake endpoint once so each test can POST against its UUID.
+        self.webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(
+            deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        )
+
+    def _set_validation_method(self, method):
+        self.webhook_endpoint.djstripe_validation_method = method
+        self.webhook_endpoint.save()
+
+    def _webhook_url(self, uuid=None):
+        return reverse(
+            "djstripe:djstripe_webhook_by_uuid",
+            kwargs={"uuid": uuid or self.webhook_endpoint.djstripe_uuid},
+        )
+
+    def _send_event(self, event_data, *, validation_method="none"):
+        # Webhooks now validate per-endpoint. Tests posting unsigned bodies
+        # default to "none"; tests that exercise signature/retrieval
+        # validation pass an explicit value.
+        self._set_validation_method(validation_method)
         return Client().post(
-            reverse("djstripe:webhook"),
+            self._webhook_url(),
             json.dumps(event_data),
             content_type="application/json",
             HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
@@ -59,13 +81,15 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
 
     def test_webhook_test_event(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
-        resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
+        with mock_stripe_world():
+            resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(WebhookEventTrigger.objects.count(), 1)
 
     def test___str__(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
-        resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
+        with mock_stripe_world():
+            resp = self._send_event(FAKE_EVENT_TEST_CHARGE_SUCCEEDED)
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(WebhookEventTrigger.objects.count(), 1)
         webhookeventtrigger = WebhookEventTrigger.objects.first()
@@ -98,7 +122,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         invalid_event["id"] = "evt_invalid"
         invalid_event["data"]["valid"] = "not really"
 
-        resp = self._send_event(invalid_event)
+        resp = self._send_event(invalid_event, validation_method="retrieve_event")
 
         self.assertEqual(resp.status_code, 400)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
@@ -129,7 +153,9 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         account_retrieve_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-        resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
+        resp = self._send_event(
+            FAKE_EVENT_TRANSFER_CREATED, validation_method="retrieve_event"
+        )
 
         self.assertEqual(resp.status_code, 200)
         event_retrieve_mock.assert_called_once_with(
@@ -160,7 +186,11 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         invalid_event["id"] = "evt_invalid"
         invalid_event["data"]["valid"] = "not really"
 
-        resp = self._send_event(invalid_event)
+        # The endpoint has a secret but the request body has no real signature
+        # — verification fails and the handler returns 400.
+        self.webhook_endpoint.secret = "whsec_XXXXX"
+        self.webhook_endpoint.save()
+        resp = self._send_event(invalid_event, validation_method="verify_signature")
 
         self.assertEqual(resp.status_code, 400)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
@@ -195,7 +225,13 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         verify_header_mock,
         transfer__attach_object_post_save_hook_mock,
     ):
-        resp = self._send_event(FAKE_EVENT_TRANSFER_CREATED)
+        # verify_signature requires a non-empty secret on the endpoint.
+        self.webhook_endpoint.secret = "whsec_XXXXX"
+        self.webhook_endpoint.save()
+
+        resp = self._send_event(
+            FAKE_EVENT_TRANSFER_CREATED, validation_method="verify_signature"
+        )
 
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
@@ -285,7 +321,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
     def test_webhook_no_signature(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
         resp = Client().post(
-            reverse("djstripe:webhook"), "{}", content_type="application/json"
+            self._webhook_url(), "{}", content_type="application/json"
         )
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
@@ -299,7 +335,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
                 with warnings.catch_warnings():
                     warnings.simplefilter("ignore")
                     Client().post(
-                        reverse("djstripe:webhook"),
+                        self._webhook_url(),
                         "{}",
                         content_type="application/json",
                         HTTP_STRIPE_SIGNATURE="PLACEHOLDER",
