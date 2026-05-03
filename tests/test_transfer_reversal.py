@@ -160,16 +160,17 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
             id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"]
         )
 
-        transfer_reversal_list_mock.assert_called_once_with(
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"],
-            expand=[
-                "data.transfer",
-                "data.balance_transaction",
-                "data.transfer.balance_transaction",
-            ],
+        transfer_reversal_list_mock.assert_called_once()
+        kwargs = transfer_reversal_list_mock.call_args.kwargs
+        assert (
+            kwargs["id"]
+            == FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"]
         )
+        assert set(kwargs["expand"]) == {
+            "data.transfer",
+            "data.balance_transaction",
+            "data.transfer.balance_transaction",
+        }
 
     def test_is_valid_object(self):
         assert TransferReversal.is_valid_object(

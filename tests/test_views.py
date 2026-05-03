@@ -548,9 +548,9 @@ class TestConfirmCustomActionView(CreateAccountMixin):
         view = ConfirmCustomAction()
         view.setup(request, **kwargs)
 
-        with pytest.warns(Warning, match=r"some random error message"):
-            # Invoke the Custom Actions
-            view._cancel(request, [instance])
+        view._cancel(request, [instance])
+        emitted = {m.message: m.level_tag for m in messages.get_messages(request)}
+        assert any("some random error message" in str(k) for k in emitted), emitted
 
     def test__release_subscription_schedule(
         self,
@@ -703,9 +703,9 @@ class TestConfirmCustomActionView(CreateAccountMixin):
         view = ConfirmCustomAction()
         view.setup(request, **kwargs)
 
-        with pytest.warns(Warning, match=r"some random error message"):
-            # Invoke the Custom Actions
-            view._release_subscription_schedule(request, [instance])
+        view._release_subscription_schedule(request, [instance])
+        emitted = {m.message: m.level_tag for m in messages.get_messages(request)}
+        assert any("some random error message" in str(k) for k in emitted), emitted
 
     def test__cancel_subscription_schedule_stripe_invalid_request_error(
         self,
@@ -748,6 +748,6 @@ class TestConfirmCustomActionView(CreateAccountMixin):
         view = ConfirmCustomAction()
         view.setup(request, **kwargs)
 
-        with pytest.warns(Warning, match=r"some random error message"):
-            # Invoke the Custom Actions
-            view._cancel_subscription_schedule(request, [instance])
+        view._cancel_subscription_schedule(request, [instance])
+        emitted = {m.message: m.level_tag for m in messages.get_messages(request)}
+        assert any("some random error message" in str(k) for k in emitted), emitted

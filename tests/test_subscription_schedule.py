@@ -145,10 +145,6 @@ class SubscriptionScheduleTest(CreateAccountMixin, AssertStripeFksMixin, TestCas
 
         self.assert_fks(schedule, expected_blank_fks=self.default_expected_blank_fks)
 
-    @pytest.mark.parametrize(
-        "method, stripe_method",
-        [("release", "release"), ("cancel", "cancel"), ("update", "modify")],
-    )
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
@@ -161,18 +157,22 @@ class SubscriptionScheduleTest(CreateAccountMixin, AssertStripeFksMixin, TestCas
         customer_retrieve_mock,
         product_retrieve_mock,
         plan_retrieve_mock,
-        method,
-        stripe_method,
     ):
-        schedule = SubscriptionSchedule.sync_from_stripe_data(
-            deepcopy(FAKE_SUBSCRIPTION_SCHEDULE)
-        )
-        with patch.object(
-            stripe.SubscriptionSchedule,
-            stripe_method,
-            return_value=FAKE_SUBSCRIPTION_SCHEDULE,
-        ) as stripe_mock:
-            getattr(schedule, method)()
+        for method, stripe_method in (
+            ("release", "release"),
+            ("cancel", "cancel"),
+            ("update", "modify"),
+        ):
+            with self.subTest(method=method):
+                schedule = SubscriptionSchedule.sync_from_stripe_data(
+                    deepcopy(FAKE_SUBSCRIPTION_SCHEDULE)
+                )
+                with patch.object(
+                    stripe.SubscriptionSchedule,
+                    stripe_method,
+                    return_value=FAKE_SUBSCRIPTION_SCHEDULE,
+                ) as stripe_mock:
+                    getattr(schedule, method)()
 
-        stripe_mock.assert_called_once()
-        assert stripe_mock.call_args.args[0] == FAKE_SUBSCRIPTION_SCHEDULE["id"]
+                stripe_mock.assert_called_once()
+                assert stripe_mock.call_args.args[0] == FAKE_SUBSCRIPTION_SCHEDULE["id"]

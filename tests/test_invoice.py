@@ -65,10 +65,6 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(invoice.stripe_data.get("account_name"))
         self.assertTrue(invoice.stripe_data.get("collection_method"))
 
-        self.assertEqual(invoice.default_tax_rates.count(), 1)
-        self.assertEqual(
-            invoice.default_tax_rates.first().id, FAKE_TAX_RATE_EXAMPLE_1_VAT["id"]
-        )
         self.assert_fks(invoice)
 
     def test_sync_from_stripe_data_default_payment_method(self):

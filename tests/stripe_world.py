@@ -29,6 +29,7 @@ from . import (
     FAKE_PRODUCT,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_ITEM,
+    FAKE_TAX_RATE_EXAMPLE_1_VAT,
 )
 
 
@@ -48,6 +49,7 @@ def _stripe_world_registry(**overrides):
         "Product": FAKE_PRODUCT,
         "Subscription": FAKE_SUBSCRIPTION,
         "SubscriptionItem": FAKE_SUBSCRIPTION_ITEM,
+        "TaxRate": FAKE_TAX_RATE_EXAMPLE_1_VAT,
     }
     registry.update(overrides)
     return registry
