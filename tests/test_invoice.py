@@ -63,7 +63,7 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
         self.assertTrue(invoice.stripe_data.get("account_country"))
         self.assertTrue(invoice.stripe_data.get("account_name"))
-        self.assertTrue(bool(invoice.collection_method))
+        self.assertTrue(invoice.stripe_data.get("collection_method"))
 
         self.assertEqual(invoice.default_tax_rates.count(), 1)
         self.assertEqual(

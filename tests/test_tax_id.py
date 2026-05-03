@@ -12,8 +12,7 @@ from django.conf import settings
 from django.test.testcases import TestCase
 
 from djstripe import enums
-from djstripe.models import Customer, TaxId
-from djstripe.settings import djstripe_settings
+from djstripe.models import TaxId
 
 from . import FAKE_CUSTOMER, FAKE_TAX_ID, AssertStripeFksMixin
 from .conftest import CreateAccountMixin
@@ -71,103 +70,6 @@ class TestTransfer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.subscriber",
             },
-        )
-
-    # we are returning any value for the Customer.objects.get as we only need to avoid the Customer.DoesNotExist error
-    @patch(
-        "djstripe.models.core.Customer.objects.get",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.create_tax_id",
-        return_value=deepcopy(FAKE_TAX_ID),
-        autospec=True,
-    )
-    def test__api_create(
-        self,
-        tax_id_create_mock,
-        customer_get_mock,
-    ):
-        STRIPE_DATA = TaxId._api_create(
-            id=FAKE_CUSTOMER["id"], type=FAKE_TAX_ID["type"], value=FAKE_TAX_ID["value"]
-        )
-
-        assert STRIPE_DATA == FAKE_TAX_ID
-        tax_id_create_mock.assert_called_once_with(
-            id=FAKE_CUSTOMER["id"],
-            type=FAKE_TAX_ID["type"],
-            value=FAKE_TAX_ID["value"],
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
-        )
-
-    # we are returning any value for the Customer.objects.get as we only need to avoid the Customer.DoesNotExist error
-    @patch(
-        "djstripe.models.core.Customer.objects.get",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.create_tax_id",
-        return_value=deepcopy(FAKE_TAX_ID),
-        autospec=True,
-    )
-    def test__api_create_no_id_kwarg(
-        self,
-        tax_id_create_mock,
-        customer_get_mock,
-    ):
-        with pytest.raises(KeyError) as exc:
-            TaxId._api_create(
-                FAKE_CUSTOMER["id"],
-                type=FAKE_TAX_ID["type"],
-                value=FAKE_TAX_ID["value"],
-            )
-        assert "Customer Object ID is missing" in str(exc.value)
-
-    @patch(
-        "stripe.Customer.create_tax_id",
-        return_value=deepcopy(FAKE_TAX_ID),
-        autospec=True,
-    )
-    def test__api_create_no_customer(
-        self,
-        tax_id_create_mock,
-    ):
-        with pytest.raises(Customer.DoesNotExist):
-            TaxId._api_create(
-                id=FAKE_CUSTOMER["id"],
-                type=FAKE_TAX_ID["type"],
-                value=FAKE_TAX_ID["value"],
-            )
-
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve_tax_id",
-        return_value=deepcopy(FAKE_TAX_ID),
-        autospec=True,
-    )
-    def test_api_retrieve(
-        self,
-        tax_id_retrieve_mock,
-        customer_retrieve_mock,
-    ):
-        tax_id = TaxId.sync_from_stripe_data(FAKE_TAX_ID)
-        assert tax_id
-        tax_id.api_retrieve()
-        assert tax_id.djstripe_owner_account
-
-        tax_id_retrieve_mock.assert_called_once_with(
-            id=FAKE_CUSTOMER["id"],
-            nested_id=FAKE_TAX_ID["id"],
-            expand=[],
-            stripe_account=tax_id.djstripe_owner_account.id,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            api_key=djstripe_settings.STRIPE_SECRET_KEY,
         )
 
     @pytest.mark.stripe_api

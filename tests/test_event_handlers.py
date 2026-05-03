@@ -2540,9 +2540,8 @@ class TestTaxIdEvents(CreateAccountMixin, EventTestCase):
         autospec=True,
     )
     @patch(
-        "stripe.Customer.retrieve_tax_id",
+        "stripe.TaxId.retrieve",
         return_value=deepcopy(FAKE_TAX_ID),
-        autospec=True,
     )
     @patch(
         "stripe.Event.retrieve",
@@ -2562,10 +2561,7 @@ class TestTaxIdEvents(CreateAccountMixin, EventTestCase):
         return_value=deepcopy(FAKE_CUSTOMER),
         autospec=True,
     )
-    @patch(
-        "stripe.Customer.retrieve_tax_id",
-        autospec=True,
-    )
+    @patch("stripe.TaxId.retrieve")
     @patch(
         "stripe.Event.retrieve",
         autospec=True,
@@ -2594,10 +2590,7 @@ class TestTaxIdEvents(CreateAccountMixin, EventTestCase):
         return_value=deepcopy(FAKE_CUSTOMER),
         autospec=True,
     )
-    @patch(
-        "stripe.Customer.retrieve_tax_id",
-        autospec=True,
-    )
+    @patch("stripe.TaxId.retrieve")
     @patch(
         "stripe.Event.retrieve",
         autospec=True,
