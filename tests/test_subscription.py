@@ -261,7 +261,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         subscription = Subscription.sync_from_stripe_data(subscription_fake)
         self.assertFalse(subscription in self.customer.active_subscriptions)
-        self.assertEqual(self.customer.active_subscriptions.count(), 0)
+        self.assertEqual(len(self.customer.active_subscriptions), 0)
 
         # Extend the Subscription by 30 days
         delta = timezone.timedelta(days=30)

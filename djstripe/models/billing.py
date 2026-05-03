@@ -452,7 +452,9 @@ class BaseInvoice(StripeModel):
 
         for line in data.get("lines", []):
             invoice_item_data = line.get("invoice_item")
-            if invoice_item_data:
+            # invoice_item is normally a string id; only inline-expanded
+            # responses contain a dict that we can sync directly.
+            if isinstance(invoice_item_data, dict):
                 InvoiceItem.sync_from_stripe_data(invoice_item_data, api_key=api_key)
 
     @property
