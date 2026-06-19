@@ -332,18 +332,17 @@ class Command(BaseCommand):
         all Stripe Accounts"""
 
         all_list_kwargs = []
-        payment_method_types = enums.PaymentMethodType.__members__
 
+        # Listing without a `type` returns every payment method type (except
+        # `custom`), so there's no need to iterate over PaymentMethodType. This
+        # also picks up types that aren't in our enum yet.
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
             api_key = def_kwarg.get("api_key")
             for stripe_customer in models.Customer.api_list(
                 stripe_account=stripe_account, api_key=api_key
             ):
-                for type in payment_method_types:
-                    all_list_kwargs.append(
-                        {"customer": stripe_customer.id, "type": type, **def_kwarg}
-                    )
+                all_list_kwargs.append({"customer": stripe_customer.id, **def_kwarg})
 
         return all_list_kwargs
 
