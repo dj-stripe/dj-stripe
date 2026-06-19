@@ -11,6 +11,7 @@ from django.test import TestCase
 from stripe import InvalidRequestError
 
 from djstripe.enums import SubscriptionStatus
+from djstripe.event_handlers import update_customer_helper
 from djstripe.models import (
     Card,
     Charge,
@@ -788,6 +789,41 @@ class TestCheckoutEvents(CreateAccountMixin, EventTestCase):
         self.assertEqual(session.customer.id, self.customer.id)
         self.assertEqual(self.customer.subscriber, self.user)
         self.assertEqual(self.customer.metadata, {"djstripe_subscriber": self.user.id})
+
+
+class TestUpdateCustomerHelper(CreateAccountMixin, TestCase):
+    """Regression tests for update_customer_helper (#2203)."""
+
+    def setUp(self):
+        self.user = get_user_model().objects.create_user(
+            username="pydanny", email="pydanny@gmail.com"
+        )
+        self.customer = FAKE_CUSTOMER.create_for_user(self.user)
+        self.customer.subscriber = None
+        self.customer.save()
+        self.key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
+
+    @patch("djstripe.event_handlers.djstripe_settings.get_subscriber_model")
+    def test_subscriber_looked_up_by_pk(self, get_subscriber_model_mock):
+        # The subscriber id stored in metadata is the subscriber's pk (see
+        # Customer.create), which is not necessarily a field named "id" on
+        # custom user models, so the lookup must use pk= rather than id=.
+        subscriber_model = get_subscriber_model_mock.return_value
+        subscriber_model.objects.get.return_value = self.user
+
+        update_customer_helper({self.key: 42}, self.customer.id, self.key)
+
+        subscriber_model.objects.get.assert_called_once_with(pk=42)
+        self.customer.refresh_from_db()
+        self.assertEqual(self.customer.subscriber, self.user)
+
+    def test_non_numeric_subscriber_id_is_ignored(self):
+        # A non-numeric value against an integer primary key raises ValueError;
+        # it must be swallowed rather than crashing the webhook handler.
+        update_customer_helper({self.key: "not-a-real-pk"}, self.customer.id, self.key)
+
+        self.customer.refresh_from_db()
+        self.assertIsNone(self.customer.subscriber)
 
 
 class TestCustomerEvents(CreateAccountMixin, EventTestCase):

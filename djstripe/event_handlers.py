@@ -37,9 +37,11 @@ def update_customer_helper(metadata, customer_id, subscriber_key):
         subscriber_model = djstripe_settings.get_subscriber_model()
 
         try:
-            subscriber = subscriber_model.objects.get(id=subscriber_id)
+            # subscriber_id is the subscriber's pk (see Customer.create), which
+            # is not necessarily a field named "id" on custom user models.
+            subscriber = subscriber_model.objects.get(pk=subscriber_id)
             customer = models.Customer.objects.get(id=customer_id)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValueError):
             pass
         else:
             customer.subscriber = subscriber
