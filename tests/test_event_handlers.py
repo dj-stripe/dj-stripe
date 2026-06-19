@@ -36,10 +36,12 @@ from djstripe.settings import djstripe_settings
 from . import (
     FAKE_ACCOUNT,
     FAKE_BALANCE_TRANSACTION,
+    FAKE_BANK_ACCOUNT_IV,  # noqa: F401 — resolved dynamically via globals()
     FAKE_CARD,
     FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CARD_II,
     FAKE_CARD_III,
+    FAKE_CARD_IV,  # noqa: F401 — resolved dynamically via globals()
     FAKE_CHARGE,
     FAKE_CHARGE_II,
     FAKE_CUSTOM_ACCOUNT,
@@ -58,6 +60,12 @@ from . import (
     FAKE_DISPUTE_V_PARTIAL,
     FAKE_EVENT_ACCOUNT_APPLICATION_AUTHORIZED,
     FAKE_EVENT_ACCOUNT_APPLICATION_DEAUTHORIZED,
+    FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_CREATED,  # noqa: F401 — resolved dynamically via globals()
+    FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_DELETED,  # noqa: F401 — resolved dynamically via globals()
+    FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_BANK_ACCOUNT_UPDATED,  # noqa: F401 — resolved dynamically via globals()
+    FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_CREATED,  # noqa: F401 — resolved dynamically via globals()
+    FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_DELETED,  # noqa: F401 — resolved dynamically via globals()
+    FAKE_EVENT_ACCOUNT_EXTERNAL_ACCOUNT_CARD_UPDATED,  # noqa: F401 — resolved dynamically via globals()
     FAKE_EVENT_CARD_PAYMENT_METHOD_ATTACHED,
     FAKE_EVENT_CARD_PAYMENT_METHOD_DETACHED,
     FAKE_EVENT_CHARGE_SUCCEEDED,
