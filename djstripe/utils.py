@@ -107,13 +107,6 @@ def get_queryset(pks, model_name):
 
 def get_timezone_utc():
     """
-    Returns UTC attribute in a backwards compatible way.
-
-    UTC attribute has been moved from django.utils.timezone module to
-    datetime.timezone class
+    Returns the UTC timezone.
     """
-    try:
-        # Django 4+
-        return datetime.timezone.utc
-    except AttributeError:
-        return timezone.utc
+    return datetime.timezone.utc

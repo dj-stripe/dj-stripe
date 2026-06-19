@@ -1,5 +1,4 @@
 import operator
-from collections import OrderedDict
 
 from django.utils.translation import gettext_lazy as _
 
@@ -12,14 +11,10 @@ class EnumMetaClass(type):
         # add a class attribute
         cls.humanize = _human_enum_values
 
-    @classmethod
-    def __prepare__(cls, name, bases):
-        return OrderedDict()
-
     def __new__(cls, name, bases, classdict):
         members = []
         keys = {}
-        choices = OrderedDict()
+        choices = {}
         for key, value in classdict.items():
             if key.startswith("__"):
                 continue

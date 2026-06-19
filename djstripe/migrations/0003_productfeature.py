@@ -7,30 +7,70 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('djstripe', '0002_2_10'),
+        ("djstripe", "0002_2_10"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ProductFeature',
+            name="ProductFeature",
             fields=[
-                ('djstripe_created', models.DateTimeField(auto_now_add=True)),
-                ('djstripe_updated', models.DateTimeField(auto_now=True)),
-                ('stripe_data', djstripe.fields.JSONField(default=dict)),
-                ('djstripe_id', models.BigAutoField(primary_key=True, serialize=False, verbose_name='ID')),
-                ('id', djstripe.fields.StripeIdField(max_length=255, unique=True)),
-                ('livemode', models.BooleanField(blank=True, default=None, help_text='Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.', null=True)),
-                ('created', djstripe.fields.StripeDateTimeField(blank=True, null=True)),
-                ('metadata', djstripe.fields.JSONField(blank=True, null=True)),
-                ('djstripe_owner_account', djstripe.fields.StripeForeignKey(blank=True, help_text='The Stripe Account this object belongs to.', null=True, on_delete=django.db.models.deletion.CASCADE, to='djstripe.account', to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD)),
-                ('entitlement_feature', djstripe.fields.StripeForeignKey(help_text='The feature that this product feature references.', on_delete=django.db.models.deletion.CASCADE, related_name='product_features', to='djstripe.feature', to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD)),
-                ('product', djstripe.fields.StripeForeignKey(help_text='The product this feature is attached to.', on_delete=django.db.models.deletion.CASCADE, related_name='features', to='djstripe.product', to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD)),
+                ("djstripe_created", models.DateTimeField(auto_now_add=True)),
+                ("djstripe_updated", models.DateTimeField(auto_now=True)),
+                ("stripe_data", djstripe.fields.JSONField(default=dict)),
+                (
+                    "djstripe_id",
+                    models.BigAutoField(
+                        primary_key=True, serialize=False, verbose_name="ID"
+                    ),
+                ),
+                ("id", djstripe.fields.StripeIdField(max_length=255, unique=True)),
+                (
+                    "livemode",
+                    models.BooleanField(
+                        blank=True,
+                        default=None,
+                        help_text="Null here indicates that the livemode status is unknown or was previously unrecorded. Otherwise, this field indicates whether this record comes from Stripe test mode or live mode operation.",
+                        null=True,
+                    ),
+                ),
+                ("created", djstripe.fields.StripeDateTimeField(blank=True, null=True)),
+                ("metadata", djstripe.fields.JSONField(blank=True, null=True)),
+                (
+                    "djstripe_owner_account",
+                    djstripe.fields.StripeForeignKey(
+                        blank=True,
+                        help_text="The Stripe Account this object belongs to.",
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="djstripe.account",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                    ),
+                ),
+                (
+                    "entitlement_feature",
+                    djstripe.fields.StripeForeignKey(
+                        help_text="The feature that this product feature references.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="product_features",
+                        to="djstripe.feature",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                    ),
+                ),
+                (
+                    "product",
+                    djstripe.fields.StripeForeignKey(
+                        help_text="The product this feature is attached to.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="features",
+                        to="djstripe.product",
+                        to_field=settings.DJSTRIPE_FOREIGN_KEY_TO_FIELD,
+                    ),
+                ),
             ],
             options={
-                'get_latest_by': 'created',
-                'abstract': False,
+                "get_latest_by": "created",
+                "abstract": False,
             },
         ),
     ]

@@ -145,10 +145,9 @@ class StripeModel(StripeBaseModel):
         """Get the stripe dashboard url for this object."""
         if not self.stripe_dashboard_item_name or not self.id:
             return ""
-        else:
-            base_url = self._get_base_stripe_dashboard_url()
-            item = self.stripe_dashboard_item_name
-            return f"{base_url}{item}/{self.id}"
+        base_url = self._get_base_stripe_dashboard_url()
+        item = self.stripe_dashboard_item_name
+        return f"{base_url}{item}/{self.id}"
 
     @property
     def default_api_key(self) -> str:
@@ -525,9 +524,7 @@ class StripeModel(StripeBaseModel):
             if id_ == raw_field_data:
                 # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
                 refetch = True
-            else:
-                # A field like {"subscription": {"id": sub_6lsC8pt7IcFpjA", ...}}
-                pass
+            # else: a field like {"subscription": {"id": "sub_6lsC8pt7IcFpjA", ...}}
 
             if id_ in current_ids:
                 # this object is currently being fetched, don't try to fetch again,
@@ -800,9 +797,9 @@ class StripeModel(StripeBaseModel):
                         # reference their ids.
                         # Context: https://github.com/dj-stripe/dj-stripe/issues/2025
                         return None, False
-                    elif "No such charge:" in str(e) or "No such application fee:" in str(
+                    elif "No such charge:" in str(
                         e
-                    ):
+                    ) or "No such application fee:" in str(e):
                         # Connect: a webhook delivered on the platform account can
                         # reference objects that only exist on a connected account
                         # (eg. a destination charge's `application_fee`, or that
@@ -1034,7 +1031,6 @@ class StripeModel(StripeBaseModel):
         cls,
         data,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
-        stripe_version=djstripe_settings.STRIPE_API_VERSION,
     ):
         """
         Syncs this object from the stripe data provided.
