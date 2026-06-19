@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dj-stripe"
-version = "2.10.3"
+version = "2.10.4"
 description = "Django + Stripe made easy"
 license = "MIT"
 authors = [
@@ -34,7 +34,7 @@ exclude = ["manage.py"]
 [tool.poetry.dependencies]
 python = "^3.11"
 django = ">=5.0"
-stripe = ">=11.3.0"
+stripe = ">=11.3.0,<16"
 psycopg = { version = "^3.2.3", optional = true }
 mysqlclient = { version = ">=1.4.0", optional = true }
 
