@@ -41,5 +41,5 @@ class Review(StripeModel):
 
     # https://docs.stripe.com/api/radar/reviews/object#review_object-reason
     @property
-    def readon(self) -> str:
+    def reason(self) -> str:
         return self.stripe_data["reason"]
