@@ -1,3 +1,4 @@
+import json
 import logging
 import uuid
 from datetime import timedelta
@@ -376,6 +377,13 @@ class StripeModel(StripeBaseModel):
         """
         from .webhooks import WebhookEndpoint
 
+        # As of stripe-python 5+, StripeObject no longer subclasses dict and its
+        # nested values are not JSON-serializable. Coerce to a plain dict up front
+        # (via its JSON representation, which is recursive) so that every derived
+        # field (stripe_data, metadata, ...) can be stored in a JSONField.
+        if hasattr(data, "to_dict"):
+            data = json.loads(str(data))
+
         manipulated_data = cls._manipulate_stripe_object_hook(data)
         if not cls.is_valid_object(manipulated_data):
             object_type = manipulated_data.get("object", "")
@@ -383,7 +391,7 @@ class StripeModel(StripeBaseModel):
                 f"Trying to fit {object_type!r} into {cls.__name__!r}. Aborting."
             )
 
-        # By default we put the  raw stripe data in the stripe_data json field
+        # By default we put the raw stripe data in the stripe_data json field
         result = {"stripe_data": data}
 
         if current_ids is None:
@@ -773,10 +781,9 @@ class StripeModel(StripeBaseModel):
                         # or test. Reported to Stripe in August 2020.
                         # Context: https://github.com/dj-stripe/dj-stripe/issues/830
                         pass
-                    elif (
-                        "No such PaymentMethod:" in str(e)
-                        or "No such payment_method:" in str(e)
-                    ):
+                    elif "No such PaymentMethod:" in str(
+                        e
+                    ) or "No such payment_method:" in str(e):
                         # payment methods (card_… etc) can be irretrievably deleted,
                         # but still present during sync. For example, if a refund is
                         # issued on a charge whose payment method has been deleted,
@@ -784,10 +791,9 @@ class StripeModel(StripeBaseModel):
                         # detached. Stripe's wording varies between "PaymentMethod"
                         # and "payment_method".
                         return None, False
-                    elif (
-                        "No such subscription_item:" in str(e)
-                        or "Invalid subscription_item id:" in str(e)
-                    ):
+                    elif "No such subscription_item:" in str(
+                        e
+                    ) or "Invalid subscription_item id:" in str(e):
                         # subscription items removed during a SubscriptionSchedule
                         # phase change can become irretrievable from Stripe even
                         # though invoices created during the prior phase still

@@ -160,12 +160,16 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             mocks["BalanceTransaction"].return_value = deepcopy(
                 FAKE_BALANCE_TRANSACTION_REFUND
             )
-            charge_refunded = Charge.sync_from_stripe_data(deepcopy(FAKE_CHARGE_REFUNDED))
+            charge_refunded = Charge.sync_from_stripe_data(
+                deepcopy(FAKE_CHARGE_REFUNDED)
+            )
 
         self.assertEqual(charge.id, charge_refunded.id)
         self.assertEqual(Decimal(20), charge_refunded.amount)
         self.assertTrue(charge_refunded.refunded)
-        self.assertEqual(int(charge_refunded.amount * 100), charge_refunded.amount_refunded)
+        self.assertEqual(
+            int(charge_refunded.amount * 100), charge_refunded.amount_refunded
+        )
 
         mocks["Charge"].assert_not_called()
         mocks["BalanceTransaction"].assert_called_once()

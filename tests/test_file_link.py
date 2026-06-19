@@ -9,7 +9,6 @@ import pytest
 from django.test import TestCase
 
 from djstripe.models import File, FileLink
-from djstripe.settings import djstripe_settings
 
 from . import FAKE_FILEUPLOAD_ICON
 from .conftest import CreateAccountMixin

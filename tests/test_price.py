@@ -11,7 +11,6 @@ from django.test import TestCase
 
 from djstripe.enums import PriceType, PriceUsageType
 from djstripe.models import Price, Product
-from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_PRICE,

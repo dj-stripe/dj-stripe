@@ -10,7 +10,6 @@ from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 
 from djstripe.models import Dispute
-from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_CARD_AS_PAYMENT_METHOD,

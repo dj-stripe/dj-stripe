@@ -5,7 +5,6 @@ dj-stripe SubscriptionSchedule model tests.
 from copy import deepcopy
 from unittest.mock import patch
 
-import pytest
 import stripe
 from django.contrib.auth import get_user_model
 from django.test import TestCase

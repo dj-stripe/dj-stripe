@@ -19,7 +19,7 @@ repos:
       - id: trailing-whitespace
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: "v0.15.4"
+    rev: "v0.15.18"
     hooks:
       - id: ruff
       - id: ruff-format
@@ -33,7 +33,7 @@ repos:
     rev: "1.30.0"
     hooks:
       - id: django-upgrade
-        args: [--target-version, "3.2"]
+        args: [--target-version, "5.2"]
 
   - repo: local
     hooks:

@@ -19,8 +19,8 @@ classifiers = [
     "Topic :: Office/Business :: Financial",
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Framework :: Django",
-    "Framework :: Django :: 5.0",
-    "Framework :: Django :: 5.1",
+    "Framework :: Django :: 5.2",
+    "Framework :: Django :: 6.0",
 ]
 
 packages = [{ include = "djstripe" }]
@@ -33,20 +33,20 @@ exclude = ["manage.py"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-django = ">=5.1"
-stripe = ">=13.0.1,<16"
-psycopg = { version = "^3.2.10", optional = true }
-mysqlclient = { version = ">=1.4.0", optional = true }
+django = ">=5.2"
+stripe = ">=15.0.1,<16"
+psycopg = { version = "^3.3.4", optional = true }
+mysqlclient = { version = ">=2.2.0", optional = true }
 
 [tool.poetry.group.dev]
 optional = true
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.20.2"
+mypy = "^2.1.0"
 pre-commit = "^4.6.0"
-pytest = "^9.0.3"
+pytest = "^9.1.1"
 pytest-django = "^4.12.0"
 pytest-dotenv = "^0.5.2"
-ruff = "^0.15.12"
+ruff = "^0.15.18"
 
 [tool.poetry.group.docs]
 optional = true
@@ -61,8 +61,8 @@ jinja2 = "^3.1.6"
 [tool.poetry.group.ci]
 optional = true
 [tool.poetry.group.ci.dependencies]
-coverage = { version = "^7.13.5", extras = ["toml"] }
-tox = "^4.53.1"
+coverage = { version = "^7.14.1", extras = ["toml"] }
+tox = "^4.55.1"
 tox-gh = "^1.7.1"
 
 [tool.poetry.extras]
@@ -70,7 +70,7 @@ postgres = ["psycopg"]
 mysql = ["mysqlclient"]
 
 [build-system]
-requires = ["poetry_core>=1.1.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.ruff.lint]
@@ -79,16 +79,18 @@ select = ["F", "FURB", "UP"]
 [tool.tox]
 isolated_build = true
 envlist = [
-    "django{50,51}-py{310,311,312,313}-{postgres,sqlite}",
-    "djangomain-py313-postgres",
+    "django{52,60}-py{312,313}-{postgres,sqlite}",
+    "django52-py311-{postgres,sqlite}",
+    "django60-py314-{postgres,sqlite}",
+    "djangomain-py314-postgres",
 ]
 skip_missing_interpreters = true
 
 [tool.tox.gh.python]
+"3.14" = ["py314"]
 "3.13" = ["py313"]
 "3.12" = ["py312"]
 "3.11" = ["py311"]
-"3.10" = ["py310"]
 
 [tool.tox.testenv]
 passenv = ["DJSTRIPE_*"]
@@ -98,10 +100,10 @@ deps = [
     "pytest-django",
     "pytest-cov",
     "pytest-dotenv",
-    "django50: Django>=5.0,<5.1",
-    "django51: Django>=5.1,<5.2",
+    "django52: Django>=5.2,<6.0",
+    "django60: Django>=6.0,<6.1",
     "djangomain: https://github.com/django/django/archive/main.tar.gz",
-    "postgres: psycopg>=3.2.3",
+    "postgres: psycopg>=3.3.4",
 ]
 
 [tool.tox.testenv.setenv]

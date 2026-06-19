@@ -1,4 +1,3 @@
-
 import pytest
 from django.test.testcases import TestCase
 
@@ -95,5 +94,3 @@ class CouponTest(TestCase):
         )
         self.assertEqual(coupon.human_readable, "10% off forever")
         self.assertEqual(str(coupon), coupon.human_readable)
-
-

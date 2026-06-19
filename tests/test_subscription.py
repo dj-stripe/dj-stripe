@@ -4,7 +4,6 @@ dj-stripe Subscription Model Tests.
 
 import uuid
 from copy import deepcopy
-from decimal import Decimal
 from unittest.mock import patch
 
 import pytest
@@ -45,7 +44,6 @@ from . import (
     AssertStripeFksMixin,
     datetime_to_unix,
     mock_stripe_world,
-    monkeypatch_stripe_world,
 )
 from .conftest import CreateAccountMixin
 

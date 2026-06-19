@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  POETRY_VERSION: "1.8.4"
+  POETRY_VERSION: "2.4.1"
   POETRY_VIRTUALENVS_IN_PROJECT: "1"
 
 jobs:
@@ -30,12 +30,12 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: ./.github/install_poetry_action
         with:
           POETRY_VERSION: ${{ env.POETRY_VERSION }}
-          python_version: "3.12"
+          python_version: "3.13"
 
       - name: Install pre-commit
         run: poetry install --with dev -E postgres

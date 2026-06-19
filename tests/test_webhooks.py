@@ -315,9 +315,7 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
 
     def test_webhook_no_signature(self):
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
-        resp = Client().post(
-            self._webhook_url(), "{}", content_type="application/json"
-        )
+        resp = Client().post(self._webhook_url(), "{}", content_type="application/json")
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
 

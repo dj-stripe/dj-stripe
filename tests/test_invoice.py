@@ -58,9 +58,7 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         assert str(invoice) == (
             f"Invoice #{FAKE_INVOICE['number']} for $2,000.00 USD (paid)"
         )
-        self.assertGreater(
-            len(invoice.stripe_data.get("status_transitions", {})), 1
-        )
+        self.assertGreater(len(invoice.stripe_data.get("status_transitions", {})), 1)
         self.assertTrue(invoice.stripe_data.get("account_country"))
         self.assertTrue(invoice.stripe_data.get("account_name"))
         self.assertTrue(invoice.stripe_data.get("collection_method"))
@@ -270,7 +268,9 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
         fake_invoice_data = deepcopy(FAKE_INVOICE)
-        fake_invoice_data["subscription"] = FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
+        fake_invoice_data["subscription"] = FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE[
+            "id"
+        ]
         fake_invoice_data["lines"]["data"][0]["subscription"] = (
             FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
         )
@@ -324,5 +324,3 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def test_upcoming_invoice_error(self, invoice_upcoming_mock):
         with self.assertRaises(InvalidRequestError):
             Invoice.upcoming()
-
-
