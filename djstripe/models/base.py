@@ -800,6 +800,18 @@ class StripeModel(StripeBaseModel):
                         # reference their ids.
                         # Context: https://github.com/dj-stripe/dj-stripe/issues/2025
                         return None, False
+                    elif "No such charge:" in str(e) or "No such application fee:" in str(
+                        e
+                    ):
+                        # Connect: a webhook delivered on the platform account can
+                        # reference objects that only exist on a connected account
+                        # (eg. a destination charge's `application_fee`, or that
+                        # ApplicationFee's `charge`/`originating_transaction`).
+                        # These are not retrievable from the platform, so skip the
+                        # FK instead of crashing the whole webhook. The relation is
+                        # filled in later by the connected account's own webhooks.
+                        # Context: https://github.com/dj-stripe/dj-stripe/issues/2010
+                        return None, False
                     else:
                         raise
                 should_expand = False

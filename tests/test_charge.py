@@ -9,9 +9,10 @@ from unittest.mock import patch
 import pytest
 from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
+from stripe import InvalidRequestError
 
 from djstripe.enums import ChargeStatus, LegacySourceType
-from djstripe.models import Charge, DjstripePaymentMethod, Transfer
+from djstripe.models import ApplicationFee, Charge, DjstripePaymentMethod, Transfer
 
 from . import (
     COMMON_BLANK_FKS,
@@ -387,3 +388,50 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertTrue(bool(charge.pk))
         self.assertEqual(charge.amount, Decimal("999999999.99"))
         self.assertEqual(charge.balance_transaction.amount, 99999999999)
+
+
+class ConnectedAccountObjectSyncTest(TestCase):
+    """
+    Regression tests for issue #2010: a webhook delivered on the platform
+    account can reference objects that only exist on a connected account
+    (eg. a destination charge's ApplicationFee, or that ApplicationFee's
+    charge). Those objects are not retrievable from the platform, so the FK
+    sync must skip gracefully instead of crashing the webhook.
+    """
+
+    def test_get_or_create_returns_none_for_charge_on_connected_account(self):
+        # ApplicationFee.charge points at a `py_…`/`ch_…` that lives on the
+        # connected account and 404s when retrieved from the platform.
+        with patch.object(
+            Charge,
+            "api_retrieve",
+            side_effect=InvalidRequestError(
+                message="No such charge: 'py_connected'", param="charge"
+            ),
+        ):
+            result, created = Charge._get_or_create_from_stripe_object(
+                {"charge": "py_connected"},
+                field_name="charge",
+                refetch=True,
+            )
+
+        self.assertIsNone(result)
+        self.assertFalse(created)
+
+    def test_get_or_create_returns_none_for_application_fee_on_connected_account(self):
+        with patch.object(
+            ApplicationFee,
+            "api_retrieve",
+            side_effect=InvalidRequestError(
+                message="No such application fee: 'fee_connected'",
+                param="application_fee",
+            ),
+        ):
+            result, created = ApplicationFee._get_or_create_from_stripe_object(
+                {"application_fee": "fee_connected"},
+                field_name="application_fee",
+                refetch=True,
+            )
+
+        self.assertIsNone(result)
+        self.assertFalse(created)
