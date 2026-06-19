@@ -3,7 +3,7 @@ from typing import Union
 
 import stripe
 from django.apps import apps
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import format_lazy
@@ -1357,11 +1357,24 @@ class Event(StripeModel):
         # Rollback any DB operations in the case of failure so
         # we will retry creating and processing the event the
         # next time the webhook fires.
-        with transaction.atomic():
-            # process the event and create an Event Object
-            ret = cls._create_from_stripe_object(data, api_key=api_key)
-            ret.invoke_webhook_handlers()
-            return ret
+        try:
+            with transaction.atomic():
+                # process the event and create an Event Object
+                ret = cls._create_from_stripe_object(data, api_key=api_key)
+                ret.invoke_webhook_handlers()
+                return ret
+        except IntegrityError:
+            # Stripe may deliver the same event more than once (eg. on
+            # delivery timeouts/retries, or by design - see
+            # https://stripe.com/docs/webhooks#handle-duplicate-events).
+            # If a concurrent request already created this Event between the
+            # existence check above and the insert, return the existing
+            # instance instead of crashing. If the IntegrityError was raised
+            # for some other reason, re-raise it.
+            existing = cls.objects.filter(id=data["id"]).first()
+            if existing is not None:
+                return existing
+            raise
 
     def invoke_webhook_handlers(self):
         """

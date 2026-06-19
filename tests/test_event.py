@@ -6,6 +6,7 @@ from copy import deepcopy
 from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
+from django.db import IntegrityError
 from django.test import TestCase
 from stripe import StripeError
 
@@ -136,3 +137,86 @@ class EventRaceConditionTest(TestCase):
 
         self.assertEqual(transfer_objects_get_mock.call_count, 2)
         self.assertEqual(transfer_retrieve_mock.call_count, 1)
+
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
+    )
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    def test_process_duplicate_event_returns_existing(
+        self,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        """
+        Stripe may deliver the same event more than once (eg. on delivery
+        timeouts/retries). If two deliveries race past the existence check, the
+        insert raises an IntegrityError on the unique id constraint. process()
+        must recover and return the already-stored Event instead of crashing.
+
+        Regression test for
+        https://github.com/dj-stripe/dj-stripe/issues/1239
+        """
+        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
+        event_data = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+
+        # First delivery: the Event is created and processed normally.
+        event = Event.process(deepcopy(event_data))
+        self.assertEqual(Event.objects.filter(id=event_data["id"]).count(), 1)
+
+        # Second (duplicate) delivery: emulate a concurrent insert by forcing
+        # the initial existence check to miss while the row already exists, so
+        # the insert fails with an IntegrityError.
+        with (
+            patch(
+                "django.db.models.query.QuerySet.exists",
+                return_value=False,
+            ),
+            patch(
+                "djstripe.models.Event._create_from_stripe_object",
+                side_effect=IntegrityError(
+                    "duplicate key value violates unique constraint"
+                    ' "djstripe_event_stripe_id_key"'
+                ),
+                autospec=True,
+            ),
+        ):
+            result = Event.process(deepcopy(event_data))
+
+        self.assertEqual(result.pk, event.pk)
+        self.assertEqual(Event.objects.filter(id=event_data["id"]).count(), 1)
+
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_PLATFORM_ACCOUNT),
+    )
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    def test_process_unrelated_integrity_error_reraises(
+        self,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        """
+        An IntegrityError that is *not* caused by the Event already existing
+        must propagate, so genuine database errors are not silently swallowed.
+        """
+        Transfer.sync_from_stripe_data(deepcopy(FAKE_TRANSFER))
+        event_data = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+
+        with patch(
+            "djstripe.models.Event._create_from_stripe_object",
+            side_effect=IntegrityError("some unrelated constraint"),
+            autospec=True,
+        ):
+            with self.assertRaises(IntegrityError):
+                Event.process(deepcopy(event_data))
+
+        self.assertFalse(Event.objects.filter(id=event_data["id"]).exists())
