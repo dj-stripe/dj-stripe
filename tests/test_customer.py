@@ -202,6 +202,50 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             },
         )
 
+    @patch("stripe.Customer.create", autospec=True)
+    def test_customer_create_passes_through_metadata_and_kwargs(self, customer_mock):
+        user = get_user_model().objects.create_user(
+            username="test_user_create_passthrough"
+        )
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["id"] = "cus_test_create_passthrough"
+        customer_mock.return_value = fake_customer
+
+        Customer.create(
+            user,
+            metadata={"foo": "bar"},
+            description="A customer",
+        )
+
+        call_kwargs = customer_mock.call_args_list[0][1]
+        # caller-supplied metadata is merged with the subscriber key
+        self.assertEqual(
+            call_kwargs.get("metadata"),
+            {"foo": "bar", "djstripe_subscriber": user.pk},
+        )
+        # arbitrary extra kwargs are forwarded to the Stripe create call
+        self.assertEqual(call_kwargs.get("description"), "A customer")
+
+    @patch("stripe.Customer.create", autospec=True)
+    def test_customer_create_metadata_does_not_override_subscriber_key(
+        self, customer_mock
+    ):
+        user = get_user_model().objects.create_user(
+            username="test_user_create_metadata_no_override"
+        )
+
+        fake_customer = deepcopy(FAKE_CUSTOMER)
+        fake_customer["id"] = "cus_test_create_metadata_no_override"
+        customer_mock.return_value = fake_customer
+
+        Customer.create(user, metadata={"djstripe_subscriber": "evil"})
+
+        self.assertEqual(
+            customer_mock.call_args_list[0][1].get("metadata"),
+            {"djstripe_subscriber": user.pk},
+        )
+
     @patch.object(Card, "_get_or_create_from_stripe_object")
     @patch("stripe.Customer.retrieve", autospec=True)
     @patch(

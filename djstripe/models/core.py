@@ -601,6 +601,7 @@ class Customer(StripeModel):
         livemode=djstripe_settings.STRIPE_LIVE_MODE,
         stripe_account=None,
         api_key=None,
+        **kwargs,
     ):
         """
         Get or create a dj-stripe customer.
@@ -611,6 +612,10 @@ class Customer(StripeModel):
 
         :param livemode: Whether to get the subscriber in live or test mode.
         :type livemode: bool
+
+        Any additional keyword arguments (eg. ``metadata``) are passed through
+        to :meth:`create` and on to the Stripe Customer create call when a new
+        customer has to be created.
         """
         api_key = api_key or djstripe_settings.get_default_api_key(livemode=livemode)
 
@@ -628,6 +633,7 @@ class Customer(StripeModel):
                     stripe_account=stripe_account,
                     livemode=livemode,
                     api_key=api_key,
+                    **kwargs,
                 ),
                 True,
             )
@@ -640,9 +646,24 @@ class Customer(StripeModel):
         stripe_account=None,
         livemode: bool | None = djstripe_settings.STRIPE_LIVE_MODE,
         api_key=None,
+        metadata=None,
+        **kwargs,
     ):
+        """
+        Create a dj-stripe customer for the given subscriber.
+
+        :param metadata: A set of key/value pairs to store on the Stripe
+            Customer. The configured ``SUBSCRIBER_CUSTOMER_KEY`` is always set
+            to the subscriber's pk and takes precedence over a value supplied
+            here, as dj-stripe relies on it to link the Customer to the
+            subscriber.
+        :type metadata: dict
+
+        Any additional keyword arguments are forwarded to the Stripe Customer
+        create call, saving a round-trip vs. creating then updating.
+        """
         api_key = api_key or djstripe_settings.get_default_api_key(livemode=livemode)
-        metadata = {}
+        metadata = dict(metadata or {})
         subscriber_key = djstripe_settings.SUBSCRIBER_CUSTOMER_KEY
         if subscriber_key not in ("", None):
             metadata[subscriber_key] = subscriber.pk
@@ -662,6 +683,7 @@ class Customer(StripeModel):
             stripe_account=stripe_account,
             livemode=livemode,
             api_key=api_key,
+            **kwargs,
         )
         customer, created = cls.objects.get_or_create(
             id=stripe_customer["id"],
