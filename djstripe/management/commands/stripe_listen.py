@@ -82,20 +82,19 @@ class Command(BaseCommand):
             path = reverse(
                 "djstripe:djstripe_webhook_by_uuid", kwargs={"uuid": endpoint_uuid}
             )
-            path_suffix = f"webhook/{endpoint_uuid}"
             endpoint = WebhookEndpoint.objects.create(
                 id=f"djstripe_whfwd_{endpoint_uuid.hex}",
                 api_version=djstripe_settings.STRIPE_API_VERSION,
                 enabled_events=["*"],
                 secret=secret,
                 status=WebhookEndpointStatus.enabled,
-                url=base_url + path.replace(path_suffix, ""),
+                url=base_url + path,
                 djstripe_owner_account=Account.objects.first(),
                 djstripe_uuid=endpoint_uuid,
                 livemode=False,
             )
 
-        endpoint_url = endpoint.url + f"webhook/{endpoint.djstripe_uuid}"
+        endpoint_url = endpoint.url
 
         try:
             self.stdout.write(f"Forwarding Stripe webhooks to {endpoint_url}")
