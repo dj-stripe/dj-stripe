@@ -9,6 +9,7 @@ from unittest.mock import patch
 from uuid import UUID
 
 import pytest
+from django.conf import settings
 from django.http.request import HttpHeaders
 from django.test import TestCase, override_settings
 from django.test.client import Client
@@ -318,6 +319,28 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         resp = Client().post(self._webhook_url(), "{}", content_type="application/json")
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(WebhookEventTrigger.objects.count(), 0)
+
+    def test_webhook_login_required_middleware(self):
+        """
+        The webhook view must stay reachable for unauthenticated Stripe
+        requests when LoginRequiredMiddleware is enabled, rather than being
+        redirected to the login page.
+
+        Regression test for
+        https://github.com/dj-stripe/dj-stripe/issues/2137
+        """
+        middleware = (
+            *settings.MIDDLEWARE,
+            "django.contrib.auth.middleware.LoginRequiredMiddleware",
+        )
+        with override_settings(MIDDLEWARE=middleware, LOGIN_URL="/login/"):
+            resp = Client().post(
+                self._webhook_url(), "{}", content_type="application/json"
+            )
+
+        # The view is reached (400 for the missing stripe-signature header)
+        # instead of a 302 redirect to the login page.
+        self.assertEqual(resp.status_code, 400)
 
     def test_webhook_remote_addr_missing(self):
         # REMOTE_ADDR=None and REMOTE_ADDR="" both mean "no client IP";

@@ -4,6 +4,7 @@ dj-stripe - Views related to the djstripe app.
 
 import logging
 
+from django.contrib.auth.decorators import login_not_required
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @method_decorator(csrf_exempt, name="dispatch")
+@method_decorator(login_not_required, name="dispatch")
 class ProcessWebhookView(View):
     """
     A Stripe Webhook handler view.
