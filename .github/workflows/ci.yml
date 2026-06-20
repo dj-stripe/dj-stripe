@@ -13,10 +13,6 @@ on:
     branches:
       - main
 
-env:
-  POETRY_VERSION: "2.4.1"
-  POETRY_VIRTUALENVS_IN_PROJECT: "1"
-
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -42,13 +38,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: ./.github/install_poetry_action
+      - uses: astral-sh/setup-uv@v7
         with:
-          POETRY_VERSION: ${{ env.POETRY_VERSION }}
-          python_version: ${{ matrix.python-version }}
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
 
       - name: Install dependencies
-        run: poetry install --with ci
+        run: uv sync --group ci
 
       - name: Test with tox for ${{ matrix.python-version }}
-        run: poetry run tox
+        run: uv run tox

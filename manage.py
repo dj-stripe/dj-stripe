@@ -7,7 +7,7 @@ try:
 except ImportError as exc:
     raise ImportError(
         "Couldn't import Django. "
-        "Run `poetry shell` to activate a virtual environment first."
+        "Run `uv sync` to set up a virtual environment first."
     ) from exc
 
 

@@ -19,5 +19,5 @@ dj_stripe.egg-info
 .vscode
 .idea
 
-# Do not commit Poetry lockfiles for libraries
-poetry.lock
+# Do not commit lockfiles for libraries
+uv.lock

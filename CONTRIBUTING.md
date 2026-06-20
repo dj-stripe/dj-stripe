@@ -31,17 +31,17 @@ whoever wants to implement it.
 dj-stripe could always use more documentation, whether as part of the official dj-stripe
 docs, in docstrings, or even on the web in blog posts, articles, and such.
 
-To see the project's documentation live, run the following command:
-
-    mkdocs serve
-
-The documentation site will then be served on http://127.0.0.1:8000
-
-In case you get the error that some plugin is not installed, please run:
+To see the project's documentation live, first install the docs dependencies:
 
 ```bash
-poetry install --with docs
+uv sync --group docs
 ```
+
+Then run the following command:
+
+    uv run mkdocs serve
+
+The documentation site will then be served on http://127.0.0.1:8000
 
 If you wish to just generate the documentation, you can replace `serve` with `build`,
 and the docs will be generated into the `site/` folder.
@@ -85,31 +85,29 @@ Ready to contribute? Here's how to set up local development.
     For postgres and mysql, the database host,port,username and password can be set with
     environment variables, see `tests/settings.py`
 
-1.  Install [Poetry](https://python-poetry.org/) if you do not have it already.
+1.  Install [uv](https://docs.astral.sh/uv/) if you do not have it already.
 
     You can set up a virtual environment with:
 
-        $ poetry install
+        $ uv sync
 
-    You can then, at any time, open a shell into that environment with:
-
-        $ poetry shell
+    You can then run any command inside that environment by prefixing it with
+    `uv run`, for example `uv run pytest`.
 
 1.  When you're done making changes, check that your changes pass the tests. A quick
     test run can be done as follows:
 
-        $ DJSTRIPE_TEST_DB_VENDOR=sqlite poetry run pytest --reuse-db
+        $ DJSTRIPE_TEST_DB_VENDOR=sqlite uv run pytest --reuse-db
 
     You should also check that the tests pass with other python and Django versions with
     tox. pytest will output both command line and html coverage statistics and will warn
     you if your changes caused code coverage to drop.:
 
-        $ pip install tox
-        $ tox
+        $ uv run --group ci tox
 
 1.  If your changes altered the models you may need to generate Django migrations:
 
-        $ DJSTRIPE_TEST_DB_VENDOR=sqlite poetry run ./manage.py makemigrations
+        $ DJSTRIPE_TEST_DB_VENDOR=sqlite uv run ./manage.py makemigrations
 
 1.  Commit your changes and push your branch to GitHub:
 

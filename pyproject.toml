@@ -1,17 +1,15 @@
-[tool.poetry]
+[project]
 name = "dj-stripe"
 version = "2.10.1"
 description = "Django + Stripe made easy"
 license = "MIT"
 authors = [
-    "Alexander Kavanaugh <alex@kavdev.io>",
-    "Jerome Leclanche <jerome@leclan.ch>",
-    "Abe Hanoka <abe@habet.dev>",
+    { name = "Alexander Kavanaugh", email = "alex@kavdev.io" },
+    { name = "Jerome Leclanche", email = "jerome@leclan.ch" },
+    { name = "Abe Hanoka", email = "abe@habet.dev" },
 ]
 readme = "docs/README.md"
-homepage = "https://dj-stripe.dev"
-repository = "https://github.com/dj-stripe/dj-stripe"
-documentation = "https://dj-stripe.dev/dj-stripe/"
+requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Web Environment",
@@ -22,56 +20,57 @@ classifiers = [
     "Framework :: Django :: 5.2",
     "Framework :: Django :: 6.0",
 ]
+dependencies = [
+    "django>=5.2",
+    "stripe>=15.0.1,<16",
+]
 
-packages = [{ include = "djstripe" }]
-include = ["AUTHORS.md", "CONTRIBUTING.md", "HISTORY.md", "LICENSE"]
-exclude = ["manage.py"]
+[project.optional-dependencies]
+postgres = ["psycopg>=3.3.4,<4"]
+mysql = ["mysqlclient>=2.2.0"]
 
-[tool.poetry.urls]
-"Funding" = "https://github.com/sponsors/dj-stripe"
+[project.urls]
+Homepage = "https://dj-stripe.dev"
+Repository = "https://github.com/dj-stripe/dj-stripe"
+Documentation = "https://dj-stripe.dev/dj-stripe/"
+Funding = "https://github.com/sponsors/dj-stripe"
 
-
-[tool.poetry.dependencies]
-python = "^3.11"
-django = ">=5.2"
-stripe = ">=15.0.1,<16"
-psycopg = { version = "^3.3.4", optional = true }
-mysqlclient = { version = ">=2.2.0", optional = true }
-
-[tool.poetry.group.dev]
-optional = true
-[tool.poetry.group.dev.dependencies]
-mypy = "^2.1.0"
-pre-commit = "^4.6.0"
-pytest = "^9.1.1"
-pytest-django = "^4.12.0"
-pytest-dotenv = "^0.5.2"
-ruff = "^0.15.18"
-
-[tool.poetry.group.docs]
-optional = true
-[tool.poetry.group.docs.dependencies]
-mkdocs = "^1.6.1"
-mkdocs-material = "^9.7.6"
-mkdocs-autorefs = "^1.4.4"
-mkdocstrings = { extras = ["python"], version = "^1.0.4" }
-mike = "^2.2.0"
-jinja2 = "^3.1.6"
-
-[tool.poetry.group.ci]
-optional = true
-[tool.poetry.group.ci.dependencies]
-coverage = { version = "^7.14.1", extras = ["toml"] }
-tox = "^4.55.1"
-tox-gh = "^1.7.1"
-
-[tool.poetry.extras]
-postgres = ["psycopg"]
-mysql = ["mysqlclient"]
+[dependency-groups]
+dev = [
+    "mypy>=2.1.0,<3",
+    "pre-commit>=4.6.0,<5",
+    "pytest>=9.1.1,<10",
+    "pytest-django>=4.12.0,<5",
+    "pytest-dotenv>=0.5.2,<0.6",
+    "ruff>=0.15.18,<0.16",
+]
+docs = [
+    "mkdocs>=1.6.1,<2",
+    "mkdocs-material>=9.7.6,<10",
+    "mkdocs-autorefs>=1.4.4,<2",
+    "mkdocstrings[python]>=1.0.4,<2",
+    "mike>=2.2.0,<3",
+    "jinja2>=3.1.6,<4",
+]
+ci = [
+    "coverage[toml]>=7.14.1,<8",
+    "tox>=4.55.1,<5",
+    "tox-gh>=1.7.1,<2",
+]
 
 [build-system]
-requires = ["poetry-core>=2.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["djstripe"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/djstripe",
+    "/CONTRIBUTING.md",
+    "/LICENSE",
+]
 
 [tool.ruff.lint]
 select = ["F", "FURB", "UP"]

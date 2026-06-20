@@ -39,7 +39,7 @@ repos:
     hooks:
       - id: check-migrations
         name: check-migrations
-        entry: poetry run python manage.py makemigrations --dry-run --check
+        entry: uv run python manage.py makemigrations --dry-run --check
         types: [python]
         pass_filenames: false
         language: system

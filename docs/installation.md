@@ -8,10 +8,10 @@ Install dj-stripe with pip:
 pip install dj-stripe
 ```
 
-Or with [Poetry](https://python-poetry.org/) (recommended):
+Or with [uv](https://docs.astral.sh/uv/) (recommended):
 
 ```bash
-poetry add dj-stripe
+uv add dj-stripe
 ```
 
 ### Configuration

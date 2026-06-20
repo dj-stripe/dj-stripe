@@ -8,10 +8,6 @@ on:
     branches:
       - main
 
-env:
-  POETRY_VERSION: "2.4.1"
-  POETRY_VIRTUALENVS_IN_PROJECT: "1"
-
 jobs:
   linting:
     runs-on: ubuntu-latest
@@ -32,13 +28,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: ./.github/install_poetry_action
+      - uses: astral-sh/setup-uv@v7
         with:
-          POETRY_VERSION: ${{ env.POETRY_VERSION }}
-          python_version: "3.13"
+          python-version: "3.13"
+          enable-cache: true
 
       - name: Install pre-commit
-        run: poetry install --with dev -E postgres
+        run: uv sync --group dev --extra postgres
 
       - name: Run pre-commit
-        run: poetry run pre-commit run --all-files --show-diff-on-failure
+        run: uv run pre-commit run --all-files --show-diff-on-failure
