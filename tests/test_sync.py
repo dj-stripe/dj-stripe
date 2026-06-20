@@ -6,12 +6,19 @@ import contextlib
 from copy import deepcopy
 from unittest.mock import patch
 
+from io import StringIO
+
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
+from django.core.management.base import CommandError
+from django.test import override_settings
 from django.test.testcases import TestCase
 from stripe import InvalidRequestError
 
-from djstripe.models import Customer
+from djstripe.enums import APIKeyType
+from djstripe.models import APIKey, Customer
 from djstripe.management.commands.djstripe_sync_models import Command
+from djstripe.settings import djstripe_settings
 from djstripe.sync import sync_subscriber
 
 from . import FAKE_CUSTOMER, StripeList
@@ -103,3 +110,52 @@ class TestSyncModelsCommand(CreateAccountMixin, TestCase):
             "bank_account",
         }
         assert start_sync_mock.call_count == 2
+
+
+class TestSyncModelsGetApiKeys(TestCase):
+    """Tests for resolving which API keys djstripe_sync_models will sync."""
+
+    SK_TEST = "sk_test_" + "a" * 24
+    SK_LIVE = "sk_live_" + "b" * 24
+    PK_TEST = "pk_test_" + "c" * 24
+
+    def test_explicit_keys_are_used_without_db_lookup(self):
+        # Regression for #2100: explicitly passed keys must work even if they're
+        # not stored in the database.
+        keys = [self.SK_TEST, self.SK_LIVE]
+        assert Command().get_api_keys(keys) == keys
+
+    def test_explicit_invalid_key_raises(self):
+        with self.assertRaises(CommandError):
+            Command().get_api_keys(["not-a-valid-key"])
+
+    def test_falls_back_to_settings_keys(self):
+        # Regression for #2100: with no keys in the database, fall back to the
+        # keys defined in the settings (environment variables).
+        assert APIKey.objects.count() == 0
+        assert Command().get_api_keys(None) == djstripe_settings.get_api_keys()
+
+    def test_merges_db_and_settings_keys_and_skips_publishable(self):
+        APIKey.objects.create(
+            type=APIKeyType.secret, secret=self.SK_TEST, livemode=False
+        )
+        APIKey.objects.create(
+            type=APIKeyType.publishable, secret=self.PK_TEST, livemode=False
+        )
+
+        resolved = Command().get_api_keys(None)
+
+        assert self.SK_TEST in resolved
+        # publishable keys can't list resources, so they must be excluded
+        assert self.PK_TEST not in resolved
+        for secret in djstripe_settings.get_api_keys():
+            assert secret in resolved
+
+    @override_settings(
+        STRIPE_SECRET_KEY="", STRIPE_TEST_SECRET_KEY="", STRIPE_LIVE_SECRET_KEY=""
+    )
+    def test_handle_with_no_keys_anywhere_prints_helpful_error(self):
+        assert APIKey.objects.count() == 0
+        stderr = StringIO()
+        call_command("djstripe_sync_models", "Account", stderr=stderr)
+        assert "don't have any API Keys" in stderr.getvalue()

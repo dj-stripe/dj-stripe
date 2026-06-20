@@ -175,6 +175,20 @@ class DjstripeSettings:
         )
         return str(idempotency_key.uuid)
 
+    def get_api_keys(self) -> list[str]:
+        """
+        Returns the distinct, non-empty secret API keys configured in settings.
+
+        This covers STRIPE_SECRET_KEY as well as the test/live secret keys.
+        Useful for operations (such as syncing) that need to act on every key
+        defined in the project settings rather than the database.
+        """
+        keys = []
+        for key in (self.STRIPE_SECRET_KEY, self.TEST_API_KEY, self.LIVE_API_KEY):
+            if key and key not in keys:
+                keys.append(key)
+        return keys
+
     def get_default_api_key(self, livemode: bool | None) -> str:
         """
         Returns the default API key for a value of `livemode`.

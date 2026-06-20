@@ -1,6 +1,11 @@
 """Module for the djstripe_sync_model management command to sync
 all Stripe objects to the local db.
 
+By default this syncs every secret/restricted API key found in the database as
+well as the keys defined in your Django settings (STRIPE_SECRET_KEY,
+STRIPE_TEST_SECRET_KEY and STRIPE_LIVE_SECRET_KEY). This means it works with
+environment-variable-only setups, without first adding keys via the admin.
+
 Invoke like so:
     1) To sync all Objects for all API keys:
         python manage.py djstripe_sync_models
@@ -32,6 +37,9 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import models as django_models
 
 from ... import enums, models
+from ...enums import APIKeyType
+from ...exceptions import InvalidStripeAPIKey
+from ...models.api import get_api_key_details_by_prefix, redact_api_key
 from ...models.base import StripeBaseModel
 from ...settings import djstripe_settings
 
@@ -79,29 +87,46 @@ class Command(BaseCommand):
         else:
             model_list = app_config.get_models()
 
-        if api_keys is not None:
-            for api_key in api_keys:
-                try:
-                    # check to ensure the given key is in the DB
-                    models.APIKey.objects.get(secret=api_key)
-                except models.APIKey.DoesNotExist:
-                    raise CommandError(f"APIKey: {api_key} is not in the database.")
-
-            api_qs = models.APIKey.objects.filter(secret__in=api_keys)
-        else:
-            # get all APIKey objects in the db
-            api_qs = models.APIKey.objects.all()
-
-            if not api_qs.exists():
-                self.stderr.write(
-                    "You don't have any API Keys in the database. Did you forget to add"
-                    " them?"
-                )
-                return
+        api_keys = self.get_api_keys(api_keys)
+        if not api_keys:
+            self.stderr.write(
+                "You don't have any API Keys in the database or in your settings."
+                " Did you forget to add them?"
+            )
+            return
 
         for model in model_list:
-            for api_key in api_qs:
+            for api_key in api_keys:
                 self.sync_model(model, api_key=api_key)
+
+    def get_api_keys(self, api_keys: list[str] | None) -> list[str]:
+        """
+        Resolve the secret API keys to sync.
+
+        If keys are passed explicitly (via --api-keys), they are validated and
+        used as-is, whether or not they exist in the database. Otherwise, every
+        secret/restricted key in the database is used, merged with the keys
+        defined in the Django settings (so environment-variable-only setups work
+        without first adding keys to the admin).
+        """
+        if api_keys:
+            for api_key in api_keys:
+                try:
+                    get_api_key_details_by_prefix(api_key)
+                except InvalidStripeAPIKey as e:
+                    raise CommandError(str(e))
+            return api_keys
+
+        secrets = list(
+            models.APIKey.objects.filter(
+                type__in=[APIKeyType.secret, APIKeyType.restricted]
+            ).values_list("secret", flat=True)
+        )
+        for secret in djstripe_settings.get_api_keys():
+            if secret not in secrets:
+                secrets.append(secret)
+
+        return secrets
 
     def _should_sync_model(self, model):
         if not issubclass(model, StripeBaseModel):
@@ -129,46 +154,47 @@ class Command(BaseCommand):
 
         return True, ""
 
-    def sync_model(self, model, api_key: models.APIKey):
+    def sync_model(self, model, api_key: str):
         model_name = model.__name__
 
         should_sync, _ = self._should_sync_model(model)
         if not should_sync:
             return
 
-        self.stdout.write(f"Syncing {model_name} for key {api_key}:")
+        api_key_repr = redact_api_key(api_key)
+        self.stdout.write(f"Syncing {model_name} for key {api_key_repr}:")
 
         count = 0
         try:
             # todo convert get_list_kwargs into a generator to make the code memory effecient.
-            for list_kwargs in self.get_list_kwargs(model, api_key=api_key.secret):
+            for list_kwargs in self.get_list_kwargs(model, api_key=api_key):
                 stripe_account = list_kwargs.get("stripe_account", "")
 
                 if (
                     model is models.Account
                     and stripe_account
-                    == models.Account.get_default_account(api_key=api_key.secret).id
+                    == models.Account.get_default_account(api_key=api_key).id
                 ):
                     # special case, since own account isn't returned by Account.api_list
                     stripe_obj = models.Account.stripe_class.retrieve(
-                        api_key=api_key.secret,
+                        api_key=api_key,
                         stripe_version=djstripe_settings.STRIPE_API_VERSION,
                     )
 
                     djstripe_obj = model.sync_from_stripe_data(
-                        stripe_obj, api_key=api_key.secret
+                        stripe_obj, api_key=api_key
                     )
                     self.stdout.write(
                         f"  id={djstripe_obj.id},"
                         f" pk={djstripe_obj.pk} ({djstripe_obj} on {stripe_account} for"
-                        f" {api_key})"
+                        f" {api_key_repr})"
                     )
 
                     # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
                     self.sync_bank_accounts_and_cards(
                         djstripe_obj,
                         stripe_account=stripe_account,
-                        api_key=api_key.secret,
+                        api_key=api_key,
                     )
                     count += 1
 
@@ -177,17 +203,17 @@ class Command(BaseCommand):
                         # Skip model instances that throw an error
                         try:
                             djstripe_obj = model.sync_from_stripe_data(
-                                stripe_obj, api_key=api_key.secret
+                                stripe_obj, api_key=api_key
                             )
                             self.stdout.write(
                                 f"  id={djstripe_obj.id} ({djstripe_obj} on"
-                                f" {stripe_account} for {api_key})"
+                                f" {stripe_account} for {api_key_repr})"
                             )
                             # syncing BankAccount and Card objects of Stripe Connected Express and Custom Accounts
                             self.sync_bank_accounts_and_cards(
                                 djstripe_obj,
                                 stripe_account=stripe_account,
-                                api_key=api_key.secret,
+                                api_key=api_key,
                             )
                             count += 1
                         except Exception as e:
@@ -200,7 +226,7 @@ class Command(BaseCommand):
             if count == 0:
                 self.stdout.write("  (no results)")
             else:
-                self.stdout.write(f"  Synced {count} {model_name} for {api_key}")
+                self.stdout.write(f"  Synced {count} {model_name} for {api_key_repr}")
 
         except Exception as e:
             self.stderr.write(str(e))
