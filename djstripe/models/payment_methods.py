@@ -698,10 +698,6 @@ class Source(StripeModel):
         return self.stripe_data.get("amount")
 
     @property
-    def client_secret(self):
-        return self.stripe_data.get("client_secret")
-
-    @property
     def currency(self):
         return self.stripe_data.get("currency")
 
