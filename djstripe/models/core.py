@@ -332,11 +332,7 @@ class Charge(StripeModel):
             stripe_account=stripe_account,
         )
 
-        return Refund.sync_from_stripe_data(
-            refund_obj,
-            api_key=api_key,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-        )
+        return Refund.sync_from_stripe_data(refund_obj, api_key=api_key)
 
     def capture(self, **kwargs) -> "Charge":
         """
