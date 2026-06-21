@@ -12,8 +12,9 @@ from ..fields import StripeEnumField
 from ..settings import djstripe_settings
 from .base import StripeModel
 
-# A regex to validate API key format
-API_KEY_REGEX = r"^(pk|sk|rk)_(test|live)_([a-zA-Z0-9]{24,99})"
+# A regex to validate API key format. Anchored at both ends so trailing junk is
+# rejected, with no upper length bound (modern Stripe keys exceed 99 characters).
+API_KEY_REGEX = r"^(pk|sk|rk)_(test|live)_[a-zA-Z0-9]{24,}$"
 
 
 def generate_api_key_id() -> str:

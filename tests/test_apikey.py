@@ -44,6 +44,15 @@ def test_get_api_key_details_by_prefix_bad_values():
         get_api_key_details_by_prefix("sk_a")
     with pytest.raises(InvalidStripeAPIKey):
         get_api_key_details_by_prefix("rk_nope_1234")
+    # trailing junk after the key body must be rejected (regex is end-anchored)
+    with pytest.raises(InvalidStripeAPIKey):
+        get_api_key_details_by_prefix(SK_TEST + " not a key")
+
+
+def test_get_api_key_details_by_prefix_long_key():
+    # Modern Stripe keys exceed the old 99-character body limit; they must parse.
+    long_key = "sk_test_" + "A" * 107
+    assert get_api_key_details_by_prefix(long_key) == (APIKeyType.secret, False)
 
 
 def test_clean_public_apikey():
