@@ -1551,17 +1551,24 @@ class PaymentIntent(StripeModel):
         help_text="Payment method used in this PaymentIntent.",
     )
 
-    def update(self, api_key=None, **kwargs):
+    def update(self, api_key=None, stripe_account=None, **kwargs):
         """
-        Call the stripe API's modify operation for this model
+        Call the stripe API's modify operation for this model and sync the result.
 
         :param api_key: The api key to use for this request.
             Defaults to djstripe_settings.STRIPE_SECRET_KEY.
         :type api_key: string
+        :param stripe_account: The optional connected account \
+            for which this request is being made.
+        :type stripe_account: string
         """
         api_key = api_key or self.default_api_key
-        response = self.api_retrieve(api_key=api_key)
-        return response.modify(response.stripe_id, api_key=api_key, **kwargs)
+        stripe_payment_intent = self._api_update(
+            api_key=api_key, stripe_account=stripe_account, **kwargs
+        )
+        return PaymentIntent.sync_from_stripe_data(
+            stripe_payment_intent, api_key=api_key
+        )
 
     def _api_cancel(self, api_key=None, **kwargs):
         """
