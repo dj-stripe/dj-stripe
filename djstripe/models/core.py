@@ -1373,7 +1373,10 @@ class Event(StripeModel):
             self.request_id = request_obj or ""
 
     @classmethod
-    def process(cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY):
+    def process(cls, data, api_key=None):
+        # Resolve the key here rather than as a default argument so that it is
+        # read at call time (the default would be frozen at import time).
+        api_key = api_key or djstripe_settings.STRIPE_SECRET_KEY
         qs = cls.objects.filter(id=data["id"])
         if qs.exists():
             return qs.first()
