@@ -56,7 +56,7 @@ class WebhookEventTriggerAdmin(ReadOnlyMixin, admin.ModelAdmin):
     def reprocess(self, request, queryset):
         for trigger in queryset:
             if not trigger.valid:
-                self.message_user(request, "Skipped invalid trigger {trigger!r}")
+                self.message_user(request, f"Skipped invalid trigger {trigger!r}")
                 continue
 
             trigger.process()
