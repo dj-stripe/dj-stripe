@@ -106,6 +106,23 @@ def _get_version():
     return __version__
 
 
+def _strip_port(ip):
+    """Strip the port number, if present, from an IP address string.
+
+    Some proxies (e.g. Azure) append the client port to the address in the
+    x-forwarded-for header, which is not a valid value for the ``inet`` column.
+    """
+    ip = ip.strip()
+    # Bracketed IPv6, optionally with a port: [::1] or [::1]:8080
+    if ip.startswith("["):
+        return ip[1:].split("]", 1)[0]
+    # IPv4 with a port has exactly one colon: 1.2.3.4:8080
+    # Bare IPv6 addresses contain several colons and must be left untouched.
+    if ip.count(":") == 1:
+        return ip.split(":", 1)[0]
+    return ip
+
+
 def get_remote_ip(request):
     """Given the HTTPRequest object return the IP Address of the client
 
@@ -118,7 +135,7 @@ def get_remote_ip(request):
     # x-forwarded-for is relevant for django running behind a proxy
     x_forwarded_for = request.headers.get("x-forwarded-for")
     if x_forwarded_for:
-        ip = x_forwarded_for.split(",")[0]
+        ip = _strip_port(x_forwarded_for.split(",")[0])
     else:
         ip = request.META.get("REMOTE_ADDR")
 

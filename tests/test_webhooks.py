@@ -688,6 +688,27 @@ class TestGetRemoteIp:
         assert get_remote_ip(request) == "127.0.0.1"
 
     @pytest.mark.parametrize(
+        "data,expected",
+        [
+            # IPv4 with a port (e.g. appended by Azure) is stripped
+            ({"HTTP_X_FORWARDED_FOR": "127.0.0.1:54321"}, "127.0.0.1"),
+            (
+                {"HTTP_X_FORWARDED_FOR": "127.0.0.1:54321,345.5.5.3:80"},
+                "127.0.0.1",
+            ),
+            # Bare IPv6 addresses are left untouched
+            ({"HTTP_X_FORWARDED_FOR": "2001:db8::1"}, "2001:db8::1"),
+            ({"HTTP_X_FORWARDED_FOR": "::1"}, "::1"),
+            # Bracketed IPv6, with and without a port
+            ({"HTTP_X_FORWARDED_FOR": "[2001:db8::1]:8080"}, "2001:db8::1"),
+            ({"HTTP_X_FORWARDED_FOR": "[2001:db8::1]"}, "2001:db8::1"),
+        ],
+    )
+    def test_get_remote_ip_strips_port(self, data, expected):
+        request = self.RequestClass(data)
+        assert get_remote_ip(request) == expected
+
+    @pytest.mark.parametrize(
         "data",
         [
             {
