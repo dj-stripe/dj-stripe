@@ -787,8 +787,7 @@ class InvoiceItem(StripeModel):
         if "-il_" in self.id:
             warnings.warn(
                 f"Attempting to retrieve InvoiceItem with id={self.id!r}"
-                " will most likely fail. "
-                "Run manage.py djstripe_update_invoiceitem_ids if this is a problem."
+                " will most likely fail, as it uses the pre-2019-12-03 id format."
             )
 
         return super().api_retrieve(*args, **kwargs)
