@@ -2,7 +2,10 @@
 dj-stripe Webhook Tests.
 """
 
+import hashlib
+import hmac
 import json
+import time
 import warnings
 from copy import deepcopy
 from unittest.mock import patch
@@ -232,6 +235,124 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
         event_retrieve_mock.assert_not_called()
+
+    @staticmethod
+    def _stripe_signature_header(payload: str, secret: str, timestamp: int) -> str:
+        """Compute a real Stripe-Signature header for the given payload.
+
+        Mirrors how Stripe signs webhook requests:
+            signed_payload = f"{timestamp}.{payload}"
+            signature = HMAC-SHA256(secret, signed_payload).hexdigest()
+            header = f"t={timestamp},v1={signature}"
+        """
+        signed_payload = f"{timestamp}.{payload}"
+        signature = hmac.new(
+            secret.encode("utf-8"),
+            signed_payload.encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+        return f"t={timestamp},v1={signature}"
+
+    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="verify_signature")
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
+        autospec=True,
+    )
+    def test_webhook_real_signature_pass(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        """End-to-end happy path exercising REAL Stripe HMAC signature
+        verification (verify_header is NOT patched here)."""
+        secret = "whsec_rguCE5LMINfRKjmIkxDJM1lOPXkAOQp3"
+        self.webhook_endpoint.secret = secret
+        self.webhook_endpoint.save()
+        self._set_validation_method("verify_signature")
+
+        payload = json.dumps(FAKE_EVENT_TRANSFER_CREATED)
+        timestamp = int(time.time())
+        signature_header = self._stripe_signature_header(payload, secret, timestamp)
+
+        resp = Client().post(
+            self._webhook_url(),
+            payload,
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE=signature_header,
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        # The event was accepted (validated as a real Stripe signature) and
+        # processed into an Event, with no retrieve_event fallback fired.
+        self.assertTrue(Event.objects.filter(type="transfer.created").exists())
+        event_retrieve_mock.assert_not_called()
+        trigger = WebhookEventTrigger.objects.get()
+        self.assertTrue(trigger.valid)
+
+    @override_settings(DJSTRIPE_WEBHOOK_VALIDATION="verify_signature")
+    @patch.object(Transfer, "_attach_objects_post_save_hook")
+    @patch(
+        "stripe.Account.retrieve",
+        return_value=deepcopy(FAKE_STANDARD_ACCOUNT),
+        autospec=True,
+    )
+    @patch(
+        "stripe.Transfer.retrieve", return_value=deepcopy(FAKE_TRANSFER), autospec=True
+    )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
+        autospec=True,
+    )
+    def test_webhook_real_signature_tampered_fail(
+        self,
+        event_retrieve_mock,
+        transfer_retrieve_mock,
+        account_retrieve_mock,
+        transfer__attach_object_post_save_hook_mock,
+    ):
+        """A request whose signature was computed with the wrong secret (or
+        equivalently a tampered body) must be rejected by REAL signature
+        verification (verify_header is NOT patched here)."""
+        secret = "whsec_rguCE5LMINfRKjmIkxDJM1lOPXkAOQp3"
+        self.webhook_endpoint.secret = secret
+        self.webhook_endpoint.save()
+        self._set_validation_method("verify_signature")
+
+        invalid_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        invalid_event["id"] = "evt_invalid"
+        payload = json.dumps(invalid_event)
+        timestamp = int(time.time())
+        # Sign with a DIFFERENT secret than the endpoint expects so the HMAC
+        # does not match the body -> invalid signature.
+        signature_header = self._stripe_signature_header(
+            payload, "whsec_WRONGSECRETWRONGSECRETWRONG000000", timestamp
+        )
+
+        resp = Client().post(
+            self._webhook_url(),
+            payload,
+            content_type="application/json",
+            HTTP_STRIPE_SIGNATURE=signature_header,
+        )
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertFalse(Event.objects.filter(id="evt_invalid").exists())
+        event_retrieve_mock.assert_not_called()
+        trigger = WebhookEventTrigger.objects.get()
+        self.assertFalse(trigger.valid)
 
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
