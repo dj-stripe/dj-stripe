@@ -7,6 +7,7 @@ from django.db import IntegrityError, models, transaction
 from django.utils import dateformat, timezone
 from stripe import APIResource, InvalidRequestError, convert_to_stripe_object
 
+from .._stripe_errors import object_is_absent
 from ..exceptions import ImpossibleAPIRequest
 from ..fields import (
     JSONField,
@@ -771,48 +772,20 @@ class StripeModel(StripeBaseModel):
                     )
                 except InvalidRequestError as e:
                     if "a similar object exists in" in str(e):
-                        # HACK around a Stripe bug.
-                        # When a File is retrieved from the Account object,
-                        # a mismatch between live and test mode is possible depending
-                        # on whether the file (usually the logo) was uploaded in live
-                        # or test. Reported to Stripe in August 2020.
+                        # HACK around a Stripe bug. Unlike the absent-object cases
+                        # below, this does NOT mean the object is gone: when a File
+                        # is retrieved from the Account object, a live/test mode
+                        # mismatch is possible depending on whether the file
+                        # (usually the logo) was uploaded in live or test. We fall
+                        # through and build the object from the inline data instead.
+                        # Reported to Stripe in August 2020.
                         # Context: https://github.com/dj-stripe/dj-stripe/issues/830
                         pass
-                    elif (
-                        "No such PaymentMethod:" in str(e)
-                        or "No such payment_method:" in str(e)
-                        or "A source must be attached to a customer" in str(e)
-                    ):
-                        # payment methods (card_… etc) can be irretrievably deleted,
-                        # but still present during sync. For example, if a refund is
-                        # issued on a charge whose payment method has been deleted,
-                        # or when a charge.expired arrives after the source was
-                        # detached. Stripe's wording varies between "PaymentMethod"
-                        # and "payment_method". A detached legacy source (src_…) is
-                        # also wrapped as a payment_method but 404s on the
-                        # payment_methods endpoint with "A source must be attached
-                        # to a customer to be used as a `payment_method`".
-                        return None, False
-                    elif "No such subscription_item:" in str(
-                        e
-                    ) or "Invalid subscription_item id:" in str(e):
-                        # subscription items removed during a SubscriptionSchedule
-                        # phase change can become irretrievable from Stripe even
-                        # though invoices created during the prior phase still
-                        # reference their ids.
-                        # Context: https://github.com/dj-stripe/dj-stripe/issues/2025
-                        return None, False
-                    elif "No such charge:" in str(
-                        e
-                    ) or "No such application fee:" in str(e):
-                        # Connect: a webhook delivered on the platform account can
-                        # reference objects that only exist on a connected account
-                        # (eg. a destination charge's `application_fee`, or that
-                        # ApplicationFee's `charge`/`originating_transaction`).
-                        # These are not retrievable from the platform, so skip the
-                        # FK instead of crashing the whole webhook. The relation is
-                        # filled in later by the connected account's own webhooks.
-                        # Context: https://github.com/dj-stripe/dj-stripe/issues/2010
+                    elif object_is_absent(e):
+                        # The referenced object can't be retrieved because it's
+                        # gone (deleted, detached, or living on a connected
+                        # account). Skip the FK instead of crashing the sync; see
+                        # djstripe._stripe_errors for the recognised cases.
                         return None, False
                     else:
                         raise
