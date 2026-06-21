@@ -71,7 +71,7 @@ class TestDispute(CreateAccountMixin, TestCase):
         payment_method_retrieve_mock,
     ):
         dispute = Dispute.sync_from_stripe_data(FAKE_DISPUTE_I)
-        self.assertEqual(str(dispute), "$10.00 USD (Needs response) ")
+        self.assertEqual(str(dispute), "$10.00 USD (Needs response)")
 
     @patch(
         "stripe.PaymentMethod.retrieve",

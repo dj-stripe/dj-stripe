@@ -1242,9 +1242,12 @@ class Dispute(StripeModel):
     )
 
     def __str__(self):
-        amount = get_friendly_currency_amount(self.amount / 100, self.currency)
         status = enums.DisputeStatus.humanize(self.status)
-        return f"{amount} ({status}) "
+        amount = self.stripe_data.get("amount")
+        if amount is None or not self.currency:
+            return f"Dispute ({status})"
+        friendly_amount = get_friendly_currency_amount(amount / 100, self.currency)
+        return f"{friendly_amount} ({status})"
 
     @property
     def amount(self) -> int:
@@ -1280,10 +1283,13 @@ class Dispute(StripeModel):
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
-        return (
-            f"{self._get_base_stripe_dashboard_url()}"
-            f"{self.stripe_dashboard_item_name}/{self.payment_intent.id}"
-        )
+        base = f"{self._get_base_stripe_dashboard_url()}{self.stripe_dashboard_item_name}"
+        # payment_intent and charge are both nullable (to avoid infinite sync),
+        # so fall back gracefully instead of dereferencing a missing relation.
+        item = self.payment_intent or self.charge
+        if not item:
+            return base
+        return f"{base}/{item.id}"
 
     def _attach_objects_post_save_hook(
         self,

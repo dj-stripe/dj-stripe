@@ -874,7 +874,9 @@ class SourceTransaction(StripeModel):
     )
 
     def __str__(self):
-        return f"Source Transaction status={self.status}, source={self.source.id}"
+        # source is nullable because webhook ordering is not deterministic.
+        source_id = self.source.id if self.source else None
+        return f"Source Transaction status={self.status}, source={source_id}"
 
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
