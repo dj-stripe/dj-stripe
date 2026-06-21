@@ -86,7 +86,7 @@ class APIKey(StripeModel):
         help_text="Whether the key is valid for live or test mode."
     )
     metadata = None
-    objects = APIKeyManager()
+    objects = APIKeyManager()  # type: ignore[misc]  # custom manager override (django-stubs)
 
     def get_stripe_dashboard_url(self):
         return self._get_base_stripe_dashboard_url() + "apikeys"

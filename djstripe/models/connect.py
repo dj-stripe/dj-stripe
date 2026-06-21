@@ -193,7 +193,7 @@ class Transfer(StripeModel):
     expand_fields = ["balance_transaction"]
     stripe_dashboard_item_name = "transfers"
 
-    objects = TransferManager()
+    objects = TransferManager()  # type: ignore[misc]  # custom manager override (django-stubs)
 
     balance_transaction = StripeForeignKey(
         "BalanceTransaction",

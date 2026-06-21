@@ -1,6 +1,6 @@
 import logging
 import warnings
-from typing import Optional
+from typing import Any, Optional
 
 import stripe
 from django.db import models
@@ -159,7 +159,7 @@ class Discount(StripeModel):
     """
 
     expand_fields = ["customer"]
-    stripe_class = None
+    stripe_class = None  # type: ignore[assignment]  # model has no Stripe API resource
 
     customer = StripeForeignKey(
         "Customer",
@@ -219,7 +219,7 @@ class BaseInvoice(StripeModel):
     expand_fields = ["discounts", "lines.data.discounts"]
 
     charge = models.OneToOneField(
-        "Charge",
+        "djstripe.Charge",
         on_delete=models.CASCADE,
         null=True,
         # we need to use the %(class)s placeholder to avoid related name
@@ -229,7 +229,7 @@ class BaseInvoice(StripeModel):
     )
     # Critical fields to keep
     customer = StripeForeignKey(
-        "Customer",
+        "djstripe.Customer",
         on_delete=models.CASCADE,
         # we need to use the %(class)s placeholder to avoid related name
         # clashes between Invoice and UpcomingInvoice
@@ -237,7 +237,7 @@ class BaseInvoice(StripeModel):
         help_text="The customer associated with this invoice.",
     )
     default_payment_method = StripeForeignKey(
-        "PaymentMethod",
+        "djstripe.PaymentMethod",
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
@@ -250,7 +250,7 @@ class BaseInvoice(StripeModel):
         ),
     )
     payment_intent = models.OneToOneField(
-        "PaymentIntent",
+        "djstripe.PaymentIntent",
         on_delete=models.CASCADE,
         null=True,
         help_text=(
@@ -385,7 +385,7 @@ class BaseInvoice(StripeModel):
             subscription_plan = subscription_plan.id
 
         upcoming = getattr(cls.stripe_class, "create_preview", None) or (
-            cls.stripe_class.upcoming
+            cls.stripe_class.upcoming  # type: ignore[attr-defined]  # deprecated Stripe method
         )
         try:
             upcoming_stripe_invoice = upcoming(
@@ -522,7 +522,7 @@ class Invoice(BaseInvoice):
     # Note:
     # Most fields are defined on BaseInvoice so they're shared with UpcomingInvoice.
     # ManyToManyFields are an exception, since UpcomingInvoice doesn't exist in the db.
-    default_tax_rates = models.ManyToManyField(
+    default_tax_rates: "models.ManyToManyField[TaxRate, Any]" = models.ManyToManyField(
         "TaxRate",
         # explicitly specify the joining table name as though the joining model
         # was defined with through="DjstripeInvoiceDefaultTaxRate"
@@ -692,7 +692,7 @@ class InvoiceItem(StripeModel):
         ),
     )
     # XXX: subscription_item
-    tax_rates = models.ManyToManyField(
+    tax_rates: "models.ManyToManyField[TaxRate, Any]" = models.ManyToManyField(
         "TaxRate",
         # explicitly specify the joining table name as though the joining model
         # was defined with through="DjstripeInvoiceItemTaxRate"
@@ -1147,7 +1147,7 @@ class Plan(StripeModel):
                     )
                     amount = f"{amount} + {formatted_flat_amount_tier_1}"
 
-        format_args = {"amount": amount}
+        format_args: dict[str, Any] = {"amount": amount}
 
         interval_count = self.interval_count
         if interval_count == 1:
@@ -1207,7 +1207,7 @@ class Subscription(StripeModel):
         help_text="The customer associated with this subscription.",
     )
 
-    objects = SubscriptionManager()
+    objects = SubscriptionManager()  # type: ignore[misc]  # custom manager override (django-stubs)
 
     # Properties for Subscription model fields
     @property
@@ -1617,7 +1617,7 @@ class SubscriptionItem(StripeModel):
         related_name="items",
         help_text="The subscription this subscription item belongs to.",
     )
-    tax_rates = models.ManyToManyField(
+    tax_rates: "models.ManyToManyField[TaxRate, Any]" = models.ManyToManyField(
         "TaxRate",
         # explicitly specify the joining table name as though the joining model
         # was defined with through="DjstripeSubscriptionItemTaxRate"
@@ -1845,7 +1845,7 @@ class ShippingRate(StripeModel):
 
     stripe_class = stripe.ShippingRate
     stripe_dashboard_item_name = "shipping-rates"
-    description = None
+    description = None  # type: ignore[assignment]  # nulls inherited base member
 
     # Foreign key remains as model field
     tax_code = StripeForeignKey(
@@ -1943,7 +1943,7 @@ class TaxId(StripeModel):
     """
 
     stripe_class = stripe.TaxId
-    description = None
+    description = None  # type: ignore[assignment]  # nulls inherited base member
     metadata = None
 
     # Foreign key remains as model field

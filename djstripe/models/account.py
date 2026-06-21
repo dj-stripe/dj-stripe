@@ -342,7 +342,7 @@ class AccountV2(StripeModel):
     Stripe documentation: https://docs.stripe.com/api/v2/core/accounts
     """
 
-    stripe_class = stripe.v2.core.Account
+    stripe_class = stripe.v2.core.Account  # type: ignore[assignment]  # not an APIResource subclass
 
     # Sub-resources that aren't returned by default and must be requested
     # explicitly with the ``include`` parameter, so that a synced account holds

@@ -162,7 +162,7 @@ class Charge(StripeModel):
         enum=enums.ChargeStatus, help_text="The status of the payment."
     )
 
-    objects = ChargeManager()
+    objects = ChargeManager()  # type: ignore[misc]  # custom manager override (django-stubs)
 
     # Property accessors for commonly used fields
     @property

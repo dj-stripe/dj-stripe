@@ -80,6 +80,17 @@ select = ["F", "FURB", "UP"]
 plugins = ["mypy_django_plugin.main"]
 warn_unused_ignores = true
 
+# The admin, management command and migration modules lean heavily on Django's
+# dynamic runtime behaviour, which django-stubs cannot model without a large
+# number of ignores. Type checking is enforced on the core model layer only.
+[[tool.mypy.overrides]]
+module = [
+    "djstripe.admin.*",
+    "djstripe.management.*",
+    "djstripe.migrations.*",
+]
+ignore_errors = true
+
 [tool.django-stubs]
 django_settings_module = "tests.settings"
 

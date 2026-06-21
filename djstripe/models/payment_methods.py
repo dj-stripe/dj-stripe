@@ -141,8 +141,8 @@ class LegacySourceMixin:
     Mixin for functionality shared between the legacy Card & BankAccount sources
     """
 
-    customer: StripeForeignKey | None
-    account: StripeForeignKey | None
+    customer: Customer | None
+    account: Account | None
     id: str
     default_api_key: str
 
@@ -669,7 +669,7 @@ class Card(LegacySourceMixin, StripeModel):
         }
         card.update(kwargs)
 
-        return stripe.Token.create(api_key=api_key, card=card)
+        return stripe.Token.create(api_key=api_key, card=card)  # type: ignore[arg-type]  # dict card payload
 
 
 class Source(StripeModel):
@@ -800,7 +800,7 @@ class Source(StripeModel):
             return False
 
     @classmethod
-    def api_list(
+    def api_list(  # type: ignore[override]  # narrows api_key/adds customer kwarg
         cls,
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
         *,
@@ -832,7 +832,7 @@ class SourceTransaction(StripeModel):
     Stripe documentation: https://stripe.com/docs/sources/ach-credit-transfer#source-transactions
     """
 
-    stripe_class = stripe.SourceTransaction
+    stripe_class = stripe.SourceTransaction  # type: ignore[assignment]  # not an APIResource subclass
     stripe_dashboard_item_name = "source_transactions"
 
     metadata = None
@@ -1006,7 +1006,7 @@ class PaymentMethod(StripeModel):
             # key cached in the Stripe object
             extra_kwargs = {"api_key": api_key}
 
-        stripe_payment_method = stripe.PaymentMethod.attach(
+        stripe_payment_method = stripe.PaymentMethod.attach(  # type: ignore[call-overload]  # api_key passed via **kwargs
             payment_method, customer=customer, **extra_kwargs
         )
         return cls.sync_from_stripe_data(stripe_payment_method, api_key=api_key)

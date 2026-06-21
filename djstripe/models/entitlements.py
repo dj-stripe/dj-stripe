@@ -36,7 +36,7 @@ class ProductFeature(StripeModel):
     Stripe Documentation: https://stripe.com/docs/api/product-feature
     """
 
-    stripe_class = stripe.ProductFeature
+    stripe_class = stripe.ProductFeature  # type: ignore[assignment]  # not an APIResource subclass
 
     product = StripeForeignKey(
         "Product",

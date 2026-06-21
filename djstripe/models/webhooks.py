@@ -255,7 +255,7 @@ class WebhookEventTrigger(models.Model):
                     sender=cls, instance=obj, api_key=api_key
                 )
         except Exception as e:
-            max_length = cls._meta.get_field("exception").max_length
+            max_length = cls._meta.get_field("exception").max_length  # type: ignore[union-attr]  # concrete field
             obj.exception = str(e)[:max_length]
             obj.traceback = format_exc()
 
@@ -319,7 +319,7 @@ class WebhookEventTrigger(models.Model):
             )
             return False
 
-        validation_method = self.webhook_endpoint.djstripe_validation_method
+        validation_method = self.webhook_endpoint.djstripe_validation_method  # type: ignore[union-attr]
 
         if validation_method == WebhookEndpointValidation.none:
             # validation disabled
@@ -334,7 +334,8 @@ class WebhookEventTrigger(models.Model):
                 local_secret = headers.get("x-djstripe-webhook-secret")
                 secret = local_secret or secret
             return self.verify_signature(
-                secret=secret, tolerance=self.webhook_endpoint.djstripe_tolerance
+                secret=secret,
+                tolerance=self.webhook_endpoint.djstripe_tolerance,  # type: ignore[union-attr]
             )
 
         livemode = local_data["livemode"]

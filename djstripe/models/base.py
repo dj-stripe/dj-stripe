@@ -198,9 +198,9 @@ class StripeModel(StripeBaseModel):
         # that account ID to the retrieve call.
         for field in reverse_account_relations:
             # Grab the related object, using the first one we find.
-            reverse_lookup_attr = field.get_accessor_name()
+            reverse_lookup_attr = field.get_accessor_name()  # type: ignore[union-attr]  # reverse relation
             try:
-                account = getattr(self, reverse_lookup_attr).first()
+                account = getattr(self, reverse_lookup_attr or "").first()
             except ValueError:
                 if isinstance(self, Account):
                     # return the id if self is the Account model itself.

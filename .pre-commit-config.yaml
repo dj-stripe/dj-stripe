@@ -43,3 +43,9 @@ repos:
         types: [python]
         pass_filenames: false
         language: system
+      - id: mypy
+        name: mypy
+        entry: uv run mypy djstripe
+        types: [python]
+        pass_filenames: false
+        language: system

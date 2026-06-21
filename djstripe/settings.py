@@ -171,7 +171,8 @@ class DjstripeSettings:
 
         action = f"{object_type}:{action}"
         idempotency_key, _created = IdempotencyKey.objects.get_or_create(
-            action=action, livemode=livemode
+            action=action,
+            livemode=livemode,  # type: ignore[misc]  # field is null=True (django-stubs gap)
         )
         return str(idempotency_key.uuid)
 
