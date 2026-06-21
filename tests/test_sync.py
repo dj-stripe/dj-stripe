@@ -2,11 +2,9 @@
 dj-stripe Sync Method Tests.
 """
 
-import contextlib
 from copy import deepcopy
-from unittest.mock import patch
-
 from io import StringIO
+from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
@@ -23,20 +21,6 @@ from djstripe.sync import sync_subscriber
 
 from . import FAKE_CUSTOMER, StripeList
 from .conftest import CreateAccountMixin
-
-
-@contextlib.contextmanager
-def capture_stdout():
-    import sys
-    from io import StringIO
-
-    old_stdout = sys.stdout
-    sys.stdout = StringIO()
-
-    try:
-        yield sys.stdout
-    finally:
-        sys.stdout = old_stdout
 
 
 class TestSyncSubscriber(CreateAccountMixin, TestCase):
@@ -80,10 +64,11 @@ class TestSyncSubscriber(CreateAccountMixin, TestCase):
     def test_sync_fail(self, stripe_customer_create_mock, api_retrieve_mock):
         api_retrieve_mock.side_effect = InvalidRequestError("No such customer:", "blah")
 
-        with capture_stdout() as stdout:
+        with self.assertLogs("djstripe.sync", level="ERROR") as logs:
             sync_subscriber(self.user)
 
-        self.assertEqual("ERROR: No such customer:", stdout.getvalue().strip())
+        self.assertIn("Failed to sync subscriber", logs.output[0])
+        self.assertIn("No such customer:", logs.output[0])
 
 
 class TestSyncModelsCommand(CreateAccountMixin, TestCase):
