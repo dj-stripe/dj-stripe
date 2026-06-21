@@ -5,8 +5,6 @@ from typing import Any, Optional
 import stripe
 from django.db import models
 from django.utils import timezone
-from django.utils.text import format_lazy
-from django.utils.translation import gettext_lazy as _
 from stripe import InvalidRequestError
 
 from .. import enums
@@ -343,7 +341,6 @@ class BaseInvoice(StripeModel):
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
         customer=None,
         subscription=None,
-        subscription_plan=None,
         **kwargs,
     ) -> Optional["UpcomingInvoice"]:
         """
@@ -366,10 +363,6 @@ class BaseInvoice(StripeModel):
         :param subscription: The identifier of the subscription to retrieve an \
         invoice for.
         :type subscription: Subscription or string (subscription ID)
-        :param subscription_plan: If set, the invoice returned will preview \
-        updating the subscription given to this plan, or creating a new \
-        subscription to this plan if no subscription is given.
-        :type subscription_plan: Plan or string (plan ID)
         """
 
         # Convert Customer to id
@@ -380,10 +373,6 @@ class BaseInvoice(StripeModel):
         if subscription is not None and isinstance(subscription, StripeModel):
             subscription = subscription.id
 
-        # Convert Plan to id
-        if subscription_plan is not None and isinstance(subscription_plan, StripeModel):
-            subscription_plan = subscription_plan.id
-
         upcoming = getattr(cls.stripe_class, "create_preview", None) or (
             cls.stripe_class.upcoming  # type: ignore[attr-defined]  # deprecated Stripe method
         )
@@ -392,7 +381,6 @@ class BaseInvoice(StripeModel):
                 api_key=api_key,
                 customer=customer,
                 subscription=subscription,
-                subscription_plan=subscription_plan,
                 stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 **kwargs,
             )
@@ -662,15 +650,6 @@ class InvoiceItem(StripeModel):
         help_text="The invoice to which this invoiceitem is attached.",
     )
     # Period fields converted to properties - see below
-    plan = models.ForeignKey(
-        "Plan",
-        null=True,
-        on_delete=models.SET_NULL,
-        help_text=(
-            "If the invoice item is a proration, the plan of the subscription "
-            "for which the proration was computed."
-        ),
-    )
     price = models.ForeignKey(
         "Price",
         null=True,
@@ -996,183 +975,6 @@ class LineItem(StripeModel):
         ).auto_paging_iter()
 
 
-class Plan(StripeModel):
-    """
-    A subscription plan contains the pricing information for different
-    products and feature levels on your site.
-
-    Stripe documentation: https://stripe.com/docs/api/plans?lang=python
-
-    NOTE: The Stripe Plans API has been deprecated in favor of the Prices API.
-    You may want to upgrade to use the Price model instead of the Plan model.
-    """
-
-    stripe_class = stripe.Plan
-    expand_fields = ["product", "tiers"]
-    stripe_dashboard_item_name = "plans"
-
-    # Properties for Plan model fields
-    @property
-    def active(self):
-        """Whether the plan is currently available for new subscriptions."""
-        return self.stripe_data.get("active", True)
-
-    @property
-    def aggregate_usage(self):
-        """Specifies a usage aggregation strategy for plans of `usage_type=metered`."""
-        return self.stripe_data.get("aggregate_usage")
-
-    @property
-    def amount(self):
-        """The amount in cents to be charged on the interval specified."""
-        return self.stripe_data.get("amount")
-
-    @property
-    def amount_decimal(self):
-        """Same as `amount`, but contains a decimal value with at most 12 decimal places."""
-        return self.stripe_data.get("amount_decimal")
-
-    @property
-    def billing_scheme(self):
-        """Describes how to compute the price per period. Either `per_unit` or `tiered`."""
-        return self.stripe_data.get("billing_scheme", "per_unit")
-
-    @property
-    def currency(self):
-        """Three-letter ISO currency code."""
-        return self.stripe_data.get("currency")
-
-    @property
-    def interval(self):
-        """The frequency at which a subscription is billed. One of `day`, `week`, `month` or `year`."""
-        return self.stripe_data.get("interval")
-
-    @property
-    def interval_count(self):
-        """The number of intervals between subscription billings."""
-        return self.stripe_data.get("interval_count", 1)
-
-    @property
-    def nickname(self):
-        """A brief description of the plan, hidden from customers."""
-        return self.stripe_data.get("nickname")
-
-    @property
-    def product(self):
-        """The product whose pricing this plan determines."""
-        return self.stripe_data.get("product")
-
-    @property
-    def tiers(self):
-        """Each element represents a pricing tier."""
-        return self.stripe_data.get("tiers", [])
-
-    @property
-    def tiers_mode(self):
-        """Defines if the tiering price should be `graduated` or `volume` based."""
-        return self.stripe_data.get("tiers_mode")
-
-    @property
-    def transform_usage(self):
-        """Apply a transformation to the reported usage or set quantity."""
-        return self.stripe_data.get("transform_usage")
-
-    @property
-    def trial_period_days(self):
-        """Number of trial period days granted when subscribing a customer to this plan."""
-        return self.stripe_data.get("trial_period_days")
-
-    @property
-    def usage_type(self):
-        """Configures how the quantity per period should be determined."""
-        return self.stripe_data.get("usage_type", "licensed")
-
-    @classmethod
-    def get_or_create(cls, **kwargs):
-        """Get or create a Plan."""
-
-        try:
-            return cls.objects.get(id=kwargs["id"]), False
-        except cls.DoesNotExist:
-            return cls.create(**kwargs), True
-
-    @classmethod
-    def create(cls, **kwargs):
-        # A few minor things are changed in the api-version of the create call
-        api_kwargs = kwargs.copy()
-        api_kwargs["amount"] = int(api_kwargs["amount"] * 100)
-
-        if isinstance(api_kwargs.get("product"), StripeModel):
-            api_kwargs["product"] = api_kwargs["product"].id
-
-        stripe_plan = cls._api_create(**api_kwargs)
-        api_key = api_kwargs.get("api_key") or djstripe_settings.STRIPE_SECRET_KEY
-        plan = cls.sync_from_stripe_data(stripe_plan, api_key=api_key)
-
-        return plan
-
-    def __str__(self):
-        product = self.product
-        if product and isinstance(product, dict) and product.get("name"):
-            name = product.get("name")
-            return f"{self.human_readable_price} for {name}"
-        return self.human_readable_price
-
-    @property
-    def amount_in_cents(self):
-        return int(self.amount * 100)
-
-    @property
-    def human_readable_price(self) -> str:
-        if self.billing_scheme == "per_unit":
-            unit_amount = self.amount
-            amount = get_friendly_currency_amount(unit_amount, self.currency)
-        else:
-            # tiered billing scheme
-            tiers = self.tiers
-            if not tiers:
-                amount = "Tiered pricing"
-            else:
-                tier_1 = tiers[0]
-                flat_amount_tier_1 = tier_1.get("flat_amount")
-                unit_amount_tier_1 = tier_1.get("unit_amount", 0)
-                formatted_unit_amount_tier_1 = get_friendly_currency_amount(
-                    unit_amount_tier_1 / 100, self.currency
-                )
-                amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
-
-                if flat_amount_tier_1 is not None:
-                    formatted_flat_amount_tier_1 = get_friendly_currency_amount(
-                        flat_amount_tier_1 / 100, self.currency
-                    )
-                    amount = f"{amount} + {formatted_flat_amount_tier_1}"
-
-        format_args: dict[str, Any] = {"amount": amount}
-
-        interval_count = self.interval_count
-        if interval_count == 1:
-            interval = {
-                "day": _("day"),
-                "week": _("week"),
-                "month": _("month"),
-                "year": _("year"),
-            }[self.interval]
-            template = _("{amount}/{interval}")
-            format_args["interval"] = interval
-        else:
-            interval = {
-                "day": _("days"),
-                "week": _("weeks"),
-                "month": _("months"),
-                "year": _("years"),
-            }[self.interval]
-            template = _("{amount} / every {interval_count} {interval}")
-            format_args["interval"] = interval
-            format_args["interval_count"] = interval_count
-
-        return str(format_lazy(template, **format_args))
-
-
 class Subscription(StripeModel):
     """
     Subscriptions allow you to charge a customer's card on a recurring basis.
@@ -1394,23 +1196,16 @@ class Subscription(StripeModel):
             kwargs["status"] = "all"
         return super().api_list(api_key=api_key, **kwargs)
 
-    def update(self, plan: StripeModel | str | None = None, **kwargs):
+    def update(self, **kwargs):
         """
         See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 
-        :param plan: The plan to which to subscribe the customer.
-        :type plan: Plan or string (plan ID)
-
-        .. important:: Updating a subscription by changing the plan or quantity \
+        .. important:: Updating a subscription by changing the price or quantity \
             creates a new ``Subscription`` in \
             Stripe (and dj-stripe).
         """
 
-        # Convert Plan to id
-        if plan is not None and isinstance(plan, StripeModel):
-            plan = plan.id
-
-        stripe_subscription = self._api_update(plan=plan, **kwargs)
+        stripe_subscription = self._api_update(**kwargs)
 
         api_key = kwargs.get("api_key") or self.default_api_key
         return Subscription.sync_from_stripe_data(stripe_subscription, api_key=api_key)
@@ -1596,12 +1391,6 @@ class SubscriptionItem(StripeModel):
     stripe_class = stripe.SubscriptionItem
 
     # Fields converted to properties - see below
-    plan = models.ForeignKey(
-        "Plan",
-        on_delete=models.CASCADE,
-        related_name="subscription_items",
-        help_text="The plan the customer is subscribed to.",
-    )
     price = models.ForeignKey(
         "Price",
         null=True,

@@ -165,11 +165,11 @@ class PurchaseSubscriptionView(FormView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        if models.Plan.objects.count() == 0:
+        if models.Price.objects.count() == 0:
             raise Exception(
-                "No Product Plans in the dj-stripe database - create some in your "
+                "No Prices in the dj-stripe database - create some in your "
                 "stripe account and then "
-                "run `./manage.py djstripe_sync_models Plan` "
+                "run `./manage.py djstripe_sync_models Price` "
                 "(or use the dj-stripe webhooks)"
             )
 
@@ -182,7 +182,7 @@ class PurchaseSubscriptionView(FormView):
     def form_valid(self, form):
         stripe_source = form.cleaned_data["stripe_source"]
         email = form.cleaned_data["email"]
-        plan = form.cleaned_data["plan"]
+        price = form.cleaned_data["price"]
 
         # Guest checkout with the provided email
         try:
@@ -201,7 +201,7 @@ class PurchaseSubscriptionView(FormView):
         # using the customer's default payment source
         stripe_subscription = stripe.Subscription.create(
             customer=customer.id,
-            items=[{"plan": plan.id}],
+            items=[{"price": price.id}],
             collection_method="charge_automatically",
             # tax_percent=15,
             api_key=djstripe_settings.djstripe_settings.STRIPE_SECRET_KEY,

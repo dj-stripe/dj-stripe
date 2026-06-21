@@ -116,7 +116,6 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Invoice.charge",
                 "djstripe.PaymentIntent.invoice (related name)",
-                "djstripe.Plan.product",
             },
         )
 
@@ -297,7 +296,6 @@ class ChargeTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
                 "djstripe.Charge.latest_invoice (related name)",
                 "djstripe.Invoice.charge",
                 "djstripe.PaymentIntent.invoice (related name)",
-                "djstripe.Plan.product",
             },
         )
 

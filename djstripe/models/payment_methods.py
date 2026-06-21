@@ -136,194 +136,70 @@ class DjstripePaymentMethod(models.Model):
         return cls.objects.get_or_create(id=id_, defaults={"type": source_type})
 
 
-class LegacySourceMixin:
+class ExternalAccountMixin:
     """
-    Mixin for functionality shared between the legacy Card & BankAccount sources
+    Mixin for functionality shared between the Card & BankAccount external
+    accounts of Stripe Connected Accounts.
     """
 
-    customer: Customer | None
     account: Account | None
     id: str
     default_api_key: str
 
     @classmethod
-    def _get_customer_or_account_from_kwargs(cls, **kwargs):
+    def _get_account_from_kwargs(cls, **kwargs):
         account = kwargs.get("account")
-        customer = kwargs.get("customer")
 
-        if not account and not customer:
-            raise StripeObjectManipulationException(
-                f"{cls.__name__} objects must be manipulated through either a "
-                "Stripe Connected Account or a customer. "
-                "Pass a Customer or an Account object into this call."
-            )
-
-        if account and not isinstance(account, Account):
+        if not account or not isinstance(account, Account):
             raise StripeObjectManipulationException(
                 f"{cls.__name__} objects must be manipulated through a Stripe Connected"
                 " Account. Pass an Account object into this call."
             )
 
-        if customer and not isinstance(customer, Customer):
-            raise StripeObjectManipulationException(
-                f"{cls.__name__} objects must be manipulated through a Customer. "
-                "Pass a Customer object into this call."
-            )
+        del kwargs["account"]
 
-        if account:
-            del kwargs["account"]
-        if customer:
-            del kwargs["customer"]
-
-        return account, customer, kwargs
+        return account, kwargs
 
     @classmethod
     def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
-        # Cards & Bank Accounts must be manipulated through a customer or account.
+        # External accounts must be manipulated through an account.
 
-        account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
-            **kwargs
+        account, clean_kwargs = cls._get_account_from_kwargs(**kwargs)
+
+        return account.api_retrieve(api_key=api_key).external_accounts.create(
+            api_key=api_key, **clean_kwargs
         )
-
-        # First we try to retrieve by customer attribute,
-        # then by account attribute
-        if customer and account:
-            try:
-                # retrieve by customer
-                return customer.api_retrieve(api_key=api_key).sources.create(
-                    api_key=api_key, **clean_kwargs
-                )
-            except Exception as customer_exc:
-                try:
-                    # retrieve by account
-                    return account.api_retrieve(
-                        api_key=api_key
-                    ).external_accounts.create(api_key=api_key, **clean_kwargs)
-                except Exception:
-                    raise customer_exc
-
-        if customer:
-            return customer.api_retrieve(api_key=api_key).sources.create(
-                api_key=api_key, **clean_kwargs
-            )
-
-        if account:
-            return account.api_retrieve(api_key=api_key).external_accounts.create(
-                api_key=api_key, **clean_kwargs
-            )
 
     @classmethod
     def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
         # OVERRIDING the parent version of this function
-        # Cards & Bank Accounts must be manipulated through a customer or account.
+        # External accounts must be manipulated through an account.
 
         # Update kwargs with `expand` param
         kwargs = cls.get_expand_params(api_key, **kwargs)
 
-        account, customer, clean_kwargs = cls._get_customer_or_account_from_kwargs(
-            **kwargs
-        )
+        account, clean_kwargs = cls._get_account_from_kwargs(**kwargs)
 
         object_name = cls.stripe_class.OBJECT_NAME
 
-        # First we try to retrieve by customer attribute,
-        # then by account attribute
-        if customer and account:
-            try:
-                # retrieve by customer
-                return (
-                    customer.api_retrieve(api_key=api_key)
-                    .sources.list(object=object_name, **clean_kwargs)
-                    .auto_paging_iter()
-                )
-            except Exception as customer_exc:
-                try:
-                    # retrieve by account
-                    return (
-                        account.api_retrieve(api_key=api_key)
-                        .external_accounts.list(object=object_name, **clean_kwargs)
-                        .auto_paging_iter()
-                    )
-                except Exception:
-                    raise customer_exc
-
-        if customer:
-            return (
-                customer.api_retrieve(api_key=api_key)
-                .sources.list(object=object_name, **clean_kwargs)
-                .auto_paging_iter()
-            )
-
-        if account:
-            return (
-                account.api_retrieve(api_key=api_key)
-                .external_accounts.list(object=object_name, **clean_kwargs)
-                .auto_paging_iter()
-            )
-
-        raise ImpossibleAPIRequest(
-            f"Can't list {object_name} without a customer or account object. This may"
-            " happen if not all accounts or customer objects are in the db. Please run"
-            ' "python manage.py djstripe_sync_models Account Customer" as a potential'
-            " fix."
+        return (
+            account.api_retrieve(api_key=api_key)
+            .external_accounts.list(object=object_name, **clean_kwargs)
+            .auto_paging_iter()
         )
 
     def get_stripe_dashboard_url(self) -> str:
-        if self.customer:
-            return self.customer.get_stripe_dashboard_url()
-        elif self.account:
+        if self.account:
             return f"https://dashboard.stripe.com/{self.account.id}/settings/payouts"
         return ""
 
-    def remove(self):
-        """
-        Removes a legacy source from this customer's account.
-        """
-
-        # Wipe default_source on customers that reference this card. The
-        # value lives in the stripe_data JSON blob and may be either the
-        # bare id or an inline source dict.
-        from django.db.models import Q
-
-        affected = Customer.objects.filter(
-            Q(stripe_data__default_source=self.id)
-            | Q(stripe_data__default_source__id=self.id)
-        )
-        for customer in affected:
-            customer.stripe_data["default_source"] = None
-            customer.save(update_fields=["stripe_data"])
-
-        try:
-            self._api_delete()
-        except InvalidRequestError as exc:
-            if "No such source:" in str(exc) or "No such customer:" in str(exc):
-                # The exception was thrown because the stripe customer or card
-                # was already deleted on the stripe side, ignore the exception
-                pass
-            else:
-                # The exception was raised for another reason, re-raise it
-                raise
-
-        self.delete()
-
     def api_retrieve(self, api_key=None, stripe_account=None):
         # OVERRIDING the parent version of this function
-        # Cards & Banks Accounts must be manipulated through a customer or account.
+        # External accounts must be manipulated through an account.
 
         api_key = api_key or self.default_api_key
 
-        if self.customer:
-            return stripe.Customer.retrieve_source(
-                self.customer.id,
-                self.id,
-                expand=self.expand_fields,
-                stripe_account=stripe_account,
-                api_key=api_key,
-                stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            )
-
-        # try to retrieve by account attribute if retrieval by customer fails.
         if self.account:
             return stripe.Account.retrieve_external_account(
                 self.account.id,
@@ -335,29 +211,20 @@ class LegacySourceMixin:
             )
 
         raise ImpossibleAPIRequest(
-            f"Can't retrieve {self.__class__} without a customer or account object."
-            " This may happen if not all accounts or customer objects are in the db."
-            ' Please run "python manage.py djstripe_sync_models Account Customer" as a'
+            f"Can't retrieve {self.__class__} without an account object."
+            " This may happen if not all accounts are in the db."
+            ' Please run "python manage.py djstripe_sync_models Account" as a'
             " potential fix."
         )
 
     def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
         # OVERRIDING the parent version of this function
-        # Cards & Banks Accounts must be manipulated through a customer or account.
+        # External accounts must be manipulated through an account.
 
         api_key = api_key or self.default_api_key
         # Prefer passed in stripe_account if set.
         if not stripe_account:
             stripe_account = self._get_stripe_account_id(api_key)
-
-        if self.customer:
-            return stripe.Customer.delete_source(
-                self.customer.id,
-                self.id,
-                api_key=api_key,
-                stripe_account=stripe_account,
-                **kwargs,
-            )
 
         if self.account:
             return stripe.Account.delete_external_account(
@@ -369,20 +236,19 @@ class LegacySourceMixin:
             )
 
         raise ImpossibleAPIRequest(
-            f"Can't delete {self.__class__} without a customer or account object. This"
-            " may happen if not all accounts or customer objects are in the db. Please"
-            ' run "python manage.py djstripe_sync_models Account Customer" as a'
+            f"Can't delete {self.__class__} without an account object. This"
+            " may happen if not all accounts are in the db. Please"
+            ' run "python manage.py djstripe_sync_models Account" as a'
             " potential fix."
         )
 
 
-class BankAccount(LegacySourceMixin, StripeModel):
+class BankAccount(ExternalAccountMixin, StripeModel):
     """
-    These bank accounts are payment methods on Customer objects.
-    On the other hand External Accounts are transfer destinations on Account
-    objects for Custom accounts. They can be bank accounts or debit cards as well.
+    External Accounts are transfer destinations on Account objects for Custom
+    accounts. They can be bank accounts or debit cards.
 
-    Stripe documentation:https://stripe.com/docs/api/customer_bank_accounts
+    Stripe documentation: https://stripe.com/docs/api/external_account_bank_accounts
     """
 
     stripe_class = stripe.BankAccount
@@ -397,9 +263,6 @@ class BankAccount(LegacySourceMixin, StripeModel):
             "The external account the charge was made on behalf of. Null here indicates"
             " that this value was never set."
         ),
-    )
-    customer = StripeForeignKey(
-        "Customer", on_delete=models.SET_NULL, null=True, related_name="bank_account"
     )
     fingerprint = models.CharField(
         max_length=16,
@@ -447,29 +310,6 @@ class BankAccount(LegacySourceMixin, StripeModel):
         return self.stripe_data.get("status")
 
     def __str__(self):
-        default = False
-        # prefer to show it by customer format if present
-        if self.customer:
-            default_source = self.customer.default_source
-            default_payment_method = self.customer.default_payment_method
-            default_source_id = (
-                default_source.get("id")
-                if isinstance(default_source, dict)
-                else default_source
-            )
-
-            if (default_payment_method and self.id == default_payment_method.id) or (
-                default_source_id and self.id == default_source_id
-            ):
-                # current card is the default payment method or source
-                default = True
-
-            customer_template = (
-                f"{self.bank_name or ''} {self.routing_number or ''} ({self.human_readable_status})"
-                f" {'Default' if default else ''} {self.currency or ''}"
-            )
-            return customer_template
-
         default = getattr(self, "default_for_currency", False)
         account_template = f"{self.bank_name or ''} {self.currency or ''} {'Default' if default else ''} {self.routing_number or ''} {self.last4 or ''}"
         return account_template
@@ -481,30 +321,23 @@ class BankAccount(LegacySourceMixin, StripeModel):
         return enums.BankAccountStatus.humanize(self.status) if self.status else ""
 
     def api_retrieve(self, **kwargs):
-        if not self.customer and not self.account:
+        if not self.account:
             raise ImpossibleAPIRequest(
-                "Can't retrieve a bank account without a customer or account object."
-                " This may happen if not all accounts or customer objects are in the"
-                ' db. Please run "python manage.py djstripe_sync_models Account'
-                ' Customer" as a potential fix.'
+                "Can't retrieve a bank account without an account object."
+                " This may happen if not all accounts are in the"
+                ' db. Please run "python manage.py djstripe_sync_models Account"'
+                " as a potential fix."
             )
 
         return super().api_retrieve(**kwargs)
 
 
-class Card(LegacySourceMixin, StripeModel):
+class Card(ExternalAccountMixin, StripeModel):
     """
-    You can store multiple cards on a customer in order to charge the customer later.
+    Cards are external accounts (debit cards) on Stripe Custom Connected
+    Accounts, used as "Payout Sources".
 
-    This is a legacy model which only applies to the "v2" Stripe API (eg. Checkout.js).
-    You should strive to use the Stripe "v3" API (eg. Stripe Elements).
-    Also see: https://stripe.com/docs/stripe-js/elements/migrating
-    When using Elements, you will not be using Card objects. Instead, you will use
-    Source objects.
-    A Source object of type "card" is equivalent to a Card object. However, Card
-    objects cannot be converted into Source objects by Stripe at this time.
-
-    Stripe documentation: https://stripe.com/docs/api?lang=python#cards
+    Stripe documentation: https://stripe.com/docs/api/external_account_cards
     """
 
     stripe_class = stripe.Card
@@ -519,9 +352,6 @@ class Card(LegacySourceMixin, StripeModel):
             "The external account the charge was made on behalf of. Null here indicates"
             " that this value was never set."
         ),
-    )
-    customer = StripeForeignKey(
-        "Customer", on_delete=models.SET_NULL, null=True, related_name="legacy_cards"
     )
     fingerprint = models.CharField(
         default="",
@@ -607,30 +437,7 @@ class Card(LegacySourceMixin, StripeModel):
         return self.stripe_data.get("tokenization_method")
 
     def __str__(self):
-        default = False
-        # prefer to show it by customer format if present
-        if self.customer:
-            default_source = self.customer.default_source
-            default_payment_method = self.customer.default_payment_method
-            default_source_id = (
-                default_source.get("id")
-                if isinstance(default_source, dict)
-                else default_source
-            )
-
-            if (default_payment_method and self.id == default_payment_method.id) or (
-                default_source_id and self.id == default_source_id
-            ):
-                # current card is the default payment method or source
-                default = True
-
-            customer_template = (
-                f"{enums.CardBrand.humanize(self.brand) if self.brand else ''} {self.last4 or ''} {'Default' if default else ''} Expires"
-                f" {self.exp_month or ''} {self.exp_year or ''}"
-            )
-            return customer_template
-
-        elif self.account:
+        if self.account:
             default = getattr(self, "default_for_currency", False)
             account_template = f"{enums.CardBrand.humanize(self.brand) if self.brand else ''} {self.account.default_currency} {'Default' if default else ''} {self.last4 or ''}"
             return account_template

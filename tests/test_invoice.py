@@ -10,13 +10,12 @@ from django.contrib.auth import get_user_model
 from django.test.testcases import TestCase
 from stripe import InvalidRequestError
 
-from djstripe.models import Invoice, Plan, Subscription, UpcomingInvoice
+from djstripe.models import Invoice, Subscription, UpcomingInvoice
 
 from . import (
     FAKE_CARD_AS_PAYMENT_METHOD,
     FAKE_CUSTOMER,
     FAKE_INVOICE,
-    FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE,
     FAKE_LINE_ITEM_SUBSCRIPTION,
     FAKE_PLAN,
     FAKE_PLATFORM_ACCOUNT,
@@ -259,54 +258,6 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         # Subscription.retrieve is called at least twice — once for the
         # invoice and once when materializing the line items.
         assert mocks["Subscription"].call_count >= 2
-        mocks["Plan"].assert_not_called()
-
-    def test_upcoming_invoice_with_subscription_plan(self):
-        fake_upcoming_invoice_data = deepcopy(FAKE_UPCOMING_INVOICE)
-        fake_upcoming_invoice_data["subscription"] = (
-            FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
-        )
-
-        fake_invoice_data = deepcopy(FAKE_INVOICE)
-        fake_invoice_data["subscription"] = FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE[
-            "id"
-        ]
-        fake_invoice_data["lines"]["data"][0]["subscription"] = (
-            FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
-        )
-        fake_invoice_data["lines"]["data"][0]["discounts"][0]["subscription"] = (
-            FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
-        )
-
-        fake_subscription_item_data = deepcopy(FAKE_SUBSCRIPTION_ITEM)
-        fake_subscription_item_data["plan"] = deepcopy(FAKE_PLAN)
-
-        fake_subscription_data = deepcopy(FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE)
-        fake_subscription_data["plan"] = deepcopy(FAKE_PLAN)
-
-        with (
-            patch(
-                "stripe.Invoice.create_preview",
-                return_value=fake_upcoming_invoice_data,
-                autospec=True,
-            ),
-            mock_stripe_world(
-                Invoice=fake_invoice_data,
-                SubscriptionItem=fake_subscription_item_data,
-                Subscription=fake_subscription_data,
-            ) as mocks,
-        ):
-            invoice = Invoice.upcoming(subscription_plan=Plan(id=FAKE_PLAN["id"]))
-
-        self.assertIsNotNone(invoice)
-        self.assertIsNone(invoice.id)
-        self.assertIsNone(invoice.save())
-
-        mocks["Subscription"].assert_called_once()
-        assert (
-            mocks["Subscription"].call_args.kwargs["id"]
-            == FAKE_INVOICE_METERED_SUBSCRIPTION_USAGE["id"]
-        )
         mocks["Plan"].assert_not_called()
 
     @patch(

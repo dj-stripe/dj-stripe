@@ -965,7 +965,7 @@ class SubscriptionDict(StripeItem):
         if type(value) is datetime.datetime:
             value = datetime_to_unix(value)
 
-        # Special case for price and plan
+        # Special case for price
         if name == "price":
             for price in (
                 FAKE_PRICE,
@@ -975,10 +975,6 @@ class SubscriptionDict(StripeItem):
             ):
                 if value == price["id"]:
                     value = price
-        elif name == "plan":
-            for plan in (FAKE_PLAN, FAKE_PLAN_II, FAKE_TIER_PLAN, FAKE_PLAN_METERED):
-                if value == plan["id"]:
-                    value = plan
 
         self[name] = value
 

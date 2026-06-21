@@ -10,10 +10,10 @@ from django.test.client import RequestFactory
 from django.test.testcases import TestCase
 
 from djstripe.mixins import PaymentsContextMixin, SubscriptionMixin
-from djstripe.models import Plan
+from djstripe.models import Price
 from djstripe.settings import djstripe_settings
 
-from . import FAKE_CUSTOMER, FAKE_PLAN, FAKE_PLAN_II, FAKE_PRODUCT
+from . import FAKE_CUSTOMER, FAKE_PRICE, FAKE_PRICE_II, FAKE_PRODUCT
 from .conftest import CreateAccountMixin
 
 
@@ -36,9 +36,9 @@ class TestPaymentsContextMixin(TestCase):
             "Incorrect STRIPE_PUBLIC_KEY.",
         )
 
-        self.assertIn("plans", context, "pans missing from context.")
+        self.assertIn("prices", context, "prices missing from context.")
         self.assertEqual(
-            list(Plan.objects.all()), list(context["plans"]), "Incorrect plans."
+            list(Price.objects.all()), list(context["prices"]), "Incorrect prices."
         )
 
 
@@ -49,8 +49,8 @@ class TestSubscriptionMixin(CreateAccountMixin, TestCase):
             return_value=deepcopy(FAKE_PRODUCT),
             autospec=True,
         ):
-            Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-            Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
+            Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
+            Price.sync_from_stripe_data(deepcopy(FAKE_PRICE_II))
 
     @patch(
         "stripe.Customer.create", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
@@ -72,8 +72,8 @@ class TestSubscriptionMixin(CreateAccountMixin, TestCase):
 
         context = test_view.get_context_data()
         self.assertIn(
-            "is_plans_plural", context, "is_plans_plural missing from context."
+            "is_prices_plural", context, "is_prices_plural missing from context."
         )
-        self.assertTrue(context["is_plans_plural"], "Incorrect is_plans_plural.")
+        self.assertTrue(context["is_prices_plural"], "Incorrect is_prices_plural.")
 
         self.assertIn("customer", context, "customer missing from context.")

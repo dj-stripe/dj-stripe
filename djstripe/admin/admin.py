@@ -471,36 +471,20 @@ class PaymentMethodAdmin(StripeModelAdmin):
 
 @admin.register(models.Card)
 class CardAdmin(StripeModelAdmin):
-    list_display = ("customer", "account")
-    search_fields = ("customer__id", "account__id")
+    list_display = ("account",)
+    search_fields = ("account__id",)
 
     def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related(
-                "customer",
-                "customer__default_payment_method",
-                "account",
-            )
-        )
+        return super().get_queryset(request).select_related("account")
 
 
 @admin.register(models.BankAccount)
 class BankAccountAdmin(StripeModelAdmin):
-    list_display = ("customer", "account")
-    search_fields = ("customer__id", "account__id")
+    list_display = ("account",)
+    search_fields = ("account__id",)
 
     def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related(
-                "customer",
-                "customer__default_payment_method",
-                "account",
-            )
-        )
+        return super().get_queryset(request).select_related("account")
 
 
 @admin.register(models.ShippingRate)

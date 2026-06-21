@@ -1270,7 +1270,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={"get_latest_by": "created", "abstract": False},
-            bases=(djstripe.models.payment_methods.LegacySourceMixin, models.Model),
+            bases=(djstripe.models.payment_methods.ExternalAccountMixin, models.Model),
         ),
         migrations.CreateModel(
             name="BankAccount",
@@ -1394,7 +1394,7 @@ class Migration(migrations.Migration):
                 ),
             ],
             options={"get_latest_by": "created", "abstract": False},
-            bases=(djstripe.models.payment_methods.LegacySourceMixin, models.Model),
+            bases=(djstripe.models.payment_methods.ExternalAccountMixin, models.Model),
         ),
         migrations.CreateModel(
             name="Dispute",

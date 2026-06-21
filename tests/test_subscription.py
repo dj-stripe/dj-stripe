@@ -15,7 +15,7 @@ from django.utils import timezone
 from stripe import InvalidRequestError
 
 from djstripe.enums import SubscriptionStatus
-from djstripe.models import LineItem, Plan, Product, Subscription, SubscriptionItem
+from djstripe.models import LineItem, Product, Subscription, SubscriptionItem
 from djstripe.models.billing import Invoice
 
 from . import (
@@ -444,54 +444,6 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         assert subscription
 
         self.assertEqual(1, subscription.quantity)
-
-    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    @patch(
-        "stripe.Subscription.modify",
-        autospec=True,
-    )
-    @patch(
-        "stripe.Subscription.retrieve",
-        return_value=deepcopy(FAKE_SUBSCRIPTION),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    def test_update_with_plan_model(
-        self,
-        customer_retrieve_mock,
-        subscription_retrieve_mock,
-        subscription_modify_mock,
-        product_retrieve_mock,
-        plan_retrieve_mock,
-    ):
-        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
-        subscription = Subscription.sync_from_stripe_data(subscription_fake)
-        new_plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN_II))
-
-        self.assertEqual(FAKE_PLAN["id"], subscription.plan["id"])
-
-        # Update the Subscription's plan
-        subscription_updated = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_updated["plan"] = deepcopy(FAKE_PLAN_II)
-        subscription_modify_mock.return_value = subscription_updated
-
-        new_subscription = subscription.update(plan=new_plan)
-
-        self.assertEqual(FAKE_PLAN_II["id"], new_subscription.plan["id"])
-
-        self.assert_fks(subscription)
-
-        self.assert_fks(
-            new_plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
 
     @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
     @patch(
@@ -985,7 +937,7 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         # Note that subscription.quantity is 1,
         # but item.quantity isn't set on metered plans
         self.assertIsNone(item.quantity)
-        self.assertEqual(item.plan.id, FAKE_PLAN_METERED["id"])
+        self.assertEqual(item.stripe_data["plan"]["id"], FAKE_PLAN_METERED["id"])
 
         self.assert_fks(
             subscription,
@@ -1112,15 +1064,13 @@ class StaleSubscriptionItemRegressionTest(CreateAccountMixin, TestCase):
         return {"id": "sub_test_2025", "items": empty_items}
 
     def test_subscription_items_preserved_after_upstream_removal(self):
-        # Build minimal rows directly. Plan/Subscription expose most fields
+        # Build minimal rows directly. Subscription exposes most fields
         # as read-only @properties over stripe_data; only the FK columns
         # are concrete model fields.
         from djstripe.models import Customer
 
         customer = Customer(id="cus_test_2025")
         customer.save()
-        plan = Plan(id="plan_test_2025", stripe_data={"product": "prod_x"})
-        plan.save()
         subscription = Subscription(
             id="sub_test_2025",
             customer=customer,
@@ -1130,7 +1080,6 @@ class StaleSubscriptionItemRegressionTest(CreateAccountMixin, TestCase):
         item = SubscriptionItem(
             id="si_stale_2025",
             subscription=subscription,
-            plan=plan,
             stripe_data={"id": "si_stale_2025"},
         )
         item.save()

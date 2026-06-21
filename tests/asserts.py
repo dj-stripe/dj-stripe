@@ -34,8 +34,7 @@ COMMON_BLANK_FKS = frozenset(
         # Invoice: default payment options + nested refs
         "djstripe.Invoice.default_payment_method",
         "djstripe.Invoice.default_source",
-        # InvoiceItem: pre-Price era invoice items have neither plan nor price
-        "djstripe.InvoiceItem.plan",
+        # InvoiceItem: pre-Price era invoice items may have no price
         "djstripe.InvoiceItem.price",
         # PaymentIntent: optional / Connect-only
         "djstripe.PaymentIntent.on_behalf_of",

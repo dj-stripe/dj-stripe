@@ -933,26 +933,6 @@ class TestCustomerEvents(CreateAccountMixin, EventTestCase):
         customer = Customer.objects.get(id=FAKE_CUSTOMER["id"])
         self.assertIsNotNone(customer.date_purged)
 
-    @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
-    @patch("stripe.Event.retrieve", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve_source",
-        return_value=deepcopy(FAKE_CARD),
-        autospec=True,
-    )
-    def test_customer_card_created(
-        self, customer_retrieve_source_mock, event_retrieve_mock, customer_retrieve_mock
-    ):
-        fake_stripe_event = deepcopy(FAKE_EVENT_CUSTOMER_SOURCE_CREATED)
-        event_retrieve_mock.return_value = fake_stripe_event
-
-        event = Event.sync_from_stripe_data(fake_stripe_event)
-        event.invoke_webhook_handlers()
-
-        card = Card.objects.get(id=fake_stripe_event["data"]["object"]["id"])
-        self.assertEqual(card.brand, fake_stripe_event["data"]["object"]["brand"])
-        self.assertEqual(card.last4, fake_stripe_event["data"]["object"]["last4"])
-
     @patch("stripe.Event.retrieve", autospec=True)
     @patch("stripe.Customer.retrieve", return_value=FAKE_CUSTOMER, autospec=True)
     def test_customer_unknown_source_created(

@@ -2,19 +2,17 @@
 dj-stripe Bank Account Model Tests.
 """
 
-import uuid
 from copy import deepcopy
 from unittest.mock import patch
 
 import pytest
 import stripe
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from djstripe import enums
 from djstripe.exceptions import StripeObjectManipulationException
-from djstripe.models import BankAccount, Customer
+from djstripe.models import BankAccount
 
 from . import (
     FAKE_BANK_ACCOUNT_IV,
@@ -31,30 +29,20 @@ pytestmark = pytest.mark.django_db
 
 class TestStrBankAccount:
     @pytest.mark.parametrize(
-        "fake_stripe_data, has_account, has_customer",
+        "fake_stripe_data, has_account",
         [
-            (deepcopy(FAKE_BANK_ACCOUNT_IV), True, False),
-            (deepcopy(FAKE_BANK_ACCOUNT_SOURCE), False, True),
-            (deepcopy(FAKE_BANK_ACCOUNT_IV), False, False),
+            (deepcopy(FAKE_BANK_ACCOUNT_IV), True),
+            (deepcopy(FAKE_BANK_ACCOUNT_IV), False),
         ],
     )
-    def test__str__(self, fake_stripe_data, has_account, has_customer, monkeypatch):
-        def mock_customer_get(*args, **kwargs):
-            data = deepcopy(FAKE_CUSTOMER_IV)
-            data["default_source"] = None
-            data["sources"] = []
-            return data
-
+    def test__str__(self, fake_stripe_data, has_account, monkeypatch):
         def mock_account_get(*args, **kwargs):
             return deepcopy(FAKE_CUSTOM_ACCOUNT)
 
-        # monkeypatch stripe.Account.retrieve and stripe.Customer.retrieve calls to return
-        # the desired json response.
+        # monkeypatch stripe.Account.retrieve to return the desired json response.
         monkeypatch.setattr(stripe.Account, "retrieve", mock_account_get)
-        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
 
         bankaccount = BankAccount.sync_from_stripe_data(fake_stripe_data)
-        default = False
 
         if has_account:
             default = fake_stripe_data["default_for_currency"]
@@ -62,29 +50,10 @@ class TestStrBankAccount:
                 f"{fake_stripe_data['bank_name']} {fake_stripe_data['currency']} {'Default' if default else ''} {fake_stripe_data['routing_number']} {fake_stripe_data['last4']}"
                 == str(bankaccount)
             )
-        if has_customer:
-            customer = Customer.objects.filter(id=fake_stripe_data["customer"]).first()
-
-            default_source = customer.default_source
-            default_payment_method = customer.default_payment_method
-
-            if (
-                default_payment_method
-                and fake_stripe_data["id"] == default_payment_method.id
-            ) or (default_source and fake_stripe_data["id"] == default_source.id):
-                # current bankaccount is the default payment method or source
-                default = True
-
-            assert (
-                f"{fake_stripe_data['bank_name']} {fake_stripe_data['routing_number']} ({bankaccount.human_readable_status})"
-                f" {'Default' if default else ''} {fake_stripe_data['currency']}"
-                == str(bankaccount)
-            )
-        if not has_account and not has_customer:
-            # ensure account and customer do not exist
+        else:
+            # ensure account does not exist
             fake_stripe_data_2 = deepcopy(fake_stripe_data)
             fake_stripe_data_2["account"] = None
-            fake_stripe_data_2["customer"] = None
 
             bankaccount = BankAccount.sync_from_stripe_data(fake_stripe_data_2)
             default = fake_stripe_data_2["default_for_currency"]
@@ -101,19 +70,11 @@ class TestStrBankAccount:
         ],
     )
     def test_human_readable_status(self, fake_stripe_data, monkeypatch):
-        def mock_customer_get(*args, **kwargs):
-            data = deepcopy(FAKE_CUSTOMER_IV)
-            data["default_source"] = None
-            data["sources"] = []
-            return data
-
         def mock_account_get(*args, **kwargs):
             return deepcopy(FAKE_CUSTOM_ACCOUNT)
 
-        # monkeypatch stripe.Account.retrieve and stripe.Customer.retrieve calls to return
-        # the desired json response.
+        # monkeypatch stripe.Account.retrieve to return the desired json response.
         monkeypatch.setattr(stripe.Account, "retrieve", mock_account_get)
-        monkeypatch.setattr(stripe.Customer, "retrieve", mock_customer_get)
 
         bankaccount = BankAccount.sync_from_stripe_data(fake_stripe_data)
 
@@ -143,88 +104,9 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.customer = fake_empty_customer.create_for_user(user)
 
-    def test_attach_objects_hook_without_customer(self):
-        FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_SOURCE)
-        FAKE_BANK_ACCOUNT_DICT["customer"] = None
-
-        bank_account = BankAccount.sync_from_stripe_data(FAKE_BANK_ACCOUNT_DICT)
-        self.assertEqual(bank_account.customer, None)
-
     def test_attach_objects_hook_without_account(self):
         bank_account = BankAccount.sync_from_stripe_data(FAKE_BANK_ACCOUNT_SOURCE)
         self.assertEqual(bank_account.account, None)
-
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_IV),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Account.retrieve_external_account",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_IV),
-        autospec=True,
-    )
-    def test_api_retrieve_by_customer_equals_retrieval_by_account(
-        self, account_retrieve_external_account_mock, customer_retrieve_mock
-    ):
-        # deepcopy the BankAccount object
-        FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_IV)
-
-        bankaccount_by_customer = BankAccount.sync_from_stripe_data(
-            FAKE_BANK_ACCOUNT_DICT
-        ).api_retrieve()
-
-        # Add account
-        FAKE_BANK_ACCOUNT_DICT["account"] = FAKE_CUSTOM_ACCOUNT["id"]
-        FAKE_BANK_ACCOUNT_DICT["customer"] = None
-
-        bankaccount_by_account = BankAccount.sync_from_stripe_data(
-            FAKE_BANK_ACCOUNT_DICT
-        ).api_retrieve()
-
-        # assert the same bankaccount object gets retrieved
-        self.assertCountEqual(bankaccount_by_customer, bankaccount_by_account)
-
-    def test_create_bank_account_finds_customer_with_account_absent(self):
-        bank_account = BankAccount.sync_from_stripe_data(FAKE_BANK_ACCOUNT_SOURCE)
-
-        self.assertEqual(self.customer, bank_account.customer)
-        self.assertEqual(
-            bank_account.get_stripe_dashboard_url(),
-            self.customer.get_stripe_dashboard_url(),
-        )
-
-        self.assert_fks(
-            bank_account,
-            expected_blank_fks={
-                "djstripe.BankAccount.account",
-                "djstripe.Customer.default_payment_method",
-                "djstripe.Customer.default_source",
-                "djstripe.Customer.coupon",
-            },
-        )
-
-    def test_create_bank_account_finds_customer_with_account_present(self):
-        FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_SOURCE)
-        FAKE_BANK_ACCOUNT_DICT["account"] = self.standard_account.id
-
-        bank_account = BankAccount.sync_from_stripe_data(FAKE_BANK_ACCOUNT_DICT)
-
-        self.assertEqual(self.customer, bank_account.customer)
-        self.assertEqual(self.standard_account, bank_account.account)
-        self.assertEqual(
-            bank_account.get_stripe_dashboard_url(),
-            self.customer.get_stripe_dashboard_url(),
-        )
-
-        self.assert_fks(
-            bank_account,
-            expected_blank_fks={
-                "djstripe.Customer.default_payment_method",
-                "djstripe.Customer.default_source",
-                "djstripe.Customer.coupon",
-            },
-        )
 
     def test_create_bank_account_finds_account_with_customer_absent(self):
         FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_SOURCE)
@@ -242,18 +124,16 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assert_fks(
             bank_account,
             expected_blank_fks={
-                "djstripe.BankAccount.customer",
                 "djstripe.Customer.default_payment_method",
                 "djstripe.Customer.default_source",
                 "djstripe.Customer.coupon",
             },
         )
 
-    def test_api_call_no_customer_and_no_account(self):
+    def test_api_call_no_account(self):
         exception_message = (
-            "BankAccount objects must be manipulated through either a Stripe Connected"
-            " Account or a customer. Pass a Customer or an Account object into this"
-            " call."
+            "BankAccount objects must be manipulated through a Stripe Connected"
+            " Account. Pass an Account object into this call."
         )
 
         with self.assertRaisesMessage(
@@ -265,22 +145,6 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             StripeObjectManipulationException, exception_message
         ):
             BankAccount.api_list()
-
-    def test_api_call_bad_customer(self):
-        exception_message = (
-            "BankAccount objects must be manipulated through a Customer. "
-            "Pass a Customer object into this call."
-        )
-
-        with self.assertRaisesMessage(
-            StripeObjectManipulationException, exception_message
-        ):
-            BankAccount._api_create(customer="fish")
-
-        with self.assertRaisesMessage(
-            StripeObjectManipulationException, exception_message
-        ):
-            BankAccount.api_list(customer="fish")
 
     def test_api_call_bad_account(self):
         exception_message = (
@@ -299,111 +163,16 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             BankAccount.api_list(account="fish")
 
     @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_IV),
-        autospec=True,
-    )
-    def test__api_create_with_account_absent(self, customer_retrieve_mock):
-        stripe_bank_account = BankAccount._api_create(
-            customer=self.customer, source=FAKE_BANK_ACCOUNT_SOURCE["id"]
-        )
-
-        self.assertEqual(FAKE_BANK_ACCOUNT_SOURCE, stripe_bank_account)
-
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_IV),
-        autospec=True,
-    )
-    @patch(
         "stripe.Account.retrieve",
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
         autospec=True,
     )
-    def test__api_create_with_customer_and_account(
-        self, account_retrieve_mock, customer_retrieve_mock
-    ):
-        FAKE_BANK_ACCOUNT_DICT = deepcopy(FAKE_BANK_ACCOUNT_SOURCE)
-        FAKE_BANK_ACCOUNT_DICT["account"] = FAKE_CUSTOM_ACCOUNT["id"]
-
-        stripe_bank_account = BankAccount._api_create(
-            account=self.custom_account,
-            customer=self.customer,
-            source=FAKE_BANK_ACCOUNT_DICT["id"],
-        )
-
-        self.assertEqual(FAKE_BANK_ACCOUNT_SOURCE, stripe_bank_account)
-
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_IV),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Account.retrieve",
-        return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
-        autospec=True,
-    )
-    def test__api_create_with_customer_absent(
-        self, account_retrieve_mock, customer_retrieve_mock
-    ):
+    def test__api_create_with_customer_absent(self, account_retrieve_mock):
         stripe_bank_account = BankAccount._api_create(
             account=self.custom_account, source=FAKE_BANK_ACCOUNT_IV["id"]
         )
 
         self.assertEqual(FAKE_BANK_ACCOUNT_IV, stripe_bank_account)
-
-    @patch(
-        "stripe.Customer.delete_source",
-        autospec=True,
-    )
-    @patch(
-        "stripe.BankAccount.retrieve",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_SOURCE),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_IV),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve_source",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_SOURCE),
-        autospec=True,
-    )
-    def test_remove_bankaccount_by_customer(
-        self,
-        customer_retrieve_source_mock,
-        customer_retrieve_mock,
-        bank_account_retrieve_mock,
-        bank_account_delete_mock,
-    ):
-        stripe_bank_account = BankAccount._api_create(
-            customer=self.customer, source=FAKE_BANK_ACCOUNT_SOURCE["id"]
-        )
-        BankAccount.sync_from_stripe_data(stripe_bank_account)
-
-        self.assertEqual(
-            1, BankAccount.objects.filter(id=stripe_bank_account["id"]).count()
-        )
-
-        bank_account = self.customer.bank_account.all()[0]
-        bank_account.remove()
-
-        self.assertEqual(
-            0, BankAccount.objects.filter(id=stripe_bank_account["id"]).count()
-        )
-
-        api_key = bank_account.default_api_key
-        stripe_account = bank_account._get_stripe_account_id(api_key)
-
-        bank_account_delete_mock.assert_called_once_with(
-            self.customer.id,
-            bank_account.id,
-            api_key=api_key,
-            stripe_account=stripe_account,
-        )
 
     @patch(
         "stripe.Account.delete_external_account",
@@ -414,7 +183,7 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         return_value=deepcopy(FAKE_CUSTOM_ACCOUNT),
         autospec=True,
     )
-    def test_remove_bankaccount_by_account(
+    def test_delete_bankaccount_by_account(
         self,
         account_retrieve_mock,
         bank_account_delete_mock,
@@ -430,11 +199,10 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         api_key = bank_account.default_api_key
         stripe_account = bank_account._get_stripe_account_id(api_key)
 
-        assert bank_account.customer is None
         assert bank_account.account is not None
 
-        # remove BankAccount
-        bank_account.remove()
+        # delete BankAccount via the Stripe API
+        bank_account._api_delete()
 
         bank_account_delete_mock.assert_called_once_with(
             self.custom_account.id,
@@ -442,79 +210,3 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             api_key=api_key,
             stripe_account=stripe_account,
         )
-
-        self.assertEqual(
-            0, BankAccount.objects.filter(id=stripe_bank_account["id"]).count()
-        )
-
-    @patch(
-        "stripe.Customer.delete_source",
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve",
-        return_value=deepcopy(FAKE_CUSTOMER_IV),
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve_source",
-        return_value=deepcopy(FAKE_BANK_ACCOUNT_SOURCE),
-        autospec=True,
-    )
-    def test_remove_already_deleted_bank_account(
-        self,
-        customer_retrieve_source_mock,
-        customer_retrieve_mock,
-        bank_account_delete_mock,
-    ):
-        stripe_bank_account = BankAccount._api_create(
-            customer=self.customer, source=FAKE_BANK_ACCOUNT_SOURCE["id"]
-        )
-        BankAccount.sync_from_stripe_data(stripe_bank_account)
-
-        self.assertEqual(self.customer.bank_account.count(), 1)
-        bank_account_object = self.customer.bank_account.first()
-        BankAccount.objects.filter(id=stripe_bank_account["id"]).delete()
-        self.assertEqual(self.customer.bank_account.count(), 0)
-        bank_account_object.remove()
-        self.assertEqual(self.customer.bank_account.count(), 0)
-
-    @pytest.mark.stripe_api
-    @pytest.mark.usefixtures("configure_settings")
-    def test_api_list(self):
-        stripe_customer = stripe.Customer.create(
-            api_key=settings.STRIPE_SECRET_KEY,
-            email=f"bank-account-api-list-{uuid.uuid4().hex}@example.com",
-            metadata={"djstripe_test": "bank_account_api_list"},
-        )
-        try:
-            customer = Customer.sync_from_stripe_data(
-                stripe_customer, api_key=settings.STRIPE_SECRET_KEY
-            )
-            stripe_bank_account = BankAccount._api_create(
-                customer=customer,
-                source="btok_us_verified",
-                api_key=settings.STRIPE_SECRET_KEY,
-            )
-            stripe_bank_account_id = (
-                stripe_bank_account["id"]
-                if isinstance(stripe_bank_account, dict)
-                else stripe_bank_account.id
-            )
-
-            bank_account_list = list(
-                BankAccount.api_list(
-                    customer=customer, api_key=settings.STRIPE_SECRET_KEY, limit=100
-                )
-            )
-
-            self.assertTrue(
-                any(
-                    bank_account.id == stripe_bank_account_id
-                    for bank_account in bank_account_list
-                )
-            )
-        finally:
-            stripe.Customer.delete(
-                stripe_customer.id, api_key=settings.STRIPE_SECRET_KEY
-            )

@@ -10,13 +10,13 @@ from unittest.mock import patch
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 
-from djstripe.models import Charge, Customer, Plan, Subscription, Transfer
+from djstripe.models import Charge, Customer, Price, Subscription, Transfer
 from djstripe.utils import get_timezone_utc
 
 from . import (
-    FAKE_PLAN,
-    FAKE_PLAN_II,
     FAKE_PLATFORM_ACCOUNT,
+    FAKE_PRICE,
+    FAKE_PRICE_II,
     FAKE_PRODUCT,
     FAKE_TRANSFER,
 )
@@ -58,8 +58,8 @@ class SubscriptionManagerTest(CreateAccountMixin, TestCase):
             return_value=deepcopy(FAKE_PRODUCT),
             autospec=True,
         ):
-            self.plan = Plan.sync_from_stripe_data(FAKE_PLAN)
-            self.plan2 = Plan.sync_from_stripe_data(FAKE_PLAN_II)
+            self.plan = Price.sync_from_stripe_data(FAKE_PRICE)
+            self.plan2 = Price.sync_from_stripe_data(FAKE_PRICE_II)
 
         # 10 active subscriptions on plan, started in Jan 2013
         for i in range(10):

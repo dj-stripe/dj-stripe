@@ -102,10 +102,6 @@ class Command(BaseCommand):
             ],
             djstripe.models.PaymentIntent: ["id"],
             djstripe.models.PaymentMethod: ["id"],
-            djstripe.models.Plan: [
-                # Can only specify one of amount and amount_decimal
-                "amount_decimal"
-            ],
             djstripe.models.Source: [
                 "id",
                 "amount",
@@ -195,7 +191,6 @@ class Command(BaseCommand):
                 tests.FAKE_CARD_III,
             ],
             djstripe.models.Source: [tests.FAKE_SOURCE],
-            djstripe.models.Plan: [tests.FAKE_PLAN, tests.FAKE_PLAN_II],
             djstripe.models.Price: [tests.FAKE_PRICE, tests.FAKE_PRICE_II],
             djstripe.models.Product: [tests.FAKE_PRODUCT],
             djstripe.models.TaxRate: [

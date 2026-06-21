@@ -82,9 +82,6 @@ class SubscriptionItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.assertEqual(subscription_item.id, FAKE_SUBSCRIPTION_ITEM_METERED["id"])
         self.assertEqual(
-            subscription_item.plan.id, FAKE_SUBSCRIPTION_ITEM_METERED["plan"]["id"]
-        )
-        self.assertEqual(
             subscription_item.price.id, FAKE_SUBSCRIPTION_ITEM_METERED["price"]["id"]
         )
         self.assertEqual(
@@ -134,9 +131,6 @@ class SubscriptionItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
         self.assertEqual(subscription_item.id, FAKE_SUBSCRIPTION_ITEM_TAX_RATES["id"])
-        self.assertEqual(
-            subscription_item.plan.id, FAKE_SUBSCRIPTION_ITEM_TAX_RATES["plan"]["id"]
-        )
         self.assertEqual(
             subscription_item.price.id, FAKE_SUBSCRIPTION_ITEM_TAX_RATES["price"]["id"]
         )
@@ -210,9 +204,6 @@ class SubscriptionItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         )
 
         self.assertEqual(subscription_item.id, FAKE_SUBSCRIPTION_ITEM_MULTI_PLAN["id"])
-        self.assertEqual(
-            subscription_item.plan.id, FAKE_SUBSCRIPTION_ITEM_MULTI_PLAN["plan"]["id"]
-        )
         self.assertEqual(
             subscription_item.price.id, FAKE_SUBSCRIPTION_ITEM_MULTI_PLAN["price"]["id"]
         )

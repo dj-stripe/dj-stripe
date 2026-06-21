@@ -20,7 +20,6 @@ from djstripe.models import (
     DjstripePaymentMethod,
     Invoice,
     PaymentMethod,
-    Plan,
     Price,
     Product,
     Subscription,
@@ -37,7 +36,6 @@ from . import (
     FAKE_COUPON,
     FAKE_CUSTOMER,
     FAKE_CUSTOMER_II,
-    FAKE_CUSTOMER_IV,
     FAKE_DISCOUNT_CUSTOMER,
     FAKE_INVOICE,
     FAKE_INVOICE_III,
@@ -289,33 +287,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             customer.default_source["id"], fake_customer["default_source"]["id"]
         )
 
-    @patch(
-        "stripe.BankAccount.retrieve",
-        return_value=FAKE_CUSTOMER_IV["default_source"],
-        autospec=True,
-    )
-    def test_customer_sync_bank_account_source(self, bank_account_retrieve_mock):
-        fake_customer = deepcopy(FAKE_CUSTOMER_IV)
-        user = get_user_model().objects.create_user(
-            username="test_user_sync_bank_account_source"
-        )
-        customer = fake_customer.create_for_user(user)
-
-        self.assertEqual(customer.deleted, False)
-        self.assertEqual(customer.sources.count(), 0)
-        self.assertEqual(customer.bank_account.count(), 1)
-        self.assertEqual(
-            customer.default_source["id"], fake_customer["default_source"]["id"]
-        )
-
-        self.assert_fks(
-            customer,
-            expected_blank_fks={
-                "djstripe.Customer.coupon",
-                "djstripe.Customer.default_payment_method",
-            },
-        )
-
     @patch("stripe.Customer.create", autospec=True)
     def test_customer_sync_no_sources(self, customer_mock):
         fake_customer = deepcopy(FAKE_CUSTOMER)
@@ -359,7 +330,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         actual = customer.default_source
         actual_id = actual["id"] if isinstance(actual, dict) else actual
         self.assertEqual(actual_id, expected_id)
-        self.assertEqual(len(list(customer.customer_payment_methods)), 2)
+        # Legacy card/bank_account entries in a customer's `sources` list are no
+        # longer synced (dropped in dj-stripe 2.11), so no payment methods remain.
+        self.assertEqual(len(list(customer.customer_payment_methods)), 0)
 
         self.assert_fks(
             customer,
@@ -1352,69 +1325,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(kwargs["customer"], self.customer.id)
         self.assertGreaterEqual(len(kwargs["items"]), 1)
 
-    @patch.object(Subscription, "_api_create", autospec=True)
-    @patch("stripe.Subscription.create", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_subscription_shortcut_with_multiple_subscriptions_new_style_by_price_and_plan(
-        self,
-        product_retrieve_mock,
-        customer_retrieve_mock,
-        subscription_create_mock,
-        subscription_api_create_mock,
-    ):
-        price = Price.sync_from_stripe_data(deepcopy(FAKE_PRICE))
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        self.assert_fks(
-            price,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-
-        subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
-        # latest_invoice has to be None for an invoice that doesn't exist yet
-        # and hence cannot have been billed yet
-        subscription_fake_duplicate["latest_invoice"] = None
-
-        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        # latest_invoice has to be None for an invoice that doesn't exist yet
-        # and hence cannot have been billed yet
-        fake_subscription["latest_invoice"] = None
-
-        subscription_create_mock.side_effect = [
-            fake_subscription,
-            subscription_fake_duplicate,
-        ]
-
-        subscription_api_create_mock.side_effect = [
-            fake_subscription,
-            subscription_fake_duplicate,
-        ]
-
-        self.customer.subscribe(items=[{"price": price}, {"plan": plan}])
-
-        self.assertEqual(1, self.customer.subscriptions.count())
-        self.assertEqual(1, len(self.customer.valid_subscriptions))
-
-        # subscribe() forwards items but may collapse ones referring to the
-        # same price/plan, so just verify the shortcut routed to our customer.
-        subscription_api_create_mock.assert_called_once()
-        kwargs = subscription_api_create_mock.call_args.kwargs
-        self.assertEqual(kwargs["customer"], self.customer.id)
-        self.assertGreaterEqual(len(kwargs["items"]), 1)
-
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
@@ -1751,7 +1661,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         assert self.customer.is_subscribed_to(product.id)
 
 
-# These tests use Plan which is deprecated in favor of Price
 class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     def setUp(self):
         # create a Stripe Platform Account
@@ -1769,196 +1678,6 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
 
         self.customer.stripe_data["default_source"] = self.payment_method.id
         self.customer.save()
-
-    @patch(
-        "stripe.Subscription.create",
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_subscribe_plan_string_new_style(
-        self,
-        product_retrieve_mock,
-        customer_retrieve_mock,
-        subscription_create_mock,
-    ):
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-
-        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        # latest_invoice has to be None for an invoice that doesn't exist yet
-        # and hence cannot have been billed yet
-        fake_subscription["latest_invoice"] = None
-        subscription_create_mock.return_value = fake_subscription
-
-        current_subscriptions = self.customer.subscriptions.count()
-        self.customer.subscribe(items=[{"plan": plan.id}])
-
-        updated_subscriptions = self.customer.subscriptions.count()
-
-        # assert 1 new subscription got created
-        assert updated_subscriptions == current_subscriptions + 1
-
-    @patch(
-        "stripe.Subscription.create",
-        autospec=True,
-    )
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_subscribe_plan_string_old_style(
-        self,
-        product_retrieve_mock,
-        customer_retrieve_mock,
-        subscription_create_mock,
-    ):
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-
-        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        # latest_invoice has to be None for an invoice that doesn't exist yet
-        # and hence cannot have been billed yet
-        fake_subscription["latest_invoice"] = None
-        subscription_create_mock.return_value = fake_subscription
-
-        current_subscriptions = self.customer.subscriptions.count()
-        self.customer.subscribe(plan=plan.id)
-
-        updated_subscriptions = self.customer.subscriptions.count()
-
-        # assert 1 new subscription got created
-        assert updated_subscriptions == current_subscriptions + 1
-
-    @patch.object(Subscription, "_api_create", autospec=True)
-    @patch("stripe.Subscription.create", autospec=True)
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_subscription_shortcut_with_multiple_subscriptions_new_style_by_plan(
-        self,
-        product_retrieve_mock,
-        customer_retrieve_mock,
-        subscription_create_mock,
-        subscription_api_create_mock,
-    ):
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-
-        subscription_fake_duplicate = deepcopy(FAKE_SUBSCRIPTION)
-        subscription_fake_duplicate["id"] = "sub_6lsC8pt7IcF8jd"
-        # latest_invoice has to be None for an invoice that doesn't exist yet
-        # and hence cannot have been billed yet
-        subscription_fake_duplicate["latest_invoice"] = None
-
-        fake_subscription = deepcopy(FAKE_SUBSCRIPTION)
-        # latest_invoice has to be None for an invoice that doesn't exist yet
-        # and hence cannot have been billed yet
-        fake_subscription["latest_invoice"] = None
-
-        subscription_create_mock.side_effect = [
-            fake_subscription,
-            subscription_fake_duplicate,
-        ]
-
-        subscription_api_create_mock.side_effect = [
-            fake_subscription,
-            subscription_fake_duplicate,
-        ]
-
-        self.customer.subscribe(items=[{"plan": plan}, {"plan": plan}])
-
-        self.assertEqual(1, self.customer.subscriptions.count())
-        self.assertEqual(1, len(self.customer.valid_subscriptions))
-
-        # subscribe() forwards items but may collapse ones referring to the
-        # same price/plan, so just verify the shortcut routed to our customer.
-        subscription_api_create_mock.assert_called_once()
-        kwargs = subscription_api_create_mock.call_args.kwargs
-        self.assertEqual(kwargs["customer"], self.customer.id)
-        self.assertGreaterEqual(len(kwargs["items"]), 1)
-
-    @patch(
-        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
-    )
-    @patch(
-        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
-    )
-    def test_subscription_shortcut_with_invalid_subscriptions(
-        self, product_retrieve_mock, customer_retrieve_mock
-    ):
-        plan = Plan.sync_from_stripe_data(deepcopy(FAKE_PLAN))
-
-        self.assert_fks(
-            plan,
-            expected_blank_fks={
-                "djstripe.Product.default_price",
-            },
-        )
-
-        fake_subscription_upd = deepcopy(FAKE_SUBSCRIPTION)
-        # latest_invoice has to be None for an invoice that doesn't exist yet
-        # and hence cannot have been billed yet
-        fake_subscription_upd["latest_invoice"] = None
-
-        fake_subscriptions = [
-            deepcopy(fake_subscription_upd),
-            deepcopy(fake_subscription_upd),
-            deepcopy(fake_subscription_upd),
-            deepcopy(fake_subscription_upd),
-        ]
-
-        # update the status of all but one to be invalid,
-        # we need to also change the id for sync to work
-        fake_subscriptions[1]["status"] = "canceled"
-        fake_subscriptions[1]["id"] = fake_subscriptions[1]["id"] + "foo1"
-        fake_subscriptions[2]["status"] = "incomplete_expired"
-        fake_subscriptions[2]["id"] = fake_subscriptions[2]["id"] + "foo2"
-        # incomplete: initial payment not yet succeeded, so not valid (#1721)
-        fake_subscriptions[3]["status"] = "incomplete"
-        fake_subscriptions[3]["id"] = fake_subscriptions[3]["id"] + "foo3"
-
-        for _fake_subscription in fake_subscriptions:
-            with patch(
-                "stripe.Subscription.create",
-                autospec=True,
-                side_effect=[_fake_subscription],
-            ):
-                self.customer.subscribe(items=[{"plan": plan}])
-
-        self.assertEqual(4, self.customer.subscriptions.count())
-        self.assertEqual(1, len(self.customer.valid_subscriptions))
-        self.assertEqual(
-            self.customer.valid_subscriptions[0], self.customer.subscription
-        )
-
-        self.assertEqual(fake_subscriptions[0]["id"], self.customer.subscription.id)
 
     @patch(
         "stripe.BalanceTransaction.retrieve",

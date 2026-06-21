@@ -716,10 +716,8 @@ class Customer(StripeModel):
     def customer_payment_methods(self):
         """
         An iterable of all of the customer's payment methods
-        (sources, then legacy cards)
         """
         yield from self.sources.iterator()
-        yield from self.legacy_cards.iterator()
 
     @property
     def discount(self):
@@ -754,18 +752,15 @@ class Customer(StripeModel):
 
     def subscribe(self, *, items=None, price=None, **kwargs):
         """
-        Subscribes this customer to all the prices or plans in the items dict (Recommended).
+        Subscribes this customer to all the prices in the items dict (Recommended).
 
         :param items: A list of up to 20 subscription items, each with an attached price
         :type list:
-            :param items: A dictionary of Plan (or Plan ID) or Price (or Price ID)
-            :type dict:  The price or plan to which to subscribe the customer.
+            :param items: A dictionary of Price (or Price ID)
+            :type dict:  The price to which to subscribe the customer.
 
         :param price: The price to which to subscribe the customer.
         :type price: Price or string (price ID)
-
-        :param plan: The plan to which to subscribe the customer.
-        :type plan: Plan or string (plan ID)
         """
         from .billing import Subscription
 
@@ -779,8 +774,6 @@ class Customer(StripeModel):
             for item in items:
                 if "price" in item:
                     _items.append({"price": item["price"]})
-                elif "plan" in item:
-                    _items.append({"plan": item["plan"]})
 
         stripe_subscription = Subscription._api_create(
             items=_items, customer=self.id, **kwargs
@@ -1132,16 +1125,17 @@ class Customer(StripeModel):
         save = False
 
         customer_sources = data.get("sources")
-        sources = {}
         if customer_sources:
-            # Have to create sources before we handle the default_source
-            # We save all of them in the `sources` dict, so that we can find them
-            # by id when we look at the default_source (we need the source type).
+            # A customer's `sources` list may historically contain legacy card
+            # and bank_account objects, but those are no longer attached to
+            # customers (dropped in dj-stripe 2.11). Only Source objects are
+            # synced here.
             for source in customer_sources["data"]:
-                obj, _ = DjstripePaymentMethod._get_or_create_source(
+                if source["object"] != "source":
+                    continue
+                DjstripePaymentMethod._get_or_create_source(
                     source, source["object"], api_key=api_key
                 )
-                sources[source["id"]] = obj
 
         discount = data.get("discount")
         if discount:
@@ -1192,13 +1186,6 @@ class Customer(StripeModel):
         api_key = kwargs.get("api_key") or self.default_api_key
         for stripe_charge in Charge.api_list(customer=self.id, **kwargs):
             Charge.sync_from_stripe_data(stripe_charge, api_key=api_key)
-
-    def _sync_cards(self, **kwargs):
-        from .payment_methods import Card
-
-        api_key = kwargs.get("api_key") or self.default_api_key
-        for stripe_card in Card.api_list(customer=self, **kwargs):
-            Card.sync_from_stripe_data(stripe_card, api_key=api_key)
 
     def _sync_subscriptions(self, **kwargs):
         from .billing import Subscription
@@ -1759,12 +1746,7 @@ class Price(StripeModel):
     Prices define the unit cost, currency, and (optional) billing cycle for
     both recurring and one-time purchases of products.
 
-    Price and Plan objects are the same, but use a different representation.
-    Creating a recurring Price in Stripe also makes a Plan available, and vice versa.
-    This is not the case for a Price with interval=one_time.
-
-    Price objects are a more recent API representation, support more features
-    and its usage is encouraged instead of Plan objects.
+    Prices replace the legacy Plans API, which was removed in dj-stripe 2.11.
 
     Stripe documentation:
     - https://stripe.com/docs/api/prices

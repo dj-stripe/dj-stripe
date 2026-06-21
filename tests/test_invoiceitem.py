@@ -174,7 +174,6 @@ class InvoiceItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             )
             invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
-        self.assertEqual(FAKE_PLAN_II["id"], invoiceitem.plan.id)
         self.assertEqual(FAKE_PRICE_II["id"], invoiceitem.price.id)
         # InvoiceItem.subscription is set via fake `subscription` id but the
         # proration item itself doesn't reference a Subscription record yet.
@@ -205,7 +204,6 @@ class InvoiceItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             )
             invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
 
-        self.assertEqual(FAKE_PLAN_II["id"], invoiceitem.plan.id)
         self.assertEqual(FAKE_PRICE_II["id"], invoiceitem.price.id)
         self.assert_fks(
             invoiceitem,
