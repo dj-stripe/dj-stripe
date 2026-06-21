@@ -509,7 +509,7 @@ class SetupIntentStatus(Enum):
 
 
 class PaymentMethodType(Enum):
-    acss_debit = _("ACSS Dbit")
+    acss_debit = _("ACSS Debit")
     affirm = _("Affirm")
     afterpay_clearpay = _("Afterpay Clearpay")
     alipay = _("Alipay")
