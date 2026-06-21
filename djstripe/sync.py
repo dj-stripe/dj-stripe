@@ -2,9 +2,13 @@
 Utility functions used for syncing data.
 """
 
+import logging
+
 from stripe import InvalidRequestError
 
 from .models import Customer
+
+logger = logging.getLogger(__name__)
 
 
 def sync_subscriber(subscriber):
@@ -16,6 +20,6 @@ def sync_subscriber(subscriber):
         customer._sync_invoices()
         customer._sync_cards()
         customer._sync_charges()
-    except InvalidRequestError as e:
-        print("ERROR: " + str(e))
+    except InvalidRequestError:
+        logger.exception("Failed to sync subscriber %r", subscriber)
     return customer
