@@ -37,6 +37,7 @@ Funding = "https://github.com/sponsors/dj-stripe"
 
 [dependency-groups]
 dev = [
+    "django-stubs[compatible-mypy]>=6.0.5,<7",
     "mypy>=2.1.0,<3",
     "pre-commit>=4.6.0,<5",
     "pytest>=9.1.1,<10",
@@ -74,6 +75,13 @@ include = [
 
 [tool.ruff.lint]
 select = ["F", "FURB", "UP"]
+
+[tool.mypy]
+plugins = ["mypy_django_plugin.main"]
+warn_unused_ignores = true
+
+[tool.django-stubs]
+django_settings_module = "tests.settings"
 
 [tool.tox]
 isolated_build = true
