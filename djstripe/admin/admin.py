@@ -141,7 +141,7 @@ class APIKeyAdmin(admin.ModelAdmin):
     change_form_template = "djstripe/admin/change_form.html"
 
     list_display = ("__str__", "type", "djstripe_owner_account", "livemode")
-    readonly_fields = ("djstripe_owner_account", "livemode", "type", "secret")
+    readonly_fields = ("djstripe_owner_account", "livemode", "type", "secret_redacted")
     search_fields = ("name",)
 
     def get_readonly_fields(self, request, obj=None):
@@ -152,7 +152,7 @@ class APIKeyAdmin(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         if obj is None:
             return APIKeyAdminCreateForm.Meta.fields
-        return ["type", "djstripe_owner_account", "livemode", "name", "secret"]
+        return ["type", "djstripe_owner_account", "livemode", "name", "secret_redacted"]
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
