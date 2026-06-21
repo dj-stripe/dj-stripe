@@ -1920,6 +1920,37 @@ class TestPriceEvents(CreateAccountMixin, EventTestCase):
             FAKE_EVENT_PRICE_UPDATED["data"]["object"]["unit_amount_decimal"],
         )
 
+    @patch(
+        "stripe.Price.retrieve",
+        side_effect=InvalidRequestError(
+            message="No such price: 'price_deleted'",
+            param="id",
+            code="resource_missing",
+        ),
+        autospec=True,
+    )
+    @patch("stripe.Event.retrieve", autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    def test_created_event_for_object_deleted_before_processing(
+        self, product_retrieve_mock, event_retrieve_mock, price_retrieve_mock
+    ):
+        # Regression test for #1218: a `*.created`/`*.updated` webhook must not
+        # crash when the object was deleted on Stripe's side before the webhook
+        # was processed (eg. created and deleted in quick succession, with the
+        # webhook retried in between). The retrieve 404s and the event is skipped.
+        fake_stripe_event = deepcopy(FAKE_EVENT_PRICE_CREATED)
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()  # should not raise
+
+        self.assertFalse(
+            Price.objects.filter(id=fake_stripe_event["data"]["object"]["id"]).exists(),
+            "A price deleted before its created webhook ran should not be synced",
+        )
+
     @patch("stripe.Price.retrieve", return_value=FAKE_PRICE, autospec=True)
     @patch(
         "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True

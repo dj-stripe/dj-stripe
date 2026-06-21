@@ -499,9 +499,28 @@ def _handle_crud_like_event(
 
         # Stripe doesn't allow direct retrieval of Discount Objects
         if target_cls != models.Discount:
-            data = target_cls(**kwargs).api_retrieve(
-                stripe_account=stripe_account, api_key=event.default_api_key
-            )
+            try:
+                data = target_cls(**kwargs).api_retrieve(
+                    stripe_account=stripe_account, api_key=event.default_api_key
+                )
+            except InvalidRequestError as e:
+                if getattr(e, "code", None) == "resource_missing" or "No such" in str(
+                    e
+                ):
+                    # The object was deleted on Stripe's side before this
+                    # create/update webhook was processed (eg. a plan created and
+                    # deleted in quick succession, with the webhook retried in
+                    # between). There is nothing left to retrieve, so skip instead
+                    # of crashing the webhook. A matching `*.deleted` event, if
+                    # any, removes the local copy.
+                    logger.warning(
+                        "Skipping %s event %r: object %r no longer exists on Stripe",
+                        event.type,
+                        event.id,
+                        id,
+                    )
+                    return None
+                raise
         else:
             data = data.get("object")
 
