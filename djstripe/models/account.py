@@ -123,7 +123,7 @@ class Account(StripeModel):
     def default_api_key(self) -> str:
         return self.get_default_api_key()
 
-    def get_default_api_key(self, livemode: bool = None) -> str:
+    def get_default_api_key(self, livemode: bool | None = None) -> str:
         if livemode is None:
             livemode = self.livemode
             api_key = APIKey.objects.filter(

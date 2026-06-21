@@ -1394,7 +1394,7 @@ class Subscription(StripeModel):
             kwargs["status"] = "all"
         return super().api_list(api_key=api_key, **kwargs)
 
-    def update(self, plan: StripeModel | str = None, **kwargs):
+    def update(self, plan: StripeModel | str | None = None, **kwargs):
         """
         See `Customer.subscribe() <#djstripe.models.Customer.subscribe>`__
 

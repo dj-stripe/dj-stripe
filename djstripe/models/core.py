@@ -793,8 +793,8 @@ class Customer(StripeModel):
         self,
         amount: Decimal,
         *,
-        application_fee: Decimal = None,
-        source: str | StripeModel = None,
+        application_fee: Decimal | None = None,
+        source: str | StripeModel | None = None,
         **kwargs,
     ) -> Charge:
         """

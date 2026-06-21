@@ -204,7 +204,7 @@ class DjstripeSettings:
 
     def get_subscriber_model_string(self) -> str:
         """Get the configured subscriber model as a module path string."""
-        return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)  # type: ignore
+        return getattr(settings, "DJSTRIPE_SUBSCRIBER_MODEL", settings.AUTH_USER_MODEL)
 
     def get_subscriber_model(self):
         """
