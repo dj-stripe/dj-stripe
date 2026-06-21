@@ -301,6 +301,48 @@ class ChargeManagerTest(TestCase):
             self.charge_2016.id, charges, "2016 charge unexpectedly in charges."
         )
 
+    def test_is_during_december_2015_rollover(self):
+        # The 2016 charge is on 2016-01-01 00:00 UTC, i.e. the start of the
+        # *next* month, and so must be excluded from December by the half-open
+        # [start, next_month) UTC range (which must roll the year over).
+        december_charge = Charge(
+            id="ch_XXXXDEC1",
+            customer=Customer.objects.get(id="cus_XXXXXXX"),
+            created=datetime.datetime(2015, 12, 15, tzinfo=get_timezone_utc()),
+            amount=0,
+            currency="usd",
+            status="pending",
+            stripe_data={"id": "ch_XXXXDEC1", "object": "charge"},
+        )
+        december_charge.save()
+
+        charges = [charge.id for charge in Charge.objects.during(year=2015, month=12)]
+
+        self.assertIn(december_charge.id, charges)
+        self.assertNotIn(self.november_charge.id, charges)
+        self.assertNotIn(self.charge_2016.id, charges)
+
+    def test_during_is_utc_regardless_of_time_zone(self):
+        # Stripe stores `created` in UTC, so `during()` must select the same
+        # calendar month no matter what settings.TIME_ZONE is active.
+        from django.test import override_settings
+
+        april_utc = {charge.id for charge in Charge.objects.during(year=2015, month=4)}
+
+        for tz in ("UTC", "America/New_York", "Asia/Tokyo"):
+            with override_settings(TIME_ZONE=tz):
+                april = {
+                    charge.id for charge in Charge.objects.during(year=2015, month=4)
+                }
+                self.assertEqual(
+                    april,
+                    april_utc,
+                    f"during() selection changed under TIME_ZONE={tz}",
+                )
+                # Boundary charges (00:00 UTC on month edges) stay excluded.
+                self.assertNotIn(self.march_charge.id, april)
+                self.assertNotIn(self.may_charge.id, april)
+
     def test_get_paid_totals_for_april_2015(self):
         paid_totals = Charge.objects.paid_totals_for(year=2015, month=4)
 

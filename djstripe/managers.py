@@ -10,13 +10,22 @@ from django.db.models.functions import Cast
 from django.utils import timezone
 
 
-def _month_unix_range(year, month):
-    """Return (start, end) Unix timestamps spanning the given month."""
+def _month_utc_range(year, month):
+    """Return (start, end) UTC datetimes spanning the given month.
+
+    The range is half-open: ``start <= dt < end``.
+    """
     start = datetime(year, month, 1, tzinfo=UTC)
     if month == 12:
         end = datetime(year + 1, 1, 1, tzinfo=UTC)
     else:
         end = datetime(year, month + 1, 1, tzinfo=UTC)
+    return start, end
+
+
+def _month_unix_range(year, month):
+    """Return (start, end) Unix timestamps spanning the given month."""
+    start, end = _month_utc_range(year, month)
     return int(start.timestamp()), int(end.timestamp())
 
 
@@ -123,8 +132,14 @@ class TransferManager(models.Manager):
     """
 
     def during(self, year, month):
-        """Return Transfers between a certain time range."""
-        return self.filter(created__year=year, created__month=month)
+        """Return Transfers created during a certain month, in UTC.
+
+        Stripe stores ``created`` as a UTC Unix timestamp, so the month is
+        selected by an explicit UTC datetime range rather than the
+        timezone-sensitive ``created__year/__month`` lookups.
+        """
+        start, end = _month_utc_range(year, month)
+        return self.filter(created__gte=start, created__lt=end)
 
     def paid_totals_for(self, year, month):
         return self.during(year, month).aggregate(
@@ -149,8 +164,14 @@ class ChargeManager(models.Manager):
     """
 
     def during(self, year, month):
-        """Return Charges between a certain time range based on `created`."""
-        return self.filter(created__year=year, created__month=month)
+        """Return Charges created during a certain month, in UTC.
+
+        Stripe stores ``created`` as a UTC Unix timestamp, so the month is
+        selected by an explicit UTC datetime range rather than the
+        timezone-sensitive ``created__year/__month`` lookups.
+        """
+        start, end = _month_utc_range(year, month)
+        return self.filter(created__gte=start, created__lt=end)
 
     def paid_totals_for(self, year, month):
         return (
