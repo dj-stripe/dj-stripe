@@ -5,6 +5,7 @@ dj-stripe - Views related to the djstripe app.
 import logging
 
 from django.contrib.auth.decorators import login_not_required
+from django.db import transaction
 from django.http import HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from django.utils.decorators import method_decorator
@@ -16,6 +17,14 @@ from .models import WebhookEndpoint, WebhookEventTrigger
 logger = logging.getLogger(__name__)
 
 
+# Exempt the webhook view from ATOMIC_REQUESTS. When processing fails,
+# WebhookEventTrigger.from_request re-raises so the error reaches Django's
+# logging (see #833), but it also needs the trigger row (with the exception and
+# traceback) to persist for debugging. Under ATOMIC_REQUESTS that re-raise would
+# roll the whole request — including that row — back. Exempting the view lets
+# from_request manage its own transactions: the error row is committed while the
+# event-processing work is still rolled back on failure.
+@method_decorator(transaction.non_atomic_requests, name="dispatch")
 @method_decorator(csrf_exempt, name="dispatch")
 @method_decorator(login_not_required, name="dispatch")
 class ProcessWebhookView(View):

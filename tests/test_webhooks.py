@@ -512,6 +512,47 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         event_trigger = WebhookEventTrigger.objects.first()
         self.assertEqual(event_trigger.exception, exception_message)
 
+    def test_webhook_view_is_exempt_from_atomic_requests(self):
+        # #833: the trigger row (with exception/traceback) must persist on the
+        # error path even under ATOMIC_REQUESTS, which requires the view to be
+        # exempt so from_request can commit it before re-raising.
+        from djstripe.views import ProcessWebhookView
+
+        view = ProcessWebhookView.as_view()
+        self.assertTrue(getattr(view, "_non_atomic_requests", None))
+
+    @patch(
+        "djstripe.models.WebhookEventTrigger.validate", return_value=True, autospec=True
+    )
+    @patch("djstripe.models.WebhookEventTrigger.process", autospec=True)
+    def test_webhook_error_record_persists_when_processing_rolls_back(
+        self, process_mock, validate_mock
+    ):
+        # #833: a failure during processing must roll back any partially-synced
+        # objects, while the trigger row itself survives with the recorded error.
+        from djstripe.models import Coupon
+
+        class ProcessException(Exception):
+            pass
+
+        def process_side_effect(self, save=True, api_key=None):
+            # A partial write that must be undone when processing then fails.
+            Coupon.objects.create(id="co_rollback_marker")
+            raise ProcessException("boom")
+
+        process_mock.side_effect = process_side_effect
+
+        with self.assertRaises(ProcessException):
+            self._send_event(deepcopy(FAKE_EVENT_TRANSFER_CREATED))
+
+        # The trigger row survives, with the error recorded ...
+        self.assertEqual(WebhookEventTrigger.objects.count(), 1)
+        trigger = WebhookEventTrigger.objects.first()
+        self.assertEqual(trigger.exception, "boom")
+        self.assertTrue(trigger.traceback)
+        # ... but the partial processing write was rolled back.
+        self.assertFalse(Coupon.objects.filter(id="co_rollback_marker").exists())
+
     @patch.object(
         WebhookEventTrigger.validate, "__defaults__", (None, "whsec_XXXXX", 300, None)
     )
