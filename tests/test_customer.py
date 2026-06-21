@@ -1442,6 +1442,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             deepcopy(fake_subscription_upd),
             deepcopy(fake_subscription_upd),
             deepcopy(fake_subscription_upd),
+            deepcopy(fake_subscription_upd),
         ]
 
         # update the status of all but one to be invalid,
@@ -1450,6 +1451,9 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         fake_subscriptions[1]["id"] = fake_subscriptions[1]["id"] + "foo1"
         fake_subscriptions[2]["status"] = "incomplete_expired"
         fake_subscriptions[2]["id"] = fake_subscriptions[2]["id"] + "foo2"
+        # incomplete: initial payment not yet succeeded, so not valid (#1721)
+        fake_subscriptions[3]["status"] = "incomplete"
+        fake_subscriptions[3]["id"] = fake_subscriptions[3]["id"] + "foo3"
 
         for _fake_subscription in fake_subscriptions:
             with patch(
@@ -1459,7 +1463,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             ):
                 self.customer.subscribe(items=[{"price": price}])
 
-        self.assertEqual(3, self.customer.subscriptions.count())
+        self.assertEqual(4, self.customer.subscriptions.count())
         self.assertEqual(1, len(self.customer.valid_subscriptions))
         self.assertEqual(
             self.customer.valid_subscriptions[0], self.customer.subscription
@@ -1927,6 +1931,7 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             deepcopy(fake_subscription_upd),
             deepcopy(fake_subscription_upd),
             deepcopy(fake_subscription_upd),
+            deepcopy(fake_subscription_upd),
         ]
 
         # update the status of all but one to be invalid,
@@ -1935,6 +1940,9 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         fake_subscriptions[1]["id"] = fake_subscriptions[1]["id"] + "foo1"
         fake_subscriptions[2]["status"] = "incomplete_expired"
         fake_subscriptions[2]["id"] = fake_subscriptions[2]["id"] + "foo2"
+        # incomplete: initial payment not yet succeeded, so not valid (#1721)
+        fake_subscriptions[3]["status"] = "incomplete"
+        fake_subscriptions[3]["id"] = fake_subscriptions[3]["id"] + "foo3"
 
         for _fake_subscription in fake_subscriptions:
             with patch(
@@ -1944,7 +1952,7 @@ class TestCustomerLegacy(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             ):
                 self.customer.subscribe(items=[{"plan": plan}])
 
-        self.assertEqual(3, self.customer.subscriptions.count())
+        self.assertEqual(4, self.customer.subscriptions.count())
         self.assertEqual(1, len(self.customer.valid_subscriptions))
         self.assertEqual(
             self.customer.valid_subscriptions[0], self.customer.subscription

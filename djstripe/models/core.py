@@ -1027,7 +1027,12 @@ class Customer(StripeModel):
     def valid_subscriptions(self):
         """
         Returns this customer's valid subscriptions
-        (subscriptions that aren't canceled or incomplete_expired).
+        (subscriptions that aren't canceled, incomplete or incomplete_expired).
+
+        ``incomplete`` subscriptions are excluded because their initial payment
+        has not yet succeeded (eg. subscriptions created with
+        ``payment_behavior="default_incomplete"``), so the customer is not yet
+        paying for them.
         """
         return [
             subscription
@@ -1035,6 +1040,7 @@ class Customer(StripeModel):
             if subscription.status
             not in [
                 enums.SubscriptionStatus.canceled,
+                enums.SubscriptionStatus.incomplete,
                 enums.SubscriptionStatus.incomplete_expired,
             ]
         ]
