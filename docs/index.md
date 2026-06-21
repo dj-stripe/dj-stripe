@@ -23,7 +23,7 @@ For example, if you need to interact with a customer subscription, you can use *
 
 -   Support for multiple accounts and API keys → **May be done by the time this website is ready**
 
--   Tested with Stripe API 2020-08-27 (see API versions)
+-   Tested with Stripe API 2026-05-27.dahlia (see API versions)
 
 # Tutorials
 

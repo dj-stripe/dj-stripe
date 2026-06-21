@@ -17,7 +17,7 @@ class DjstripeSettings:
 
     """
 
-    DEFAULT_STRIPE_API_VERSION = "2020-08-27"
+    DEFAULT_STRIPE_API_VERSION = "2026-05-27.dahlia"
 
     ZERO_DECIMAL_CURRENCIES = {
         "bif",
