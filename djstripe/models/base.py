@@ -778,15 +778,20 @@ class StripeModel(StripeBaseModel):
                         # or test. Reported to Stripe in August 2020.
                         # Context: https://github.com/dj-stripe/dj-stripe/issues/830
                         pass
-                    elif "No such PaymentMethod:" in str(
-                        e
-                    ) or "No such payment_method:" in str(e):
+                    elif (
+                        "No such PaymentMethod:" in str(e)
+                        or "No such payment_method:" in str(e)
+                        or "A source must be attached to a customer" in str(e)
+                    ):
                         # payment methods (card_… etc) can be irretrievably deleted,
                         # but still present during sync. For example, if a refund is
                         # issued on a charge whose payment method has been deleted,
                         # or when a charge.expired arrives after the source was
                         # detached. Stripe's wording varies between "PaymentMethod"
-                        # and "payment_method".
+                        # and "payment_method". A detached legacy source (src_…) is
+                        # also wrapped as a payment_method but 404s on the
+                        # payment_methods endpoint with "A source must be attached
+                        # to a customer to be used as a `payment_method`".
                         return None, False
                     elif "No such subscription_item:" in str(
                         e

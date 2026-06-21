@@ -2050,6 +2050,41 @@ class TestPaymentMethodEvents(CreateAccountMixin, AssertStripeFksMixin, EventTes
             "Detach of a 'card_' payment_method should delete it",
         )
 
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        side_effect=InvalidRequestError(
+            message=(
+                "A source must be attached to a customer to be used as a "
+                "`payment_method`."
+            ),
+            param="payment_method",
+        ),
+        autospec=True,
+    )
+    @patch("stripe.Event.retrieve", autospec=True)
+    def test_source_payment_method_detached(
+        self, event_retrieve_mock, payment_method_retrieve_mock
+    ):
+        # Regression test for #1068: a detached legacy source (id="src_xxx") is
+        # delivered as a payment_method.detached event but 404s on the
+        # payment_methods endpoint. The webhook must not crash; instead the
+        # payment method is synced from the event payload (customer=null).
+        fake_stripe_event = deepcopy(FAKE_EVENT_PAYMENT_METHOD_DETACHED)
+        fake_stripe_event["data"]["object"]["id"] = "src_1FlXckFAKEFAKEFAKE0001"
+        fake_stripe_event["data"]["object"]["customer"] = None
+        event_retrieve_mock.return_value = fake_stripe_event
+
+        event = Event.sync_from_stripe_data(fake_stripe_event)
+        event.invoke_webhook_handlers()
+
+        payment_method = PaymentMethod.objects.get(
+            id=fake_stripe_event["data"]["object"]["id"]
+        )
+        self.assertIsNone(
+            payment_method.customer,
+            "Detach of a 'src_' payment_method should set customer to null",
+        )
+
 
 class TestPaymentIntentEvents(EventTestCase):
     """Test case for payment intent event handling."""

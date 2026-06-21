@@ -335,3 +335,29 @@ class PaymentMethodTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assert_fks(
             payment_method, expected_blank_fks={"djstripe.PaymentMethod.customer"}
         )
+
+    def test_get_or_create_returns_none_for_detached_source(self):
+        # Regression test for #1068: a detached legacy source (src_…) referenced
+        # as a foreign key during sync (eg. djstripe_sync_models over historical
+        # charges/invoices) 404s on the payment_methods endpoint with "A source
+        # must be attached to a customer to be used as a `payment_method`". The
+        # FK sync must skip gracefully instead of crashing.
+        with patch.object(
+            models.PaymentMethod,
+            "api_retrieve",
+            side_effect=InvalidRequestError(
+                message=(
+                    "A source must be attached to a customer to be used as a "
+                    "`payment_method`."
+                ),
+                param="payment_method",
+            ),
+        ):
+            result, created = models.PaymentMethod._get_or_create_from_stripe_object(
+                {"payment_method": "src_1FlXckFAKEFAKEFAKE0001"},
+                field_name="payment_method",
+                refetch=True,
+            )
+
+        self.assertIsNone(result)
+        self.assertFalse(created)

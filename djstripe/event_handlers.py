@@ -15,6 +15,7 @@ from enum import Enum
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
+from stripe import InvalidRequestError
 
 from djstripe.models import Event
 from djstripe.settings import djstripe_settings
@@ -215,6 +216,27 @@ def handle_payment_method_event(sender, event, **kwargs):
                 event=event,
                 crud_type=CrudType.DELETED,
             )
+        elif event.parts == ["payment_method", "detached"]:
+            # A "pm_" payment method is still retrievable after detach, but a
+            # detached legacy source ("src_") is wrapped as a payment_method and
+            # 404s on the payment_methods endpoint ("A source must be attached to
+            # a customer to be used as a `payment_method`"). In that case the
+            # api_retrieve in _handle_crud_like_event crashes the whole webhook,
+            # so fall back to syncing from the event payload, which already
+            # reflects the detached state (customer=null).
+            try:
+                _handle_crud_like_event(target_cls=models.PaymentMethod, event=event)
+            except InvalidRequestError as e:
+                if (
+                    "A source must be attached to a customer" in str(e)
+                    or "No such payment_method:" in str(e)
+                    or "No such PaymentMethod:" in str(e)
+                ):
+                    models.PaymentMethod.sync_from_stripe_data(
+                        event.data["object"], api_key=event.default_api_key
+                    )
+                else:
+                    raise
         else:
             _handle_crud_like_event(target_cls=models.PaymentMethod, event=event)
 
