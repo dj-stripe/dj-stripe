@@ -3,7 +3,7 @@ dj-stripe model managers
 """
 
 import decimal
-from datetime import datetime, timedelta, timezone as tz
+from datetime import datetime, timedelta, UTC
 
 from django.db import models
 from django.db.models.functions import Cast
@@ -12,11 +12,11 @@ from django.utils import timezone
 
 def _month_unix_range(year, month):
     """Return (start, end) Unix timestamps spanning the given month."""
-    start = datetime(year, month, 1, tzinfo=tz.utc)
+    start = datetime(year, month, 1, tzinfo=UTC)
     if month == 12:
-        end = datetime(year + 1, 1, 1, tzinfo=tz.utc)
+        end = datetime(year + 1, 1, 1, tzinfo=UTC)
     else:
-        end = datetime(year, month + 1, 1, tzinfo=tz.utc)
+        end = datetime(year, month + 1, 1, tzinfo=UTC)
     return int(start.timestamp()), int(end.timestamp())
 
 

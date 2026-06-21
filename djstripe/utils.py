@@ -109,4 +109,4 @@ def get_timezone_utc():
     """
     Returns the UTC timezone.
     """
-    return datetime.timezone.utc
+    return datetime.UTC

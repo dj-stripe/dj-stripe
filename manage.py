@@ -6,8 +6,7 @@ try:
     from django.core.management import execute_from_command_line
 except ImportError as exc:
     raise ImportError(
-        "Couldn't import Django. "
-        "Run `uv sync` to set up a virtual environment first."
+        "Couldn't import Django. Run `uv sync` to set up a virtual environment first."
     ) from exc
 
 
