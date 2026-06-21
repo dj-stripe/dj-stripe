@@ -20,6 +20,7 @@ from djstripe.models import (
     Event,
     Invoice,
     InvoiceItem,
+    PaymentIntent,
     PaymentMethod,
     Price,
     Subscription,
@@ -2112,6 +2113,34 @@ class TestPaymentIntentEvents(EventTestCase):
                 ),
             )
         )
+
+    @patch(
+        "stripe.PaymentMethod.retrieve",
+        side_effect=InvalidRequestError(
+            message="No such PaymentMethod: card_fakefakefakefakefake0001",
+            param="payment_method",
+            code="resource_missing",
+        ),
+        autospec=True,
+    )
+    def test_payment_intent_with_deleted_payment_method(
+        self, payment_method_retrieve_mock
+    ):
+        # Regression test for #1169: a payment_intent.created (or any PaymentIntent
+        # sync) must not crash when the referenced payment method has already been
+        # deleted/detached on Stripe's side and can no longer be retrieved. The FK
+        # should simply be left null.
+        fake_payment_intent = deepcopy(FAKE_PAYMENT_INTENT_I)
+        fake_payment_intent["payment_method"] = "card_fakefakefakefakefake0001"
+        # Isolate the payment_method FK from unrelated syncs.
+        fake_payment_intent["customer"] = None
+        fake_payment_intent["invoice"] = None
+        fake_payment_intent["charges"]["data"] = []
+
+        payment_intent = PaymentIntent.sync_from_stripe_data(fake_payment_intent)
+
+        self.assertIsNone(payment_intent.payment_method)
+        payment_method_retrieve_mock.assert_called_once()
 
 
 class TestSubscriptionScheduleEvents(CreateAccountMixin, EventTestCase):
