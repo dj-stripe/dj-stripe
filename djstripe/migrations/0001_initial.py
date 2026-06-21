@@ -289,7 +289,7 @@ class Migration(migrations.Migration):
                         unique=True,
                         validators=[
                             django.core.validators.RegexValidator(
-                                regex="^(pk|sk|rk)_(test|live)_([a-zA-Z0-9]{24,99})"
+                                regex="^(pk|sk|rk)_(test|live)_[a-zA-Z0-9]{24,}$"
                             )
                         ],
                     ),

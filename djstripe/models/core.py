@@ -1283,7 +1283,9 @@ class Dispute(StripeModel):
 
     def get_stripe_dashboard_url(self) -> str:
         """Get the stripe dashboard url for this object."""
-        base = f"{self._get_base_stripe_dashboard_url()}{self.stripe_dashboard_item_name}"
+        base = (
+            f"{self._get_base_stripe_dashboard_url()}{self.stripe_dashboard_item_name}"
+        )
         # payment_intent and charge are both nullable (to avoid infinite sync),
         # so fall back gracefully instead of dereferencing a missing relation.
         item = self.payment_intent or self.charge
