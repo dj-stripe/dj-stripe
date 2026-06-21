@@ -96,6 +96,33 @@ class TestSyncModelsCommand(CreateAccountMixin, TestCase):
         }
         assert start_sync_mock.call_count == 2
 
+    SK_TEST = "sk_test_" + "a" * 24
+
+    def test_call_command_does_not_raise_on_sync_failure(self):
+        # Programmatic call_command() must not raise even when a sync fails, so
+        # callers like the admin "Sync All Instances" action keep working.
+        with patch.object(Command, "sync_model", return_value=False):
+            stderr = StringIO()
+            call_command(
+                "djstripe_sync_models",
+                "Account",
+                api_keys=[self.SK_TEST],
+                stderr=stderr,
+            )
+        assert "sync(s) failed" in stderr.getvalue()
+
+    def test_fail_on_error_raises_on_sync_failure(self):
+        # With --fail-on-error (or its programmatic equivalent), a failed sync
+        # must surface as a non-zero exit / CommandError for cron and CI.
+        with patch.object(Command, "sync_model", return_value=False):
+            with self.assertRaises(CommandError):
+                call_command(
+                    "djstripe_sync_models",
+                    "Account",
+                    api_keys=[self.SK_TEST],
+                    fail_on_error=True,
+                )
+
 
 class TestSyncModelsGetApiKeys(TestCase):
     """Tests for resolving which API keys djstripe_sync_models will sync."""

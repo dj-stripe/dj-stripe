@@ -31,6 +31,8 @@ Invoke like so:
         python manage.py djstripe_sync_models Account Charge --api-keys sk_test_XXX sk_test_YYY
 """
 
+import argparse
+
 from django.apps import apps
 from django.core.exceptions import FieldDoesNotExist
 from django.core.management.base import BaseCommand, CommandError
@@ -70,11 +72,30 @@ class Command(BaseCommand):
             action="extend",
             help="Specify the api_keys you would like to perform this sync for.",
         )
+        parser.add_argument(
+            "--fail-on-error",
+            action=argparse.BooleanOptionalAction,
+            default=None,
+            help=(
+                "Exit with a non-zero status if any model/key or object fails to"
+                " sync. Defaults to enabled when run from the command line (so"
+                " cron/CI can detect failures) and disabled when invoked"
+                " programmatically via call_command()."
+            ),
+        )
 
-    def handle(self, *args, api_keys: list[str], **options):
+    def handle(self, *args, api_keys: list[str], fail_on_error=None, **options):
         app_label = "djstripe"
         app_config = apps.get_app_config(app_label)
         model_list: list[models.StripeModel] = []
+
+        # When --fail-on-error / --no-fail-on-error isn't passed explicitly,
+        # default to failing loudly on the command line (so cron/CI can detect
+        # problems) but stay quiet when invoked programmatically via
+        # call_command(), where a raised CommandError would become an unhandled
+        # exception in the caller (e.g. the admin "Sync All Instances" action).
+        if fail_on_error is None:
+            fail_on_error = self._called_from_command_line
 
         if args:
             for model_label in args:
@@ -95,9 +116,20 @@ class Command(BaseCommand):
             )
             return
 
+        # Count (model, api_key) pairs that failed to sync cleanly so we can
+        # surface a summary and exit non-zero, without aborting the whole run on
+        # the first error.
+        failed_syncs = 0
         for model in model_list:
             for api_key in api_keys:
-                self.sync_model(model, api_key=api_key)
+                if not self.sync_model(model, api_key=api_key):
+                    failed_syncs += 1
+
+        if failed_syncs:
+            message = f"{failed_syncs} model/key sync(s) failed; see the errors above."
+            self.stderr.write(self.style.ERROR(message))
+            if fail_on_error:
+                raise CommandError(message)
 
     def get_api_keys(self, api_keys: list[str] | None) -> list[str]:
         """
@@ -154,17 +186,26 @@ class Command(BaseCommand):
 
         return True, ""
 
-    def sync_model(self, model, api_key: str):
+    def sync_model(self, model, api_key: str) -> bool:
+        """Sync a single model for a single API key.
+
+        Returns True if the model synced without any errors, and False if the
+        whole (model, api_key) sync failed or any individual object failed to
+        sync. Per-object errors are reported and counted but don't abort the
+        run. KeyboardInterrupt/SystemExit are never swallowed.
+        """
         model_name = model.__name__
 
         should_sync, _ = self._should_sync_model(model)
         if not should_sync:
-            return
+            # Skipping a model that isn't syncable is expected, not a failure.
+            return True
 
         api_key_repr = redact_api_key(api_key)
         self.stdout.write(f"Syncing {model_name} for key {api_key_repr}:")
 
         count = 0
+        object_errors = 0
         try:
             # todo convert get_list_kwargs into a generator to make the code memory effecient.
             for list_kwargs in self.get_list_kwargs(model, api_key=api_key):
@@ -200,7 +241,8 @@ class Command(BaseCommand):
 
                 try:
                     for stripe_obj in model.api_list(**list_kwargs):
-                        # Skip model instances that throw an error
+                        # Skip (but count) model instances that throw an error,
+                        # so a single bad object doesn't abort the whole sync.
                         try:
                             djstripe_obj = model.sync_from_stripe_data(
                                 stripe_obj, api_key=api_key
@@ -216,20 +258,52 @@ class Command(BaseCommand):
                                 api_key=api_key,
                             )
                             count += 1
+                        except (KeyboardInterrupt, SystemExit):
+                            raise
                         except Exception as e:
-                            self.stderr.write(f"Skipping {stripe_obj.get('id')}: {e}")
+                            object_errors += 1
+                            self.stderr.write(
+                                self.style.ERROR(
+                                    f"  Error syncing {stripe_obj.get('id')}: {e!r}"
+                                )
+                            )
 
                             continue
+                except (KeyboardInterrupt, SystemExit):
+                    raise
                 except Exception as e:
-                    self.stderr.write(f"Skipping: {e}")
+                    object_errors += 1
+                    self.stderr.write(
+                        self.style.ERROR(f"  Error listing {model_name}: {e!r}")
+                    )
 
             if count == 0:
                 self.stdout.write("  (no results)")
             else:
                 self.stdout.write(f"  Synced {count} {model_name} for {api_key_repr}")
 
+            if object_errors:
+                self.stderr.write(
+                    self.style.ERROR(
+                        f"  {object_errors} {model_name} object(s) failed to sync"
+                        f" for {api_key_repr}"
+                    )
+                )
+
+        except (KeyboardInterrupt, SystemExit):
+            raise
         except Exception as e:
-            self.stderr.write(str(e))
+            # A hard failure syncing this (model, api_key) pair (e.g. an auth
+            # error or unexpected exception). Report it with the exception so
+            # callers can tell a real failure apart from "no data".
+            self.stderr.write(
+                self.style.ERROR(
+                    f"Failed syncing {model_name} for {api_key_repr}: {e!r}"
+                )
+            )
+            return False
+
+        return object_errors == 0
 
     @classmethod
     def get_stripe_account(cls, api_key: str, *args, **kwargs):
