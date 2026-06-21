@@ -1,4 +1,4 @@
-from .account import Account
+from .account import Account, AccountV2
 from .api import APIKey
 from .base import IdempotencyKey, StripeModel
 from .billing import (
@@ -65,6 +65,7 @@ from .webhooks import WebhookEndpoint, WebhookEventTrigger
 
 __all__ = [
     "Account",
+    "AccountV2",
     "ActiveEntitlement",
     "APIKey",
     "ApplicationFee",

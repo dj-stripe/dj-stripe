@@ -169,11 +169,14 @@ class Command(BaseCommand):
 
         if not hasattr(model.stripe_class, "list"):
             if model in (
+                models.AccountV2,
                 models.ApplicationFeeRefund,
                 models.LineItem,
                 models.TransferReversal,
                 models.TaxId,
             ):
+                # AccountV2 lists via the v2 service (model.api_list), not via a
+                # ``list`` classmethod on its stripe_class.
                 return True, ""
             return False, "no stripe_class.list"
 

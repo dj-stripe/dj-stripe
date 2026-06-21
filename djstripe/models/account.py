@@ -1,3 +1,5 @@
+import datetime
+
 import stripe
 from django.db import transaction
 from stripe import AuthenticationError, InvalidRequestError, PermissionError
@@ -319,3 +321,172 @@ class Account(StripeModel):
                     # But, the logo file object is not a particularly important thing.
                     # Until we have a better solution, just ignore this error.
                     pass
+
+
+class AccountV2(StripeModel):
+    """
+    An Account v2 object, from the Stripe Accounts v2 / Organizations API.
+
+    Unlike the v1 :class:`Account`, this object is served by Stripe's v2 Core
+    API (``/v2/core/accounts``), which is service-based rather than
+    resource-class based. It represents a company, individual or other entity,
+    and can hold one or more configurations (customer, merchant, recipient).
+
+    Because the v2 API differs from v1 in several ways — it is reached through
+    ``StripeClient(...).v2.core.accounts``, retrieval uses ``include`` rather
+    than ``expand``, deletion is replaced by ``close``, and ``created`` is an
+    RFC 3339 string rather than a unix timestamp — the relevant ``api_*``
+    methods are overridden below. The base sync machinery (which operates on the
+    JSON-coerced ``stripe_data`` dict) is otherwise reused unchanged.
+
+    Stripe documentation: https://docs.stripe.com/api/v2/core/accounts
+    """
+
+    stripe_class = stripe.v2.core.Account
+
+    # Sub-resources that aren't returned by default and must be requested
+    # explicitly with the ``include`` parameter, so that a synced account holds
+    # its full data. See AccountRetrieveParams in stripe-python.
+    DEFAULT_INCLUDE = (
+        "configuration.customer",
+        "configuration.merchant",
+        "configuration.recipient",
+        "defaults",
+        "future_requirements",
+        "identity",
+        "requirements",
+    )
+
+    @property
+    def applied_configurations(self):
+        """The configurations that have been applied to the account."""
+        return self.stripe_data.get("applied_configurations") or []
+
+    @property
+    def closed(self):
+        """Whether the account is closed."""
+        return self.stripe_data.get("closed", False)
+
+    @property
+    def configuration(self):
+        """The configurations (customer, merchant, recipient) on the account."""
+        return self.stripe_data.get("configuration")
+
+    @property
+    def contact_email(self):
+        """The default contact email address for the account."""
+        return self.stripe_data.get("contact_email", "")
+
+    @property
+    def contact_phone(self):
+        """The default contact phone number for the account."""
+        return self.stripe_data.get("contact_phone", "")
+
+    @property
+    def dashboard(self):
+        """The dashboard the account has access to (express, full or none)."""
+        return self.stripe_data.get("dashboard")
+
+    @property
+    def defaults(self):
+        """Default values to apply to the account's configurations."""
+        return self.stripe_data.get("defaults")
+
+    @property
+    def display_name(self):
+        """A descriptive name for the account, shown in the dashboard."""
+        return self.stripe_data.get("display_name", "")
+
+    @property
+    def future_requirements(self):
+        """Requirements that will apply to the account in the future."""
+        return self.stripe_data.get("future_requirements")
+
+    @property
+    def identity(self):
+        """Information about the company or individual the account represents."""
+        return self.stripe_data.get("identity")
+
+    @property
+    def requirements(self):
+        """Information about what is needed to keep the account enabled."""
+        return self.stripe_data.get("requirements")
+
+    def __str__(self):
+        return self.display_name or super().__str__()
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        """
+        The v2 API returns ``created`` as an RFC 3339 string rather than a unix
+        timestamp. Coerce it on a copy so the base ``StripeDateTimeField``
+        conversion works, while the original (string) value is preserved in
+        ``stripe_data``.
+        """
+        data = super()._manipulate_stripe_object_hook(data)
+        created = data.get("created")
+        if isinstance(created, str):
+            data = dict(data)
+            data["created"] = int(datetime.datetime.fromisoformat(created).timestamp())
+        return data
+
+    @classmethod
+    def _v2_accounts(cls, api_key):
+        """Return the v2 core accounts service bound to ``api_key``."""
+        client = stripe.StripeClient(
+            api_key, stripe_version=djstripe_settings.STRIPE_API_VERSION
+        )
+        return client.v2.core.accounts
+
+    def api_retrieve(self, api_key=None, stripe_account=None):
+        # v2 core accounts are organisation-level, so stripe_account context
+        # does not apply; it is accepted only for signature compatibility.
+        api_key = api_key or self.default_api_key
+        return self._v2_accounts(api_key).retrieve(
+            self.id, params={"include": list(self.DEFAULT_INCLUDE)}
+        )
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        # The v2 list endpoint takes ``include``/pagination via ``params`` and
+        # does not use the v1 ``expand``/``stripe_account`` kwargs the sync
+        # command passes, so those are ignored here.
+        api_key = api_key or djstripe_settings.STRIPE_SECRET_KEY
+        return (
+            cls._v2_accounts(api_key)
+            .list(params={"include": list(cls.DEFAULT_INCLUDE)})
+            .auto_paging_iter()
+        )
+
+    @classmethod
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        api_key = api_key or djstripe_settings.get_default_api_key()
+        return cls._v2_accounts(api_key).create(params=kwargs or None)
+
+    def _api_update(self, api_key=None, stripe_account=None, **kwargs):
+        api_key = api_key or self.default_api_key
+        return self._v2_accounts(api_key).update(self.id, params=kwargs or None)
+
+    def api_close(self, api_key=None, **kwargs):
+        """Close this account (the v2 equivalent of deleting it)."""
+        api_key = api_key or self.default_api_key
+        return self._v2_accounts(api_key).close(self.id, params=kwargs or None)
+
+    def _api_delete(self, api_key=None, stripe_account=None, **kwargs):
+        # v2 accounts cannot be deleted, only closed.
+        return self.api_close(api_key=api_key, **kwargs)
+
+    @classmethod
+    def _get_or_retrieve(cls, id, stripe_account=None, **kwargs):
+        try:
+            return cls.objects.get(id=id)
+        except cls.DoesNotExist:
+            pass
+
+        api_key = kwargs.get("api_key") or djstripe_settings.get_default_api_key(
+            livemode=kwargs.get("livemode")
+        )
+        data = cls._v2_accounts(api_key).retrieve(
+            id, params={"include": list(cls.DEFAULT_INCLUDE)}
+        )
+        return cls.sync_from_stripe_data(data, api_key=api_key)

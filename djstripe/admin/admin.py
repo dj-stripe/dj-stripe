@@ -135,6 +135,13 @@ class AccountAdmin(StripeModelAdmin):
     search_fields = ("settings", "business_profile")
 
 
+@admin.register(models.AccountV2)
+class AccountV2Admin(StripeModelAdmin):
+    list_display = ("display_name", "contact_email", "dashboard")
+
+    search_fields = ("id", "stripe_data")
+
+
 @admin.register(models.APIKey)
 class APIKeyAdmin(admin.ModelAdmin):
     add_form_template = "djstripe/admin/add_form.html"
