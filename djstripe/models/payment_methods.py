@@ -1,3 +1,4 @@
+import warnings
 from typing import Union
 
 import stripe
@@ -486,6 +487,11 @@ class Source(StripeModel):
     the Stripe API just like a Card object: once chargeable,
     they can be charged, or can be attached to customers.
 
+    .. deprecated:: 2.11.0
+        The Stripe Sources API has been deprecated in favour of the
+        PaymentMethods API. Use the `PaymentMethod` model instead. The `Source`
+        model will be removed in a future release.
+
     Stripe documentation: https://stripe.com/docs/api?lang=python#sources
     """
 
@@ -499,6 +505,17 @@ class Source(StripeModel):
 
     stripe_class = stripe.Source
     stripe_dashboard_item_name = "sources"
+
+    @classmethod
+    def sync_from_stripe_data(cls, data, api_key=None):
+        warnings.warn(
+            "The Source model is deprecated, as the Stripe Sources API has been"
+            " deprecated in favour of the PaymentMethods API. Use the PaymentMethod"
+            " model instead. Source will be removed in a future dj-stripe release.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return super().sync_from_stripe_data(data, api_key=api_key)
 
     @property
     def amount(self):
@@ -577,8 +594,9 @@ class Source(StripeModel):
         Detach the source from its customer.
         """
 
-        # First, wipe default source on all customers that use this.
-        # See ``LegacySourceMixin.remove`` for the rationale on the JSON path.
+        # First, wipe default source on all customers that use this. The value
+        # lives in the stripe_data JSON blob and may be either the bare id or an
+        # inline source dict, so match both.
         from django.db.models import Q
 
         affected = Customer.objects.filter(
