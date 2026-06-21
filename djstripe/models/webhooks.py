@@ -88,7 +88,15 @@ class WebhookEndpoint(StripeModel):
         super()._attach_objects_hook(
             cls, data, current_ids=current_ids, api_key=api_key
         )
-        self.djstripe_uuid = data.get("metadata", {}).get("djstripe_uuid")
+        # Endpoints created through dj-stripe carry their djstripe_uuid in the
+        # Stripe metadata. Endpoints created elsewhere (eg. the Stripe dashboard)
+        # don't, so only adopt the metadata value when it's actually present;
+        # otherwise keep the existing (or auto-generated default) uuid. Setting
+        # it to None here would violate the NOT NULL/unique constraint and abort
+        # the sync (#2146).
+        djstripe_uuid = data.get("metadata", {}).get("djstripe_uuid")
+        if djstripe_uuid:
+            self.djstripe_uuid = djstripe_uuid
 
         djstripe_tolerance = data.get("djstripe_tolerance")
         # As djstripe_tolerance can be set to 0

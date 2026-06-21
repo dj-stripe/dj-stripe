@@ -742,6 +742,26 @@ class TestWebhookEndpoint(CreateAccountMixin):
         # assert WebHookEndpoint's secret does not exist for a new sync
         assert not webhook_endpoint.secret
 
+    def test_sync_from_stripe_data_dashboard_created_endpoint(self):
+        # Endpoints created outside dj-stripe (eg. on the Stripe dashboard) have
+        # no djstripe_uuid in their metadata. Syncing them must still work and
+        # auto-generate a djstripe_uuid rather than crash with a DoesNotExist
+        # caused by a NOT NULL violation (#2146).
+        fake_webhook = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
+        fake_webhook["metadata"] = {}
+        del fake_webhook["djstripe_uuid"]
+
+        webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook)
+
+        assert webhook_endpoint.id == fake_webhook["id"]
+        assert isinstance(webhook_endpoint.djstripe_uuid, UUID)
+
+        # Re-syncing keeps the generated uuid stable
+        generated_uuid = webhook_endpoint.djstripe_uuid
+        WebhookEndpoint.sync_from_stripe_data(deepcopy(fake_webhook))
+        webhook_endpoint.refresh_from_db()
+        assert webhook_endpoint.djstripe_uuid == generated_uuid
+
     def test_sync_from_stripe_data_existent_webhook_endpoint(self):
         fake_webhook_1 = deepcopy(FAKE_WEBHOOK_ENDPOINT_1)
         webhook_endpoint = WebhookEndpoint.sync_from_stripe_data(fake_webhook_1)
