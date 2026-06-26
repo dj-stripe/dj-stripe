@@ -1,6 +1,6 @@
 [project]
 name = "dj-stripe"
-version = "2.10.1"
+version = "2.11.0"
 description = "Django + Stripe made easy"
 license = "MIT"
 authors = [
