@@ -61,9 +61,9 @@ class DjstripePaymentMethod(models.Model):
     def _model_for_type(cls, type):
         if type == "card":
             return Card
-        elif type == "bank_account":
+        if type == "bank_account":
             return BankAccount
-        elif type == "account":
+        if type == "account":
             return Account
 
         raise ValueError(f"Unknown source type: {type}")
@@ -581,7 +581,7 @@ class PaymentMethod(StripeModel):
                     customer.api_retrieve(api_key=api_key), api_key=api_key
                 )
 
-        except (InvalidRequestError,):
+        except InvalidRequestError:
             # The source was already detached. Resyncing.
 
             if self.pk and not is_legacy_card:

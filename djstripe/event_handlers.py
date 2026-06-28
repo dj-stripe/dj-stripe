@@ -459,7 +459,7 @@ def _handle_crud_like_event(
         # no ID the event is ignored/dropped. This happens in events such as
         # invoice.upcoming, which refer to a future (non-existant) invoice.
         logger.debug("Ignoring Stripe event %r without object ID", event.id)
-        return
+        return None
 
     crud_type = crud_type or CrudType.determine(event=event, verb=event.verb)
 

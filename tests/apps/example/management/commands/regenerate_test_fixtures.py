@@ -255,9 +255,8 @@ class Command(BaseCommand):
             for path in tests.FIXTURE_DIR_PATH.glob("*.json"):
                 if path in paths:
                     continue
-                else:
-                    self.stdout.write(f"deleting {path!r}")
-                    path.unlink()
+                self.stdout.write(f"deleting {path!r}")
+                path.unlink()
 
     def init_fake_id_map(self):
         """
@@ -544,7 +543,7 @@ class Command(BaseCommand):
 
             self.stdout.write(f"    found {id_}")
         except InvalidRequestError:
-            assert False, "Expected to find invoice via subscription"
+            raise AssertionError("Expected to find invoice via subscription") from None
 
         for k in writable_fields:
             if isinstance(obj.get(k), dict):
@@ -567,7 +566,7 @@ class Command(BaseCommand):
 
             self.stdout.write(f"    found {id_}")
         except InvalidRequestError:
-            assert False, "Expected to find charge via invoice"
+            raise AssertionError("Expected to find charge via invoice") from None
 
         for k in writable_fields:
             if isinstance(obj.get(k), dict):
@@ -590,7 +589,9 @@ class Command(BaseCommand):
 
             self.stdout.write(f"    found {id_}")
         except InvalidRequestError:
-            assert False, "Expected to find payment_intent via invoice"
+            raise AssertionError(
+                "Expected to find payment_intent via invoice"
+            ) from None
 
         for k in writable_fields:
             if isinstance(obj.get(k), dict):
@@ -652,7 +653,9 @@ class Command(BaseCommand):
 
             self.stdout.write(f"    found {id_}")
         except InvalidRequestError:
-            assert False, "Expected to find balance transaction via source"
+            raise AssertionError(
+                "Expected to find balance transaction via source"
+            ) from None
 
         return created, obj
 
@@ -744,7 +747,8 @@ class Command(BaseCommand):
             if isinstance(new_val, ListObject):
                 # recursively process nested lists
                 for n, (old_val_item, new_val_item) in enumerate(
-                    zip(old_val.get("data", []), new_val.data)
+                    # old (fixture) and new (Stripe) lists may differ in length
+                    zip(old_val.get("data", []), new_val.data, strict=False)
                 ):
                     new_val.data[n] = self.preserve_old_sideeffect_values(
                         old_obj=old_val_item,

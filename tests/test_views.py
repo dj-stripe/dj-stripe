@@ -241,7 +241,7 @@ class TestConfirmCustomActionView(CreateAccountMixin):
                 or model.__name__ not in self.ignore_models
             ):
                 # monkeypatch utils.get_model
-                def mock_get_model(*args, **kwargs):
+                def mock_get_model(*args, model=model, **kwargs):
                     return model
 
                 monkeypatch.setattr(utils, "get_model", mock_get_model)

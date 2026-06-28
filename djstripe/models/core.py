@@ -270,9 +270,9 @@ class Charge(StripeModel):
     def human_readable_status(self) -> str:
         if not self.captured:
             return "Uncaptured"
-        elif self.disputed:
+        if self.disputed:
             return "Disputed"
-        elif self.refunded:
+        if self.refunded:
             return "Refunded"
         return enums.ChargeStatus.humanize(self.status)
 
@@ -1048,10 +1048,9 @@ class Customer(StripeModel):
                 "This customer has multiple subscriptions. Use Customer.subscriptions "
                 "to access them."
             )
-        elif subscriptions:
+        if subscriptions:
             return subscriptions[0]
-        else:
-            return None
+        return None
 
     def send_invoice(self, **kwargs):
         """

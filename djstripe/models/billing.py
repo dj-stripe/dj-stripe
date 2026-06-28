@@ -787,7 +787,8 @@ class InvoiceItem(StripeModel):
         if "-il_" in self.id:
             warnings.warn(
                 f"Attempting to retrieve InvoiceItem with id={self.id!r}"
-                " will most likely fail, as it uses the pre-2019-12-03 id format."
+                " will most likely fail, as it uses the pre-2019-12-03 id format.",
+                stacklevel=2,
             )
 
         return super().api_retrieve(*args, **kwargs)

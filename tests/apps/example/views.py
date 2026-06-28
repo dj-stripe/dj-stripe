@@ -283,8 +283,7 @@ def create_payment_intent(request):
             return_data[0], content_type="application/json", status=return_data[1]
         )
 
-    else:
-        context = {
-            "STRIPE_PUBLIC_KEY": djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
-        }
-        return TemplateResponse(request, "payment_intent.html", context)
+    context = {
+        "STRIPE_PUBLIC_KEY": djstripe_settings.djstripe_settings.STRIPE_PUBLIC_KEY
+    }
+    return TemplateResponse(request, "payment_intent.html", context)

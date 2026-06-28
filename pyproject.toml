@@ -74,7 +74,7 @@ include = [
 ]
 
 [tool.ruff.lint]
-select = ["F", "FURB", "UP"]
+select = ["B", "F", "FURB", "RET502", "RET505", "RET506", "RET507", "UP"]
 
 [tool.mypy]
 plugins = ["mypy_django_plugin.main"]

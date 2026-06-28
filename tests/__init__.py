@@ -52,8 +52,7 @@ class StripeItem(dict):
         """Give StripeItem normal object access to match Stripe behavior."""
         if name in self:
             return self[name]
-        else:
-            raise AttributeError("No such attribute: " + name)
+        raise AttributeError("No such attribute: " + name)
 
     def __setattr__(self, name, value):
         self[name] = value
@@ -112,8 +111,7 @@ class StripeList(dict):
         """Give StripeItem normal object access to match Stripe behavior."""
         if name in self:
             return self[name]
-        else:
-            raise AttributeError("No such attribute: " + name)
+        raise AttributeError("No such attribute: " + name)
 
     def __setattr__(self, name, value):
         self[name] = value
@@ -133,8 +131,7 @@ class StripeList(dict):
         """Define iteration for StripeList."""
         if len(self.iter_copy) > 0:
             return self.iter_copy.pop(0)
-        else:
-            raise StopIteration()
+        raise StopIteration()
 
     def list(self, **kwargs: Any) -> "StripeList":
         """Add a list method to the StripeList which returns itself.

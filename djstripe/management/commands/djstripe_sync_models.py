@@ -102,7 +102,9 @@ class Command(BaseCommand):
                 try:
                     model = app_config.get_model(model_label)
                 except LookupError:
-                    raise CommandError(f"Unknown model: {app_label}.{model_label}")
+                    raise CommandError(
+                        f"Unknown model: {app_label}.{model_label}"
+                    ) from None
 
                 model_list.append(model)
         else:
@@ -146,7 +148,7 @@ class Command(BaseCommand):
                 try:
                     get_api_key_details_by_prefix(api_key)
                 except InvalidStripeAPIKey as e:
-                    raise CommandError(str(e))
+                    raise CommandError(str(e)) from e
             return api_keys
 
         secrets = list(

@@ -91,7 +91,7 @@ def get_id_from_stripe_data(data):
     if isinstance(data, str):
         # data like "sub_6lsC8pt7IcFpjA"
         return data
-    elif data:
+    if data:
         # data like {"id": sub_6lsC8pt7IcFpjA", ...}
         return data.get("id")
 

@@ -451,10 +451,9 @@ class StripeModel(StripeBaseModel):
                     # as stripe does not return the secret except for the CREATE call
                     if cls is WebhookEndpoint and field.name == "secret":
                         continue
-                    else:
-                        # TODO - this applies to StripeEnumField as well, since it
-                        #  sub-classes CharField, is that intentional?
-                        field_data = ""
+                    # TODO - this applies to StripeEnumField as well, since it
+                    #  sub-classes CharField, is that intentional?
+                    field_data = ""
 
             result[field.name] = field_data
 
@@ -749,7 +748,7 @@ class StripeModel(StripeBaseModel):
                 f"dj-stripe encountered an empty field {cls.__name__}.{field_name} ="
                 f" {field}"
             )
-        elif id_ == field:
+        if id_ == field:
             # A field like {"subscription": "sub_6lsC8pt7IcFpjA", ...}
             # We'll have to expand if the field is not "id" (= is nested)
             should_expand = is_nested_data

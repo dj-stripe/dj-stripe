@@ -254,7 +254,7 @@ class Transfer(StripeModel):
         if self.stripe_data.get("reversed"):
             # Complete Reversal
             return f"{amount} Reversed"
-        elif self.stripe_data.get("amount_reversed"):
+        if self.stripe_data.get("amount_reversed"):
             # Partial Reversal
             return f"{amount} Partially Reversed"
         # No Reversal

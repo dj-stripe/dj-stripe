@@ -36,7 +36,7 @@ class TestCustomerSubscriberFK(TestCase):
         """
         # assert DJSTRIPE_SUBSCRIBER_MODEL has not been set
         with pytest.raises(AttributeError):
-            settings.DJSTRIPE_SUBSCRIBER_MODEL
+            _ = settings.DJSTRIPE_SUBSCRIBER_MODEL
 
         field = Customer._meta.get_field("subscriber")
         self.assertEqual(field.related_model, get_user_model())

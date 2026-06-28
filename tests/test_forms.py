@@ -59,7 +59,9 @@ class TestCustomActionForm:
                 ("_sync_all_instances", "_sync_all_instances")
             ]
         else:
-            assert _selected_action_field.choices == list(zip(pk_values, pk_values))
+            assert _selected_action_field.choices == list(
+                zip(pk_values, pk_values, strict=True)
+            )
 
 
 class TestAPIKeyAdminCreateForm(CreateAccountMixin):

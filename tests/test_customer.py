@@ -1250,7 +1250,7 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertEqual(2, len(self.customer.valid_subscriptions))
 
         with self.assertRaises(MultipleSubscriptionException):
-            self.customer.subscription
+            _ = self.customer.subscription
 
     @patch.object(Subscription, "_api_create", autospec=True)
     @patch("stripe.Subscription.create", autospec=True)

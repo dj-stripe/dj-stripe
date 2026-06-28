@@ -70,6 +70,7 @@ class CustomActionForm(forms.Form):
                 choices=zip(
                     model.objects.values_list("pk", flat=True),
                     model.objects.values_list("pk", flat=True),
+                    strict=True,
                 ),
             )
 
@@ -160,7 +161,7 @@ class WebhookEndpointAdminCreateForm(WebhookEndpointAdminBaseForm):
             "The list of events to enable for this endpoint. ['*'] indicates that all"
             " events are enabled, except those that require explicit selection."
         ),
-        choices=zip(ENABLED_EVENTS, ENABLED_EVENTS),
+        choices=zip(ENABLED_EVENTS, ENABLED_EVENTS, strict=True),
         initial=["*"],
     )
     livemode = forms.BooleanField(
@@ -255,7 +256,7 @@ class WebhookEndpointAdminEditForm(WebhookEndpointAdminBaseForm):
             "The list of events to enable for this endpoint. ['*'] indicates that all"
             " events are enabled, except those that require explicit selection."
         ),
-        choices=zip(ENABLED_EVENTS, ENABLED_EVENTS),
+        choices=zip(ENABLED_EVENTS, ENABLED_EVENTS, strict=True),
     )
     base_url = forms.URLField(
         required=False,

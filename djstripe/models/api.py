@@ -99,7 +99,7 @@ class APIKey(StripeModel):
             try:
                 self.type, self.livemode = get_api_key_details_by_prefix(self.secret)
             except InvalidStripeAPIKey as e:
-                raise ValidationError(str(e))
+                raise ValidationError(str(e)) from e
 
     def refresh_account(self, commit=True):
         from .account import Account

@@ -4,24 +4,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('djstripe', '0003_2_11'),
+        ("djstripe", "0003_2_11"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='sourcetransaction',
-            name='source',
+            model_name="sourcetransaction",
+            name="source",
         ),
         migrations.RemoveField(
-            model_name='sourcetransaction',
-            name='djstripe_owner_account',
+            model_name="sourcetransaction",
+            name="djstripe_owner_account",
         ),
         migrations.DeleteModel(
-            name='Source',
+            name="Source",
         ),
         migrations.DeleteModel(
-            name='SourceTransaction',
+            name="SourceTransaction",
         ),
     ]

@@ -41,7 +41,7 @@ class DjstripeSettings:
         # Set STRIPE_API_HOST if you want to use a different Stripe API server
         # Example: https://github.com/stripe/stripe-mock
         if hasattr(settings, "STRIPE_API_HOST"):
-            stripe.api_base = getattr(settings, "STRIPE_API_HOST")
+            stripe.api_base = settings.STRIPE_API_HOST
 
     # generic setter and deleter methods to ensure object patching works
     def __setattr__(self, name, value):
@@ -190,7 +190,7 @@ class DjstripeSettings:
         if livemode is None:
             # Livemode is unknown. Use the default secret key.
             return self.STRIPE_SECRET_KEY
-        elif livemode:
+        if livemode:
             # Livemode is true, use the live secret key
             return self.LIVE_API_KEY or self.STRIPE_SECRET_KEY
         # Livemode is false, use the test secret key
@@ -213,18 +213,17 @@ class DjstripeSettings:
         """
         model_name = self.get_subscriber_model_string()
 
-        # Attempt a Django 1.7 app lookup
         try:
             subscriber_model = django_apps.get_model(model_name)
-        except ValueError:
+        except ValueError as e:
             raise ImproperlyConfigured(
                 "DJSTRIPE_SUBSCRIBER_MODEL must be of the form 'app_label.model_name'."
-            )
-        except LookupError:
+            ) from e
+        except LookupError as e:
             raise ImproperlyConfigured(
                 f"DJSTRIPE_SUBSCRIBER_MODEL refers to model '{model_name}' "
                 "that has not been installed."
-            )
+            ) from e
 
         if (
             "email"

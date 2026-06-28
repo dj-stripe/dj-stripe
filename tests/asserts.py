@@ -56,18 +56,15 @@ class AssertStripeFksMixin:
         if isinstance(field, models.OneToOneRel):
             if field.parent_link:
                 return ""
-            else:
-                reverse_id_name = str(field.remote_field.foreign_related_fields[0])
-                return (
-                    reverse_id_name.replace("djstripe_id", field.name)
-                    + " (related name)"
-                )
+            reverse_id_name = str(field.remote_field.foreign_related_fields[0])
+            return (
+                reverse_id_name.replace("djstripe_id", field.name) + " (related name)"
+            )
 
-        elif isinstance(field, models.ForeignKey):
+        if isinstance(field, models.ForeignKey):
             return str(field)
 
-        else:
-            return ""
+        return ""
 
     def assert_fks(
         self,

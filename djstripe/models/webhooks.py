@@ -150,7 +150,8 @@ def get_remote_ip(request):
     if not ip:
         warnings.warn(
             "Could not determine remote IP (missing REMOTE_ADDR). "
-            "This is likely an issue with your wsgi/server setup."
+            "This is likely an issue with your wsgi/server setup.",
+            stacklevel=2,
         )
         ip = "0.0.0.0"
 
@@ -356,9 +357,9 @@ class WebhookEventTrigger(models.Model):
 
         if validation_method == WebhookEndpointValidation.none:
             # validation disabled
-            warnings.warn("WEBHOOK VALIDATION is disabled.")
+            warnings.warn("WEBHOOK VALIDATION is disabled.", stacklevel=2)
             return True
-        elif validation_method == WebhookEndpointValidation.verify_signature:
+        if validation_method == WebhookEndpointValidation.verify_signature:
             if settings.DEBUG:
                 # In debug mode, allow overriding the webhook secret with
                 # the x-djstripe-webhook-secret header.
