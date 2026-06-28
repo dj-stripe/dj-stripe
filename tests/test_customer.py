@@ -24,7 +24,6 @@ from djstripe.models import (
     Product,
     Subscription,
 )
-from djstripe.models.payment_methods import Source
 from djstripe.settings import djstripe_settings
 
 from . import (
@@ -47,7 +46,6 @@ from . import (
     FAKE_PRICE,
     FAKE_PRODUCT,
     FAKE_REFUND,
-    FAKE_SOURCE_II,
     FAKE_SUBSCRIPTION,
     FAKE_SUBSCRIPTION_II,
     FAKE_SUBSCRIPTION_ITEM,
@@ -272,17 +270,8 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             username="test_user_sync_non_local_card"
         )
 
-        # create a source object so that FAKE_CUSTOMER_III with a default source
-        # can be created correctly.
-        fake_source_data = deepcopy(FAKE_SOURCE_II)
-        fake_source_data["card"] = deepcopy(fake_card)
-        fake_source_data["customer"] = fake_customer
-
-        Source.sync_from_stripe_data(fake_source_data)
-
         customer = fake_customer.create_for_user(user)
 
-        self.assertEqual(customer.sources.count(), 1)
         self.assertEqual(
             customer.default_source["id"], fake_customer["default_source"]["id"]
         )
@@ -304,7 +293,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             {"djstripe_subscriber": user.pk},
         )
 
-        self.assertEqual(customer.sources.count(), 0)
         self.assertEqual(customer.default_source, None)
 
         self.assert_fks(
@@ -330,9 +318,6 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         actual = customer.default_source
         actual_id = actual["id"] if isinstance(actual, dict) else actual
         self.assertEqual(actual_id, expected_id)
-        # Legacy card/bank_account entries in a customer's `sources` list are no
-        # longer synced (dropped in dj-stripe 2.11), so no payment methods remain.
-        self.assertEqual(len(list(customer.customer_payment_methods)), 0)
 
         self.assert_fks(
             customer,

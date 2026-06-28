@@ -713,13 +713,6 @@ class Customer(StripeModel):
         return self.stripe_data.get("delinquent", False) or False
 
     @property
-    def customer_payment_methods(self):
-        """
-        An iterable of all of the customer's payment methods
-        """
-        yield from self.sources.iterator()
-
-    @property
     def discount(self):
         return self.stripe_data.get("discount")
 
@@ -955,11 +948,9 @@ class Customer(StripeModel):
 
         self.subscriber = None
 
-        # Remove sources. default_source is a read-only @property over
-        # stripe_data, so write to the underlying dict instead.
+        # default_source is a read-only @property over stripe_data, so write to
+        # the underlying dict instead.
         self.stripe_data["default_source"] = None
-        for source in self.sources.all():
-            source.detach()
 
         self.date_purged = timezone.now()
         self.save()
@@ -1116,37 +1107,17 @@ class Customer(StripeModel):
         api_key=djstripe_settings.STRIPE_SECRET_KEY,
     ):
         from .billing import Coupon
-        from .payment_methods import DjstripePaymentMethod
 
         super()._attach_objects_post_save_hook(
             cls, data, pending_relations=pending_relations, api_key=api_key
         )
 
-        save = False
-
-        customer_sources = data.get("sources")
-        if customer_sources:
-            # A customer's `sources` list may historically contain legacy card
-            # and bank_account objects, but those are no longer attached to
-            # customers (dropped in dj-stripe 2.11). Only Source objects are
-            # synced here.
-            for source in customer_sources["data"]:
-                if source["object"] != "source":
-                    continue
-                DjstripePaymentMethod._get_or_create_source(
-                    source, source["object"], api_key=api_key
-                )
-
         discount = data.get("discount")
         if discount:
-            coupon, _created = Coupon._get_or_create_from_stripe_object(
+            # Coupon is accessed via stripe_data, so we don't need to save it.
+            Coupon._get_or_create_from_stripe_object(
                 discount, "coupon", api_key=api_key
             )
-            # Coupon is now accessed via stripe_data, so we don't need to save it
-            pass
-
-        if save:
-            self.save()
 
     def _attach_objects_hook(
         self, cls, data, current_ids=None, api_key=djstripe_settings.STRIPE_SECRET_KEY

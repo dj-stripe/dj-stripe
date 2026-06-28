@@ -102,20 +102,6 @@ class Command(BaseCommand):
             ],
             djstripe.models.PaymentIntent: ["id"],
             djstripe.models.PaymentMethod: ["id"],
-            djstripe.models.Source: [
-                "id",
-                "amount",
-                "card",
-                "client_secret",
-                "currency",
-                "customer",
-                "flow",
-                "owner",
-                "statement_descriptor",
-                "status",
-                "type",
-                "usage",
-            ],
             djstripe.models.Subscription: [
                 "id",
                 # not actually read-only
@@ -144,7 +130,6 @@ class Command(BaseCommand):
         """
         model_sideeffect_fields = {
             djstripe.models.BalanceTransaction: ["available_on"],
-            djstripe.models.Source: ["client_secret"],
             djstripe.models.Charge: ["receipt_url"],
             djstripe.models.Subscription: [
                 "billing_cycle_anchor",
@@ -190,7 +175,6 @@ class Command(BaseCommand):
                 tests.FAKE_CARD_II,
                 tests.FAKE_CARD_III,
             ],
-            djstripe.models.Source: [tests.FAKE_SOURCE],
             djstripe.models.Price: [tests.FAKE_PRICE, tests.FAKE_PRICE_II],
             djstripe.models.Product: [tests.FAKE_PRODUCT],
             djstripe.models.TaxRate: [
@@ -539,37 +523,6 @@ class Command(BaseCommand):
                 create_obj.pop(k, None)
 
             obj = stripe.Customer.create_source(**{"source": "tok_visa"})
-
-            for k, v in create_obj.items():
-                setattr(obj, k, v)
-
-            obj.save()
-            created = True
-
-        return created, obj
-
-    def get_or_create_stripe_source(self, old_obj, readonly_fields):
-        customer_id = old_obj["customer"]
-
-        try:
-            obj = stripe.Customer.retrieve_source(customer_id, old_obj["id"])
-            created = False
-
-            self.stdout.write("    found")
-        except InvalidRequestError:
-            self.stdout.write("    creating")
-
-            create_obj = deepcopy(old_obj)
-
-            # create in Stripe
-            for k in readonly_fields:
-                create_obj.pop(k, None)
-
-            source_obj = djstripe.models.Source._api_create(
-                **{"token": "tok_visa", "type": "card"}
-            )
-
-            obj = stripe.Customer.create_source(**{"source": source_obj.id})
 
             for k, v in create_obj.items():
                 setattr(obj, k, v)

@@ -365,73 +365,6 @@ FAKE_CARD_III = CardDict(load_fixture("card_card_fakefakefakefakefake0003.json")
 FAKE_CARD_IV = CardDict(load_fixture("card_card_fakefakefakefakefake0004.json"))
 
 
-class SourceDict(dict):
-    def detach(self):
-        self.pop("customer")
-        self.update({"status": "consumed"})
-        return self
-
-
-# Attached, chargeable source
-FAKE_SOURCE = SourceDict(load_fixture("source_src_fakefakefakefakefake0001.json"))
-
-# Detached, consumed source
-FAKE_SOURCE_II = SourceDict(
-    {
-        "id": "src_1DuuGjkE6hxDGaasasjdlajl",
-        "object": "source",
-        "amount": None,
-        "card": {
-            "address_line1_check": None,
-            "address_zip_check": "pass",
-            "brand": "Visa",
-            "country": "US",
-            "cvc_check": "pass",
-            "dynamic_last4": None,
-            "exp_month": 10,
-            "exp_year": 2029,
-            "fingerprint": "TmOrYzPdAoO6YFNB",
-            "funding": "credit",
-            "last4": "4242",
-            "name": None,
-            "three_d_secure": "optional",
-            "tokenization_method": None,
-        },
-        "client_secret": "src_client_secret_ENg5dyB1KTXCAEJGJQWEf67X",
-        "created": 1548046215,
-        "currency": None,
-        "flow": "none",
-        "livemode": False,
-        "metadata": {"djstripe_test_fake_id": "src_fakefakefakefakefake0002"},
-        "owner": {
-            "address": {
-                "city": None,
-                "country": None,
-                "line1": None,
-                "line2": None,
-                "postal_code": "90210",
-                "state": None,
-            },
-            "email": None,
-            "name": None,
-            "phone": None,
-            "verified_address": None,
-            "verified_email": None,
-            "verified_name": None,
-            "verified_phone": None,
-        },
-        "statement_descriptor": None,
-        "status": "consumed",
-        "type": "card",
-        "usage": "reusable",
-    }
-)
-
-
-FAKE_SOURCE_TRANSACTION = load_fixture(
-    "sourcetransaction_srctxn_fakefakefakefakefake0001.json"
-)
-
 FAKE_PAYMENT_INTENT_I = load_fixture("payment_intent_pi_fakefakefakefakefake0001.json")
 
 FAKE_PAYMENT_INTENT_II = deepcopy(FAKE_PAYMENT_INTENT_I)
@@ -1201,10 +1134,9 @@ def convert_source_dict(data):
             data = CardDict(data)
         elif source_type == "bank_account":
             data = BankAccountDict(data)
-        elif source_type == "source":
-            data = SourceDict(data)
-        else:
-            raise ValueError(f"Unknown source type: {source_type}")
+        # Other payment source types (e.g. the legacy "source" object) are left
+        # as plain dicts: they are no longer modelled by dj-stripe and only need
+        # to round-trip through the customer's stripe_data.
 
     return data
 

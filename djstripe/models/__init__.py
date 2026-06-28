@@ -56,7 +56,6 @@ from .payment_methods import (
     Card,
     DjstripePaymentMethod,
     PaymentMethod,
-    Source,
 )
 from .radar import EarlyFraudWarning, Review
 from .sigma import ScheduledQueryRun
@@ -108,7 +107,6 @@ __all__ = [
     "ScheduledQueryRun",
     "SetupIntent",
     "Session",
-    "Source",
     "StripeModel",
     "Subscription",
     "SubscriptionItem",

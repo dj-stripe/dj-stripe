@@ -1,4 +1,3 @@
-import warnings
 from typing import Union
 
 import stripe
@@ -7,13 +6,7 @@ from stripe import InvalidRequestError
 
 from .. import enums
 from ..exceptions import ImpossibleAPIRequest, StripeObjectManipulationException
-from ..fields import (
-    JSONField,
-    StripeCurrencyCodeField,
-    StripeDecimalCurrencyAmountField,
-    StripeEnumField,
-    StripeForeignKey,
-)
+from ..fields import StripeForeignKey
 from ..settings import djstripe_settings
 from ..utils import get_id_from_stripe_data
 from .account import Account
@@ -23,12 +16,11 @@ from .core import Customer
 
 class DjstripePaymentMethod(models.Model):
     """
-    An internal model that abstracts the legacy Card and BankAccount
-    objects with Source objects.
+    An internal model that abstracts the legacy Card and BankAccount objects.
 
     Contains two fields: `id` and `type`:
     - `id` is the id of the Stripe object.
-    - `type` can be `card`, `bank_account` `account` or `source`.
+    - `type` can be `card`, `bank_account` or `account`.
     """
 
     id = models.CharField(max_length=255, primary_key=True)
@@ -69,8 +61,6 @@ class DjstripePaymentMethod(models.Model):
     def _model_for_type(cls, type):
         if type == "card":
             return Card
-        elif type == "source":
-            return Source
         elif type == "bank_account":
             return BankAccount
         elif type == "account":
@@ -105,9 +95,6 @@ class DjstripePaymentMethod(models.Model):
         if id_.startswith("card"):
             source_cls = Card
             source_type = "card"
-        elif id_.startswith("src"):
-            source_cls = Source
-            source_type = "source"
         elif id_.startswith("ba"):
             source_cls = BankAccount
             source_type = "bank_account"
@@ -478,283 +465,6 @@ class Card(ExternalAccountMixin, StripeModel):
         card.update(kwargs)
 
         return stripe.Token.create(api_key=api_key, card=card)  # type: ignore[arg-type]  # dict card payload
-
-
-class Source(StripeModel):
-    """
-    Source objects allow you to accept a variety of payment methods.
-    They represent a customer's payment instrument, and can be used with
-    the Stripe API just like a Card object: once chargeable,
-    they can be charged, or can be attached to customers.
-
-    .. deprecated:: 2.11.0
-        The Stripe Sources API has been deprecated in favour of the
-        PaymentMethods API. Use the `PaymentMethod` model instead. The `Source`
-        model will be removed in a future release.
-
-    Stripe documentation: https://stripe.com/docs/api?lang=python#sources
-    """
-
-    customer = StripeForeignKey(
-        "Customer",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="sources",
-    )
-
-    stripe_class = stripe.Source
-    stripe_dashboard_item_name = "sources"
-
-    @classmethod
-    def sync_from_stripe_data(cls, data, api_key=None):
-        warnings.warn(
-            "The Source model is deprecated, as the Stripe Sources API has been"
-            " deprecated in favour of the PaymentMethods API. Use the PaymentMethod"
-            " model instead. Source will be removed in a future dj-stripe release.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return super().sync_from_stripe_data(data, api_key=api_key)
-
-    @property
-    def amount(self):
-        return self.stripe_data.get("amount")
-
-    @property
-    def currency(self):
-        return self.stripe_data.get("currency")
-
-    @property
-    def flow(self):
-        return self.stripe_data.get("flow")
-
-    @property
-    def owner(self):
-        return self.stripe_data.get("owner")
-
-    @property
-    def statement_descriptor(self):
-        return self.stripe_data.get("statement_descriptor")
-
-    @property
-    def status(self):
-        return self.stripe_data.get("status")
-
-    @property
-    def type(self):
-        return self.stripe_data.get("type")
-
-    @property
-    def usage(self):
-        return self.stripe_data.get("usage")
-
-    @property
-    def code_verification(self):
-        return self.stripe_data.get("code_verification")
-
-    @property
-    def receiver(self):
-        return self.stripe_data.get("receiver")
-
-    @property
-    def redirect(self):
-        return self.stripe_data.get("redirect")
-
-    @property
-    def source_data(self):
-        # The source_data dict is an alias of all the source types
-        source_type = self.stripe_data.get("type")
-        if source_type:
-            return self.stripe_data.get(source_type, {})
-        return {}
-
-    def __str__(self):
-        return f"{self.type or ''} {self.id}"
-
-    def _attach_objects_hook(
-        self, cls, data, api_key=djstripe_settings.STRIPE_SECRET_KEY, current_ids=None
-    ):
-        customer = None
-        # "customer" key could be like "cus_6lsBvm5rJ0zyHc" or {"id": "cus_6lsBvm5rJ0zyHc"}
-        customer_id = get_id_from_stripe_data(data.get("customer"))
-
-        if current_ids is None or customer_id not in current_ids:
-            customer = cls._stripe_object_to_customer(
-                target_cls=Customer, data=data, current_ids=current_ids, api_key=api_key
-            )
-
-        if customer:
-            self.customer = customer
-        else:
-            self.customer = None
-
-    def detach(self) -> bool:
-        """
-        Detach the source from its customer.
-        """
-
-        # First, wipe default source on all customers that use this. The value
-        # lives in the stripe_data JSON blob and may be either the bare id or an
-        # inline source dict, so match both.
-        from django.db.models import Q
-
-        affected = Customer.objects.filter(
-            Q(stripe_data__default_source=self.id)
-            | Q(stripe_data__default_source__id=self.id)
-        )
-        for customer in affected:
-            customer.stripe_data["default_source"] = None
-            customer.save(update_fields=["stripe_data"])
-
-        api_key = self.default_api_key
-        try:
-            # TODO - we could use the return value of sync_from_stripe_data
-            #  or call its internals - self._sync/_attach_objects_hook etc here
-            #  to update `self` at this point?
-            self.sync_from_stripe_data(
-                self.api_retrieve(api_key=api_key).detach(), api_key=api_key
-            )
-            return True
-        except InvalidRequestError:
-            # The source was already detached. Resyncing.
-            self.sync_from_stripe_data(
-                self.api_retrieve(api_key=self.default_api_key),
-                api_key=self.default_api_key,
-            )
-            return False
-
-    @classmethod
-    def api_list(  # type: ignore[override]  # narrows api_key/adds customer kwarg
-        cls,
-        api_key=djstripe_settings.STRIPE_SECRET_KEY,
-        *,
-        customer: Customer,
-        **kwargs,
-    ):
-        """
-        Call the stripe API's list operation for this model.
-        :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
-        :type api_key: string
-        See Stripe documentation for accepted kwargs for each object.
-        :returns: an iterator over all items in the query
-        """
-        # Update kwargs with `expand` param
-        kwargs = cls.get_expand_params(api_key, **kwargs)
-
-        return Customer.stripe_class.list_sources(
-            object="source",
-            api_key=api_key,
-            stripe_version=djstripe_settings.STRIPE_API_VERSION,
-            customer=customer.id,
-            **kwargs,
-        ).auto_paging_iter()
-
-
-class SourceTransaction(StripeModel):
-    """
-    Stripe documentation: https://stripe.com/docs/sources/ach-credit-transfer#source-transactions
-    """
-
-    stripe_class = stripe.SourceTransaction  # type: ignore[assignment]  # not an APIResource subclass
-    stripe_dashboard_item_name = "source_transactions"
-
-    metadata = None
-    type = enums.SourceType.ach_credit_transfer
-
-    ach_credit_transfer = JSONField(
-        help_text="The data corresponding to the ach_credit_transfer type."
-    )
-    amount = StripeDecimalCurrencyAmountField(
-        null=True,
-        blank=True,
-        help_text=(
-            "Amount (as decimal) associated with the ACH Credit Transfer. This is the"
-            " amount your customer has sent for which the source will be chargeable"
-            " once ready. "
-        ),
-    )
-    currency = StripeCurrencyCodeField()
-
-    # did not use CharField because no idea about possible max-length
-    customer_data = JSONField(
-        null=True,
-        blank=True,
-        help_text="Customer defined string used to initiate the ACH Credit Transfer.",
-    )
-    # source cannot be null but we are allowing this because the order of webhooks is not deterministic
-    source = StripeForeignKey(
-        "Source",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
-    status = StripeEnumField(
-        enum=enums.SourceTransactionStatus,
-        help_text=(
-            "The status of the ACH Credit Transfer. Only `chargeable` sources can be"
-            " used to create a charge."
-        ),
-    )
-
-    def __str__(self):
-        # source is nullable because webhook ordering is not deterministic.
-        source_id = self.source.id if self.source else None
-        return f"Source Transaction status={self.status}, source={source_id}"
-
-    @classmethod
-    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
-        """
-        Call the stripe API's list operation for this model.
-        :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
-        :type api_key: string
-        See Stripe documentation for accepted kwargs for each object.
-        :returns: an iterator over all items in the query
-        """
-        # Update kwargs with `expand` param
-        kwargs = cls.get_expand_params(api_key, **kwargs)
-
-        source = kwargs.pop("id", None)
-        if not source:
-            raise KeyError("Source Object ID is missing")
-
-        return stripe.Source.list_source_transactions(
-            source, api_key=api_key, **kwargs
-        ).auto_paging_iter()
-
-    def api_retrieve(self, api_key=None, stripe_account=None):
-        """
-        Call the stripe API's retrieve operation for this model.
-
-        :param api_key: The api key to use for this request. \
-            Defaults to djstripe_settings.STRIPE_SECRET_KEY.
-        :type api_key: string
-        :param stripe_account: The optional connected account \
-            for which this request is being made.
-        :type stripe_account: string
-        """
-        # Prefer passed in stripe_account if set.
-        if not stripe_account:
-            stripe_account = self._get_stripe_account_id(api_key)
-
-        for source_trx in SourceTransaction.api_list(
-            id=self.source.id, api_key=api_key, stripe_account=stripe_account
-        ):
-            if source_trx.id == self.id:
-                return source_trx
-
-    def get_stripe_dashboard_url(self) -> str:
-        """Get the stripe dashboard url for this object."""
-        if (
-            not self.stripe_dashboard_item_name
-            or not self.id
-            or not self.source
-            or not self.source.id
-        ):
-            return ""
-        return f"{self._get_base_stripe_dashboard_url()}sources/{self.source.id}"
 
 
 class PaymentMethod(StripeModel):
