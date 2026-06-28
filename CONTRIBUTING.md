@@ -31,20 +31,17 @@ whoever wants to implement it.
 dj-stripe could always use more documentation, whether as part of the official dj-stripe
 docs, in docstrings, or even on the web in blog posts, articles, and such.
 
-To see the project's documentation live, first install the docs dependencies:
+The prose documentation lives as plain Markdown under [`docs/`](https://github.com/dj-stripe/dj-stripe/tree/main/docs).
+You can edit those files directly — no build step is required to make a change.
 
-```bash
-uv sync --group docs
-```
-
-Then run the following command:
-
-    uv run mkdocs serve
-
-The documentation site will then be served on http://127.0.0.1:8000
-
-If you wish to just generate the documentation, you can replace `serve` with `build`,
-and the docs will be generated into the `site/` folder.
+The published site at [dj-stripe.dev](https://dj-stripe.dev/) is built from this
+Markdown by a separate repository,
+[dj-stripe/dj-stripe.github.io](https://github.com/dj-stripe/dj-stripe.github.io),
+which also auto-generates the API reference from the docstrings in the `djstripe`
+package. To preview the fully rendered site locally, clone that repository and
+follow its README. Markdown in `docs/` may use shortcut references like
+`` [`Customer.charge`][djstripe.models.core.Customer.charge] `` to link into the
+generated API reference.
 
 ### Submit Feedback
 
@@ -145,7 +142,7 @@ Therefore the default type for string fields that don't have a maxLength specifi
 the [Stripe OpenAPI schema](https://github.com/stripe/openapi/tree/master/openapi)
 should usually be:
 
-    str_field = TextField(max_length=5000, default=", blank=True, help_text="...")
+    str_field = TextField(max_length=5000, default="", blank=True, help_text="...")
 
 ### Enumerations
 
@@ -194,7 +191,8 @@ Before you submit a pull request, check that it meets these guidelines:
 1.  If the pull request adds functionality, the docs should be updated. Put your new
     functionality into a function with a docstring.
 1.  If the pull request makes changes to a model, include Django migrations.
-1.  The pull request should work for Python 3.6+. Check [Github
+1.  The pull request should work for all supported Python and Django versions (see
+    `pyproject.toml`). Check [Github
     Actions](https://github.com/dj-stripe/dj-stripe/actions) and make sure that the
-    tests pass for all supported Python versions.
+    tests pass.
 1.  Code formatting: Make sure to install `pre-commit` to automatically run it on `staged files` or run manually with `pre-commit run --all-files` at the dj-stripe root to keep a consistent style.

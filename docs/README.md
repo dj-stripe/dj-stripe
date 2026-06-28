@@ -4,9 +4,9 @@
 
 [![CI tests](https://github.com/dj-stripe/dj-stripe/actions/workflows/ci.yml/badge.svg)](https://github.com/dj-stripe/dj-stripe/actions/workflows/ci.yml)
 [![Package Downloads](https://img.shields.io/pypi/dm/dj-stripe)](https://pypi.org/project/dj-stripe/)
-[![Documentation](https://img.shields.io/static/v1?label=Docs&message=READ&color=informational&style=plastic)](https://dj-stripe.github.io/dj-stripe/)
+[![Documentation](https://img.shields.io/static/v1?label=Docs&message=READ&color=informational&style=plastic)](https://dj-stripe.dev/)
 [![Sponsor dj-stripe](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=red&style=plastic)](https://github.com/sponsors/dj-stripe)
-[![MIT License](https://img.shields.io/static/v1?label=License&message=MIT&color=informational&style=plastic)](https://github.com/sponsors/dj-stripe)
+[![MIT License](https://img.shields.io/static/v1?label=License&message=MIT&color=informational&style=plastic)](https://github.com/dj-stripe/dj-stripe/blob/main/LICENSE)
 
 Stripe Models for Django.
 
@@ -17,21 +17,20 @@ webhook endpoint and start receiving model updates. You will then have
 a copy of all the Stripe models available in Django models, as soon as
 they are updated!
 
-The full documentation is available [on Read the Docs](https://dj-stripe.github.io/dj-stripe/).
+The full documentation is available at [dj-stripe.dev](https://dj-stripe.dev/).
 
 ## Features
 
 -   Stripe Core
--   Stripe Billing
--   Stripe Cards (JS v2) and Sources (JS v3)
+-   Stripe Billing (subscriptions, invoices, prices)
 -   Payment Methods and Payment Intents (SCA support)
 -   Support for multiple accounts and API keys
 -   Stripe Connect (partial support)
--   Tested with latest Stripe API (see [API versions](api_versions.md#dj-stripe_latest_tested_version))
+-   Tested with latest Stripe API (see [API versions](api_versions.md#dj-stripe-latest-tested-version))
 
 ## Requirements
 
--   Django >=5.0
+-   Django >=5.2
 -   Python >=3.11
 -   PostgreSQL engine (recommended) >=12
 -   MySQL engine: MariaDB >=10.5 or MySQL >=8.0

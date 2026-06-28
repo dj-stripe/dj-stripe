@@ -1,42 +1,46 @@
----
-title: Home
-hide:
-    - navigation
-    - toc
----
-
 # What is dj-stripe?
 
-Dj-stripe is an extensible wrapper around the Stripe API that continuously syncs most of the Stripe Data to your local database as pre-implemented Django Models, out of the box! This allows you to use the Django ORM, in your code, to work with the data making it easier and faster!
+dj-stripe implements Stripe models, for Django. It continuously syncs your Stripe
+data to your local database via webhooks, exposing it as native Django models. You
+work with subscriptions, invoices, charges and the rest of the Stripe object graph
+through the Django ORM — querying your own database instead of making repeated,
+slower calls to the Stripe API.
 
-For example, if you need to interact with a customer subscription, you can use **dj-stripe’s Subscription Model**, in your code, to get the subscription data for that customer as well as the related models’ data too (if need be and **potentially in 1 database query!**) instead of making multiple slower and unreliable consecutive network calls only to parse through 1 or more of Stripe’s JSON like objects!
+Set up your webhook endpoint, point Stripe at it, and your database stays in sync
+with Stripe automatically.
 
-# Features
+## Why use it?
 
--   **Simplified Security**: We make it simple for you to collect sensitive data such as credit card numbers and remain PCI compliant. This means the sensitive data is sent directly to Stripe instead of passing through your server. For more information, see our Integration Security Guide.
+-   **Query Stripe data with the ORM.** A customer's subscriptions, invoices and
+    payment methods are Django models with real foreign keys. Fetch a customer and
+    their related objects in a single query instead of several network round-trips.
+-   **Stay in sync automatically.** dj-stripe's webhook handlers keep your local
+    models up to date as things change in Stripe. You can also
+    [sync on demand](usage/manually_syncing_with_stripe.md).
+-   **Built-in webhook handling.** Signature verification, event storage and
+    [Django signals](usage/webhooks.md) for every event type, out of the box.
+-   **Multiple accounts and API keys.** Operate on behalf of several Stripe
+    accounts from a single instance — see [Managing API keys](api_keys.md).
+-   **Tested against the latest Stripe API.** dj-stripe pins a known-good Stripe
+    API version (see [API versions](api_versions.md)).
 
--   **Wallets**: We support all Stripe supported wallets including but not limited to Apple Pay and Google Pay.
+## Getting started
 
--   **Payment methods**: Accepting more payment methods helps your business expand its global reach and improve checkout conversion.
+1.  [Install dj-stripe](installation.md) and run its migrations.
+2.  [Add your Stripe API keys](api_keys.md).
+3.  [Set up a webhook endpoint](usage/webhooks.md) so Stripe can notify your app.
+4.  [Sync your existing Stripe data](usage/manually_syncing_with_stripe.md).
 
--   **SCA-Ready**: The SDK automatically performs native 3D Secure authentication if needed to comply with Strong Customer Authentication regulation in Europe and other countries as mandated by the law.
+From there, the [usage guides](usage/subscribing_customers.md) cover the common
+flows: subscribing customers, creating charges, using Stripe Checkout, and
+reacting to webhook events.
 
--   Support for multiple accounts and API keys → **May be done by the time this website is ready**
+## Tutorials
 
--   Tested with Stripe API 2026-05-27.dahlia (see API versions)
+Community-written tutorials and blog posts. These are maintained externally and
+may target older versions of dj-stripe, Django or the Stripe API — treat them as
+supplementary to this documentation.
 
-# Tutorials
+-   [How to Create a Subscription SaaS Application with Django and Stripe](https://www.saaspegasus.com/guides/django-stripe-integrate/)
 
-The dj-stripe community has come up with some great tutorials:
-
-## Videos
-
-_Video tutorials coming soon! If you have created a video tutorial about dj-stripe, please submit a pull request to add it here._
-
-## Blogs
-
--   [How to Create a Subscription SaaS Application with Django and Stripe - Sep 2021 - Django 3.2 - dj-stripe 2.4.3](https://www.saaspegasus.com/guides/django-stripe-integrate/)
--   [Using Django and Stripe for Monthly Subscriptions - May 4, 2021 Uses Stripe Elements](https://ordinarycoders.com/blog/article/django-stripe-monthly-subscription)
--   [Django Stripe Integration with using dj-stripe - Jun 12, 2020](https://kartaca.com/en/django-stripe-integration-using-dj-stripe/)
-
-**Have a blog, video or online publication? Write about your dj-stripe tips and tricks, then send us a pull request with the link.**
+Written something about dj-stripe? Open a pull request to add it here.

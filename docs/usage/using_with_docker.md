@@ -1,12 +1,13 @@
 # Using with Docker
 
-A [Docker image](https://hub.docker.com/r/stripe/stripe-cli) allows you to run the Stripe CLI in a container.
+When developing locally with Docker, you can run the [Stripe CLI](https://stripe.com/docs/cli)
+as a sidecar container that forwards Stripe webhook events to your Django app. This
+is the containerised equivalent of [local webhook testing](local_webhook_testing.md).
 
-Here is a sample `docker-compose.yaml` file that sets up all the services to use `Stripe CLI` in a `dockerised django container (with djstripe)`
+Here is a sample `docker-compose.yaml` with a Postgres database, your Django app
+(running dj-stripe), and the Stripe CLI:
 
-```yml
-version: "3.9"
-
+```yaml
 volumes:
   postgres-data: {}
 
@@ -16,9 +17,9 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=random_number
-      - POSTGRES_USER=root
-      - POSTGRES_PASSWORD=random_number
+      - POSTGRES_DB=myproject
+      - POSTGRES_USER=myproject
+      - POSTGRES_PASSWORD=changeme
 
   web:
     build:
@@ -32,22 +33,19 @@ services:
     depends_on:
       - db
     environment:
-      # Stripe specific keys
-      - STRIPE_PUBLIC_KEY=pk_test_******
-      - STRIPE_SECRET_KEY=sk_test_******
-
-      # Database Specific Settings
-      - DJSTRIPE_TEST_DB_VENDOR=postgres
-      - DJSTRIPE_TEST_DB_PORT=5432
-      - DJSTRIPE_TEST_DB_USER=root
-      - DJSTRIPE_TEST_DB_NAME=random_number
-      - DJSTRIPE_TEST_DB_PASS=random_number
-      - DJSTRIPE_TEST_DB_HOST=db
+      - STRIPE_TEST_SECRET_KEY=sk_test_******
+      - DATABASE_URL=postgres://myproject:changeme@db:5432/myproject
 
   stripe:
-    image: stripe/stripe-cli:v1.7.4
-    # In case Stripe CLI is used to perform local webhook testing, set x-djstripe-webhook-secret custom header to output of Stripe CLI.
-    command: [ "listen", "-H", "x-djstripe-webhook-secret: whsec_******", "--forward-to", "http://web:8000/djstripe/webhook/{uuid}/" ]
+    image: stripe/stripe-cli:latest
+    command:
+      [
+        "listen",
+        "-H",
+        "x-djstripe-webhook-secret: whsec_******",
+        "--forward-to",
+        "http://web:8000/stripe/webhook/{uuid}/",
+      ]
     depends_on:
       - web
     environment:
@@ -55,4 +53,12 @@ services:
       - STRIPE_DEVICE_NAME=djstripe_docker
 ```
 
-_NOTE_: In case the `Stripe CLI` is used to perform local webhook testing, set `x-djstripe-webhook-secret` Custom Header in Stripe `listen` to the `Webhook Signing Secret` output of `Stripe CLI`. That is what Stripe expects and uses to create the `stripe-signature` header.
+Replace the URL path (`stripe/`) with whatever prefix you mounted
+[dj-stripe's URLs](../installation.md) under, and `{uuid}` with your webhook
+endpoint's UUID.
+
+_NOTE_: Pass the Stripe CLI's webhook signing secret to dj-stripe via the
+`x-djstripe-webhook-secret` header, as shown above. Obtain the secret from
+`stripe listen --print-secret`. See
+[local webhook testing](local_webhook_testing.md) for how dj-stripe uses this
+header to verify signatures.

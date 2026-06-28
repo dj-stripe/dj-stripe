@@ -1,33 +1,45 @@
 # Integrating Stripe Elements (JS SDK)
 
-TLDR: If you haven't yet migrated to PaymentIntents, prefer
-`stripe.createSource()` over `stripe.createToken()` for better
-compatibility with PaymentMethods.
+To collect card and other payment details in the browser without sensitive data
+touching your server, Stripe provides [Stripe.js](https://stripe.com/docs/js) and
+[Stripe Elements](https://stripe.com/docs/payments/elements). Your frontend
+tokenises the payment details with Stripe and sends only the resulting identifier
+to your backend, where dj-stripe takes over.
 
-A point that can cause confusion when integrating Stripe on the web is
-that there are multiple generations of frontend JS APIs that use Stripe
-Elements with stripe js v3.
+There are several generations of Stripe's frontend APIs. dj-stripe works with all
+of them, but new integrations should use **Payment Intents** with the **Payment
+Element**.
 
-## In descending order of preference these are:
+## Recommended: Payment Intents + Payment Element
 
-### [Payment Intents](https://stripe.com/docs/payments/payment-intents) (SCA compliant)
+The [Payment Intents API](https://stripe.com/docs/payments/payment-intents) is the
+current, recommended way to accept payments. It supports
+[Strong Customer Authentication](https://stripe.com/docs/strong-customer-authentication)
+(3D Secure) and a wide range of payment methods through a single integration.
 
-The newest and preferred way of handling payments, which supports SCA
-compliance (3D secure etc).
+Follow Stripe's [Accept a payment](https://stripe.com/docs/payments/accept-a-payment)
+guide for the frontend. On the backend, your code creates a `PaymentIntent` (or a
+`SetupIntent` / `Subscription`) via the Stripe API and syncs the result with
+dj-stripe — see [Manually syncing data with Stripe](usage/manually_syncing_with_stripe.md)
+and the [`PaymentIntent`][djstripe.models.core.PaymentIntent] and
+[`PaymentMethod`][djstripe.models.payment_methods.PaymentMethod] models.
 
-### [Charges using stripe.createSource()](https://stripe.com/docs/js/tokens_sources/create_source)
+dj-stripe ships a runnable example of this flow: see
+[`PurchaseSubscriptionView`](https://github.com/dj-stripe/dj-stripe/blob/main/tests/apps/example/views.py)
+in the test app, which creates a `Customer`, attaches a payment method, and creates
+a `Subscription`.
 
-This creates Source objects within Stripe, and can be used for various different methods of payment (including, but not limited to cards), but isn't SCA compliant.
+## Legacy token-based flows
 
-The [Card Elements Quickstart JS](https://stripe.com/docs/payments/accept-a-payment-charges?platform=web) example can be used, except use `stripe.createSource` instead of `stripe.createToken` and the `result.source` instead of `result.token`. [`Checkout a working example of this`][tests.apps.example.views.PurchaseSubscriptionView]
+Older integrations collect payment details with `stripe.createToken()`, producing a
+single-use token (`tok_...`) that you pass to
+[`Customer.add_payment_method`][djstripe.models.core.Customer.add_payment_method].
+This still works, but it predates SCA and only supports cards.
 
-### Charges using stripe.createToken()
+_WARNING_: The Stripe **Sources** API (`stripe.createSource()`) is deprecated by
+Stripe, and the corresponding `Source` model was **removed in dj-stripe 3.0**. If
+your integration still relies on Sources, migrate to Payment Intents and
+`PaymentMethod` objects. See the [3.0 release notes](changes/3_0_0.md).
 
-This predates `stripe.createSource`, and creates legacy Card objects within Stripe, which have some compatibility issues with Payment Methods.
-
-If you're using `stripe.createToken`, see if you can upgrade to
-`stripe.createSource` or ideally to Payment Intents .
-
-### Helpful guides
-
-Checkout [Card Elements Quickstart JS](https://stripe.com/docs/payments/accept-a-payment-charges?platform=web)
+If you are maintaining a legacy integration, prefer migrating to Payment Intents
+over investing further in token- or source-based flows.

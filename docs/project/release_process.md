@@ -1,107 +1,68 @@
 # Release Process
 
-*NOTE*: Before `MAJOR` or `MINOR` releases:
+Releases are published to [PyPI](https://pypi.org/project/dj-stripe/) automatically
+by the [`release.yml`](https://github.com/dj-stripe/dj-stripe/blob/main/.github/workflows/release.yml)
+GitHub Actions workflow whenever a GitHub Release is published. Publishing uses
+[PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/) (OIDC), so no
+API tokens are involved. The job runs `uv build` and uploads the resulting sdist
+and wheel.
 
--   Review deprecation notes (eg search for "deprecated") and remove
-    deprecated features as appropriate
--   Squash migrations (ONLY on unreleased migrations) - see below
+This document covers the manual steps a maintainer performs before creating that
+release.
+
+## Before a `MAJOR` or `MINOR` release
+
+-   Review deprecation notes (e.g. search the codebase for "deprecated") and remove
+    deprecated features as appropriate.
+-   Squash unreleased migrations — see below.
 
 ## Squash migrations
 
-If there's more than one unreleased migration on master consider
-squashing them with `squashmigrations`, immediately before tagging the
-new release:
+If there is more than one unreleased migration on `main`, consider squashing them
+with `squashmigrations` immediately before tagging the new release. Only ever
+squash migrations that have **never** been part of a tagged release.
 
--   Create a new squashed migration with `./manage.py squashmigrations`
-    (only squash migrations that have never been in a tagged release)
+-   Create a squashed migration with `./manage.py squashmigrations`.
+-   Commit it with a message like `Squash x.y.0dev migrations`. This lets users
+    running `main` safely upgrade.
+-   Transition the squashed migration to a normal migration, per
+    [Django's migration-squashing docs](https://docs.djangoproject.com/en/stable/topics/migrations/#migration-squashing):
+    -   Delete the migration files it replaces.
+    -   Update migrations that depended on the deleted ones to depend on the
+        squashed migration instead.
+    -   Remove the `replaces` attribute from the squashed migration's `Migration`
+        class (this is how Django recognises a squashed migration).
+-   Commit these changes with a message like
+    `Transition squashed migration to normal migration`.
 
--   Commit the squashed migration on master with a commit message like
-    "Squash x.y.0dev migrations" (this will allow users who running
-    master to safely upgrade, see note below about rc package)
+## Prepare the release commit
 
--   Then transition the squashed migration to a normal migration as per Django:
+-   Choose the version number following [semver](https://semver.org/). If the
+    release contains a new migration, it must be a `MAJOR.0.0` or `MAJOR.MINOR.0`
+    version.
+-   Update the changelog under [`docs/changes/`](https://github.com/dj-stripe/dj-stripe/tree/main/docs/changes):
+    finalise the section for this version and check that it summarises the changes
+    since the last release.
+-   Bump `version` in `pyproject.toml`.
+-   Review the tested Stripe API version. The value that matters is
+    `DjstripeSettings.DEFAULT_STRIPE_API_VERSION` in
+    [`djstripe/settings.py`](https://github.com/dj-stripe/dj-stripe/blob/main/djstripe/settings.py)
+    — the most recent Stripe account version the maintainers have tested against.
 
-    -   Delete all the migration files it replaces
-    -   Update all migrations that depend on the deleted migrations to
-        depend on the squashed migration instead
-    -   Remove the `replaces` attribute in the Migration class of the
-        squashed migration (this is how Django tells that it is a
-        squashed migration)
+Commit these changes (a message like `Release $VERSION` is conventional) and push
+to `main`.
 
--   Commit these changes to master with a message like "Transition
-    squashed migration to normal migration"
+## Publish the release
 
--   Then do the normal release process - bump version as another commit
-    and tag the release
+-   Create the [GitHub Release](https://github.com/dj-stripe/dj-stripe/releases/new)
+    for the new version, tagging the release commit. Publishing it triggers
+    `release.yml`, which builds and uploads to PyPI.
+-   Verify the new version appears on [PyPI](https://pypi.org/project/dj-stripe/).
 
-See
-[https://docs.djangoproject.com/en/dev/topics/migrations/#migration-squashing](https://docs.djangoproject.com/en/dev/topics/migrations/#migration-squashing)
+## Update the stable branch
 
-## Tag + package squashed migrations as rc package (optional)
-
-As a convenience to users who are running master, an rc version can be
-created to package the squashed migration.
-
-To do this, immediately after the "Squash x.y.0dev migrations" commit,
-follow the steps below but with a x.y.0rc0 version to tag and package a
-rc version.
-
-Users who have been using the x.y.0dev code from master can then run the
-squashed migrations migrations before upgrading to &gt;=x.y.0.
-
-The simplest way to do this is to `pip install dj-stripe==x.y.0rc0` and
-migrate, or alternatively check out the `x.y.0rc0` git tag and migrate.
-
-## Prepare changes for the release commit
-
--   Choose your version number (using [https://semver.org/](https://semver.org/))
-
-    -   if there's a new migration, it should be a `MAJOR.0.0` or
-        `MAJOR.MINOR.0` version.
-
--   Review and update `HISTORY.md`
-
-    -   Add a section for this release version
-    -   Set date on this release version
-    -   Check that summary of feature/fixes is since the last release is
-        up to date
-
--   Update package version number in `setup.cfg`
-
--   Review and update supported API version in `README.md`
-    (this is the most recent Stripe account version tested against, not
-    `DEFAULT_STRIPE_API_VERSION`)
-
--   `git add` to stage these changes
-
-## Create signed release commit tag
-
-*NOTE*: Before doing this you should have a GPG key set up on github
-
-If you don't have a GPG key already, one method is via
-[https://keybase.io/](https://keybase.io/), and then add it to your github profile.
-
--   Create a release tag with the above staged changes (where `$VERSION`
-    is the version number to be released:
-
-        $ git commit -m "Release $VERSION"
-        $ git tag -fsm "Release $VERSION" $VERSION
-
-This can be expressed as a bash function as follows:
-
-    git_release() { git commit -m "Release $1" && git tag -fsm "Release $1" $1; }
-
--   Push the commit and tag:
-
-        $ git push --follow-tags
-
-## Update/create stable branch
-
-Push these changes to the appropriate `stable/MAJOR.MINOR` version
-branch (eg `stable/2.0`) if they're not already - note that this will
-trigger the readthedocs build
-
-## Release on pypi
-
-See
-[https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives](https://packaging.python.org/tutorials/packaging-projects/#generating-distribution-archives)
+Push the release to the matching `stable/MAJOR.MINOR` branch (e.g. `stable/2.11`).
+The documentation site builds versioned docs for each stable branch; pushing to
+`main` or a `stable/*` branch triggers the
+[docs sync workflow](https://github.com/dj-stripe/dj-stripe/blob/main/.github/workflows/docs.yml),
+which rebuilds [dj-stripe.dev](https://dj-stripe.dev/).

@@ -60,5 +60,21 @@ webhook trigger.
 This can be done using the classmethod [`sync_from_stripe_data`][djstripe.models.base.StripeModel.sync_from_stripe_data] that
 exists on all dj-stripe model classes.
 
-E.g. creating a product using the Stripe API, and then syncing the API
-return data to Django using dj-stripe:
+For example, creating a product directly via the Stripe API and then syncing the
+returned data into a dj-stripe `Product`:
+
+```python
+import stripe
+from djstripe.models import Product
+
+stripe_product = stripe.Product.create(
+    name="Premium plan",
+    api_key="sk_test_...",
+)
+
+# Returns the dj-stripe Product instance, created or updated from the data.
+product = Product.sync_from_stripe_data(stripe_product)
+```
+
+Related objects referenced by the data are fetched and synced recursively. If you
+don't pass `api_key`, dj-stripe falls back to the secret key from your settings.

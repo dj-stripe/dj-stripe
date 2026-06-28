@@ -25,5 +25,21 @@ customer = Customer.objects.first()
 customer.subscribe(price=price_1)
 ```
 
-However in some cases `subscribe()` might not support all the arguments you need for your implementation.
-When this happens you can just call the official `stripe.Customer.subscribe()`.
+In some cases [`Customer.subscribe()`][djstripe.models.core.Customer.subscribe] might
+not expose every argument you need. When that happens, create the subscription
+directly with the Stripe API and sync the result back into dj-stripe:
+
+```python
+import stripe
+from djstripe.models import Subscription
+
+stripe_subscription = stripe.Subscription.create(
+    customer=customer.id,
+    items=[{"price": price_1.id}],
+    api_key="sk_test_...",
+)
+subscription = Subscription.sync_from_stripe_data(stripe_subscription)
+```
+
+See [Manually syncing data with Stripe](manually_syncing_with_stripe.md) for more
+on `sync_from_stripe_data`.

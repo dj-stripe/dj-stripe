@@ -27,7 +27,7 @@ sent to you by Stripe with your API version, we re-fetch the data with
 dj-stripe's API version), this is because the API schema needs to match
 dj-stripe's Django model schema.
 
-It is defined by [`STRIPE_API_VERSION`](reference/settings.md#stripe_api_version-2020-08-27) with a default of
+It is defined by the [`STRIPE_API_VERSION`][djstripe.settings.DjstripeSettings.STRIPE_API_VERSION] setting, with a default of
 [`DEFAULT_STRIPE_API_VERSION`][djstripe.settings.DjstripeSettings.DEFAULT_STRIPE_API_VERSION].
 You mustn't change this as it ensures that
 dj-stripe receives data in the format it expects.
