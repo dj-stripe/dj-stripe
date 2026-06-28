@@ -26,7 +26,6 @@ by brute-force.
 dj-stripe provides the following settings to tune how your webhooks work:
 
 -   [`DJSTRIPE_WEBHOOK_VALIDATION`][djstripe.settings.DjstripeSettings.WEBHOOK_VALIDATION]
--   [`DJSTRIPE_WEBHOOK_EVENT_CALLBACK`][djstripe.settings.DjstripeSettings.WEBHOOK_EVENT_CALLBACK]
 
 ## Handling Stripe Webhooks Using Django Signals in dj-stripe
 

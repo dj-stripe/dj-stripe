@@ -79,13 +79,6 @@ class DjstripeSettings:
     def WEBHOOK_VALIDATION(self):
         return getattr(settings, "DJSTRIPE_WEBHOOK_VALIDATION", "verify_signature")
 
-    # Webhook event callbacks allow an application to take control of what happens
-    # when an event from Stripe is received.  One suggestion is to put the event
-    # onto a task queue (such as celery) for asynchronous processing.
-    @property
-    def WEBHOOK_EVENT_CALLBACK(self):
-        return self.get_callback_function("DJSTRIPE_WEBHOOK_EVENT_CALLBACK")
-
     @property
     def SUBSCRIBER_CUSTOMER_KEY(self):
         return getattr(
