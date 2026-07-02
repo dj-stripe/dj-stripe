@@ -451,7 +451,15 @@ class Product(StripeModel):
             return None
         if isinstance(default_price_id, dict):
             default_price_id = default_price_id["id"]
-        return Price.objects.get(id=default_price_id)
+        try:
+            return Price.objects.get(id=default_price_id)
+        except Price.DoesNotExist:
+            logger.warning(
+                "Default price %s for product %s does not exist",
+                default_price_id,
+                self.id,
+            )
+            return None
 
     @property
     def type(self):
@@ -1267,8 +1275,8 @@ class Dispute(StripeModel):
             cls, data, pending_relations=pending_relations, api_key=api_key
         )
 
-        # iterate and sync every balance transaction
-        for stripe_balance_transaction in self.balance_transactions:
+        # iterate and sync every balance transaction (may be missing/None)
+        for stripe_balance_transaction in self.balance_transactions or []:
             BalanceTransaction.sync_from_stripe_data(
                 stripe_balance_transaction, api_key=api_key
             )
@@ -1398,8 +1406,11 @@ class Event(StripeModel):
 
     @property
     def customer(self):
-        data = self.data["object"]
-        if data["object"] == "customer":
+        data = (self.data or {}).get("object")
+        if not isinstance(data, dict):
+            return None
+
+        if data.get("object") == "customer":
             customer_id = get_id_from_stripe_data(data.get("id"))
         else:
             customer_id = get_id_from_stripe_data(data.get("customer"))
@@ -1410,6 +1421,7 @@ class Event(StripeModel):
                 stripe_account=getattr(self.djstripe_owner_account, "id", None),
                 api_key=self.default_api_key,
             )
+        return None
 
 
 class File(StripeModel):
@@ -1429,7 +1441,7 @@ class File(StripeModel):
         return data and data.get("object") in ("file", "file_upload")
 
     def __str__(self):
-        return self.filename
+        return self.filename or f"File {self.id}"
 
     @property
     def filename(self):
@@ -1472,7 +1484,7 @@ class FileLink(StripeModel):
     file = StripeForeignKey("File", on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.url
+        return self.url or f"FileLink {self.id}"
 
     @property
     def expires_at(self):
@@ -1808,7 +1820,10 @@ class Price(StripeModel):
         return price
 
     def __str__(self):
-        return f"{self.human_readable_price} for {self.product.name}"
+        product = self.product
+        if product is not None:
+            return f"{self.human_readable_price} for {product.name}"
+        return str(self.human_readable_price)
 
     @property
     def human_readable_price(self):
@@ -1819,12 +1834,12 @@ class Price(StripeModel):
             # tiered billing scheme
             tier_1 = self.tiers[0]
             formatted_unit_amount_tier_1 = get_friendly_currency_amount(
-                (tier_1["unit_amount"] or 0) / 100, self.currency
+                (tier_1.get("unit_amount") or 0) / 100, self.currency
             )
             amount = f"Starts at {formatted_unit_amount_tier_1} per unit"
 
             # stripe shows flat fee even if it is set to 0.00
-            flat_amount_tier_1 = tier_1["flat_amount"]
+            flat_amount_tier_1 = tier_1.get("flat_amount")
             if flat_amount_tier_1 is not None:
                 formatted_flat_amount_tier_1 = get_friendly_currency_amount(
                     flat_amount_tier_1 / 100, self.currency
