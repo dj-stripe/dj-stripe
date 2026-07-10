@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import patch
 
 import pytest
 from django.test.testcases import TestCase
@@ -121,6 +122,24 @@ class CouponTest(TestCase):
             redeem_by=future_ts,
         )
         self.assertTrue(coupon.valid)
+
+    def test_valid_redeem_by_is_now(self):
+        """A coupon whose redeem_by equals the current time is valid.
+
+        Uses ``<`` (strict less-than), so a coupon expiring exactly now
+        is still considered valid.
+        """
+        now = timezone.now().replace(microsecond=0)
+        now_ts = int(now.timestamp())
+        coupon = _make_coupon(
+            "coupon-test-redeem-by-now",
+            percent_off=10,
+            currency="usd",
+            duration="forever",
+            redeem_by=now_ts,
+        )
+        with patch("djstripe.models.billing.timezone.now", return_value=now):
+            self.assertTrue(coupon.valid)
 
     def test_valid_past_redeem_by(self):
         """A coupon with a past redeem_by date is invalid (expired)."""
