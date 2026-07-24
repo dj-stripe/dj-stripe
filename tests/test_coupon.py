@@ -1,5 +1,9 @@
+import datetime
+from unittest.mock import patch
+
 import pytest
 from django.test.testcases import TestCase
+from django.utils import timezone
 
 from djstripe.models import Coupon
 
@@ -94,3 +98,96 @@ class CouponTest(TestCase):
         )
         self.assertEqual(coupon.human_readable, "10% off forever")
         self.assertEqual(str(coupon), coupon.human_readable)
+
+    # --- valid property tests (issue #717) ---
+
+    def test_valid_no_restrictions(self):
+        """A coupon with no redeem_by or max_redemptions is always valid."""
+        coupon = _make_coupon(
+            "coupon-test-valid",
+            percent_off=10,
+            currency="usd",
+            duration="forever",
+        )
+        self.assertTrue(coupon.valid)
+
+    def test_valid_future_redeem_by(self):
+        """A coupon with a future redeem_by date is valid."""
+        future_ts = int((timezone.now() + datetime.timedelta(days=30)).timestamp())
+        coupon = _make_coupon(
+            "coupon-test-future-redeem-by",
+            percent_off=10,
+            currency="usd",
+            duration="forever",
+            redeem_by=future_ts,
+        )
+        self.assertTrue(coupon.valid)
+
+    def test_valid_redeem_by_is_now(self):
+        """A coupon whose redeem_by equals the current time is valid.
+
+        Uses ``<`` (strict less-than), so a coupon expiring exactly now
+        is still considered valid.
+        """
+        now = timezone.now().replace(microsecond=0)
+        now_ts = int(now.timestamp())
+        coupon = _make_coupon(
+            "coupon-test-redeem-by-now",
+            percent_off=10,
+            currency="usd",
+            duration="forever",
+            redeem_by=now_ts,
+        )
+        with patch("djstripe.models.billing.timezone.now", return_value=now):
+            self.assertTrue(coupon.valid)
+
+    def test_valid_past_redeem_by(self):
+        """A coupon with a past redeem_by date is invalid (expired)."""
+        past_ts = int((timezone.now() - datetime.timedelta(days=1)).timestamp())
+        coupon = _make_coupon(
+            "coupon-test-past-redeem-by",
+            percent_off=10,
+            currency="usd",
+            duration="forever",
+            redeem_by=past_ts,
+        )
+        self.assertFalse(coupon.valid)
+
+    def test_valid_max_redemptions_not_reached(self):
+        """A coupon that hasn't reached max_redemptions is valid."""
+        coupon = _make_coupon(
+            "coupon-test-max-redemptions-active",
+            percent_off=10,
+            currency="usd",
+            duration="forever",
+            max_redemptions=100,
+            times_redeemed=50,
+        )
+        self.assertTrue(coupon.valid)
+
+    def test_valid_max_redemptions_reached(self):
+        """A coupon that has reached max_redemptions is invalid (exhausted)."""
+        coupon = _make_coupon(
+            "coupon-test-max-redemptions-exhausted",
+            percent_off=10,
+            currency="usd",
+            duration="forever",
+            max_redemptions=100,
+            times_redeemed=100,
+        )
+        self.assertFalse(coupon.valid)
+
+    def test_valid_both_expired_and_exhausted(self):
+        """When both redeem_by and max_redemptions indicate invalid, the
+        coupon is invalid."""
+        past_ts = int((timezone.now() - datetime.timedelta(days=1)).timestamp())
+        coupon = _make_coupon(
+            "coupon-test-both-invalid",
+            percent_off=10,
+            currency="usd",
+            duration="forever",
+            redeem_by=past_ts,
+            max_redemptions=10,
+            times_redeemed=10,
+        )
+        self.assertFalse(coupon.valid)
