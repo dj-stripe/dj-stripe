@@ -177,7 +177,7 @@ class TestSyncModelsGetApiKeys(TestCase):
 
 class TestSyncModelsRestrictedKeys(TestCase):
     """
-    dj-stripe does not attempt `GET /v1/account` with restricted keys.
+    Restricted keys are handled by asking Stripe, not by sniffing the prefix.
 
     Regression tests for #1908: syncing with `--api-keys rk_...` crashed with
     `'NoneType' object has no attribute 'id'`, because the restricted-key guard
@@ -187,18 +187,29 @@ class TestSyncModelsRestrictedKeys(TestCase):
 
     RK_TEST = "rk_test_" + "d" * 24
 
-    def test_get_default_account_returns_none_for_passed_restricted_key(self):
-        # Settings hold an `sk_` key, but the caller passes an `rk_` one. The
-        # guard must follow the argument, not the setting.
-        assert not djstripe_settings.STRIPE_SECRET_KEY.startswith("rk_")
-
-        with patch("stripe.Account.retrieve") as retrieve_mock:
+    def test_get_default_account_is_none_when_the_account_is_not_permitted(self):
+        with patch(
+            "stripe.Account.retrieve",
+            side_effect=StripePermissionError("not permitted"),
+        ) as retrieve_mock:
             assert Account.get_default_account(api_key=self.RK_TEST) is None
 
-        retrieve_mock.assert_not_called()
+        # The call is attempted: Stripe decides, the key prefix does not.
+        retrieve_mock.assert_called_once()
 
-    def test_get_stripe_account_skips_platform_retrieve_for_restricted_key(self):
-        # Skipping the platform account must not cost us the connected ones,
+    def test_get_default_account_is_returned_when_a_restricted_key_may_read_it(self):
+        # A restricted key granted the permission must not be denied on its
+        # prefix -- this is what the old guard got wrong.
+        account_data = StripeItem(id="acct_permitted", object="account", livemode=False)
+
+        with patch("stripe.Account.retrieve", return_value=account_data):
+            account = Account.get_default_account(api_key=self.RK_TEST)
+
+        assert account is not None
+        assert account.id == "acct_permitted"
+
+    def test_get_stripe_account_falls_back_when_the_platform_account_is_denied(self):
+        # Losing the platform account id must not cost us the connected ones,
         # and the key's own account must still be represented -- by the empty
         # string, which omits the Stripe-Account header on the resulting calls.
         connected = StripeList(
@@ -206,19 +217,24 @@ class TestSyncModelsRestrictedKeys(TestCase):
         )
 
         with (
-            patch("stripe.Account.retrieve") as retrieve_mock,
+            patch(
+                "stripe.Account.retrieve",
+                side_effect=StripePermissionError("not permitted"),
+            ),
             patch("djstripe.models.Account.api_list", return_value=connected),
         ):
             accounts = Command.get_stripe_account(api_key=self.RK_TEST)
 
         assert accounts == {"", "acct_one", "acct_two"}
-        retrieve_mock.assert_not_called()
 
     def test_get_stripe_account_survives_unlistable_connected_accounts(self):
         # A restricted key scoped to, say, customer-read only cannot list
         # connected accounts. That must not abort the sync of its own account.
         with (
-            patch("stripe.Account.retrieve") as retrieve_mock,
+            patch(
+                "stripe.Account.retrieve",
+                side_effect=StripePermissionError("not permitted"),
+            ),
             patch(
                 "djstripe.models.Account.api_list",
                 side_effect=StripePermissionError("not permitted"),
@@ -227,7 +243,6 @@ class TestSyncModelsRestrictedKeys(TestCase):
             accounts = Command.get_stripe_account(api_key=self.RK_TEST)
 
         assert accounts == {""}
-        retrieve_mock.assert_not_called()
 
     def test_connected_accounts_are_enumerated_once_per_key(self):
         # Enumerating the connected accounts costs a platform retrieve plus a
@@ -276,13 +291,16 @@ class TestSyncModelsRestrictedKeys(TestCase):
         assert first["id"] == "in_one"
 
     def test_sync_with_restricted_key_actually_syncs(self):
-        # Regression: skipping the platform retrieve must not leave the account
+        # Regression: losing the platform retrieve must not leave the account
         # set empty, which would build no list kwargs and silently sync nothing
         # while still exiting successfully.
         stderr = StringIO()
 
         with (
-            patch("stripe.Account.retrieve") as retrieve_mock,
+            patch(
+                "stripe.Account.retrieve",
+                side_effect=StripePermissionError("not permitted"),
+            ),
             patch(
                 "djstripe.models.Customer.api_list", return_value=StripeList(data=[])
             ) as api_list_mock,
@@ -297,7 +315,6 @@ class TestSyncModelsRestrictedKeys(TestCase):
 
         assert api_list_mock.called, "restricted-key sync did no work at all"
         assert api_list_mock.call_args.kwargs["stripe_account"] == ""
-        retrieve_mock.assert_not_called()
         assert stderr.getvalue() == ""
 
     @override_settings(
@@ -305,14 +322,17 @@ class TestSyncModelsRestrictedKeys(TestCase):
     )
     def test_sync_account_does_not_dereference_missing_default_account(self):
         # The originally reported failure: with a restricted key configured,
-        # `get_default_account()` correctly returns None and the command then
-        # blew up dereferencing `.id` on it. `get_stripe_account` is stubbed so
-        # the run reaches that line instead of failing earlier on the
-        # platform-account retrieve.
+        # `get_default_account()` returns None and the command then blew up
+        # dereferencing `.id` on it. `get_stripe_account` is stubbed so the run
+        # reaches that line instead of failing earlier on the platform retrieve.
         stderr = StringIO()
 
         with (
             patch.object(Command, "get_stripe_account", return_value={"acct_test"}),
+            patch(
+                "stripe.Account.retrieve",
+                side_effect=StripePermissionError("not permitted"),
+            ),
             patch("djstripe.models.Account.api_list", return_value=StripeList(data=[])),
         ):
             call_command("djstripe_sync_models", "Account", stderr=stderr)

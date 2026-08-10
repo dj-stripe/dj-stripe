@@ -42,11 +42,7 @@ from stripe import PermissionError as StripePermissionError
 from ... import enums, models
 from ...enums import APIKeyType
 from ...exceptions import InvalidStripeAPIKey
-from ...models.api import (
-    get_api_key_details_by_prefix,
-    is_restricted_key,
-    redact_api_key,
-)
+from ...models.api import get_api_key_details_by_prefix, redact_api_key
 from ...models.base import StripeBaseModel
 from ...settings import djstripe_settings
 from ...utils import owner_account_cache
@@ -335,17 +331,17 @@ class Command(BaseCommand):
         accs_set = set()
 
         # special case, since own account isn't returned by Account.api_list
-        if not is_restricted_key(api_key):
+        try:
             stripe_platform_obj = models.Account.stripe_class.retrieve(
                 api_key=api_key,
                 stripe_version=djstripe_settings.STRIPE_API_VERSION,
             )
             accs_set.add(stripe_platform_obj.id)
-        else:
-            # We can't learn the platform account id from a restricted key, but
-            # an empty stripe_account omits the Stripe-Account header, so the
-            # request still targets the key's own account. Without this the set
-            # would be empty and nothing would be synced at all.
+        except StripePermissionError:
+            # This key may not read the platform account, so we cannot learn its
+            # id. An empty stripe_account omits the Stripe-Account header, so
+            # requests still target the key's own account. Without this entry
+            # the set would be empty and nothing would be synced at all.
             accs_set.add("")
 
         try:

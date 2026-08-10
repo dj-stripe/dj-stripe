@@ -445,14 +445,18 @@ class TestAccountRestrictedKeys(TestCase):
     @patch("stripe.Account.retrieve", autospec=True)
     def test_account_str_restricted_key(self, account_retrieve_mock):
         """
-        Test that we do not attempt to retrieve account ID with restricted keys.
+        A key that may not read the platform account resolves to None.
+
+        The decision comes from Stripe's response, not from the key prefix: a
+        restricted key granted the permission is expected to work.
         """
         assert djstripe_settings.STRIPE_SECRET_KEY == "rk_test_blah"
+        account_retrieve_mock.side_effect = stripe.PermissionError("not permitted")
 
         account = Account.get_default_account()
 
         assert account is None
-        account_retrieve_mock.assert_not_called()
+        account_retrieve_mock.assert_called_once()
 
 
 @pytest.mark.parametrize(
