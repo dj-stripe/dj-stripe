@@ -458,6 +458,27 @@ class TestAccountRestrictedKeys(TestCase):
         assert account is None
         account_retrieve_mock.assert_called_once()
 
+    @override_settings(
+        STRIPE_TEST_SECRET_KEY="rk_test_" + "b" * 24,
+        STRIPE_TEST_PUBLIC_KEY="pk_test_foo",
+        STRIPE_LIVE_MODE=False,
+    )
+    @patch("stripe.Account.retrieve", autospec=True)
+    def test_account_restricted_key_with_permission_returns_the_account(
+        self, account_retrieve_mock
+    ):
+        """
+        A restricted key that *may* read the platform account gets it.
+
+        This is the case the old `rk_` prefix guard refused outright.
+        """
+        account_retrieve_mock.return_value = deepcopy(FAKE_ACCOUNT)
+
+        account = Account.get_default_account()
+
+        assert account is not None
+        assert account.id == FAKE_ACCOUNT["id"]
+
 
 @pytest.mark.parametrize(
     "mock_account_id, other_mock_account_id, expected_stripe_account",

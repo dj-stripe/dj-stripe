@@ -2,7 +2,8 @@ import datetime
 
 import stripe
 from django.db import transaction
-from stripe import AuthenticationError, InvalidRequestError, PermissionError
+from stripe import AuthenticationError, InvalidRequestError
+from stripe import PermissionError as StripePermissionError
 
 from ..enums import APIKeyType
 from ..settings import djstripe_settings
@@ -169,7 +170,7 @@ class Account(StripeModel):
             account_data = cls.stripe_class.retrieve(
                 api_key=api_key, stripe_version=djstripe_settings.STRIPE_API_VERSION
             )
-        except PermissionError:
+        except StripePermissionError:
             return None
 
         return cls._get_or_create_from_stripe_object(account_data, api_key=api_key)[0]
@@ -325,7 +326,7 @@ class Account(StripeModel):
                         file_data,
                         api_key=api_key,
                     )
-                except PermissionError:
+                except StripePermissionError:
                     # No permission to retrieve the data with the key
                     logger.warning(
                         f"Cannot retrieve business branding {field} for acct"
