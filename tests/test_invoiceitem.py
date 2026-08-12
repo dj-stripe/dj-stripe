@@ -103,8 +103,12 @@ class InvoiceItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             self.assert_fks(invoiceitem)
 
             # Coverage of sync of existing data
-            invoiceitem = InvoiceItem.sync_from_stripe_data(invoiceitem_data)
+            updated_invoiceitem_data = deepcopy(invoiceitem_data)
+            updated_invoiceitem_data["description"] = "UPDATED LINE ITEM"
+            invoiceitem = InvoiceItem.sync_from_stripe_data(updated_invoiceitem_data)
             self.assert_fks(invoiceitem)
+            invoiceitem.refresh_from_db()
+            assert invoiceitem.description == "UPDATED LINE ITEM"
 
         mocks["Invoice"].assert_called_once()
         assert mocks["Invoice"].call_args.kwargs["id"] == FAKE_INVOICE_II["id"]
