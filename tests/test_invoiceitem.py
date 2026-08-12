@@ -108,7 +108,7 @@ class InvoiceItemTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             invoiceitem = InvoiceItem.sync_from_stripe_data(updated_invoiceitem_data)
             self.assert_fks(invoiceitem)
             invoiceitem.refresh_from_db()
-            assert invoiceitem.description == "UPDATED LINE ITEM"
+            self.assertEqual(invoiceitem.description, "UPDATED LINE ITEM")
 
         mocks["Invoice"].assert_called_once()
         assert mocks["Invoice"].call_args.kwargs["id"] == FAKE_INVOICE_II["id"]
