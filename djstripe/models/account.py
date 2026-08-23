@@ -2,11 +2,12 @@ import datetime
 
 import stripe
 from django.db import transaction
-from stripe import AuthenticationError, InvalidRequestError, PermissionError
+from stripe import AuthenticationError, InvalidRequestError
+from stripe import PermissionError as StripePermissionError
 
 from ..enums import APIKeyType
 from ..settings import djstripe_settings
-from .api import APIKey, get_api_key_details_by_prefix, is_restricted_key
+from .api import APIKey, get_api_key_details_by_prefix
 from .base import StripeModel, logger
 
 
@@ -159,17 +160,17 @@ class Account(StripeModel):
         if api_key is None:
             api_key = djstripe_settings.STRIPE_SECRET_KEY
 
-        # dj-stripe does not attempt GET /v1/account with restricted keys: as of
-        # API version 2020-03-02 no permission was available that allowed it.
-        # NOTE: test the key we were passed, not the one in settings: callers
-        # such as `djstripe_sync_models --api-keys rk_...` pass a key that is
-        # not the configured default.
-        if is_restricted_key(api_key):
+        # Ask, rather than guess from the key prefix. Restricted keys were once
+        # categorically unable to call GET /v1/account, but that is no longer
+        # true: a restricted key granted the permission can read it, and a
+        # prefix check would deny those unnecessarily. A key without the
+        # permission answers with PermissionError, which is the real signal.
+        try:
+            account_data = cls.stripe_class.retrieve(
+                api_key=api_key, stripe_version=djstripe_settings.STRIPE_API_VERSION
+            )
+        except StripePermissionError:
             return None
-
-        account_data = cls.stripe_class.retrieve(
-            api_key=api_key, stripe_version=djstripe_settings.STRIPE_API_VERSION
-        )
 
         return cls._get_or_create_from_stripe_object(account_data, api_key=api_key)[0]
 
@@ -311,7 +312,7 @@ class Account(StripeModel):
                         file_data,
                         api_key=api_key,
                     )
-                except PermissionError:
+                except StripePermissionError:
                     # No permission to retrieve the data with the key
                     logger.warning(
                         f"Cannot retrieve business branding {field} for acct"

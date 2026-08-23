@@ -42,11 +42,7 @@ from stripe import PermissionError as StripePermissionError
 from ... import enums, models
 from ...enums import APIKeyType
 from ...exceptions import InvalidStripeAPIKey
-from ...models.api import (
-    get_api_key_details_by_prefix,
-    is_restricted_key,
-    redact_api_key,
-)
+from ...models.api import get_api_key_details_by_prefix, redact_api_key
 from ...models.base import StripeBaseModel
 from ...settings import djstripe_settings
 
@@ -319,23 +315,42 @@ class Command(BaseCommand):
 
         return object_errors == 0
 
+    def get_stripe_account_cached(self, api_key: str, *args, **kwargs):
+        """
+        `get_stripe_account` memoised for the lifetime of one command run.
+
+        `get_list_kwargs` calls this once per model, so a full sync asked Stripe
+        for the same account list around 45 times. That was merely wasteful when
+        the platform account was skipped on the key prefix; now that we ask and
+        let Stripe answer, an unpermitted key would pay 45 rejected round-trips.
+        """
+        if not hasattr(self, "_stripe_account_cache"):
+            self._stripe_account_cache: dict[str, set[str]] = {}
+
+        if api_key not in self._stripe_account_cache:
+            self._stripe_account_cache[api_key] = self.get_stripe_account(
+                api_key, *args, **kwargs
+            )
+
+        return self._stripe_account_cache[api_key]
+
     @classmethod
     def get_stripe_account(cls, api_key: str, *args, **kwargs):
         """Get set of all stripe account ids including the Platform Acccount"""
         accs_set = set()
 
         # special case, since own account isn't returned by Account.api_list
-        if not is_restricted_key(api_key):
+        try:
             stripe_platform_obj = models.Account.stripe_class.retrieve(
                 api_key=api_key,
                 stripe_version=djstripe_settings.STRIPE_API_VERSION,
             )
             accs_set.add(stripe_platform_obj.id)
-        else:
-            # We can't learn the platform account id from a restricted key, but
-            # an empty stripe_account omits the Stripe-Account header, so the
-            # request still targets the key's own account. Without this the set
-            # would be empty and nothing would be synced at all.
+        except StripePermissionError:
+            # This key may not read the platform account, so we cannot learn its
+            # id. An empty stripe_account omits the Stripe-Account header, so
+            # requests still target the key's own account. Without this entry
+            # the set would be empty and nothing would be synced at all.
             accs_set.add("")
 
         try:
@@ -595,7 +610,7 @@ class Command(BaseCommand):
         # get all Stripe Accounts for the given platform account.
         # note that we need to fetch from Stripe as we have no way of knowing that the ones in the local db are up to date
         # as this can also be the first time the user runs sync.
-        accs_set = self.get_stripe_account(api_key=api_key)
+        accs_set = self.get_stripe_account_cached(api_key=api_key)
 
         default_list_kwargs = self.get_default_list_kwargs(
             model, accs_set, api_key=api_key
