@@ -5,6 +5,7 @@ dj-stripe Settings Tests.
 from unittest.mock import patch
 
 import stripe
+from django.conf import settings as django_settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db.models.base import ModelBase
 from django.test import TestCase
@@ -127,5 +128,28 @@ class TestGetStripeApiVersion(TestCase):
     def test_with_override(self):
         self.assertEqual(
             "2016-03-07",
+            settings.djstripe_settings.STRIPE_API_VERSION,
+        )
+
+
+class TestStripeApiVersionUnset(TestCase):
+    """
+    With no STRIPE_API_VERSION in the project's settings at all, dj-stripe must
+    fall back to its own DEFAULT_STRIPE_API_VERSION, not to whatever version
+    the installed stripe-python happens to pin.
+
+    TestGetStripeApiVersion cannot catch this: it is decorated with
+    ``@override_settings(STRIPE_API_VERSION=None)``, which makes the setting
+    present and falsy rather than absent, so ``getattr``'s default is never
+    reached.
+    """
+
+    def test_setting_is_genuinely_absent(self):
+        self.assertFalse(hasattr(django_settings, "STRIPE_API_VERSION"))
+
+    @patch.object(stripe, "api_version", "1999-01-01.sdk-pin")
+    def test_falls_back_to_djstripe_default(self):
+        self.assertEqual(
+            settings.djstripe_settings.DEFAULT_STRIPE_API_VERSION,
             settings.djstripe_settings.STRIPE_API_VERSION,
         )

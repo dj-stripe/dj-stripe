@@ -17,7 +17,7 @@ class DjstripeSettings:
 
     """
 
-    DEFAULT_STRIPE_API_VERSION = "2026-05-27.dahlia"
+    DEFAULT_STRIPE_API_VERSION = "2026-07-29.dahlia"
 
     ZERO_DECIMAL_CURRENCIES = {
         "bif",
@@ -125,7 +125,7 @@ class DjstripeSettings:
         """
         Get the desired API version to use for Stripe requests.
         """
-        version = getattr(settings, "STRIPE_API_VERSION", stripe.api_version)
+        version = getattr(settings, "STRIPE_API_VERSION", None)
         return version or self.DEFAULT_STRIPE_API_VERSION
 
     def get_callback_function(self, setting_name, default=None):
