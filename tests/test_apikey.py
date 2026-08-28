@@ -14,6 +14,7 @@ from djstripe.enums import APIKeyType
 from djstripe.exceptions import InvalidStripeAPIKey
 from djstripe.models import Account, APIKey
 from djstripe.models.api import get_api_key_details_by_prefix
+from djstripe.utils import owner_account_cache
 
 from . import FAKE_FILEUPLOAD_ICON, FAKE_FILEUPLOAD_LOGO, FAKE_PLATFORM_ACCOUNT
 from .conftest import CreateAccountMixin
@@ -156,6 +157,43 @@ class APIKeyTest(CreateAccountMixin, TestCase):
     def test_get_account_by_api_key(self):
         account = Account.get_or_retrieve_for_api_key(self.apikey_test.secret)
         assert account == self.account
+
+    def test_get_account_by_api_key_hits_the_db_every_time_by_default(self):
+        # Each resolution costs a savepoint, an APIKey lookup, the owner
+        # account dereference, and the savepoint release.
+        with self.assertNumQueries(8):
+            for _ in range(2):
+                assert (
+                    Account.get_or_retrieve_for_api_key(self.apikey_test.secret)
+                    == self.account
+                )
+
+    def test_owner_account_cache_resolves_each_key_once(self):
+        """Inside the cache, repeat lookups of a key don't touch the database."""
+        with owner_account_cache(), self.assertNumQueries(4):
+            for _ in range(5):
+                assert (
+                    Account.get_or_retrieve_for_api_key(self.apikey_test.secret)
+                    == self.account
+                )
+
+    def test_owner_account_cache_is_per_key(self):
+        """Each distinct key is still resolved (once) on its own."""
+        with owner_account_cache(), self.assertNumQueries(8):
+            for secret in (self.apikey_test.secret, self.apikey_live.secret):
+                for _ in range(3):
+                    assert Account.get_or_retrieve_for_api_key(secret) == self.account
+
+    def test_owner_account_cache_does_not_outlive_the_block(self):
+        """Leaving the block discards the cache rather than leaking it."""
+        with owner_account_cache():
+            Account.get_or_retrieve_for_api_key(self.apikey_test.secret)
+
+        with self.assertNumQueries(4):
+            assert (
+                Account.get_or_retrieve_for_api_key(self.apikey_test.secret)
+                == self.account
+            )
 
     @patch(
         "stripe.Account.retrieve",

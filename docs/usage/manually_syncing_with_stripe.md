@@ -79,3 +79,23 @@ product = Product.sync_from_stripe_data(stripe_product)
 
 Related objects referenced by the data are fetched and synced recursively. If you
 don't pass `api_key`, dj-stripe falls back to the secret key from your settings.
+
+### Syncing in bulk
+
+Every object dj-stripe converts resolves the Stripe `Account` that owns the API
+key it came from, which costs a couple of queries per object. That answer never
+changes for a given key, so bulk syncs can hold on to it with
+[`owner_account_cache`][djstripe.utils.owner_account_cache]:
+
+```python
+from djstripe.models import Charge
+from djstripe.utils import owner_account_cache
+
+with owner_account_cache():
+    for stripe_charge in stripe.Charge.list(api_key="sk_test_...").auto_paging_iter():
+        Charge.sync_from_stripe_data(stripe_charge, api_key="sk_test_...")
+```
+
+The cache exists only for the duration of the block. dj-stripe applies it itself
+around `djstripe_sync_models` runs and around webhook processing, so you only
+need it for syncs you drive yourself.
