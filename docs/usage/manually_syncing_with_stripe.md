@@ -88,6 +88,7 @@ changes for a given key, so bulk syncs can hold on to it with
 [`owner_account_cache`][djstripe.utils.owner_account_cache]:
 
 ```python
+import stripe
 from djstripe.models import Charge
 from djstripe.utils import owner_account_cache
 

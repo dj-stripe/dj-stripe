@@ -129,9 +129,15 @@ def owner_account_cache():
     dj-stripe applies this itself around ``djstripe_sync_models`` runs and around
     webhook processing; wrap your own bulk syncs in it too.
 
-    The cache is created on entry and discarded on exit, and lives in a
-    ``ContextVar``, so it is scoped to the current thread (or asyncio task) and
-    can never hand back an account that outlives the block.
+    The cache lives in a ``ContextVar``, so concurrent threads and asyncio tasks
+    each get their own and never share entries. It is created on entry and
+    dropped on exit.
+
+    The one caveat is that ``asyncio`` copies the context when a task is
+    created: a task spawned *inside* the block inherits the same cache and goes
+    on using it for its own lifetime, even after the block has exited. Don't
+    spawn tasks that outlive the block if you need the cache to be gone when it
+    ends.
     """
     token = _owner_account_cache.set({})
     try:
