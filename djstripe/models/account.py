@@ -6,6 +6,7 @@ from stripe import AuthenticationError, InvalidRequestError, PermissionError
 
 from ..enums import APIKeyType
 from ..settings import djstripe_settings
+from ..utils import _owner_account_cache
 from .api import APIKey, get_api_key_details_by_prefix, is_restricted_key
 from .base import StripeModel, logger
 
@@ -175,12 +176,25 @@ class Account(StripeModel):
 
     @classmethod
     def get_or_retrieve_for_api_key(cls, api_key: str):
+        # This runs once per Stripe object converted, so it dominates the query
+        # count of a bulk sync. Inside `djstripe.utils.owner_account_cache()` the
+        # answer is memoised for the duration of the block; outside it, nothing
+        # changes and every call hits the database as before.
+        cache = _owner_account_cache.get()
+        if cache is not None and api_key in cache:
+            return cache[api_key]
+
         with transaction.atomic():
             apikey_instance, _ = APIKey.objects.get_or_create_by_api_key(api_key)
             if not apikey_instance.djstripe_owner_account:
                 apikey_instance.refresh_account()
 
-            return apikey_instance.djstripe_owner_account
+            account = apikey_instance.djstripe_owner_account
+
+        if cache is not None:
+            cache[api_key] = account
+
+        return account
 
     def __str__(self):
         settings = self.stripe_data.get("settings") or {}

@@ -17,6 +17,7 @@ from .. import signals
 from ..enums import WebhookEndpointStatus, WebhookEndpointValidation
 from ..fields import JSONField, StripeEnumField, StripeForeignKey
 from ..settings import djstripe_settings
+from ..utils import owner_account_cache
 from .base import StripeModel, logger
 from .core import Event
 
@@ -259,7 +260,12 @@ class WebhookEventTrigger(models.Model):
             # this block so its exception/traceback survive on the error path.
             # The view is exempt from ATOMIC_REQUESTS (see views.py), so these
             # commits are not undone when we re-raise.
-            with transaction.atomic():
+            #
+            # One event fans out into a recursive sync of the object it carries
+            # plus everything it references, each of which otherwise re-resolves
+            # the owner account for `api_key`. It cannot change mid-event, so
+            # resolve it once for the whole trigger.
+            with owner_account_cache(), transaction.atomic():
                 # Validate the webhook first
                 signals.webhook_pre_validate.send(sender=cls, instance=obj)
 

@@ -14,6 +14,7 @@ from django.test.testcases import TestCase
 from stripe import InvalidRequestError
 from stripe import PermissionError as StripePermissionError
 
+from djstripe import models
 from djstripe.enums import APIKeyType
 from djstripe.management.commands.djstripe_sync_models import Command
 from djstripe.models import Account, APIKey, Customer
@@ -227,6 +228,52 @@ class TestSyncModelsRestrictedKeys(TestCase):
 
         assert accounts == {""}
         retrieve_mock.assert_not_called()
+
+    def test_connected_accounts_are_enumerated_once_per_key(self):
+        # Enumerating the connected accounts costs a platform retrieve plus a
+        # full paginated list, and the answer is the same for every model in
+        # the run. Doing it per (model, key) pair made a sync of a platform
+        # with N connected accounts pay for that enumeration ~50 times over.
+        stderr = StringIO()
+
+        with (
+            patch.object(
+                Command, "get_stripe_account", return_value={"acct_test"}
+            ) as get_stripe_account_mock,
+            patch(
+                "djstripe.models.Customer.api_list", return_value=StripeList(data=[])
+            ),
+            patch("djstripe.models.Coupon.api_list", return_value=StripeList(data=[])),
+            patch("djstripe.models.Account.api_list", return_value=StripeList(data=[])),
+        ):
+            call_command(
+                "djstripe_sync_models",
+                "Customer",
+                "Coupon",
+                api_keys=[self.RK_TEST],
+                stderr=stderr,
+            )
+
+        assert stderr.getvalue() == ""
+        get_stripe_account_mock.assert_called_once_with(api_key=self.RK_TEST)
+
+    def test_nested_list_kwargs_are_yielded_lazily(self):
+        # Handlers that enumerate a parent resource (an invoice per line item
+        # here) used to materialise every id before a single object was synced.
+        command = Command()
+        command._accounts_by_api_key[self.RK_TEST] = {""}
+
+        invoices = StripeList(data=[StripeItem(id="in_one"), StripeItem(id="in_two")])
+
+        with patch(
+            "djstripe.models.Invoice.api_list", return_value=invoices
+        ) as invoice_list_mock:
+            list_kwargs = command.get_list_kwargs(models.LineItem, api_key=self.RK_TEST)
+            invoice_list_mock.assert_not_called()
+
+            first = next(iter(list_kwargs))
+
+        assert first["id"] == "in_one"
 
     def test_sync_with_restricted_key_actually_syncs(self):
         # Regression: skipping the platform retrieve must not leave the account

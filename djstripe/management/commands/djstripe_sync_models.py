@@ -49,6 +49,7 @@ from ...models.api import (
 )
 from ...models.base import StripeBaseModel
 from ...settings import djstripe_settings
+from ...utils import owner_account_cache
 
 # TODO Improve performance using multiprocessing
 
@@ -57,6 +58,12 @@ class Command(BaseCommand):
     """Sync models from stripe."""
 
     help = "Sync models from stripe."
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Connected-account ids per API key, resolved lazily in
+        # get_list_kwargs() and reused for every model in this run.
+        self._accounts_by_api_key: dict[str, set[str]] = {}
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -127,10 +134,14 @@ class Command(BaseCommand):
         # surface a summary and exit non-zero, without aborting the whole run on
         # the first error.
         failed_syncs = 0
-        for model in model_list:
-            for api_key in api_keys:
-                if not self.sync_model(model, api_key=api_key):
-                    failed_syncs += 1
+        # Every synced object resolves the Account that owns the key it came
+        # from. That answer is fixed for the whole run, so hold it rather than
+        # re-querying it once per object.
+        with owner_account_cache():
+            for model in model_list:
+                for api_key in api_keys:
+                    if not self.sync_model(model, api_key=api_key):
+                        failed_syncs += 1
 
         if failed_syncs:
             message = f"{failed_syncs} model/key sync(s) failed; see the errors above."
@@ -225,7 +236,6 @@ class Command(BaseCommand):
                 else None
             )
 
-            # todo convert get_list_kwargs into a generator to make the code memory effecient.
             for list_kwargs in self.get_list_kwargs(model, api_key=api_key):
                 stripe_account = list_kwargs.get("stripe_account", "")
 
@@ -436,10 +446,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_il(default_list_kwargs):
-        """Returns sequence of kwargs to sync Line Items for
-        all Stripe Accounts"""
-
-        all_list_kwargs = []
+        """Yields kwargs to sync Line Items for all Stripe Accounts"""
 
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
@@ -447,16 +454,11 @@ class Command(BaseCommand):
             for stripe_invoice in models.Invoice.api_list(
                 stripe_account=stripe_account, api_key=api_key
             ):
-                all_list_kwargs.append({"id": stripe_invoice.id, **def_kwarg})
-
-        return all_list_kwargs
+                yield {"id": stripe_invoice.id, **def_kwarg}
 
     @staticmethod
     def get_list_kwargs_pm(default_list_kwargs):
-        """Returns sequence of kwargs to sync Payment Methods for
-        all Stripe Accounts"""
-
-        all_list_kwargs = []
+        """Yields kwargs to sync Payment Methods for all Stripe Accounts"""
 
         # Listing without a `type` returns every payment method type (except
         # `custom`), so there's no need to iterate over PaymentMethodType. This
@@ -467,35 +469,26 @@ class Command(BaseCommand):
             for stripe_customer in models.Customer.api_list(
                 stripe_account=stripe_account, api_key=api_key
             ):
-                all_list_kwargs.append({"customer": stripe_customer.id, **def_kwarg})
-
-        return all_list_kwargs
+                yield {"customer": stripe_customer.id, **def_kwarg}
 
     @staticmethod
     def get_list_kwargs_si(default_list_kwargs):
-        """Returns sequence of kwargs to sync Subscription Items for
-        all Stripe Accounts"""
+        """Yields kwargs to sync Subscription Items for all Stripe Accounts"""
 
-        all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
             api_key = def_kwarg.get("api_key")
             for subscription in models.Subscription.api_list(
                 stripe_account=stripe_account, api_key=api_key
             ):
-                all_list_kwargs.append({"subscription": subscription.id, **def_kwarg})
-        return all_list_kwargs
+                yield {"subscription": subscription.id, **def_kwarg}
 
     @staticmethod
     def get_list_kwargs_country_spec(default_list_kwargs):
-        """Returns sequence of kwargs to sync Country Specs for
-        all Stripe Accounts"""
+        """Yields kwargs to sync Country Specs for all Stripe Accounts"""
 
-        all_list_kwargs = []
         for def_kwarg in default_list_kwargs:
-            all_list_kwargs.append({"limit": 50, **def_kwarg})
-
-        return all_list_kwargs
+            yield {"limit": 50, **def_kwarg}
 
     @staticmethod
     def get_list_kwargs_txcd(default_list_kwargs):
@@ -507,54 +500,40 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_list_kwargs_trr(default_list_kwargs):
-        """Returns sequence of kwargs to sync Transfer Reversals for
-        all Stripe Accounts"""
-        all_list_kwargs = []
+        """Yields kwargs to sync Transfer Reversals for all Stripe Accounts"""
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
             api_key = def_kwarg.get("api_key")
             for transfer in models.Transfer.api_list(
                 stripe_account=stripe_account, api_key=api_key
             ):
-                all_list_kwargs.append({"id": transfer.id, **def_kwarg})
-
-        return all_list_kwargs
+                yield {"id": transfer.id, **def_kwarg}
 
     @staticmethod
     def get_list_kwargs_fee_refund(default_list_kwargs):
-        """Returns sequence of kwargs to sync Application Fee Refunds for
-        all Stripe Accounts"""
-        all_list_kwargs = []
+        """Yields kwargs to sync Application Fee Refunds for all Stripe Accounts"""
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
             api_key = def_kwarg.get("api_key")
             for fee in models.ApplicationFee.api_list(
                 stripe_account=stripe_account, api_key=api_key
             ):
-                all_list_kwargs.append({"id": fee.id, **def_kwarg})
-
-        return all_list_kwargs
+                yield {"id": fee.id, **def_kwarg}
 
     @staticmethod
     def get_list_kwargs_tax_id(default_list_kwargs):
-        """Returns sequence of kwargs to sync Tax Ids for
-        all Stripe Accounts"""
-        all_list_kwargs = []
+        """Yields kwargs to sync Tax Ids for all Stripe Accounts"""
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
             api_key = def_kwarg.get("api_key")
             for customer in models.Customer.api_list(
                 stripe_account=stripe_account, api_key=api_key
             ):
-                all_list_kwargs.append({"id": customer.id, **def_kwarg})
-
-        return all_list_kwargs
+                yield {"id": customer.id, **def_kwarg}
 
     @staticmethod
     def get_list_kwargs_sis(default_list_kwargs):
-        """Returns sequence of kwargs to sync Usage Record Summarys for
-        all Stripe Accounts"""
-        all_list_kwargs = []
+        """Yields kwargs to sync Usage Record Summarys for all Stripe Accounts"""
         for def_kwarg in default_list_kwargs:
             stripe_account = def_kwarg.get("stripe_account")
             api_key = def_kwarg.get("api_key")
@@ -566,19 +545,22 @@ class Command(BaseCommand):
                     stripe_account=stripe_account,
                     api_key=api_key,
                 ):
-                    all_list_kwargs.append({"id": subscription_item.id, **def_kwarg})
-
-        return all_list_kwargs
+                    yield {"id": subscription_item.id, **def_kwarg}
 
     # todo handle supoorting double + nested fields like data.invoice.subscriptions.customer etc?
     def get_list_kwargs(self, model, api_key: str):
         """
-        Returns a sequence of kwargs dicts to pass to model.api_list
+        Returns an iterable of kwargs dicts to pass to model.api_list
 
-        This allows us to sync models that require parameters to api_list
+        This allows us to sync models that require parameters to api_list.
+
+        Handlers that have to enumerate a parent resource first (every invoice,
+        every customer, ...) yield lazily, so syncing starts on the first page
+        rather than after the whole enumeration, and the ids never all sit in
+        memory at once.
 
         :param model:
-        :return: Sequence[dict]
+        :return: Iterable[dict]
         """
 
         list_kwarg_handlers_dict = {
@@ -595,7 +577,16 @@ class Command(BaseCommand):
         # get all Stripe Accounts for the given platform account.
         # note that we need to fetch from Stripe as we have no way of knowing that the ones in the local db are up to date
         # as this can also be the first time the user runs sync.
-        accs_set = self.get_stripe_account(api_key=api_key)
+        # The answer is the same for every model synced with this key, and
+        # costs a retrieve plus a full paginated list of the connected
+        # accounts, so resolve it once per key instead of once per
+        # (model, key) pair.
+        if api_key in self._accounts_by_api_key:
+            accs_set = self._accounts_by_api_key[api_key]
+        else:
+            accs_set = self._accounts_by_api_key[api_key] = self.get_stripe_account(
+                api_key=api_key
+            )
 
         default_list_kwargs = self.get_default_list_kwargs(
             model, accs_set, api_key=api_key
