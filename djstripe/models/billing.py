@@ -80,6 +80,31 @@ class Coupon(StripeModel):
     def times_redeemed(self):
         return self.stripe_data.get("times_redeemed", 0)
 
+    @property
+    def valid(self) -> bool:
+        """
+        Whether the coupon is still valid.
+
+        Stripe does not send a webhook event when a coupon expires (either by
+        reaching its ``redeem_by`` date or by being redeemed the maximum number
+        of times), so the ``valid`` field from the Stripe API response can
+        become stale.  This property is computed on-the-fly from the coupon's
+        underlying data so it always reflects the current state.
+
+        See https://github.com/dj-stripe/dj-stripe/issues/717
+        """
+        redeem_by = self.redeem_by
+        if redeem_by:
+            redeem_by_dt = convert_tstamp(redeem_by)
+            if redeem_by_dt is not None and redeem_by_dt < timezone.now():
+                return False
+
+        max_redemptions = self.max_redemptions
+        if max_redemptions and self.times_redeemed >= max_redemptions:
+            return False
+
+        return True
+
     class Meta(StripeModel.Meta):
         unique_together = ("id", "livemode")
 
