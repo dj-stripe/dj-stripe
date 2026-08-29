@@ -7,8 +7,18 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.test import TestCase
 
-from djstripe.models import Account, APIKey, Coupon, Customer, StripeModel
+from djstripe.models import (
+    Account,
+    APIKey,
+    Coupon,
+    Customer,
+    Price,
+    Product,
+    StripeModel,
+)
 from djstripe.settings import djstripe_settings
+
+from . import StripeList
 
 pytestmark = pytest.mark.django_db
 
@@ -340,3 +350,85 @@ class TestSyncFromStripeData(TestCase):
         # ...and so does a fresh read from the database.
         assert Coupon.objects.get(id="co_test_sync").stripe_data["percent_off"] == 25
         assert Coupon.objects.count() == 1
+
+    @staticmethod
+    def _product_data(id):
+        return {
+            "id": id,
+            "object": "product",
+            "active": True,
+            "name": id,
+            "livemode": False,
+            "metadata": {},
+        }
+
+    def _price_data(self, product_id):
+        return {
+            "id": "price_test_sync",
+            "object": "price",
+            "active": True,
+            "currency": "usd",
+            "product": product_id,
+            "unit_amount": 1000,
+            "livemode": False,
+            "metadata": {},
+        }
+
+    def test_updates_a_foreign_key_on_an_existing_instance(self):
+        # Most sync tests write into an empty database, so the `not created`
+        # branch's handling of relations is barely covered (#799).
+        for product_id in ("prod_before", "prod_after"):
+            Product.sync_from_stripe_data(self._product_data(product_id))
+
+        Price.sync_from_stripe_data(self._price_data("prod_before"))
+        Price.sync_from_stripe_data(self._price_data("prod_after"))
+
+        price = Price.objects.get(id="price_test_sync")
+        assert price.product_id is not None
+        assert price.product.id == "prod_after"
+        assert Price.objects.count() == 1
+
+    def test_updates_a_foreign_key_given_a_nested_object(self):
+        # Stripe may send the relation expanded rather than as a bare id.
+        Product.sync_from_stripe_data(self._product_data("prod_before"))
+        Price.sync_from_stripe_data(self._price_data("prod_before"))
+
+        nested = self._price_data("prod_after")
+        nested["product"] = self._product_data("prod_after")
+        Price.sync_from_stripe_data(nested)
+
+        price = Price.objects.get(id="price_test_sync")
+        assert price.product.id == "prod_after"
+        # The expanded object is synced too, not just linked by id.
+        assert Product.objects.filter(id="prod_after").exists()
+
+    @patch("stripe.Product.list_features", return_value=StripeList(data=[]))
+    def test_an_expanded_relation_does_not_refresh_an_existing_row(
+        self, list_features_mock
+    ):
+        """
+        Documents current behaviour, which may not be intended.
+
+        When a relation arrives expanded, the payload is only used if the
+        target row is missing. `_get_or_create_from_stripe_object` returns the
+        existing row at `base.py:758` before looking at the data, so a related
+        object that changed in Stripe stays stale locally until it is synced in
+        its own right.
+        """
+        Product.sync_from_stripe_data(self._product_data("prod_before"))
+        Price.sync_from_stripe_data(self._price_data("prod_before"))
+
+        renamed = self._price_data("prod_before")
+        renamed["product"] = self._product_data("prod_before") | {"name": "renamed"}
+        Price.sync_from_stripe_data(renamed)
+
+        product = Product.objects.get(id="prod_before")
+        assert product.stripe_data["name"] == "prod_before"  # not "renamed"
+
+        # Syncing the product directly does apply the change, so the data is
+        # reachable -- it is only the nested path that drops it.
+        Product.sync_from_stripe_data(
+            self._product_data("prod_before") | {"name": "renamed"}
+        )
+        product.refresh_from_db()
+        assert product.stripe_data["name"] == "renamed"
