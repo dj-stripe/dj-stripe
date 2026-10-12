@@ -16,7 +16,7 @@ from stripe import PermissionError as StripePermissionError
 
 from djstripe.enums import APIKeyType
 from djstripe.management.commands.djstripe_sync_models import Command
-from djstripe.models import Account, APIKey, Customer
+from djstripe.models import Account, APIKey, BankAccount, Card, Customer
 from djstripe.settings import djstripe_settings
 from djstripe.sync import sync_subscriber
 
@@ -74,28 +74,69 @@ class TestSyncSubscriber(CreateAccountMixin, TestCase):
 
 class TestSyncModelsCommand(CreateAccountMixin, TestCase):
     @patch("stripe.Customer.list_sources", autospec=True)
-    def test_sync_bank_accounts_and_cards_customer_does_not_pass_id(
+    def test_customer_sync_does_not_list_removed_legacy_sources(
         self, list_sources_mock
     ):
-        command = Command()
+        # Legacy customer cards and bank accounts were removed in 2.11. A key
+        # that can read customers must not also need to list those sources.
+        list_sources_mock.side_effect = StripePermissionError("not permitted")
         customer = Customer(id="cus_test")
-        list_sources_mock.return_value = StripeList(data=[])
+        command = Command(stderr=StringIO())
 
-        with patch.object(command, "start_sync") as start_sync_mock:
-            command.sync_bank_accounts_and_cards(
-                customer, stripe_account="acct_test", api_key="sk_test_123"
+        with (
+            patch.object(
+                command,
+                "get_list_kwargs",
+                return_value=[{"api_key": self.SK_TEST, "stripe_account": "acct_test"}],
+            ),
+            patch.object(
+                Customer, "api_list", return_value=StripeList(data=[FAKE_CUSTOMER])
+            ),
+            patch.object(Customer, "sync_from_stripe_data", return_value=customer),
+        ):
+            assert command.sync_model(Customer, api_key=self.SK_TEST)
+
+        list_sources_mock.assert_not_called()
+        assert command.stderr.getvalue() == ""
+
+    @patch("stripe.Account.list_external_accounts", autospec=True)
+    def test_connected_account_sync_still_lists_external_accounts(self, list_mock):
+        command = Command()
+        for account_type in ("express", "custom"):
+            account = Account(id="acct_connected", stripe_data={"type": account_type})
+            bank = StripeItem(id="ba_test", object="bank_account")
+            card = StripeItem(id="card_test", object="card")
+            items = StripeList(data=[bank, card])
+            list_mock.return_value = items
+            with (
+                patch.object(
+                    BankAccount,
+                    "sync_from_stripe_data",
+                    return_value=BankAccount(id=bank.id),
+                ) as bank_sync,
+                patch.object(
+                    Card, "sync_from_stripe_data", return_value=Card(id=card.id)
+                ) as card_sync,
+            ):
+                command.sync_bank_accounts_and_cards(
+                    account, stripe_account=account.id, api_key=self.SK_TEST
+                )
+            list_mock.assert_called_with(
+                account=account.id,
+                api_key=self.SK_TEST,
+                stripe_account=account.id,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
             )
+            bank_sync.assert_called_once_with(bank, api_key=self.SK_TEST)
+            card_sync.assert_called_once_with(card, api_key=self.SK_TEST)
 
-        # Regression: must not pass `id=` (Customer's pk) when listing sources;
-        # Stripe rejects unknown kwargs and the call would fail in production.
-        for _, kwargs in list_sources_mock.call_args_list:
-            assert "id" not in kwargs
-            assert kwargs["customer"] == "cus_test"
-        assert {kwargs["object"] for _, kwargs in list_sources_mock.call_args_list} == {
-            "card",
-            "bank_account",
-        }
-        assert start_sync_mock.call_count == 2
+    @patch("stripe.Account.list_external_accounts", autospec=True)
+    def test_standard_account_sync_does_not_list_external_accounts(self, list_mock):
+        account = Account(id="acct_standard", stripe_data={"type": "standard"})
+        Command().sync_bank_accounts_and_cards(
+            account, stripe_account=account.id, api_key=self.SK_TEST
+        )
+        list_mock.assert_not_called()
 
     SK_TEST = "sk_test_" + "a" * 24
 
