@@ -609,7 +609,7 @@ class Command(BaseCommand):
 
     def sync_bank_accounts_and_cards(self, instance, *, stripe_account, api_key):
         """
-        Syncs Bank Accounts and Cards for both customers and all external accounts
+        Syncs external Bank Accounts and Cards for Connect accounts
         """
         type = getattr(instance, "type", None)
         kwargs = {
@@ -623,18 +623,10 @@ class Command(BaseCommand):
         ):
             # fetch all Card and BankAccount objects associated with the instance
             items = models.Account.stripe_class.list_external_accounts(
-                id=instance.id, **kwargs
+                account=instance.id, **kwargs
             ).auto_paging_iter()
 
             self.start_sync(items, instance, api_key=api_key)
-        elif isinstance(instance, models.Customer):
-            for object in ("card", "bank_account"):
-                # fetch all Card and BankAccount objects associated with the instance
-                items = models.Customer.stripe_class.list_sources(
-                    customer=instance.id, object=object, **kwargs
-                ).auto_paging_iter()
-
-                self.start_sync(items, instance, api_key=api_key)
 
     def start_sync(self, items, instance, api_key: str):
         bank_count = 0
