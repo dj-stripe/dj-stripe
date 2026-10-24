@@ -155,6 +155,27 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         mocks["Plan"].assert_not_called()
         self.assert_fks(invoice, expected_blank_fks={"djstripe.Invoice.subscription"})
 
+    def test_sync_subscription_from_parent(self):
+        # Since API 2025-03-31.basil an invoice has no subscription or paid field.
+        invoice_data = deepcopy(FAKE_INVOICE)
+        subscription_id = invoice_data.pop("subscription")
+        del invoice_data["paid"]
+        invoice_data["parent"] = {
+            "type": "subscription_details",
+            "quote_details": None,
+            "subscription_details": {"metadata": {}, "subscription": subscription_id},
+        }
+
+        with (
+            self._patch_default_account(),
+            mock_stripe_world(Invoice=invoice_data),
+        ):
+            invoice = Invoice.sync_from_stripe_data(invoice_data)
+
+        self.assertEqual(invoice.subscription.id, subscription_id)
+        self.assertIs(invoice.paid, True)
+        self.assert_fks(invoice)
+
     def test_invoice_with_subscription_invoice_items(self):
         with self._patch_default_account(), mock_stripe_world():
             invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
