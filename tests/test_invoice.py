@@ -176,6 +176,9 @@ class InvoiceTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         self.assertIs(invoice.paid, True)
         self.assert_fks(invoice)
 
+        invoice.stripe_data["status"] = "open"
+        self.assertIs(invoice.paid, False)
+
     def test_invoice_with_subscription_invoice_items(self):
         with self._patch_default_account(), mock_stripe_world():
             invoice = Invoice.sync_from_stripe_data(deepcopy(FAKE_INVOICE))
