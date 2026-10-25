@@ -1081,7 +1081,7 @@ class Subscription(StripeModel):
                 if item.get("current_period_end") is not None
             ]
             if periods:
-                end, start = min(periods)
+                end, start = min(periods, key=lambda period: period[0])
                 data["current_period_end"] = end
                 if data.get("current_period_start") is None:
                     data["current_period_start"] = start

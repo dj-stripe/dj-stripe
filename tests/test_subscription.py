@@ -231,6 +231,36 @@ class SubscriptionTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
     @patch(
         "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
     )
+    def test_sync_expired_period_from_items(
+        self, customer_retrieve_mock, product_retrieve_mock, plan_retrieve_mock
+    ):
+        end = timezone.now() - timezone.timedelta(days=1)
+        subscription_fake = deepcopy(FAKE_SUBSCRIPTION)
+        del subscription_fake["current_period_start"]
+        del subscription_fake["current_period_end"]
+        item = subscription_fake["items"]["data"][0]
+        item["current_period_end"] = datetime_to_unix(end)
+        item.pop("current_period_start", None)
+        second_item = deepcopy(item)
+        second_item["current_period_start"] = datetime_to_unix(
+            end - timezone.timedelta(days=30)
+        )
+        subscription_fake["items"]["data"].append(second_item)
+
+        subscription = Subscription.sync_from_stripe_data(subscription_fake)
+
+        self.assertEqual(
+            datetime_to_unix(subscription.current_period_end), datetime_to_unix(end)
+        )
+        self.assertFalse(subscription.is_period_current())
+
+    @patch("stripe.Plan.retrieve", return_value=deepcopy(FAKE_PLAN), autospec=True)
+    @patch(
+        "stripe.Product.retrieve", return_value=deepcopy(FAKE_PRODUCT), autospec=True
+    )
+    @patch(
+        "stripe.Customer.retrieve", return_value=deepcopy(FAKE_CUSTOMER), autospec=True
+    )
     def test_is_scheduled_for_cancellation(
         self, customer_retrieve_mock, product_retrieve_mock, plan_retrieve_mock
     ):
