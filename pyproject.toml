@@ -23,7 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "django>=5.2",
-    "stripe>=15.0.1,<16",
+    "stripe>=15.0.1,<17",
 ]
 
 [project.optional-dependencies]
