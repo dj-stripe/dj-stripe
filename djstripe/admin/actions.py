@@ -12,6 +12,7 @@ from django.utils.text import capfirst
 
 from . import views
 from .forms import CustomActionForm
+from .utils import _location_kwargs
 
 
 class CustomActionMixin:
@@ -72,12 +73,12 @@ class CustomActionMixin:
                 )
         return context
 
-    def get_actions(self, request):
+    def get_actions(self, request, action_location=None):
         """
         Returns _resync_instances only for
         models with a defined model.stripe_class.retrieve
         """
-        actions = super().get_actions(request)
+        actions = super().get_actions(request, **_location_kwargs(action_location))
 
         # ensure we return "_resync_instances" ONLY for
         # models that have a GET method

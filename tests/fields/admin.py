@@ -9,22 +9,14 @@ from .models import CustomActionModel
 
 @admin.register(CustomActionModel)
 class CustomActionModelAdmin(StripeModelAdmin):
-    def get_actions(self, request):
-        # get all actions
-        actions = super().get_actions(request)
-
-        # For Subscription model's custom action, _cancel
-        actions["_cancel"] = self.get_action("_cancel")
-
-        # For SubscriptionSchedule's custom action, _release_subscription_schedule
-        actions["_release_subscription_schedule"] = self.get_action(
-            "_release_subscription_schedule"
-        )
-        # For SubscriptionSchedule's custom action, _cancel_subscription_schedule
-        actions["_cancel_subscription_schedule"] = self.get_action(
-            "_cancel_subscription_schedule"
-        )
-        return actions
+    actions = (
+        *StripeModelAdmin.actions,
+        # Subscription's custom action
+        "_cancel",
+        # SubscriptionSchedule's custom actions
+        "_release_subscription_schedule",
+        "_cancel_subscription_schedule",
+    )
 
     @admin.action(description="Cancel selected subscriptions")
     def _cancel(self, request, queryset):
