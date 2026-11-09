@@ -85,12 +85,21 @@ def test_admin_reaches_get_actions_without_deprecation_warning(
 @requires_action_locations
 @pytest.mark.parametrize("model_admin", DJSTRIPE_MODEL_ADMINS)
 def test_get_actions_honours_action_location(model_admin, admin_request):
-    for location in ActionLocation:
-        actions = model_admin.get_actions(admin_request, action_location=location)
-        for name, action in actions.items():
-            assert location in action.locations, f"{name} offered on {location}"
+    offered = {
+        location: model_admin.get_actions(admin_request, action_location=location)
+        for location in ActionLocation
+    }
+    # Every action is offered at each location it declares, and only there.
+    all_actions = {
+        name: action for actions in offered.values() for name, action in actions.items()
+    }
+    for name, action in all_actions.items():
+        for location in ActionLocation:
+            declared = location in action.locations
+            assert (name in offered[location]) is declared, f"{name} on {location}"
 
-    change_list_actions = model_admin.get_actions(
-        admin_request, action_location=ActionLocation.CHANGE_LIST
+    # Without a location, get_actions() returns the change list actions, whose
+    # names test_change_list_actions checks.
+    assert list(offered[ActionLocation.CHANGE_LIST]) == list(
+        model_admin.get_actions(admin_request)
     )
-    assert list(change_list_actions) == list(model_admin.get_actions(admin_request))
