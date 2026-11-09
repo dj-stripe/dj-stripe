@@ -26,7 +26,11 @@ from .forms import (
     WebhookEndpointAdminCreateForm,
     WebhookEndpointAdminEditForm,
 )
-from .utils import ReadOnlyMixin, get_forward_relation_fields_for_model
+from .utils import (
+    ReadOnlyMixin,
+    _location_kwargs,
+    get_forward_relation_fields_for_model,
+)
 
 
 @admin.register(models.IdempotencyKey)
@@ -260,12 +264,12 @@ class DiscountAdmin(ReadOnlyMixin, StripeModelAdmin):
     list_display = ("customer", "promotion_code", "subscription")
     list_filter = ("customer", "promotion_code")
 
-    def get_actions(self, request):
+    def get_actions(self, request, action_location=None):
         """
         Returns _resync_instances only for
         models with a defined model.stripe_class.retrieve
         """
-        actions = super().get_actions(request)
+        actions = super().get_actions(request, **_location_kwargs(action_location))
 
         # remove "_sync_all_instances" as Discounts cannot be listed
         actions.pop("_sync_all_instances", None)
@@ -395,12 +399,12 @@ class MandateAdmin(StripeModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("payment_method")
 
-    def get_actions(self, request):
+    def get_actions(self, request, action_location=None):
         """
         Returns _resync_instances only for
         models with a defined model.stripe_class.retrieve
         """
-        actions = super().get_actions(request)
+        actions = super().get_actions(request, **_location_kwargs(action_location))
 
         # remove "_sync_all_instances" as Mandates cannot be listed
         actions.pop("_sync_all_instances", None)
@@ -498,12 +502,7 @@ class SubscriptionAdmin(StripeModelAdmin):
     list_display = ("customer",)
 
     inlines = (SubscriptionItemInline, SubscriptionScheduleInline, LineItemInline)
-
-    def get_actions(self, request):
-        # get all actions
-        actions = super().get_actions(request)
-        actions["_cancel"] = self.get_action("_cancel")
-        return actions
+    actions = (*StripeModelAdmin.actions, "_cancel")
 
     @admin.action(description="Cancel selected subscriptions")
     def _cancel(self, request, queryset):
@@ -566,8 +565,8 @@ class WebhookEndpointAdmin(CustomActionMixin, admin.ModelAdmin):
     )
     actions = ("_resync_instances", "_sync_all_instances")
 
-    def get_actions(self, request):
-        actions = super().get_actions(request)
+    def get_actions(self, request, action_location=None):
+        actions = super().get_actions(request, **_location_kwargs(action_location))
         # Disable the mass-delete action for webhook endpoints.
         # We don't want to enable deleting multiple endpoints on Stripe at once.
         if "delete_selected" in actions:
