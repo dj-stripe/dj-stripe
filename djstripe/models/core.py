@@ -292,9 +292,14 @@ class Charge(StripeModel):
         # amount_refunded comes from stripe_data and is in cents.
         amount_refunded = Decimal(self.amount_refunded or 0) / 100
         eligible_to_refund = self.amount - amount_refunded
-        amount_to_refund = (
-            min(eligible_to_refund, amount) if amount else eligible_to_refund
-        )
+        if amount is None:
+            amount_to_refund = eligible_to_refund
+        elif int(amount * 100) < 1:
+            raise ValueError(
+                f"Refund amount must be at least one minor currency unit, got {amount}"
+            )
+        else:
+            amount_to_refund = min(eligible_to_refund, amount)
 
         return int(amount_to_refund * 100)
 
