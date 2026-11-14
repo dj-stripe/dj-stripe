@@ -294,8 +294,10 @@ class Charge(StripeModel):
         eligible_to_refund = self.amount - amount_refunded
         if amount is None:
             amount_to_refund = eligible_to_refund
-        elif amount <= 0:
-            raise ValueError(f"Refund amount must be positive, got {amount}")
+        elif int(amount * 100) < 1:
+            raise ValueError(
+                f"Refund amount must be at least one minor currency unit, got {amount}"
+            )
         else:
             amount_to_refund = min(eligible_to_refund, amount)
 
