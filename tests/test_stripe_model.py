@@ -374,7 +374,8 @@ class TestSyncFromStripeData(TestCase):
             "metadata": {},
         }
 
-    def test_updates_a_foreign_key_on_an_existing_instance(self):
+    @patch("stripe.Product.list_features", return_value=StripeList(data=[]))
+    def test_updates_a_foreign_key_on_an_existing_instance(self, list_features_mock):
         # Most sync tests write into an empty database, so the `not created`
         # branch's handling of relations is barely covered (#799).
         for product_id in ("prod_before", "prod_after"):
@@ -388,7 +389,8 @@ class TestSyncFromStripeData(TestCase):
         assert price.product.id == "prod_after"
         assert Price.objects.count() == 1
 
-    def test_updates_a_foreign_key_given_a_nested_object(self):
+    @patch("stripe.Product.list_features", return_value=StripeList(data=[]))
+    def test_updates_a_foreign_key_given_a_nested_object(self, list_features_mock):
         # Stripe may send the relation expanded rather than as a bare id.
         Product.sync_from_stripe_data(self._product_data("prod_before"))
         Price.sync_from_stripe_data(self._price_data("prod_before"))
@@ -411,7 +413,7 @@ class TestSyncFromStripeData(TestCase):
 
         When a relation arrives expanded, the payload is only used if the
         target row is missing. `_get_or_create_from_stripe_object` returns the
-        existing row at `base.py:758` before looking at the data, so a related
+        existing row before looking at the data, so a related
         object that changed in Stripe stays stale locally until it is synced in
         its own right.
         """
