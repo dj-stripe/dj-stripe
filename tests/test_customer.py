@@ -765,6 +765,20 @@ class TestCustomer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             charge._calculate_refund_amount(amount=decimal.Decimal("600.00")), 50000
         )
 
+    def test_calculate_refund_amount_rejects_non_positive_amount(self):
+        charge = Charge(
+            id="ch_111111", customer=self.customer, amount=decimal.Decimal("500.00")
+        )
+        for amount in (
+            0,
+            decimal.Decimal("0.00"),
+            decimal.Decimal("0.001"),
+            decimal.Decimal("-5.00"),
+        ):
+            with self.subTest(amount=amount):
+                with self.assertRaises(ValueError):
+                    charge._calculate_refund_amount(amount=amount)
+
     @patch(
         "stripe.Customer.delete_source",
         autospec=True,
