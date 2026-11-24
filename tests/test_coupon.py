@@ -1,5 +1,8 @@
+import datetime
+
 import pytest
 from django.test.testcases import TestCase
+from django.utils import timezone
 
 from djstripe.models import Coupon
 
@@ -93,3 +96,44 @@ class CouponTest(TestCase):
         )
         self.assertEqual(coupon.human_readable, "10% off forever")
         self.assertEqual(str(coupon), coupon.human_readable)
+
+
+class CouponIsValidTest(TestCase):
+    NOW = datetime.datetime(2026, 6, 1, 12, 0, tzinfo=datetime.UTC)
+
+    def _coupon(self, **stripe_data):
+        return _make_coupon(
+            "coupon-test-is-valid", percent_off=10, duration="forever", **stripe_data
+        )
+
+    def test_valid_without_restrictions(self):
+        assert self._coupon(valid=True).is_valid(at=self.NOW)
+
+    def test_stripe_valid_false_wins(self):
+        # e.g. Stripe already marked it invalid when it was last synced.
+        assert not self._coupon(valid=False).is_valid(at=self.NOW)
+
+    def test_redeem_by(self):
+        redeem_by = int(self.NOW.timestamp())
+        # Stripe still reports valid=True, because no webhook fires when
+        # redeem_by passes.
+        coupon = self._coupon(valid=True, redeem_by=redeem_by)
+
+        assert coupon.is_valid(at=self.NOW - datetime.timedelta(seconds=1))
+        assert coupon.is_valid(at=self.NOW)
+        assert not coupon.is_valid(at=self.NOW + datetime.timedelta(seconds=1))
+
+    def test_defaults_to_now(self):
+        past = int((timezone.now() - datetime.timedelta(days=1)).timestamp())
+        future = int((timezone.now() + datetime.timedelta(days=1)).timestamp())
+
+        assert not self._coupon(valid=True, redeem_by=past).is_valid()
+        assert self._coupon(valid=True, redeem_by=future).is_valid()
+
+    def test_max_redemptions(self):
+        assert self._coupon(valid=True, max_redemptions=10, times_redeemed=9).is_valid(
+            at=self.NOW
+        )
+        assert not self._coupon(
+            valid=True, max_redemptions=10, times_redeemed=10
+        ).is_valid(at=self.NOW)

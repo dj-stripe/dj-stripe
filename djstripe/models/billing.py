@@ -80,6 +80,32 @@ class Coupon(StripeModel):
     def times_redeemed(self):
         return self.stripe_data.get("times_redeemed", 0)
 
+    def is_valid(self, at=None) -> bool:
+        """
+        Whether the coupon can still be redeemed at ``at`` (default: now).
+
+        Stripe's own ``valid`` field is only as fresh as the last sync, and
+        Stripe sends no webhook when a coupon's ``redeem_by`` date passes, so
+        this also checks ``redeem_by`` against ``at``.
+
+        The redemption count has the same staleness: Stripe sends no webhook
+        when a coupon is redeemed either, so a coupon redeemed up to its
+        ``max_redemptions`` since it was last synced still reads as valid here
+        until it is synced again (see #717).
+        """
+        if not self.stripe_data.get("valid", True):
+            return False
+
+        redeem_by = convert_tstamp(self.redeem_by)
+        if redeem_by is not None and (at or timezone.now()) > redeem_by:
+            return False
+
+        max_redemptions = self.max_redemptions
+        if max_redemptions and self.times_redeemed >= max_redemptions:
+            return False
+
+        return True
+
     class Meta(StripeModel.Meta):
         unique_together = ("id", "livemode")
 
