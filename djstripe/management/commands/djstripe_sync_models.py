@@ -224,8 +224,8 @@ class Command(BaseCommand):
         count = 0
         object_errors = 0
         try:
-            # Resolved once, outside the loop. This is None for restricted
-            # keys, which cannot retrieve the platform account.
+            # Resolved once, outside the loop. This is None for keys that may
+            # not read the platform account.
             default_account = (
                 models.Account.get_default_account(api_key=api_key)
                 if model is models.Account
