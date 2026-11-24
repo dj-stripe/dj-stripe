@@ -21,6 +21,11 @@ database and in your settings. You can also name the models to sync.
     ./manage.py djstripe_sync_models Invoice Subscription
 ```
 
+`Card` and `BankAccount` are synced as external accounts on Express and Custom
+Connect accounts. Customer sync does not list legacy customer cards or bank
+accounts, whose support was removed in dj-stripe 2.11. Use `PaymentMethod` to
+sync customer payment instruments.
+
 Note that this may be redundant since we recursively sync related
 objects.
 
