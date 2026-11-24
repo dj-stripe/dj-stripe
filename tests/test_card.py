@@ -13,6 +13,7 @@ from django.test import TestCase
 from djstripe import enums
 from djstripe.exceptions import StripeObjectManipulationException
 from djstripe.models import Account, Card
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_CARD,
@@ -103,7 +104,11 @@ class CardTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
         card = {"number": "4242", "exp_month": 5, "exp_year": 2012, "cvc": 445}
         Card.create_token(**card)
 
-        token_create_mock.assert_called_with(api_key=ANY, card=card)
+        token_create_mock.assert_called_with(
+            api_key=ANY,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            card=card,
+        )
 
     def test_api_call_no_account(self):
         exception_message = (

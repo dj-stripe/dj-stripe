@@ -11,6 +11,7 @@ from unittest.mock import patch
 from django.test import TestCase
 from django.test.utils import override_settings
 
+from djstripe.settings import djstripe_settings
 from djstripe.utils import (
     convert_tstamp,
     get_friendly_currency_amount,
@@ -53,8 +54,12 @@ class TestGetSupportedCurrencyChoices(TestCase):
         # Simple test to test sure that at least one currency choice tuple is returned.
 
         currency_choices = get_supported_currency_choices(None)
-        stripe_account_retrieve_mock.assert_called_once_with(api_key=None)
-        stripe_countryspec_retrieve_mock.assert_called_once_with("US", api_key=None)
+        stripe_account_retrieve_mock.assert_called_once_with(
+            api_key=None, stripe_version=djstripe_settings.STRIPE_API_VERSION
+        )
+        stripe_countryspec_retrieve_mock.assert_called_once_with(
+            "US", api_key=None, stripe_version=djstripe_settings.STRIPE_API_VERSION
+        )
         self.assertGreaterEqual(
             len(currency_choices), 1, "Currency choices pull returned an empty list."
         )

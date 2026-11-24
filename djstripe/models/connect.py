@@ -340,12 +340,15 @@ class TransferReversal(StripeModel):
         if not kwargs.get("id"):
             raise KeyError("Transfer Object ID is missing")
 
+        transfer_id = kwargs.pop("id")
         try:
-            Transfer.objects.get(id=kwargs["id"])
+            Transfer.objects.get(id=transfer_id)
         except Transfer.DoesNotExist:
             raise
 
+        # stripe-python 16+ takes path parameters positionally only.
         return stripe.Transfer.create_reversal(
+            transfer_id,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,
@@ -390,8 +393,11 @@ class TransferReversal(StripeModel):
         """
         # Update kwargs with `expand` param
         kwargs = cls.get_expand_params(api_key, **kwargs)
+        transfer_id = kwargs.pop("id")
 
+        # stripe-python 16+ takes path parameters positionally only.
         return stripe.Transfer.list_reversals(
+            transfer_id,
             api_key=api_key,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
             **kwargs,

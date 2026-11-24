@@ -13,6 +13,7 @@ from django.test import TestCase
 from djstripe import enums
 from djstripe.exceptions import StripeObjectManipulationException
 from djstripe.models import BankAccount
+from djstripe.settings import djstripe_settings
 
 from . import (
     FAKE_BANK_ACCOUNT_IV,
@@ -209,4 +210,5 @@ class BankAccountTest(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             bank_account.id,
             api_key=api_key,
             stripe_account=stripe_account,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )

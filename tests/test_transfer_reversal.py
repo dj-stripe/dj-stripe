@@ -146,7 +146,7 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         )
 
         transfer_reversal_create_mock.assert_called_once_with(
-            id=FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"],
+            FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"],
             api_key=djstripe_settings.STRIPE_SECRET_KEY,
             stripe_version=djstripe_settings.STRIPE_API_VERSION,
         )
@@ -161,11 +161,13 @@ class TestTransfer(AssertStripeFksMixin, TestCase):
         )
 
         transfer_reversal_list_mock.assert_called_once()
-        kwargs = transfer_reversal_list_mock.call_args.kwargs
-        assert (
-            kwargs["id"]
-            == FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"]
+        args, kwargs = transfer_reversal_list_mock.call_args
+        # The transfer id is a path parameter, which stripe-python 16+ only
+        # accepts positionally.
+        assert args == (
+            FAKE_TRANSFER_WITH_1_REVERSAL["reversals"]["data"][0]["transfer"]["id"],
         )
+        assert "id" not in kwargs
         assert set(kwargs["expand"]) == {
             "data.transfer",
             "data.balance_transaction",

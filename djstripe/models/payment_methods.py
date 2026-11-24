@@ -220,6 +220,7 @@ class ExternalAccountMixin:
                 self.id,
                 api_key=api_key,
                 stripe_account=stripe_account,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
                 **kwargs,
             )
 
@@ -464,7 +465,11 @@ class Card(ExternalAccountMixin, StripeModel):
         }
         card.update(kwargs)
 
-        return stripe.Token.create(api_key=api_key, card=card)  # type: ignore[arg-type]  # dict card payload
+        return stripe.Token.create(
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            card=card,  # type: ignore[arg-type]  # dict card payload
+        )
 
 
 class PaymentMethod(StripeModel):
@@ -539,7 +544,10 @@ class PaymentMethod(StripeModel):
             # send api_key if we're not passing in a Stripe object
             # avoids "Received unknown parameter: api_key" since api uses the
             # key cached in the Stripe object
-            extra_kwargs = {"api_key": api_key}
+            extra_kwargs = {
+                "api_key": api_key,
+                "stripe_version": djstripe_settings.STRIPE_API_VERSION,
+            }
 
         stripe_payment_method = stripe.PaymentMethod.attach(  # type: ignore[call-overload]  # api_key passed via **kwargs
             payment_method, customer=customer, **extra_kwargs

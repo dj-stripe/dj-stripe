@@ -1010,7 +1010,12 @@ class LineItem(StripeModel):
         # get expand parameter that needs to be passed to invoice.lines.list call
         expand_fields = kwargs.pop("expand")
 
-        invoice = Invoice.stripe_class.retrieve(invoice_id, api_key=api_key, **kwargs)
+        invoice = Invoice.stripe_class.retrieve(
+            invoice_id,
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        )
 
         # iterate over all the line items on the current invoice
         return invoice.lines.list(

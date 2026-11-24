@@ -493,6 +493,7 @@ class Product(StripeModel):
                 self.id,
                 api_key=api_key,
                 stripe_account=stripe_account_id,
+                stripe_version=djstripe_settings.STRIPE_API_VERSION,
             )
         except Exception:
             logger.warning(
