@@ -102,6 +102,54 @@ class ApplicationFeeRefund(StripeModel):
     def currency(self):
         return self.stripe_data.get("currency")
 
+    # Application fee refunds are nested under their fee in the Stripe API:
+    # stripe.ApplicationFeeRefund has no `list` or `create`, and its `retrieve`
+    # raises NotImplementedError. Go through stripe.ApplicationFee instead.
+
+    @classmethod
+    def _api_create(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        Refund an application fee. Pass the fee's id as ``id``.
+        """
+        fee_id = kwargs.pop("id")
+        return stripe.ApplicationFee.create_refund(
+            fee_id,
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        )
+
+    def api_retrieve(self, api_key=None, stripe_account=None):
+        api_key = api_key or self.default_api_key
+
+        # Prefer passed in stripe_account if set.
+        if not stripe_account:
+            stripe_account = self._get_stripe_account_id(api_key)
+
+        return stripe.ApplicationFee.retrieve_refund(
+            self.fee.id,
+            self.id,
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            expand=self.expand_fields,
+            stripe_account=stripe_account,
+        )
+
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        List the refunds of one application fee. Pass the fee's id as ``id``.
+        """
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+        fee_id = kwargs.pop("id")
+
+        return stripe.ApplicationFee.list_refunds(
+            fee_id,
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        ).auto_paging_iter()
+
 
 class CountrySpec(StripeBaseModel):
     """
