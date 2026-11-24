@@ -1806,6 +1806,24 @@ class TaxId(StripeModel):
     def verification(self) -> dict | None:
         return self.stripe_data.get("verification", None)
 
+    @classmethod
+    def api_list(cls, api_key=djstripe_settings.STRIPE_SECRET_KEY, **kwargs):
+        """
+        List the tax ids of one customer. Pass the customer's id as ``id``.
+
+        `stripe.TaxId.list()` lists the account's own tax ids unless given an
+        ``owner``, and rejects an ``id``, so go through the customer instead.
+        """
+        kwargs = cls.get_expand_params(api_key, **kwargs)
+        customer_id = kwargs.pop("id")
+
+        return stripe.Customer.list_tax_ids(
+            customer_id,
+            api_key=api_key,
+            stripe_version=djstripe_settings.STRIPE_API_VERSION,
+            **kwargs,
+        ).auto_paging_iter()
+
 
 class TaxRate(StripeModel):
     """

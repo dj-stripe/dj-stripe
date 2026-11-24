@@ -13,8 +13,9 @@ from django.test.testcases import TestCase
 
 from djstripe import enums
 from djstripe.models import TaxId
+from djstripe.settings import djstripe_settings
 
-from . import FAKE_CUSTOMER, FAKE_TAX_ID, AssertStripeFksMixin
+from . import FAKE_CUSTOMER, FAKE_TAX_ID, AssertStripeFksMixin, StripeList
 from .conftest import CreateAccountMixin
 
 pytestmark = pytest.mark.django_db
@@ -101,3 +102,25 @@ class TestTransfer(CreateAccountMixin, AssertStripeFksMixin, TestCase):
             stripe.Customer.delete(
                 stripe_customer.id, api_key=settings.STRIPE_SECRET_KEY
             )
+
+
+class TestTaxIdApiList(TestCase):
+    @patch("stripe.TaxId.list", autospec=True)
+    @patch("stripe.Customer.list_tax_ids", autospec=True)
+    def test_api_list_lists_the_tax_ids_of_one_customer(
+        self, list_tax_ids_mock, tax_id_list_mock
+    ):
+        # stripe.TaxId.list() rejects an `id` and, without an `owner`, lists
+        # the account's own tax ids rather than a customer's.
+        list_tax_ids_mock.return_value = StripeList(data=[])
+
+        TaxId.api_list(id="cus_1", api_key="sk_test_x")
+
+        tax_id_list_mock.assert_not_called()
+        args, kwargs = list_tax_ids_mock.call_args
+        # The customer id is a path parameter, which stripe-python 16+ only
+        # accepts positionally.
+        assert args == ("cus_1",)
+        assert "id" not in kwargs
+        assert kwargs["api_key"] == "sk_test_x"
+        assert kwargs["stripe_version"] == djstripe_settings.STRIPE_API_VERSION
