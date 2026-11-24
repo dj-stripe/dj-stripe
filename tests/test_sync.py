@@ -123,7 +123,7 @@ class TestSyncModelsCommand(CreateAccountMixin, TestCase):
                     account, stripe_account=account.id, api_key=self.SK_TEST
                 )
             list_mock.assert_called_with(
-                account=account.id,
+                account.id,
                 api_key=self.SK_TEST,
                 stripe_account=account.id,
                 stripe_version=djstripe_settings.STRIPE_API_VERSION,

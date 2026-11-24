@@ -609,8 +609,10 @@ class Command(BaseCommand):
             instance, models.Account
         ):
             # fetch all Card and BankAccount objects associated with the instance
+            # Pass the account positionally: stripe-python 16 makes it
+            # positional-only.
             items = models.Account.stripe_class.list_external_accounts(
-                account=instance.id, **kwargs
+                instance.id, **kwargs
             ).auto_paging_iter()
 
             self.start_sync(items, instance, api_key=api_key)
