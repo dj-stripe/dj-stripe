@@ -470,7 +470,22 @@ class BaseInvoice(StripeModel):
 
     @property
     def paid(self) -> bool:
-        return self.stripe_data["paid"]
+        if "paid" in self.stripe_data:
+            return self.stripe_data["paid"]
+        # API 2025-03-31.basil removed Invoice.paid
+        return self.stripe_data.get("status") == enums.InvoiceStatus.paid
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        data = super()._manipulate_stripe_object_hook(data)
+        # API 2025-03-31.basil moved Invoice.subscription to
+        # parent.subscription_details.subscription
+        if data.get("subscription") is None:
+            parent = data.get("parent") or {}
+            details = parent.get("subscription_details") or {}
+            if details.get("subscription"):
+                data["subscription"] = details["subscription"]
+        return data
 
     @property
     def footer(self) -> str:
@@ -1053,6 +1068,24 @@ class Subscription(StripeModel):
     def collection_method(self):
         """Either charge_automatically, or send_invoice."""
         return self.stripe_data.get("collection_method", "charge_automatically")
+
+    @classmethod
+    def _manipulate_stripe_object_hook(cls, data):
+        data = super()._manipulate_stripe_object_hook(data)
+        # API 2025-03-31.basil moved current_period_start/end to the items;
+        # keep the subscription-level fields the helpers and managers query.
+        if data.get("current_period_end") is None:
+            periods = [
+                (item["current_period_end"], item.get("current_period_start"))
+                for item in (data.get("items") or {}).get("data") or []
+                if item.get("current_period_end") is not None
+            ]
+            if periods:
+                end, start = min(periods, key=lambda period: period[0])
+                data["current_period_end"] = end
+                if data.get("current_period_start") is None:
+                    data["current_period_start"] = start
+        return data
 
     @property
     def current_period_end(self):
