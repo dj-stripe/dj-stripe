@@ -391,6 +391,11 @@ class WebhookEventTrigger(models.Model):
             stripe_version=local_data["api_version"],
         )
 
+        # Since stripe-python 15 a StripeObject is no longer a dict and never
+        # equals one, so compare its JSON form (as _stripe_object_to_record does).
+        if hasattr(remote_data, "to_dict"):
+            remote_data = json.loads(str(remote_data))
+
         return local_data["data"] == remote_data["data"]
 
     def process(self, save=True, api_key: str | None = None):

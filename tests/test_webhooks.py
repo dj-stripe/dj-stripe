@@ -12,6 +12,7 @@ from unittest.mock import patch
 from uuid import UUID
 
 import pytest
+import stripe
 from django.conf import settings
 from django.http.request import HttpHeaders
 from django.test import TestCase, override_settings
@@ -142,7 +143,10 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
     )
     @patch(
         "stripe.Event.retrieve",
-        return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
+        # what stripe-python returns: a StripeObject, not a dict
+        return_value=stripe.Event.construct_from(
+            deepcopy(FAKE_EVENT_TRANSFER_CREATED), "sk_test_foo"
+        ),
         autospec=True,
     )
     def test_webhook_retrieve_event_pass(
