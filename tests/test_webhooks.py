@@ -12,6 +12,7 @@ from unittest.mock import patch
 from uuid import UUID
 
 import pytest
+import stripe
 from django.conf import settings
 from django.http.request import HttpHeaders
 from django.test import TestCase, override_settings
@@ -131,6 +132,30 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
         "__defaults__",
         (None, "whsec_XXXXX", 300, "retrieve_event"),
     )
+    @patch(
+        "stripe.Event.retrieve",
+        return_value=stripe.Event.construct_from(
+            deepcopy(FAKE_EVENT_TRANSFER_CREATED), "sk_test_foo"
+        ),
+        autospec=True,
+    )
+    def test_webhook_retrieve_event_changed_type_fail(self, event_retrieve_mock):
+        # same id and data as the real event, but another type
+        forged_event = deepcopy(FAKE_EVENT_TRANSFER_CREATED)
+        forged_event["type"] = "transfer.reversed"
+
+        resp = self._send_event(forged_event, validation_method="retrieve_event")
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertFalse(
+            Event.objects.filter(id=FAKE_EVENT_TRANSFER_CREATED["id"]).exists()
+        )
+
+    @patch.object(
+        WebhookEventTrigger.validate,
+        "__defaults__",
+        (None, "whsec_XXXXX", 300, "retrieve_event"),
+    )
     @patch.object(Transfer, "_attach_objects_post_save_hook")
     @patch(
         "stripe.Account.retrieve",
@@ -142,7 +167,10 @@ class TestWebhookEventTrigger(CreateAccountMixin, TestCase):
     )
     @patch(
         "stripe.Event.retrieve",
-        return_value=deepcopy(FAKE_EVENT_TRANSFER_CREATED),
+        # what stripe-python returns: a StripeObject, not a dict
+        return_value=stripe.Event.construct_from(
+            deepcopy(FAKE_EVENT_TRANSFER_CREATED), "sk_test_foo"
+        ),
         autospec=True,
     )
     def test_webhook_retrieve_event_pass(
