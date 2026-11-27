@@ -396,7 +396,12 @@ class WebhookEventTrigger(models.Model):
         if hasattr(remote_data, "to_dict"):
             remote_data = json.loads(str(remote_data))
 
-        return local_data["data"] == remote_data["data"]
+        # process() handles the posted body, so the fields that pick the
+        # handler and the account must match Stripe's copy too, not only data.
+        return local_data["data"] == remote_data["data"] and all(
+            local_data.get(key) == remote_data.get(key)
+            for key in ("type", "livemode", "account")
+        )
 
     def process(self, save=True, api_key: str | None = None):
         # Reset traceback and exception in case of reprocessing
